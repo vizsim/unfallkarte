@@ -1,6 +1,7 @@
 
 import { setupPhotonGeocoder } from './geocoder.js';
 import { MAPTILER_API_KEY, MAPILLARY_TOKEN } from './config.public.js'; // this works for now, however not locally
+//import { MAPTILER_API_KEY, MAPILLARY_TOKEN } from './config.js'; // this works for now, however not locally
 
 
 
