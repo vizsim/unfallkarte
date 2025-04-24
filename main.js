@@ -1,16 +1,7 @@
 
 import { setupPhotonGeocoder } from './geocoder.js';
-(async () => {
-  let MAPTILER_API_KEY, MAPILLARY_TOKEN;
+import { MAPTILER_API_KEY, MAPILLARY_TOKEN } from './config.public.js'; // this works for now, however not locally
 
-  try {
-    const config = await import('./config.js');
-    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
-  } catch {
-    const config = await import('./config.public.js');
-    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
-    console.warn("config.js nicht gefunden – fallback auf config.public.js");
-  }
 
 
 window.addEventListener("load", () => {
@@ -828,6 +819,4 @@ document.getElementById("toggle-mapillary").addEventListener("change", function 
     map.setMinZoom(originalMinZoom);
     map.setMaxZoom(originalMaxZoom);
   }
-}); //  richtige Klammer für addEventListener
-
-})(); // und jetzt korrektes Ende für das IIFE
+});
