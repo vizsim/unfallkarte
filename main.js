@@ -1,7 +1,17 @@
 
 import { setupPhotonGeocoder } from './geocoder.js';
-import { MAPTILER_API_KEY, MAPILLARY_TOKEN } from './config.js';
+let MAPTILER_API_KEY, MAPILLARY_TOKEN;
 
+try {
+  const config = await import('./config.js');
+  MAPTILER_API_KEY = config.MAPTILER_API_KEY;
+  MAPILLARY_TOKEN = config.MAPILLARY_TOKEN;
+} catch (err) {
+  console.warn("config.js nicht gefunden – fallback auf config.public.js");
+  const publicConfig = await import('./config.public.js');
+  MAPTILER_API_KEY = publicConfig.MAPTILER_API_KEY;
+  MAPILLARY_TOKEN = publicConfig.MAPILLARY_TOKEN;
+}
 
 window.addEventListener("load", () => {
   const waitForMap = setInterval(() => {
