@@ -1,31 +1,38 @@
 
-import { setupPhotonGeocoder } from './geocoder.js';
+//import { setupPhotonGeocoder } from './geocoder.js';
 //import { MAPTILER_API_KEY, MAPILLARY_TOKEN } from './config.public.js'; // this works for now, however not locally
 //import { MAPTILER_API_KEY, MAPILLARY_TOKEN } from './config.js'; // this works for now, however not locally
 
-let MAPTILER_API_KEY, MAPILLARY_TOKEN;
-
-try {
-  // Erst lokal versuchen
-  const config = await import('./config.js');
-  ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
-  console.log("✅ config.js geladen");
-} catch (err) {
-  // Falls nicht vorhanden, fallback auf public
-  const config = await import('./config.public.js');
-  ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
-  console.warn("⚠️ config.js nicht gefunden – fallback auf config.public.js");
-}
 
 
-window.addEventListener("load", () => {
-  const waitForMap = setInterval(() => {
-    if (window.map && window.map instanceof maplibregl.Map) {
-      setupPhotonGeocoder(window.map);
-      clearInterval(waitForMap);
-    }
-  }, 250);
-});
+import { setupPhotonGeocoder } from './geocoder.js';
+
+let MAPTILER_API_KEY = '';
+let MAPILLARY_TOKEN = '';
+
+(async () => {
+  try {
+    const config = await import('./config.js');
+    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
+    console.log("Lokale config.js geladen");
+  } catch (e) {
+    const config = await import('./config.public.js');
+    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
+    console.warn("config.js nicht gefunden – fallback auf config.public.js");
+  }
+
+  initMap();
+})();
+
+
+// window.addEventListener("load", () => {
+//   const waitForMap = setInterval(() => {
+//     if (window.map && window.map instanceof maplibregl.Map) {
+//       setupPhotonGeocoder(window.map);
+//       clearInterval(waitForMap);
+//     }
+//   }, 250);
+// });
 
 
 document.querySelector('[data-map="standard"]').style.backgroundImage =
@@ -190,7 +197,7 @@ document.querySelectorAll('input[name="color-style"]').forEach(rb => {
 });
 
 
-
+async function initMap() {
 window.map = new maplibregl.Map({
   container: "map",
   style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
@@ -204,6 +211,7 @@ const originalMinZoom = map.getMinZoom();
 const originalMaxZoom = map.getMaxZoom();
 
 map.on("load", () => {
+  setupPhotonGeocoder(map); //
   const protocol = new pmtiles.Protocol();
   maplibregl.addProtocol("pmtiles", protocol.tile);
 
@@ -792,6 +800,7 @@ map.on("load", () => {
 
   updateLayerFilter();
 });
+}
 
 
 document.querySelectorAll(".basemap-thumb").forEach(thumb => {
