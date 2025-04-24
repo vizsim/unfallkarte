@@ -1,212 +1,216 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
   <meta charset="utf-8" />
-  <title>Unfalldaten: MapLibre + Photon-Geocoder</title>
+  <title>Unfallkarte</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:,">
   <link href="https://unpkg.com/maplibre-gl@3.3.0/dist/maplibre-gl.css" rel="stylesheet" />
   <style>
-    html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
 
-#map {
-  width: 100%;
-  height: 100%;
-}
+    #map {
+      width: 100%;
+      height: 100%;
+    }
 
-/* ────────────── Legend Style ────────────── */
-.legend {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: white;
-  padding: 10px;
-  font-family: sans-serif;
-  font-size: 12px;
-  border-radius: 5px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  width: 320px;
-  max-width: 100%;
-  max-height: 90%;
-  overflow-y: auto;
-}
+    /* ────────────── Legend Style ────────────── */
+    .legend {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 10px;
+      font-family: sans-serif;
+      font-size: 12px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      width: 320px;
+      max-width: 100%;
+      max-height: 90%;
+      overflow-y: auto;
+    }
 
-/* Allgemeine Styles für Legend-Items */
-.legend .legend-item {
-  margin-bottom: 4px;
-}
+    /* Allgemeine Styles für Legend-Items */
+    .legend .legend-item {
+      margin-bottom: 4px;
+    }
 
-.legend .legend-item span {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-right: 6px;
-  vertical-align: middle;
-}
+    .legend .legend-item span {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
 
-/* Titelbereich */
-.legend .legend-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 1.4;
-}
+    /* Titelbereich */
+    .legend .legend-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.4;
+    }
 
-.legend .legend-title .info-icon {
-  font-size: 14px;
-  cursor: help;
-  color: #555;
-}
+    .legend .legend-title .info-icon {
+      font-size: 14px;
+      cursor: help;
+      color: #555;
+    }
 
-/* Einklappbare Sektionen */
-.legend-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-}
-/* Mehr Abstand rund um Gruppenüberschriften */
-.legend-header {
-  padding-top: 4px;
-  padding-bottom: 6px;
-}
-.legend-header label {
-  font-size: 16px;
-}
+    /* Einklappbare Sektionen */
+    .legend-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
 
-/* Abschnittstrennlinie über jeder Legenden-Gruppe */
-.legend-section-divider {
-  border-top: 1px solid #ccc;
-  margin: 12px 0 6px;
-}
+    /* Mehr Abstand rund um Gruppenüberschriften */
+    .legend-header {
+      padding-top: 4px;
+      padding-bottom: 6px;
+    }
 
-.toggle-arrow {
-  font-size: 12px;
-  transition: transform 0.2s ease;
-}
+    .legend-header label {
+      font-size: 16px;
+    }
 
-.toggle-arrow.open {
-  transform: rotate(90deg);
-}
+    /* Abschnittstrennlinie über jeder Legenden-Gruppe */
+    .legend-section-divider {
+      border-top: 1px solid #ccc;
+      margin: 12px 0 6px;
+    }
 
-.legend-items {
-  margin-left: 8px;
-}
+    .toggle-arrow {
+      font-size: 12px;
+      transition: transform 0.2s ease;
+    }
 
-.legend-items.collapsed {
-  display: none;
-}
+    .toggle-arrow.open {
+      transform: rotate(90deg);
+    }
 
-/* ────────────── Feature Count ────────────── */
-#feature-count {
-  margin-top: 10px;
-  font-size: 11px;
-  color: #333;
-}
+    .legend-items {
+      margin-left: 8px;
+    }
 
-/* ────────────── Photon Geocoder ────────────── */
-.geocoder {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1;
-  background: white;
-  padding: 6px;
-  border-radius: 4px;
-  font-family: sans-serif;
-  width: 300px;
-}
+    .legend-items.collapsed {
+      display: none;
+    }
 
-#search {
-  width: 100%;
-  padding: 6px;
-  font-size: 14px;
-  border: none;
-  outline: none;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
+    /* ────────────── Feature Count ────────────── */
+    #feature-count {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #333;
+    }
 
-#results {
-  margin-top: 4px;
-  max-height: 200px;
-  overflow-y: auto;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  display: none;
-}
+    /* ────────────── Photon Geocoder ────────────── */
+    .geocoder {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1;
+      background: white;
+      padding: 6px;
+      border-radius: 4px;
+      font-family: sans-serif;
+      width: 300px;
+    }
 
-.result-item {
-  padding: 6px;
-  cursor: pointer;
-}
+    #search {
+      width: 100%;
+      padding: 6px;
+      font-size: 14px;
+      border: none;
+      outline: none;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
 
-.result-item:hover {
-  background: #f0f0f0;
-}
+    #results {
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: none;
+    }
 
-#basemap-thumbnails {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  display: flex;
-  gap: 8px;
-  z-index: 2;
-}
+    .result-item {
+      padding: 6px;
+      cursor: pointer;
+    }
 
-.basemap-thumb {
-  width: 60px;
-  height: 60px;
-  background-size: cover;
-  background-position: center;
-  border: 2px solid #ccc;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 0 4px rgba(0,0,0,0.2);
-  transition: border 0.2s;
-}
+    .result-item:hover {
+      background: #f0f0f0;
+    }
 
-.basemap-thumb.selected {
-  border: 2px solid #0077ff;
-}
-#cluster-legend {
-  margin-top: 12px;
-  font-size: 12px;
-  font-family: sans-serif;
-  display: grid;
-  row-gap: 6px;
-}
+    #basemap-thumbnails {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
 
-.cluster-legend-entry {
-  display: grid;
-  grid-template-columns: 30px auto;
-  align-items: center;
-}
+    .basemap-thumb {
+      width: 60px;
+      height: 60px;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+      transition: border 0.2s;
+    }
 
-.cluster-dot {
-  justify-self: center;
-  background-color: #0044cc;
-  border-radius: 50%;
-}
+    .basemap-thumb.selected {
+      border: 2px solid #0077ff;
+    }
 
+    #cluster-legend {
+      margin-top: 12px;
+      font-size: 12px;
+      font-family: sans-serif;
+      display: grid;
+      row-gap: 6px;
+    }
 
+    .cluster-legend-entry {
+      display: grid;
+      grid-template-columns: 30px auto;
+      align-items: center;
+    }
+
+    .cluster-dot {
+      justify-self: center;
+      background-color: #0044cc;
+      border-radius: 50%;
+    }
   </style>
 </head>
+
 <body>
   <div id="map"></div>
-  
+
   <div class="legend">
 
     <div class="legend-title">
-      <div>Unfalldaten aus Unfallatlas<br/>von 2017–2023</div>
+      <div>Unfalldaten aus Unfallatlas<br />von 2017–2023</div>
       <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
     </div>
 
@@ -219,15 +223,15 @@
     </div>
     <label class="legend-item" data-group="UKATEGORIE" data-value="1">
       <input type="checkbox" value="1" data-group="UKATEGORIE" checked /> <span></span> Getötete
-    </label><br/>
+    </label><br />
     <label class="legend-item" data-group="UKATEGORIE" data-value="2">
       <input type="checkbox" value="2" data-group="UKATEGORIE" checked /> <span></span> Schwerverletzte
-    </label><br/>
+    </label><br />
     <label class="legend-item" data-group="UKATEGORIE" data-value="3">
       <input type="checkbox" value="3" data-group="UKATEGORIE" checked /> <span></span> Leichtverletzte
-    </label><br/>
+    </label><br />
 
-    
+
     <div class="legend-section">
       <div class="legend-section-divider"></div>
       <div class="legend-header" data-toggle="beteiligung">
@@ -237,9 +241,9 @@
         </label>
         <span class="toggle-arrow open" data-arrow="beteiligung">▶</span>
 
-        
+
       </div>
-    
+
       <div class="legend-items" data-section="beteiligung">
         <div style="margin: 6px 0 6px 16px;">
           <label>
@@ -247,31 +251,31 @@
             Beteiligungsdetails anzeigen
           </label>
         </div>
-    
+
         <label class="legend-item" data-group="BETEILIGUNG" data-field="IstRad">
           <input type="checkbox" data-field="IstRad" checked />
           <span></span> Fahrrad
-        </label><br/>
+        </label><br />
         <label class="legend-item" data-group="BETEILIGUNG" data-field="IstPKW">
           <input type="checkbox" data-field="IstPKW" checked />
           <span></span> Pkw
-        </label><br/>
+        </label><br />
         <label class="legend-item" data-group="BETEILIGUNG" data-field="IstFuss">
           <input type="checkbox" data-field="IstFuss" checked />
           <span></span> Fußgänger
-        </label><br/>
+        </label><br />
         <label class="legend-item" data-group="BETEILIGUNG" data-field="IstKrad">
           <input type="checkbox" data-field="IstKrad" checked />
           <span></span> Kraftrad
-        </label><br/>
+        </label><br />
         <label class="legend-item" data-group="BETEILIGUNG" data-field="IstGkfz">
           <input type="checkbox" data-field="IstGkfz" checked />
           <span></span> Güterkraftfahrzeug (GKFZ)
-        </label><br/>
+        </label><br />
         <label class="legend-item" data-group="BETEILIGUNG" data-field="IstSonstig">
           <input type="checkbox" data-field="IstSonstig" checked />
           <span></span> Sonstige
-        </label><br/>
+        </label><br />
       </div>
     </div>
 
@@ -284,13 +288,20 @@
       <span class="toggle-arrow open" data-arrow="UJAHR">▶</span>
     </div>
     <div class="legend-items" data-section="UJAHR">
-      <label class="legend-item" data-group="UJAHR" data-value="2017"><input type="checkbox" value="2017" data-group="UJAHR" checked /> <span></span> 2017</label><br/>
-      <label class="legend-item" data-group="UJAHR" data-value="2018"><input type="checkbox" value="2018" data-group="UJAHR" checked /> <span></span> 2018</label><br/>
-      <label class="legend-item" data-group="UJAHR" data-value="2019"><input type="checkbox" value="2019" data-group="UJAHR" checked /> <span></span> 2019</label><br/>
-      <label class="legend-item" data-group="UJAHR" data-value="2020"><input type="checkbox" value="2020" data-group="UJAHR" checked /> <span></span> 2020</label><br/>
-      <label class="legend-item" data-group="UJAHR" data-value="2021"><input type="checkbox" value="2021" data-group="UJAHR" checked /> <span></span> 2021</label><br/>
-      <label class="legend-item" data-group="UJAHR" data-value="2022"><input type="checkbox" value="2022" data-group="UJAHR" checked /> <span></span> 2022</label><br/>
-      <label class="legend-item" data-group="UJAHR" data-value="2023"><input type="checkbox" value="2023" data-group="UJAHR" checked /> <span></span> 2023</label><br/>
+      <label class="legend-item" data-group="UJAHR" data-value="2017"><input type="checkbox" value="2017"
+          data-group="UJAHR" checked /> <span></span> 2017</label><br />
+      <label class="legend-item" data-group="UJAHR" data-value="2018"><input type="checkbox" value="2018"
+          data-group="UJAHR" checked /> <span></span> 2018</label><br />
+      <label class="legend-item" data-group="UJAHR" data-value="2019"><input type="checkbox" value="2019"
+          data-group="UJAHR" checked /> <span></span> 2019</label><br />
+      <label class="legend-item" data-group="UJAHR" data-value="2020"><input type="checkbox" value="2020"
+          data-group="UJAHR" checked /> <span></span> 2020</label><br />
+      <label class="legend-item" data-group="UJAHR" data-value="2021"><input type="checkbox" value="2021"
+          data-group="UJAHR" checked /> <span></span> 2021</label><br />
+      <label class="legend-item" data-group="UJAHR" data-value="2022"><input type="checkbox" value="2022"
+          data-group="UJAHR" checked /> <span></span> 2022</label><br />
+      <label class="legend-item" data-group="UJAHR" data-value="2023"><input type="checkbox" value="2023"
+          data-group="UJAHR" checked /> <span></span> 2023</label><br />
     </div>
 
 
@@ -304,100 +315,117 @@
     </div>
 
     <div class="legend-items collapsed" data-section="UTYP1">
-    <label class="legend-item" data-group="UTYP1" data-value="1"><input type="checkbox" value="1" data-group="UTYP1" checked /> <span></span> Fahrunfall</label><br/>
-    <label class="legend-item" data-group="UTYP1" data-value="2"><input type="checkbox" value="2" data-group="UTYP1" checked /> <span></span> Abbiegeunfall</label><br/>
-    <label class="legend-item" data-group="UTYP1" data-value="3"><input type="checkbox" value="3" data-group="UTYP1" checked /> <span></span> Einbiegen/Kreuzen</label><br/>
-    <label class="legend-item" data-group="UTYP1" data-value="4"><input type="checkbox" value="4" data-group="UTYP1" checked /> <span></span> Fußgänger (Überschreiten)</label><br/>
-    <label class="legend-item" data-group="UTYP1" data-value="5"><input type="checkbox" value="5" data-group="UTYP1" checked /> <span></span> Ruhender Verkehr</label><br/>
-    <label class="legend-item" data-group="UTYP1" data-value="6"><input type="checkbox" value="6" data-group="UTYP1" checked /> <span></span> Längsverkehr</label><br/>
-    <label class="legend-item" data-group="UTYP1" data-value="7"><input type="checkbox" value="7" data-group="UTYP1" checked /> <span></span> Sonstiger Unfall</label><br/>
-  </div>
-<div class="legend-section-divider"></div>
-  <div class="legend-header" data-toggle="UART">
-    <label style="flex-grow: 1;">
-      <input type="radio" name="color-style" value="UART" />
-      <strong>UART (Unfallart)</strong>
-    </label>
-    <span class="toggle-arrow" data-arrow="UART">▶</span>
-  </div>
-  <div class="legend-items collapsed" data-section="UART">
-  <label class="legend-item" data-group="UART" data-value="1"><input type="checkbox" value="1" data-group="UART" checked /> <span></span> Anfahrend/ruhend</label><br/>
-  <label class="legend-item" data-group="UART" data-value="2"><input type="checkbox" value="2" data-group="UART" checked /> <span></span> Vorausfahrend/wartend</label><br/>
-  <label class="legend-item" data-group="UART" data-value="3"><input type="checkbox" value="3" data-group="UART" checked /> <span></span> Seitlich gleiche Richtung</label><br/>
-  <label class="legend-item" data-group="UART" data-value="4"><input type="checkbox" value="4" data-group="UART" checked /> <span></span> Entgegenkommend</label><br/>
-  <label class="legend-item" data-group="UART" data-value="5"><input type="checkbox" value="5" data-group="UART" checked /> <span></span> Einbiegend/kreuzend</label><br/>
-  <label class="legend-item" data-group="UART" data-value="6"><input type="checkbox" value="6" data-group="UART" checked /> <span></span> Fußgänger</label><br/>
-  <label class="legend-item" data-group="UART" data-value="7"><input type="checkbox" value="7" data-group="UART" checked /> <span></span> Fahrbahnhindernis</label><br/>
-  <label class="legend-item" data-group="UART" data-value="8"><input type="checkbox" value="8" data-group="UART" checked /> <span></span> Abkommen rechts</label><br/>
-  <label class="legend-item" data-group="UART" data-value="9"><input type="checkbox" value="9" data-group="UART" checked /> <span></span> Abkommen links</label><br/>
-  <label class="legend-item" data-group="UART" data-value="0"><input type="checkbox" value="0" data-group="UART" checked /> <span></span> Sonstiger Unfall</label><br/>
-</div>
+      <label class="legend-item" data-group="UTYP1" data-value="1"><input type="checkbox" value="1" data-group="UTYP1"
+          checked /> <span></span> Fahrunfall</label><br />
+      <label class="legend-item" data-group="UTYP1" data-value="2"><input type="checkbox" value="2" data-group="UTYP1"
+          checked /> <span></span> Abbiegeunfall</label><br />
+      <label class="legend-item" data-group="UTYP1" data-value="3"><input type="checkbox" value="3" data-group="UTYP1"
+          checked /> <span></span> Einbiegen/Kreuzen</label><br />
+      <label class="legend-item" data-group="UTYP1" data-value="4"><input type="checkbox" value="4" data-group="UTYP1"
+          checked /> <span></span> Fußgänger (Überschreiten)</label><br />
+      <label class="legend-item" data-group="UTYP1" data-value="5"><input type="checkbox" value="5" data-group="UTYP1"
+          checked /> <span></span> Ruhender Verkehr</label><br />
+      <label class="legend-item" data-group="UTYP1" data-value="6"><input type="checkbox" value="6" data-group="UTYP1"
+          checked /> <span></span> Längsverkehr</label><br />
+      <label class="legend-item" data-group="UTYP1" data-value="7"><input type="checkbox" value="7" data-group="UTYP1"
+          checked /> <span></span> Sonstiger Unfall</label><br />
+    </div>
+    <div class="legend-section-divider"></div>
+    <div class="legend-header" data-toggle="UART">
+      <label style="flex-grow: 1;">
+        <input type="radio" name="color-style" value="UART" />
+        <strong>UART (Unfallart)</strong>
+      </label>
+      <span class="toggle-arrow" data-arrow="UART">▶</span>
+    </div>
+    <div class="legend-items collapsed" data-section="UART">
+      <label class="legend-item" data-group="UART" data-value="1"><input type="checkbox" value="1" data-group="UART"
+          checked /> <span></span> Anfahrend/ruhend</label><br />
+      <label class="legend-item" data-group="UART" data-value="2"><input type="checkbox" value="2" data-group="UART"
+          checked /> <span></span> Vorausfahrend/wartend</label><br />
+      <label class="legend-item" data-group="UART" data-value="3"><input type="checkbox" value="3" data-group="UART"
+          checked /> <span></span> Seitlich gleiche Richtung</label><br />
+      <label class="legend-item" data-group="UART" data-value="4"><input type="checkbox" value="4" data-group="UART"
+          checked /> <span></span> Entgegenkommend</label><br />
+      <label class="legend-item" data-group="UART" data-value="5"><input type="checkbox" value="5" data-group="UART"
+          checked /> <span></span> Einbiegend/kreuzend</label><br />
+      <label class="legend-item" data-group="UART" data-value="6"><input type="checkbox" value="6" data-group="UART"
+          checked /> <span></span> Fußgänger</label><br />
+      <label class="legend-item" data-group="UART" data-value="7"><input type="checkbox" value="7" data-group="UART"
+          checked /> <span></span> Fahrbahnhindernis</label><br />
+      <label class="legend-item" data-group="UART" data-value="8"><input type="checkbox" value="8" data-group="UART"
+          checked /> <span></span> Abkommen rechts</label><br />
+      <label class="legend-item" data-group="UART" data-value="9"><input type="checkbox" value="9" data-group="UART"
+          checked /> <span></span> Abkommen links</label><br />
+      <label class="legend-item" data-group="UART" data-value="0"><input type="checkbox" value="0" data-group="UART"
+          checked /> <span></span> Sonstiger Unfall</label><br />
+    </div>
 
-<div class="legend-section-divider"></div>
-<div style="margin-top: 6px;">
-  <label>
-    <input type="checkbox" id="toggle-mapillary" />
-    Mapillary-Bilder anzeigen
-  </label>
-</div>
+    <div class="legend-section-divider"></div>
+    <div style="margin-top: 6px;">
+      <label>
+        <input type="checkbox" id="toggle-mapillary" />
+        Mapillary-Bilder anzeigen
+      </label>
+    </div>
 
-<div id="cluster-legend" style="display: none;">
-  <strong style="display: block; margin-bottom: 8px;">Cluster-Legende</strong>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 2px; height: 2px;"></div>
-    <div class="cluster-label">1 Unfall</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 4px; height: 4px;"></div>
-    <div class="cluster-label">2–9 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 6px; height: 6px;"></div>
-    <div class="cluster-label">10–49 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 8px; height: 8px;"></div>
-    <div class="cluster-label">50–99 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 10px; height: 10px;"></div>
-    <div class="cluster-label">100–199 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 12px; height: 12px;"></div>
-    <div class="cluster-label">200–499 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 14px; height: 14px;"></div>
-    <div class="cluster-label">500–999 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 18px; height: 18px;"></div>
-    <div class="cluster-label">1000–1999 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 22px; height: 22px;"></div>
-    <div class="cluster-label">2000–3999 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 24px; height: 24px;"></div>
-    <div class="cluster-label">4000–7999 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 26px; height: 26px;"></div>
-    <div class="cluster-label">8000–15999 Unfälle</div>
-  </div>
-  <div class="cluster-legend-entry">
-    <div class="cluster-dot" style="width: 26px; height: 26px;"></div>
-    <div class="cluster-label">16000+ Unfälle</div>
-  </div>
-</div>
+    <div id="cluster-legend" style="display: none;">
+      <strong style="display: block; margin-bottom: 8px;">Cluster-Legende</strong>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 2px; height: 2px;"></div>
+        <div class="cluster-label">1 Unfall</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 4px; height: 4px;"></div>
+        <div class="cluster-label">2–9 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 6px; height: 6px;"></div>
+        <div class="cluster-label">10–49 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 8px; height: 8px;"></div>
+        <div class="cluster-label">50–99 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 10px; height: 10px;"></div>
+        <div class="cluster-label">100–199 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 12px; height: 12px;"></div>
+        <div class="cluster-label">200–499 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 14px; height: 14px;"></div>
+        <div class="cluster-label">500–999 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 18px; height: 18px;"></div>
+        <div class="cluster-label">1000–1999 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 22px; height: 22px;"></div>
+        <div class="cluster-label">2000–3999 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 24px; height: 24px;"></div>
+        <div class="cluster-label">4000–7999 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 26px; height: 26px;"></div>
+        <div class="cluster-label">8000–15999 Unfälle</div>
+      </div>
+      <div class="cluster-legend-entry">
+        <div class="cluster-dot" style="width: 26px; height: 26px;"></div>
+        <div class="cluster-label">16000+ Unfälle</div>
+      </div>
+    </div>
 
-  
+
 
 
     <div id="feature-count" style="margin-top:10px;">
-      Sichtbare Punkte: ...<br/>
+      Sichtbare Punkte: ...<br />
       Zoomlevel: ...
     </div>
   </div>
@@ -414,7 +442,7 @@
   <!-- <script src="./main.js" type="module"></script> -->
 
   <!-- ganz am Ende, kurz vorm </body> -->
-<script type="module" src="./main.js"></script>
+  <script type="module" src="./main.js"></script>
 </body>
 
 </html>
