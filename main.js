@@ -7,21 +7,37 @@
 
 import { setupPhotonGeocoder } from './geocoder.js';
 
+// let MAPTILER_API_KEY = '';
+// let MAPILLARY_TOKEN = '';
+
+// (async () => {
+//   try {
+//     const config = await import('./config.js');
+//     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
+//     console.log("Lokale config.js geladen");
+//   } catch (e) {
+//     const config = await import('./config.public.js');
+//     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
+//     console.warn("config.js nicht gefunden – fallback auf config.public.js");
+//   }
+
+//   initMap();
+// })();
+
 let MAPTILER_API_KEY = '';
 let MAPILLARY_TOKEN = '';
 
+const isLocalhost = location.hostname === "localhost";
+
 (async () => {
   try {
-    const config = await import('./config.js');
+    const config = await import(isLocalhost ? './config.js' : './config.public.js');
     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
-    console.log("Lokale config.js geladen");
-  } catch (e) {
-    const config = await import('./config.public.js');
-    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
-    console.warn("config.js nicht gefunden – fallback auf config.public.js");
+    console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
+    initMap();
+  } catch (err) {
+    console.error("❌ Konfig konnte nicht geladen werden:", err);
   }
-
-  initMap();
 })();
 
 
