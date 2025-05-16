@@ -184,6 +184,18 @@ document.querySelectorAll('input[name="color-style"]').forEach(rb => {
 
 
 async function initMap() {
+
+  // ✅ Top level — before map.addSource()
+const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+
+const protocol = new pmtiles.Protocol(name => {
+  const fullUrl = `${pmtilesBaseURL}${name}`;
+  console.log("[PMTiles] Protocol mapping to:", fullUrl);
+  return fullUrl;
+});
+
+// maplibregl.addProtocol("pmtiles", protocol.tile); // ✅ This must be early!
+
   window.map = new maplibregl.Map({
     container: "map",
     style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
@@ -196,26 +208,45 @@ async function initMap() {
   originalMinZoom = map.getMinZoom();
   originalMaxZoom = map.getMaxZoom();
 
+
+
   map.on("load", () => {
+
     setupPhotonGeocoder(map); //
 
     // // local / github setup
     //  const protocol = new pmtiles.Protocol();  
 
-//  setup backblaze
-    const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+// //  setup backblaze
+//     const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
 
-const protocol = new pmtiles.Protocol((name) => {
-  return `${pmtilesBaseURL}${name}`;
-});
+// const protocol = new pmtiles.Protocol((name) => {
+//   return `${pmtilesBaseURL}${name}`;
+// });
 
 
-    maplibregl.addProtocol("pmtiles", protocol.tile);
+//   // Setup PMTiles with Backblaze
+//   const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+
+//   // // ✅ Use the pmtiles global variable
+//   // const protocol = new pmtiles.Protocol(name => {
+//   //   return `${pmtilesBaseURL}${name}`;
+//   // });
+
+//   const protocol = new pmtiles.Protocol(name => {
+//   const fullUrl = `${pmtilesBaseURL}${name}`;
+//   console.log("[PMTiles] Requested:", fullUrl); // 👈 Logs the actual URL being requested
+//   return fullUrl;
+// });
+
+
+    // maplibregl.addProtocol("pmtiles", protocol.tile);
 
     map.addSource("movebis", {
       type: "vector",
       url: "pmtiles://movebis_speed_germany_2020_min10cnt.pmtiles"
     });
+    console.log(map.getSource("movebis"));
 
         map.addSource("hvs", {
       type: "vector",
