@@ -594,28 +594,55 @@ async function initMap() {
       });
     });
 
-    function updateLegendVisibilityByZoom() {
-      const zoom = map.getZoom();
-      const legend = document.querySelector(".legend");
+    // function updateLegendVisibilityByZoom() {
 
-      if (!legend) return;
+    //   const zoom = map.getZoom();
+    //   const legend = document.querySelector(".legend");
+    //   if (!legend || legend.classList.contains("collapsed")) return; // ⛔ Skip update
 
-      // Hol dir alle legend-Abschnitte außer Titel und Feature Count
-      const allSections = Array.from(legend.children).filter(child =>
-        !child.classList.contains("legend-title") &&
-        child.id !== "feature-count"
-      );
+    //   if (!legend) return;
 
-      allSections.forEach(el => {
-        el.style.display = zoom < 11 ? "none" : "";
-      });
-    }
+    //   // Hol dir alle legend-Abschnitte außer Titel und Feature Count
+    //   const allSections = Array.from(legend.children).filter(child =>
+    //     !child.classList.contains("legend-title") &&
+    //     child.id !== "feature-count"
+    //   );
+
+    //   allSections.forEach(el => {
+    //     el.style.display = zoom < 11 ? "none" : "";
+    //   });
+    // }
 
     // Direkt beim Laden
     map.on("load", updateLegendVisibilityByZoom);
 
     // Und bei jedem Zoomwechsel
     map.on("zoomend", updateLegendVisibilityByZoom);
+
+
+    // inside map.on("load", ...) right before updateLayerFilter();
+document.querySelector(".legend-title").addEventListener("click", (e) => {
+  if (e.target.classList.contains("info-icon")) return;
+  const legend = document.querySelector(".legend");
+  const arrow = document.querySelector('[data-arrow="legend-root"]');
+  const collapsed = legend.classList.toggle("collapsed");
+
+  if (collapsed) {
+    // Hide everything except title and feature count
+    Array.from(legend.children).forEach(child => {
+      const isTitle = child.classList.contains("legend-title");
+      const isFeatureCount = child.id === "feature-count";
+      if (!isTitle && !isFeatureCount) {
+        child.style.display = "none";
+      }
+    });
+  } else {
+    // Immediately show zoom-appropriate content
+    updateLegendVisibilityByZoom();
+  }
+
+  if (arrow) arrow.classList.toggle("open");
+});
 
 
     function updateLayerFilter() {
@@ -696,35 +723,36 @@ async function initMap() {
       map.once("idle", updateVisibleFeatureCount);
     }
 
-    function updateLegendVisibilityByZoom() {
-      const zoom = map.getZoom();
-      const legend = document.querySelector(".legend");
+function updateLegendVisibilityByZoom() {
+  const zoom = map.getZoom();
+  const legend = document.querySelector(".legend");
 
-      if (!legend) return;
+  if (!legend || legend.classList.contains("collapsed")) return; // ✅ Skip if collapsed
 
-      const clusterLegendEl = document.getElementById("cluster-legend");
+  const clusterLegendEl = document.getElementById("cluster-legend");
 
-      // Nur behalten: .legend-title, #feature-count, #cluster-legend
-      Array.from(legend.children).forEach(el => {
-        const isTitle = el.classList.contains("legend-title");
-        const isFeatureCount = el.id === "feature-count";
-        const isClusterLegend = el.id === "cluster-legend";
+  // Nur behalten: .legend-title, #feature-count, #cluster-legend
+  Array.from(legend.children).forEach(el => {
+    const isTitle = el.classList.contains("legend-title");
+    const isFeatureCount = el.id === "feature-count";
+    const isClusterLegend = el.id === "cluster-legend";
 
-        if (zoom < 11) {
-          if (isTitle || isFeatureCount || isClusterLegend) {
-            el.style.display = "";
-          } else {
-            el.style.display = "none";
-          }
-        } else {
-          if (isClusterLegend) {
-            el.style.display = "none";
-          } else {
-            el.style.display = "";
-          }
-        }
-      });
+    if (zoom < 11) {
+      if (isTitle || isFeatureCount || isClusterLegend) {
+        el.style.display = "";
+      } else {
+        el.style.display = "none";
+      }
+    } else {
+      if (isClusterLegend) {
+        el.style.display = "none";
+      } else {
+        el.style.display = "";
+      }
     }
+  });
+}
+
 
     function updateVisibleFeatureCount() {
       const zoom = map.getZoom();
@@ -829,3 +857,33 @@ document.getElementById("toggle-mapillary").addEventListener("change", function 
     map.setMaxZoom(originalMaxZoom);
   }
 });
+
+
+
+// document.addEventListener("DOMContentLoaded", () => {
+//   document.querySelector(".legend-title").addEventListener("click", (e) => {
+//     if (e.target.classList.contains("info-icon")) return;
+//     const legend = document.querySelector(".legend");
+//     const arrow = document.querySelector('[data-arrow="legend-root"]');
+//     const collapsed = legend.classList.toggle("collapsed");
+
+// if (collapsed) {
+//   // Hide everything except title and feature count
+//   Array.from(legend.children).forEach(child => {
+//     const isTitle = child.classList.contains("legend-title");
+//     const isFeatureCount = child.id === "feature-count";
+//     if (!isTitle && !isFeatureCount) {
+//       child.style.display = "none";
+//     }
+//   });
+// } else {
+//   // Let the zoom decide what to show
+//   updateLegendVisibilityByZoom();
+// }
+
+//     if (arrow) arrow.classList.toggle("open");
+//   });
+// });
+
+
+
