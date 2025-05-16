@@ -52,15 +52,16 @@
     }
 
     /* Titelbereich */
-    .legend .legend-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      line-height: 1.4;
-    }
+.legend .legend-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  /* REMOVE the next 3 lines ↓↓↓ */
+  /* display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4; */
+}
 
     .legend .legend-title .info-icon {
       font-size: 14px;
@@ -92,23 +93,31 @@
       margin: 12px 0 6px;
     }
 
-/* Standardgröße für alle Toggle-Arrows */
 .toggle-arrow {
-  cursor: pointer;
-  font-size: 14px;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-right: 4px solid #000;
+  border-bottom: 4px solid #000;
+  transform: rotate(135deg);
+  transition: transform 0.2s ease;
   margin-right: 5px;
-  user-select: none;
 }
 
-/* Größerer Pfeil explizit für legend-root (also den Titelbereich) */
+.toggle-arrow.open {
+  transform: rotate(45deg); /* open = down */
+}
+
 [data-arrow="legend-root"] {
-  font-size: 18px;
-  /* font-weight: bold; */
+  width: 14px;
+  height: 14px;
+  border-width: 5px;
+  margin-left: auto; /* push to the right within flex container */
 }
 
-    .toggle-arrow.open {
+    /* .toggle-arrow.open {
       transform: rotate(90deg);
-    }
+    } */
 
     .legend-items {
       margin-left: 8px;
@@ -219,11 +228,13 @@
 
   <div class="legend">
 
-  <div class="legend-title">
+<div class="legend-header legend-title" data-toggle="legend-root">
+  <div style="flex-grow: 1;">
     <div>Unfalldaten aus Unfallatlas<br />von 2017–2023</div>
     <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
-    <span class="toggle-arrow open" data-arrow="legend-root">▶</span>
   </div>
+  <span class="toggle-arrow open" data-arrow="legend-root"></span>
+</div>
 
 
     <div class="legend-header" data-toggle="UKATEGORIE">
@@ -231,7 +242,7 @@
         <input type="radio" name="color-style" value="UKATEGORIE" checked />
         <strong>UKATEGORIE (Schweregrad)</strong>
       </label>
-      <span class="toggle-arrow open" data-arrow="UKATEGORIE">▶</span>
+      <span class="toggle-arrow open" data-arrow="UKATEGORIE"></span>
     </div>
 
     <div class="legend-items" data-section="UKATEGORIE">
@@ -254,7 +265,7 @@
           <input type="radio" name="color-style" value="BETEILIGUNG" />
           <strong>Beteiligung</strong>
         </label>
-        <span class="toggle-arrow open" data-arrow="beteiligung">▶</span>
+        <span class="toggle-arrow open" data-arrow="beteiligung"></span>
 
 
       </div>
@@ -300,7 +311,7 @@
         <input type="radio" name="color-style" value="UJAHR" />
         <strong>UJAHR (Jahr)</strong>
       </label>
-      <span class="toggle-arrow open" data-arrow="UJAHR">▶</span>
+      <span class="toggle-arrow open" data-arrow="UJAHR"></span>
     </div>
     <div class="legend-items" data-section="UJAHR">
       <label class="legend-item" data-group="UJAHR" data-value="2017"><input type="checkbox" value="2017"
@@ -326,7 +337,7 @@
         <input type="radio" name="color-style" value="UTYP1" />
         <strong>UTYP1 (Unfalltyp)</strong>
       </label>
-      <span class="toggle-arrow" data-arrow="UTYP1">▶</span>
+      <span class="toggle-arrow" data-arrow="UTYP1"></span>
     </div>
 
     <div class="legend-items collapsed" data-section="UTYP1">
@@ -351,7 +362,7 @@
         <input type="radio" name="color-style" value="UART" />
         <strong>UART (Unfallart)</strong>
       </label>
-      <span class="toggle-arrow" data-arrow="UART">▶</span>
+      <span class="toggle-arrow" data-arrow="UART"></span>
     </div>
     <div class="legend-items collapsed" data-section="UART">
       <label class="legend-item" data-group="UART" data-value="1"><input type="checkbox" value="1" data-group="UART"

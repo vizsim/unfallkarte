@@ -87,13 +87,13 @@ const paintStyles = {
   }
 };
 
-const beteiligungEmojis = {
-  IstRad: "🚲",
-  IstPKW: "🚗",
-  IstFuss: "🚶",
-  IstKrad: "🏍",
-  IstSonstig: "❓"
-};
+// const beteiligungEmojis = {
+//   IstRad: "🚲",
+//   IstPKW: "🚗",
+//   IstFuss: "🚶",
+//   IstKrad: "🏍",
+//   IstSonstig: "❓"
+// };
 
 function updateLegendColors(activeKey) {
   document.querySelectorAll(".legend-item").forEach(item => {
