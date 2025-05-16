@@ -1,3 +1,11 @@
 config.js
 
 *:Zone.Identifier
+
+
+*.pmtiles
+
+!accidents_11-12.pmtiles
+!accidents_12-13.pmtiles
+!combined.pmtiles
+

@@ -93,6 +93,18 @@
       margin: 12px 0 6px;
     }
 
+    #hvs-legend {
+  display: none;
+}
+
+#mapillary-legend {
+  display: none;
+}
+
+#movebis-legend {
+  display: none;
+}
+
 .toggle-arrow {
   display: inline-block;
   width: 10px;
@@ -392,11 +404,58 @@
       <label>
         <input type="checkbox" id="toggle-mapillary" />
         Mapillary-Bilder anzeigen
+        <span class="info-icon" title="Quelle: Mapillary Coverage – Lizenz: CC BY-SA 4.0">ⓘ</span>
       </label>
     </div>
 
+    <div id="mapillary-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+  <strong>Mapillary Bilder</strong><br />
+  <span style="display:inline-block;width:12px;height:12px;background:#00b955;margin-right:6px;"></span>
+  Bildpunkt
+</div>
+
+<div style="margin-top: 6px;">
+  <label>
+    <input type="checkbox" id="toggle-movebis" />
+    Stadtradeln 2020 anzeigen
+        <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
+  </label>
+</div>
+<div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+  <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
+  <div style="margin-top: 4px;">
+    <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span> ≤ 12 km/h</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span> ≈ 18 km/h</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span> ≥ 24 km/h</div>
+  </div>
+
+  <div style="margin-top: 8px;"><strong>Linienstärke (Besuche)</strong></div>
+  <div style="margin-top: 4px;">
+    <div><span style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span> wenige (≤ 10)</div>
+    <div><span style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span> mittel (≈ 100)</div>
+    <div><span style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span> viele (≥ 1000)</div>
+  </div>
+</div>
+
+
+<div style="margin-top: 6px;">
+  <label>
+    <input type="checkbox" id="toggle-hvs" />
+    Hauptverkehrsstraßen anzeigen
+        <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
+  </label>
+</div>
+<div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+  <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
+  <div style="margin-top: 4px;">
+    <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3 Mio Fahrzeuge/Jahr</div>
+    <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6 Mio Fahrzeuge/Jahr</div>
+    <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10 Mio Fahrzeuge/Jahr</div>
+  </div>
+</div>
+
     <div id="cluster-legend" style="display: none;">
-      <strong style="display: block; margin-bottom: 8px;">Cluster-Legende</strong>
+      <strong style="display: block; margin-bottom: 8px;">Cluster-Legende (ohne Filter)</strong>
       <div class="cluster-legend-entry">
         <div class="cluster-dot" style="width: 2px; height: 2px;"></div>
         <div class="cluster-label">1 Unfall</div>
