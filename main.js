@@ -4,6 +4,9 @@ import { setupPhotonGeocoder } from './geocoder.js';
 let MAPTILER_API_KEY = '';
 let MAPILLARY_TOKEN = '';
 
+let originalMinZoom = 6;
+let originalMaxZoom = 20;
+
 const isLocalhost = location.hostname === "localhost";
 
 (async () => {
@@ -190,8 +193,8 @@ async function initMap() {
     maxZoom: 20
   });
 
-  const originalMinZoom = map.getMinZoom();
-  const originalMaxZoom = map.getMaxZoom();
+  originalMinZoom = map.getMinZoom();
+  originalMaxZoom = map.getMaxZoom();
 
   map.on("load", () => {
     setupPhotonGeocoder(map); //
