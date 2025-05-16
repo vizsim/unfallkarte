@@ -198,10 +198,19 @@ async function initMap() {
 
   map.on("load", () => {
     setupPhotonGeocoder(map); //
-    const protocol = new pmtiles.Protocol();
+
+    // local / github setup
+    // const protocol = new pmtiles.Protocol();  
+
+//  setup backblaze
+    const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+
+const protocol = new pmtiles.Protocol((name) => {
+  return `${pmtilesBaseURL}${name}`;
+});
+
+
     maplibregl.addProtocol("pmtiles", protocol.tile);
-
-
 
     // map.addSource("accidents", {
     //   type: "vector",
