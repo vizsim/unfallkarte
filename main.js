@@ -222,6 +222,11 @@ async function initMap() {
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
     });
 
+    map.addSource("schools", {
+      type: "vector",
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/germany_osm_schools-25-05-09.pmtiles"
+    });
+
     map.addSource("accidents_11-12", {
       type: "vector",
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_11-12.pmtiles"
@@ -244,6 +249,15 @@ async function initMap() {
       ],
       tileSize: 256,
       attribution: "© MapTiler"
+    });
+
+    map.addSource("mapillary-images", {
+      type: "vector",
+      tiles: [
+        `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`
+      ],
+      minzoom: 14,
+      maxzoom: 14.99
     });
 
     function addAccidentLayers({ idSuffix, sourceId, minzoom, maxzoom }) {
@@ -439,7 +453,58 @@ async function initMap() {
     });
 
 
+    // Schulen POINTS
+    map.addLayer({
+      id: "schools-points",
+      type: "circle",
+      source: "schools",
+      "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
+      filter: ["==", ["geometry-type"], "Point"],
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-radius": 6,
+        "circle-color": [
+          "match",
+          ["get", "amenity"],
+          "school", "#0074D9",       // blue
+          "kindergarten", "#2ECC40", // green
+          "#aaaaaa"                  // default/fallback
+        ],
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 1
+      }
+    });
 
+    // Schulen POLYGONS
+    map.addLayer({
+      id: "schools-polygons",
+      type: "fill",
+      source: "schools",
+      "source-layer": "germany_osm_schools", // again: tippecanoe `-l` name
+      filter: ["==", ["geometry-type"], "Polygon"],
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": [
+          "match",
+          ["get", "amenity"],
+          "school", "#0074D9",       // blue
+          "kindergarten", "#2ECC40", // green
+          "#aaaaaa"                  // default/fallback
+        ],
+        "fill-opacity": 0.5,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+
+
+
+
+    // satellite
     map.addLayer({
       id: "satellite-layer",
       type: "raster",
@@ -447,15 +512,9 @@ async function initMap() {
       layout: { visibility: "none" }
     }, ACCIDENT_LAYERS[0]); // oder erster Layer
 
-    map.addSource("mapillary-images", {
-      type: "vector",
-      tiles: [
-        `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`
-      ],
-      minzoom: 14,
-      maxzoom: 14.99
-    });
 
+
+    // mapillary 
     map.addLayer({
       id: "mapillary-images-layer",
       type: "circle",
@@ -681,6 +740,44 @@ async function initMap() {
     });
 
 
+    const schoolsPopup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    function setupSchoolsPopup(layerId) {
+      map.on("mouseenter", layerId, (e) => {
+        map.getCanvas().style.cursor = "pointer";
+        const props = e.features[0].properties;
+
+        const content = `
+      <table style="font-size:12px; border-collapse:collapse;">
+        ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
+        ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
+        ${props.isced_level ? `<tr><td><strong>ISCED</strong></td><td>${props.isced_level}</td></tr>` : ""}
+        ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
+        ${props.osm_id ? `<tr><td><strong>OSM ID</strong></td><td>${props.osm_id}</td></tr>` : ""}
+      </table>
+    `;
+
+        schoolsPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+      });
+
+      map.on("mouseleave", layerId, () => {
+        map.getCanvas().style.cursor = "";
+        schoolsPopup.remove();
+      });
+    }
+
+    // Enable popups for both points and polygons
+    setupSchoolsPopup("schools-points");
+    setupSchoolsPopup("schools-polygons");
+
+
+
+
+
+
 
     document.getElementById("toggle-details").addEventListener("change", function (e) {
       const visible = e.target.checked ? "visible" : "none";
@@ -892,6 +989,7 @@ async function initMap() {
     map.on("zoomend", updateVisibleFeatureCount);
     updateLegendVisibilityByZoom();
     updateLayerFilter();
+    applyLegendVisibility(); 
   });
 }
 
@@ -902,10 +1000,15 @@ function applyZoomLock() {
   const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
   const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
   const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
+  const schoolsPointsVisible = map.getLayoutProperty("schools-points", "visibility") === "visible";
+  const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
+
+  const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
 
   // Determine the strictest minZoom
   const minZooms = [];
   if (movebisVisible) minZooms.push(13);
+  if (schoolsVisible) minZooms.push(13);
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
 
@@ -921,6 +1024,16 @@ function applyZoomLock() {
   } else if (mapillaryVisible && z > 14.99) {
     map.setZoom(14.99);
   }
+}
+
+function applyLegendVisibility() {
+  ["schools", "hvs", "mapillary", "movebis"].forEach(key => {
+    const toggle = document.getElementById(`toggle-${key}`);
+    const legend = document.getElementById(`${key}-legend`);
+    if (toggle && legend) {
+      legend.style.display = toggle.checked ? "block" : "none";
+    }
+  });
 }
 
 
@@ -939,25 +1052,33 @@ document.querySelectorAll(".basemap-thumb").forEach(thumb => {
 });
 
 
+// document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
+//   map.setLayoutProperty("mapillary-images-layer", "visibility", checked ? "visible" : "none");
+
+//   const mapillaryLegend = document.getElementById("mapillary-legend");
+//   if (mapillaryLegend) mapillaryLegend.style.display = checked ? "block" : "none";
+
+//   applyZoomLock();
+//   // requestAnimationFrame(updateLegendVisibilityByZoom);
+// });
+
 document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
   const checked = e.target.checked;
   map.setLayoutProperty("mapillary-images-layer", "visibility", checked ? "visible" : "none");
-
-  const mapillaryLegend = document.getElementById("mapillary-legend");
-  if (mapillaryLegend) mapillaryLegend.style.display = checked ? "block" : "none";
-
   applyZoomLock();
-  // requestAnimationFrame(updateLegendVisibilityByZoom);
+  applyLegendVisibility(); // 🧼 handles the legend!
 });
 
 document.getElementById("toggle-movebis").addEventListener("change", function (e) {
   const checked = e.target.checked;
   map.setLayoutProperty("movebis", "visibility", checked ? "visible" : "none");
 
-  const movebisLegend = document.getElementById("movebis-legend");
-  if (movebisLegend) movebisLegend.style.display = checked ? "block" : "none";
+  // const movebisLegend = document.getElementById("movebis-legend");
+  // if (movebisLegend) movebisLegend.style.display = checked ? "block" : "none";
 
   applyZoomLock();
+  applyLegendVisibility();
   // requestAnimationFrame(updateLegendVisibilityByZoom);
 });
 
@@ -965,12 +1086,27 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   const checked = e.target.checked;
   map.setLayoutProperty("hvs", "visibility", checked ? "visible" : "none");
 
-  const hvsLegend = document.getElementById("hvs-legend");
-  if (hvsLegend) hvsLegend.style.display = checked ? "block" : "none";
+  // const hvsLegend = document.getElementById("hvs-legend");
+  // if (hvsLegend) hvsLegend.style.display = checked ? "block" : "none";
 
   applyZoomLock();
+  applyLegendVisibility();
   // requestAnimationFrame(updateLegendVisibilityByZoom);
 });
+
+document.getElementById("toggle-schools").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  map.setLayoutProperty("schools-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("schools-polygons", "visibility", checked ? "visible" : "none");
+
+  // // Optional: adjust legend
+  // const legend = document.getElementById("schools-legend");
+  // if (legend) legend.style.display = checked ? "block" : "none";
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
 
 
 

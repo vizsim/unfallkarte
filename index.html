@@ -44,25 +44,27 @@
     */
 
     .legend {
-  position: absolute;
-  top: 60px;               /* Platz für Geocoder */
-  right: 10px;
-  background: white;
-  padding: 10px;
-  font-family: sans-serif;
-  font-size: 12px;
-  border-radius: 5px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  width: 320px;
-  max-width: 100%;
+      position: absolute;
+      top: 60px;
+      /* Platz für Geocoder */
+      right: 10px;
+      background: white;
+      padding: 10px;
+      font-family: sans-serif;
+      font-size: 12px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      width: 320px;
+      max-width: 100%;
 
-  /* Kein fixer bottom-Wert! */
-  /* bottom: 80px; ← WEG DAMIT */
+      /* Kein fixer bottom-Wert! */
+      /* bottom: 80px; ← WEG DAMIT */
 
-  /* Stattdessen: Höhe dynamisch aber nie über max */
-  max-height: calc(100vh - 140px); /* 60 oben + 80 unten */
-  overflow-y: auto;
-}
+      /* Stattdessen: Höhe dynamisch aber nie über max */
+      max-height: calc(100vh - 140px);
+      /* 60 oben + 80 unten */
+      overflow-y: auto;
+    }
 
 
     /* Allgemeine Styles für Legend-Items */
@@ -131,6 +133,11 @@
     #movebis-legend {
       display: none;
     }
+    
+    #schools-legend {
+      display: none;
+    }
+
 
     .toggle-arrow {
       display: inline-block;
@@ -144,7 +151,7 @@
     }
 
     .toggle-arrow.open {
-      transform: rotate(45deg)!important;
+      transform: rotate(45deg) !important;
       /* open = down */
     }
 
@@ -155,7 +162,7 @@
       margin-left: auto;
       /* push to the right within flex container */
     }
-    
+
 
     .legend-items {
       margin-left: 8px;
@@ -269,9 +276,9 @@
     <div class="legend-header legend-title" data-toggle="legend-root">
       <div style="flex-grow: 1;">
         <div>Unfalldaten aus Unfallatlas<br />von 2017–2023
-        <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
+          <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
         </div>
-        
+
       </div>
       <span class="toggle-arrow open" data-arrow="legend-root"></span>
     </div>
@@ -480,7 +487,7 @@
     <div style="margin-top: 6px;">
       <label>
         <input type="checkbox" id="toggle-hvs" />
-        Hauptverkehrsstraßen anzeigen
+        Verkehrsmengen anzeigen
         <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
       </label>
     </div>
@@ -493,6 +500,31 @@
           Fahrzeuge/Jahr</div>
         <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10 Mio
           Fahrzeuge/Jahr</div>
+      </div>
+    </div>
+
+
+
+    <div style="margin-top: 6px;">
+      <label>
+        <input type="checkbox" id="toggle-schools" />
+        Schulen/Kindergärten anzeigen
+        <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+      </label>
+    </div>
+    <div id="schools-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+      <div><strong>Typen</strong></div>
+      <div style="margin-top: 4px;">
+        <div>
+          <span
+            style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
+          Schule
+        </div>
+        <div>
+          <span
+            style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
+          Kindergarten
+        </div>
       </div>
     </div>
 
@@ -551,7 +583,7 @@
 
 
 
-<div class="legend-section-divider"></div>
+    <div class="legend-section-divider"></div>
     <div id="feature-count" style="margin-top:10px;">
       Sichtbare Punkte: ...<br />
       Zoomlevel: ...
