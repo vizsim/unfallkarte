@@ -122,6 +122,16 @@
       margin: 12px 0 6px;
     }
 
+    .count-badge {
+      margin-left: 6px;
+      font-size: 10px;
+      padding: 1px 4px;
+      background: #eee;
+      border-radius: 8px;
+      color: #333;
+      vertical-align: middle;
+    }
+
     #hvs-legend {
       display: none;
     }
@@ -133,7 +143,7 @@
     #movebis-legend {
       display: none;
     }
-    
+
     #schools-legend {
       display: none;
     }
@@ -171,6 +181,25 @@
     .legend-items.collapsed {
       display: none;
     }
+
+
+    .label-text {
+      white-space: nowrap;
+    }
+
+
+
+    .count-badge {
+      font-size: 10px;
+      padding: 0px 4px;
+      background: #eee;
+      border-radius: 10px;
+      min-width: 24px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+
 
     /* ────────────── Feature Count ────────────── */
     #feature-count {
@@ -293,7 +322,121 @@
     </div>
 
     <div class="legend-items" data-section="UKATEGORIE">
+
+
       <label class="legend-item" data-group="UKATEGORIE" data-value="1">
+        <input type="checkbox" value="1" data-group="UKATEGORIE" checked />
+        <span class="color-box"></span>
+        Getötete
+        <span class="count-badge"></span>
+      </label><br />
+
+      <label class="legend-item" data-group="UKATEGORIE" data-value="2">
+        <input type="checkbox" value="2" data-group="UKATEGORIE" checked />
+        <span class="color-box"></span>
+        Schwerverletzte
+        <span class="count-badge"></span>
+      </label><br />
+
+      <label class="legend-item" data-group="UKATEGORIE" data-value="3">
+        <input type="checkbox" value="3" data-group="UKATEGORIE" checked />
+        <span class="color-box"></span>
+        Leichtverletzte
+        <span class="count-badge"></span>
+      </label><br />
+
+
+
+      <!-- <label class="legend-item legend-row" data-group="UKATEGORIE" data-value="1">
+  <div class="legend-left">
+    <input type="checkbox" value="1" data-group="UKATEGORIE" checked />
+    <span class="color-box"></span>
+    <span class="legend-label">Getötete</span>
+  </div>
+  <span class="count-badge"></span>
+</label>
+
+<label class="legend-item legend-row" data-group="UKATEGORIE" data-value="2">
+  <div class="legend-left">
+    <input type="checkbox" value="2" data-group="UKATEGORIE" checked />
+    <span class="color-box"></span>
+    <span class="legend-label">Schwerverletzte</span>
+  </div>
+  <span class="count-badge"></span>
+</label>
+
+<label class="legend-item legend-row" data-group="UKATEGORIE" data-value="3">
+  <div class="legend-left">
+    <input type="checkbox" value="3" data-group="UKATEGORIE" checked />
+    <span class="color-box"></span>
+    <span class="legend-label">Leichtverletzte</span>
+  </div>
+  <span class="count-badge"></span>
+</label> -->
+
+
+
+      <!-- <div class="legend-item legend-row" data-group="UKATEGORIE" data-value="1">
+  <div class="legend-left">
+    <input type="checkbox" value="1" data-group="UKATEGORIE" checked />
+    <span class="color-box"></span>
+    <span class="legend-label">Getötete</span>
+  </div>
+  <span class="count-badge"></span>
+</div>
+<div class="legend-item legend-row" data-group="UKATEGORIE" data-value="2">
+  <div class="legend-left">
+    <input type="checkbox" value="2" data-group="UKATEGORIE" checked />
+    <span class="color-box"></span>
+    <span class="legend-label">Schwerverletzte</span>
+  </div>
+  <span class="count-badge"></span>
+</div>
+<div class="legend-item legend-row" data-group="UKATEGORIE" data-value="3">
+  <div class="legend-left">
+    <input type="checkbox" value="3" data-group="UKATEGORIE" checked />
+    <span class="color-box"></span>
+    <span class="legend-label">Leichtverletzte</span>
+  </div>
+  <span class="count-badge"></span>
+</div> -->
+
+
+
+      <!-- <div class="legend-item" data-group="UKATEGORIE" data-value="1">
+        <div class="legend-row">
+          <div class="legend-left">
+            <input type="checkbox" value="1" data-group="UKATEGORIE" checked />
+            <span class="color-box"></span>
+            <span class="legend-label">Getötete</span>
+          </div>
+          <span class="count-badge"></span>
+        </div>
+      </div>
+
+      <div class="legend-item" data-group="UKATEGORIE" data-value="2">
+        <div class="legend-row">
+          <div class="legend-left">
+            <input type="checkbox" value="2" data-group="UKATEGORIE" checked />
+            <span class="color-box"></span>
+            <span class="legend-label">Schwerverletzte</span>
+          </div>
+          <span class="count-badge"></span>
+        </div>
+      </div>
+
+      <div class="legend-item" data-group="UKATEGORIE" data-value="3">
+        <div class="legend-row">
+          <div class="legend-left">
+            <input type="checkbox" value="3" data-group="UKATEGORIE" checked />
+            <span class="color-box"></span>
+            <span class="legend-label">Leichtverletzte</span>
+          </div>
+          <span class="count-badge"></span>
+        </div>
+      </div> -->
+
+      <!-- <label class="legend-item" data-group="UKATEGORIE" data-value="1">
         <input type="checkbox" value="1" data-group="UKATEGORIE" checked /> <span></span> Getötete
       </label><br />
       <label class="legend-item" data-group="UKATEGORIE" data-value="2">
@@ -301,7 +444,9 @@
       </label><br />
       <label class="legend-item" data-group="UKATEGORIE" data-value="3">
         <input type="checkbox" value="3" data-group="UKATEGORIE" checked /> <span></span> Leichtverletzte
-      </label><br />
+      </label><br /> -->
+
+
     </div>
 
 

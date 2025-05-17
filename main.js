@@ -939,6 +939,32 @@ async function initMap() {
         // Nutze Einzelpunkt-Layer
         features = map.queryRenderedFeatures({ layers: ACCIDENT_LAYERS });
 
+        // counts for each cat
+        // Count per UKATEGORIE value
+        const countsByUKat = features.reduce((acc, feat) => {
+          const val = feat.properties.UKATEGORIE;
+          acc[val] = (acc[val] || 0) + 1;
+          return acc;
+        }, {});
+
+
+
+        document.querySelectorAll('.legend-item[data-group="UKATEGORIE"]').forEach(item => {
+  const val = parseInt(item.getAttribute('data-value'));
+  const count = countsByUKat[val] || 0;
+
+  const badge = item.querySelector(".count-badge");
+  if (badge) {
+    badge.textContent = count > 0 ? `${count}` : "";
+  }
+});
+
+        
+
+
+
+
+
         document.getElementById("feature-count").innerHTML =
           `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
       }
@@ -989,7 +1015,7 @@ async function initMap() {
     map.on("zoomend", updateVisibleFeatureCount);
     updateLegendVisibilityByZoom();
     updateLayerFilter();
-    applyLegendVisibility(); 
+    applyLegendVisibility();
   });
 }
 
