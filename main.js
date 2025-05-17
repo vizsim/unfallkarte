@@ -1,5 +1,30 @@
-
 import { setupPhotonGeocoder } from './geocoder.js';
+
+
+// // ✅ PMTiles protocol setup must be here – BEFORE anything else happens
+// const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+// //const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
+
+// const protocol = new pmtiles.Protocol(name => {
+//   const fullUrl = `${pmtilesBaseURL}${name}`;
+//   console.log("📡 Protocol resolved:", name, "→", fullUrl);
+//   return fullUrl;
+// });
+
+
+//  maplibregl.addProtocol("pmtiles", protocol.tile); // 🟢 Must run before map.addSource() anywher
+
+// const protocol = new pmtiles.Protocol();
+// maplibregl.addProtocol("pmtiles", protocol.tile);
+
+// const p1 = new pmtiles.PMTiles("https://f003.backblazeb2.com/file/unfallkarte-data/accidents_11-12.pmtiles");
+// const p2 = new pmtiles.PMTiles("https://f003.backblazeb2.com/file/unfallkarte-data/accidents_12-13.pmtiles");
+// protocol.add(p1);
+// protocol.add(p2);
+
+
+
+
 
 let MAPTILER_API_KEY = '';
 let MAPILLARY_TOKEN = '';
@@ -14,6 +39,17 @@ const isLocalhost = location.hostname === "localhost";
     const config = await import(isLocalhost ? './config.js' : './config.public.js');
     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
+
+    console.log(`er tut was geladen`);
+
+    // console.log(pmtilesBaseURL);
+    // console.log(protocol);
+    // console.log(protocol.tile);
+    // console.log("Testing mapping:", protocol.tile("accidents_11-12.pmtiles", () => {}));
+    
+
+
+    
     initMap();
   } catch (err) {
     console.error("❌ Konfig konnte nicht geladen werden:", err);
@@ -183,16 +219,31 @@ document.querySelectorAll('input[name="color-style"]').forEach(rb => {
 });
 
 
+
+
 async function initMap() {
 
-  // ✅ Top level — before map.addSource()
-const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+//   const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+// const protocol = new pmtiles.Protocol(name => {
+//   const fullUrl = `${pmtilesBaseURL}${name}`;
+//   console.log("📡 Protocol resolved:", name, "→", fullUrl);
+//   return fullUrl;
+// });
+// maplibregl.addProtocol("pmtiles", protocol.tile);
 
-const protocol = new pmtiles.Protocol(name => {
-  const fullUrl = `${pmtilesBaseURL}${name}`;
-  console.log("[PMTiles] Protocol mapping to:", fullUrl);
-  return fullUrl;
-});
+//     console.log(pmtilesBaseURL);
+//     console.log(protocol);
+//     console.log(protocol.tile);
+//     console.log("Testing mapping:", protocol.tile("accidents_11-12.pmtiles", () => {}));
+
+//   // ✅ Top level — before map.addSource()
+// const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+
+// const protocol = new pmtiles.Protocol(name => {
+//   const fullUrl = `${pmtilesBaseURL}${name}`;
+//   console.log("[PMTiles] Protocol mapping to:", fullUrl);
+//   return fullUrl;
+// });
 
 // maplibregl.addProtocol("pmtiles", protocol.tile); // ✅ This must be early!
 
@@ -223,6 +274,16 @@ const protocol = new pmtiles.Protocol(name => {
 // const protocol = new pmtiles.Protocol((name) => {
 //   return `${pmtilesBaseURL}${name}`;
 // });
+// maplibregl.addProtocol("pmtiles", protocol.tile);
+
+//// this does not really work as i give the full url later, however, it is needed for the protocol to work
+  const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+const protocol = new pmtiles.Protocol(name => {
+  const fullUrl = `${pmtilesBaseURL}${name}`;
+  console.log("📡 Protocol resolved:", name, "→", fullUrl);
+  return fullUrl;
+});
+maplibregl.addProtocol("pmtiles", protocol.tile);
 
 
 //   // Setup PMTiles with Backblaze
@@ -241,28 +302,41 @@ const protocol = new pmtiles.Protocol(name => {
 
 
     // maplibregl.addProtocol("pmtiles", protocol.tile);
+    // maplibregl.addProtocol("pmtiles", protocol.tile);
 
     map.addSource("movebis", {
       type: "vector",
-      url: "pmtiles://movebis_speed_germany_2020_min10cnt.pmtiles"
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/movebis_speed_germany_2020_min10cnt.pmtiles"
     });
-    console.log(map.getSource("movebis"));
+
+//     console.log(map.getSource("movebis"));
+
+//     const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+// const protocol = new pmtiles.Protocol(name => {
+//   const fullUrl = `${pmtilesBaseURL}${name}`;
+//   console.log("📡 Protocol resolved:", name, "→", fullUrl);
+//   return fullUrl;
+// });
+// maplibregl.addProtocol("pmtiles", protocol.tile);
 
         map.addSource("hvs", {
       type: "vector",
-      url: "pmtiles://Hauptverkehrstraßennetz.pmtiles"
+       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
+      // url: "https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
+      //      url: "pmtiles://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
+
     });
 
 
 
     map.addSource("accidents_11-12", {
       type: "vector",
-      url: "pmtiles://accidents_11-12.pmtiles"
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_11-12.pmtiles"
     });
 
     map.addSource("accidents_12-13", {
       type: "vector",
-      url: "pmtiles://accidents_12-13.pmtiles"
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_12-13.pmtiles"
     });
 
     // map.addSource("accidents-cluster", {
@@ -272,7 +346,7 @@ const protocol = new pmtiles.Protocol(name => {
 
     map.addSource("accidents-cluster", {
       type: "vector",
-      url: "pmtiles://combined.pmtiles"
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/combined.pmtiles"
     });
 
     map.addSource("satellite", {
