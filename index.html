@@ -6,7 +6,8 @@
   <title>Unfallkarte</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:,">
-  <link href="https://unpkg.com/maplibre-gl@3.3.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <!-- <link href="https://unpkg.com/maplibre-gl@3.3.0/dist/maplibre-gl.css" rel="stylesheet" /> -->
+  <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.css' />
   <style>
     html,
     body {
@@ -21,10 +22,11 @@
     }
 
     /* ────────────── Legend Style ────────────── */
-    .legend {
+    /* .legend {
       position: absolute;
-      /* top: 10px; */
-      top: 60px; /* Adjust this based on geocoder height */
+
+      top: 60px;
+
       right: 10px;
       background: white;
       padding: 10px;
@@ -34,9 +36,34 @@
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
       width: 320px;
       max-width: 100%;
-      max-height: calc(100vh - 80px); /* 60px top + 20px breathing room */
+      max-height: calc(100vh - 80px);
+
       overflow-y: auto;
-    }
+      bottom: 80px;
+    } 
+    */
+
+    .legend {
+  position: absolute;
+  top: 60px;               /* Platz für Geocoder */
+  right: 10px;
+  background: white;
+  padding: 10px;
+  font-family: sans-serif;
+  font-size: 12px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  max-width: 100%;
+
+  /* Kein fixer bottom-Wert! */
+  /* bottom: 80px; ← WEG DAMIT */
+
+  /* Stattdessen: Höhe dynamisch aber nie über max */
+  max-height: calc(100vh - 140px); /* 60 oben + 80 unten */
+  overflow-y: auto;
+}
+
 
     /* Allgemeine Styles für Legend-Items */
     .legend .legend-item {
@@ -52,16 +79,16 @@
     }
 
     /* Titelbereich */
-.legend .legend-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  /* REMOVE the next 3 lines ↓↓↓ */
-  /* display: flex;
+    .legend .legend-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      /* REMOVE the next 3 lines ↓↓↓ */
+      /* display: flex;
   align-items: center;
   gap: 6px;
   line-height: 1.4; */
-}
+    }
 
     .legend .legend-title .info-icon {
       font-size: 14px;
@@ -94,42 +121,41 @@
     }
 
     #hvs-legend {
-  display: none;
-}
+      display: none;
+    }
 
-#mapillary-legend {
-  display: none;
-}
+    #mapillary-legend {
+      display: none;
+    }
 
-#movebis-legend {
-  display: none;
-}
+    #movebis-legend {
+      display: none;
+    }
 
-.toggle-arrow {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-right: 4px solid #000;
-  border-bottom: 4px solid #000;
-  transform: rotate(135deg);
-  transition: transform 0.2s ease;
-  margin-right: 5px;
-}
+    .toggle-arrow {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-right: 4px solid #000;
+      border-bottom: 4px solid #000;
+      transform: rotate(135deg);
+      transition: transform 0.2s ease;
+      margin-right: 5px;
+    }
 
-.toggle-arrow.open {
-  transform: rotate(45deg); /* open = down */
-}
+    .toggle-arrow.open {
+      transform: rotate(45deg)!important;
+      /* open = down */
+    }
 
-[data-arrow="legend-root"] {
-  width: 14px;
-  height: 14px;
-  border-width: 5px;
-  margin-left: auto; /* push to the right within flex container */
-}
-
-    /* .toggle-arrow.open {
-      transform: rotate(90deg);
-    } */
+    [data-arrow="legend-root"] {
+      width: 14px;
+      height: 14px;
+      border-width: 5px;
+      margin-left: auto;
+      /* push to the right within flex container */
+    }
+    
 
     .legend-items {
       margin-left: 8px;
@@ -240,33 +266,35 @@
 
   <div class="legend">
 
-<div class="legend-header legend-title" data-toggle="legend-root">
-  <div style="flex-grow: 1;">
-    <div>Unfalldaten aus Unfallatlas<br />von 2017–2023</div>
-    <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
-  </div>
-  <span class="toggle-arrow open" data-arrow="legend-root"></span>
-</div>
+    <div class="legend-header legend-title" data-toggle="legend-root">
+      <div style="flex-grow: 1;">
+        <div>Unfalldaten aus Unfallatlas<br />von 2017–2023
+        <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
+        </div>
+        
+      </div>
+      <span class="toggle-arrow open" data-arrow="legend-root"></span>
+    </div>
 
 
     <div class="legend-header" data-toggle="UKATEGORIE">
       <label style="flex-grow: 1;">
         <input type="radio" name="color-style" value="UKATEGORIE" checked />
-        <strong>UKATEGORIE (Schweregrad)</strong>
+        <strong>Schweregrad (UKATEGORIE)</strong>
       </label>
       <span class="toggle-arrow open" data-arrow="UKATEGORIE"></span>
     </div>
 
     <div class="legend-items" data-section="UKATEGORIE">
-    <label class="legend-item" data-group="UKATEGORIE" data-value="1">
-      <input type="checkbox" value="1" data-group="UKATEGORIE" checked /> <span></span> Getötete
-    </label><br />
-    <label class="legend-item" data-group="UKATEGORIE" data-value="2">
-      <input type="checkbox" value="2" data-group="UKATEGORIE" checked /> <span></span> Schwerverletzte
-    </label><br />
-    <label class="legend-item" data-group="UKATEGORIE" data-value="3">
-      <input type="checkbox" value="3" data-group="UKATEGORIE" checked /> <span></span> Leichtverletzte
-    </label><br />
+      <label class="legend-item" data-group="UKATEGORIE" data-value="1">
+        <input type="checkbox" value="1" data-group="UKATEGORIE" checked /> <span></span> Getötete
+      </label><br />
+      <label class="legend-item" data-group="UKATEGORIE" data-value="2">
+        <input type="checkbox" value="2" data-group="UKATEGORIE" checked /> <span></span> Schwerverletzte
+      </label><br />
+      <label class="legend-item" data-group="UKATEGORIE" data-value="3">
+        <input type="checkbox" value="3" data-group="UKATEGORIE" checked /> <span></span> Leichtverletzte
+      </label><br />
     </div>
 
 
@@ -275,7 +303,7 @@
       <div class="legend-header" data-toggle="beteiligung">
         <label style="flex-grow: 1;">
           <input type="radio" name="color-style" value="BETEILIGUNG" />
-          <strong>Beteiligung</strong>
+          <strong>Beteiligung (IstRad, IstPKW, ...)</strong>
         </label>
         <span class="toggle-arrow open" data-arrow="beteiligung"></span>
 
@@ -321,11 +349,12 @@
     <div class="legend-header" data-toggle="UJAHR">
       <label style="flex-grow: 1;">
         <input type="radio" name="color-style" value="UJAHR" />
-        <strong>UJAHR (Jahr)</strong>
+        <strong>Jahr (UJAHR)</strong>
       </label>
       <span class="toggle-arrow open" data-arrow="UJAHR"></span>
     </div>
-    <div class="legend-items" data-section="UJAHR">
+    <!-- <div class="legend-items" data-section="UJAHR"> -->
+    <div class="legend-items collapsed" data-section="UJAHR">
       <label class="legend-item" data-group="UJAHR" data-value="2017"><input type="checkbox" value="2017"
           data-group="UJAHR" checked /> <span></span> 2017</label><br />
       <label class="legend-item" data-group="UJAHR" data-value="2018"><input type="checkbox" value="2018"
@@ -347,7 +376,7 @@
     <div class="legend-header" data-toggle="UTYP1">
       <label style="flex-grow: 1;">
         <input type="radio" name="color-style" value="UTYP1" />
-        <strong>UTYP1 (Unfalltyp)</strong>
+        <strong>Unfalltyp (UTYP1)</strong>
       </label>
       <span class="toggle-arrow" data-arrow="UTYP1"></span>
     </div>
@@ -372,7 +401,7 @@
     <div class="legend-header" data-toggle="UART">
       <label style="flex-grow: 1;">
         <input type="radio" name="color-style" value="UART" />
-        <strong>UART (Unfallart)</strong>
+        <strong>Unfallart (UART)</strong>
       </label>
       <span class="toggle-arrow" data-arrow="UART"></span>
     </div>
@@ -400,6 +429,7 @@
     </div>
 
     <div class="legend-section-divider"></div>
+    <div class="legend-section-divider"></div>
     <div style="margin-top: 6px;">
       <label>
         <input type="checkbox" id="toggle-mapillary" />
@@ -409,50 +439,63 @@
     </div>
 
     <div id="mapillary-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-  <strong>Mapillary Bilder</strong><br />
-  <span style="display:inline-block;width:12px;height:12px;background:#00b955;margin-right:6px;"></span>
-  Bildpunkt
-</div>
+      <strong>Mapillary Bilder</strong><br />
+      <span style="display:inline-block;width:12px;height:12px;background:#00b955;margin-right:6px;"></span>
+      Bildpunkt
+    </div>
 
-<div style="margin-top: 6px;">
-  <label>
-    <input type="checkbox" id="toggle-movebis" />
-    Stadtradeln 2020 anzeigen
+    <div style="margin-top: 6px;">
+      <label>
+        <input type="checkbox" id="toggle-movebis" />
+        Stadtradeln 2020 anzeigen
         <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
-  </label>
-</div>
-<div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-  <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
-  <div style="margin-top: 4px;">
-    <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span> ≤ 12 km/h</div>
-    <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span> ≈ 18 km/h</div>
-    <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span> ≥ 24 km/h</div>
-  </div>
+      </label>
+    </div>
+    <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+      <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
+      <div style="margin-top: 4px;">
+        <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span> ≤ 12
+          km/h</div>
+        <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span> ≈ 18
+          km/h</div>
+        <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span> ≥ 24
+          km/h</div>
+      </div>
 
-  <div style="margin-top: 8px;"><strong>Linienstärke (Besuche)</strong></div>
-  <div style="margin-top: 4px;">
-    <div><span style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span> wenige (≤ 10)</div>
-    <div><span style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span> mittel (≈ 100)</div>
-    <div><span style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span> viele (≥ 1000)</div>
-  </div>
-</div>
+      <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
+      <div style="margin-top: 4px;">
+        <div><span
+            style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+          wenige (≤ 10)</div>
+        <div><span
+            style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+          mittel (≈ 100)</div>
+        <div><span
+            style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+          viele (≥ 1000)</div>
+      </div>
+    </div>
 
 
-<div style="margin-top: 6px;">
-  <label>
-    <input type="checkbox" id="toggle-hvs" />
-    Hauptverkehrsstraßen anzeigen
+    <div style="margin-top: 6px;">
+      <label>
+        <input type="checkbox" id="toggle-hvs" />
+        Hauptverkehrsstraßen anzeigen
         <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
-  </label>
-</div>
-<div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-  <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
-  <div style="margin-top: 4px;">
-    <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3 Mio Fahrzeuge/Jahr</div>
-    <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6 Mio Fahrzeuge/Jahr</div>
-    <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10 Mio Fahrzeuge/Jahr</div>
-  </div>
-</div>
+      </label>
+    </div>
+    <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+      <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
+      <div style="margin-top: 4px;">
+        <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3 Mio
+          Fahrzeuge/Jahr</div>
+        <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6 Mio
+          Fahrzeuge/Jahr</div>
+        <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10 Mio
+          Fahrzeuge/Jahr</div>
+      </div>
+    </div>
+
 
     <div id="cluster-legend" style="display: none;">
       <strong style="display: block; margin-bottom: 8px;">Cluster-Legende (ohne Filter)</strong>
@@ -508,7 +551,7 @@
 
 
 
-
+<div class="legend-section-divider"></div>
     <div id="feature-count" style="margin-top:10px;">
       Sichtbare Punkte: ...<br />
       Zoomlevel: ...
@@ -522,14 +565,9 @@
   </div>
 
 
-        <script src="https://unpkg.com/maplibre-gl@4.7.0/dist/maplibre-gl.js" crossorigin="anonymous"></script>
-        <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.0/dist/maplibre-gl.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
 
-<!-- <script src="https://unpkg.com/maplibre-gl@3.3.0/dist/maplibre-gl.js"></script> -->
-  <!-- <script src="./pmtiles.js"></script> -->
-  <!-- <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script> -->
-  <!-- <script src="https://unpkg.com/maplibre-gl@3.3.0/dist/maplibre-gl.js"></script> -->
-  <!-- <script src="./main.js" type="module"></script> -->
 
   <!-- ganz am Ende, kurz vorm </body> -->
   <script type="module" src="./main.js"></script>

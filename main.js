@@ -1,31 +1,5 @@
 import { setupPhotonGeocoder } from './geocoder.js';
 
-
-// // ✅ PMTiles protocol setup must be here – BEFORE anything else happens
-// const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-// //const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
-
-// const protocol = new pmtiles.Protocol(name => {
-//   const fullUrl = `${pmtilesBaseURL}${name}`;
-//   console.log("📡 Protocol resolved:", name, "→", fullUrl);
-//   return fullUrl;
-// });
-
-
-//  maplibregl.addProtocol("pmtiles", protocol.tile); // 🟢 Must run before map.addSource() anywher
-
-// const protocol = new pmtiles.Protocol();
-// maplibregl.addProtocol("pmtiles", protocol.tile);
-
-// const p1 = new pmtiles.PMTiles("https://f003.backblazeb2.com/file/unfallkarte-data/accidents_11-12.pmtiles");
-// const p2 = new pmtiles.PMTiles("https://f003.backblazeb2.com/file/unfallkarte-data/accidents_12-13.pmtiles");
-// protocol.add(p1);
-// protocol.add(p2);
-
-
-
-
-
 let MAPTILER_API_KEY = '';
 let MAPILLARY_TOKEN = '';
 
@@ -39,17 +13,6 @@ const isLocalhost = location.hostname === "localhost";
     const config = await import(isLocalhost ? './config.js' : './config.public.js');
     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
-
-    console.log(`er tut was geladen`);
-
-    // console.log(pmtilesBaseURL);
-    // console.log(protocol);
-    // console.log(protocol.tile);
-    // console.log("Testing mapping:", protocol.tile("accidents_11-12.pmtiles", () => {}));
-    
-
-
-    
     initMap();
   } catch (err) {
     console.error("❌ Konfig konnte nicht geladen werden:", err);
@@ -123,13 +86,7 @@ const paintStyles = {
   }
 };
 
-// const beteiligungEmojis = {
-//   IstRad: "🚲",
-//   IstPKW: "🚗",
-//   IstFuss: "🚶",
-//   IstKrad: "🏍",
-//   IstSonstig: "❓"
-// };
+
 
 function updateLegendColors(activeKey) {
   document.querySelectorAll(".legend-item").forEach(item => {
@@ -223,30 +180,6 @@ document.querySelectorAll('input[name="color-style"]').forEach(rb => {
 
 async function initMap() {
 
-//   const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-// const protocol = new pmtiles.Protocol(name => {
-//   const fullUrl = `${pmtilesBaseURL}${name}`;
-//   console.log("📡 Protocol resolved:", name, "→", fullUrl);
-//   return fullUrl;
-// });
-// maplibregl.addProtocol("pmtiles", protocol.tile);
-
-//     console.log(pmtilesBaseURL);
-//     console.log(protocol);
-//     console.log(protocol.tile);
-//     console.log("Testing mapping:", protocol.tile("accidents_11-12.pmtiles", () => {}));
-
-//   // ✅ Top level — before map.addSource()
-// const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-
-// const protocol = new pmtiles.Protocol(name => {
-//   const fullUrl = `${pmtilesBaseURL}${name}`;
-//   console.log("[PMTiles] Protocol mapping to:", fullUrl);
-//   return fullUrl;
-// });
-
-// maplibregl.addProtocol("pmtiles", protocol.tile); // ✅ This must be early!
-
   window.map = new maplibregl.Map({
     container: "map",
     style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
@@ -268,66 +201,26 @@ async function initMap() {
     // // local / github setup
     //  const protocol = new pmtiles.Protocol();  
 
-// //  setup backblaze
-//     const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+    // //  setup backblaze
+    //// this does not really work as i give the full url later, however, it is needed for the protocol to work
+    const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+    const protocol = new pmtiles.Protocol(name => {
+      const fullUrl = `${pmtilesBaseURL}${name}`;
+      console.log("📡 Protocol resolved:", name, "→", fullUrl);
+      return fullUrl;
+    });
+    maplibregl.addProtocol("pmtiles", protocol.tile);
 
-// const protocol = new pmtiles.Protocol((name) => {
-//   return `${pmtilesBaseURL}${name}`;
-// });
-// maplibregl.addProtocol("pmtiles", protocol.tile);
-
-//// this does not really work as i give the full url later, however, it is needed for the protocol to work
-  const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-const protocol = new pmtiles.Protocol(name => {
-  const fullUrl = `${pmtilesBaseURL}${name}`;
-  console.log("📡 Protocol resolved:", name, "→", fullUrl);
-  return fullUrl;
-});
-maplibregl.addProtocol("pmtiles", protocol.tile);
-
-
-//   // Setup PMTiles with Backblaze
-//   const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-
-//   // // ✅ Use the pmtiles global variable
-//   // const protocol = new pmtiles.Protocol(name => {
-//   //   return `${pmtilesBaseURL}${name}`;
-//   // });
-
-//   const protocol = new pmtiles.Protocol(name => {
-//   const fullUrl = `${pmtilesBaseURL}${name}`;
-//   console.log("[PMTiles] Requested:", fullUrl); // 👈 Logs the actual URL being requested
-//   return fullUrl;
-// });
-
-
-    // maplibregl.addProtocol("pmtiles", protocol.tile);
-    // maplibregl.addProtocol("pmtiles", protocol.tile);
 
     map.addSource("movebis", {
       type: "vector",
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/movebis_speed_germany_2020_min10cnt.pmtiles"
     });
 
-//     console.log(map.getSource("movebis"));
-
-//     const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-// const protocol = new pmtiles.Protocol(name => {
-//   const fullUrl = `${pmtilesBaseURL}${name}`;
-//   console.log("📡 Protocol resolved:", name, "→", fullUrl);
-//   return fullUrl;
-// });
-// maplibregl.addProtocol("pmtiles", protocol.tile);
-
-        map.addSource("hvs", {
+    map.addSource("hvs", {
       type: "vector",
-       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
-      // url: "https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
-      //      url: "pmtiles://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
-
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
     });
-
-
 
     map.addSource("accidents_11-12", {
       type: "vector",
@@ -338,11 +231,6 @@ maplibregl.addProtocol("pmtiles", protocol.tile);
       type: "vector",
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_12-13.pmtiles"
     });
-
-    // map.addSource("accidents-cluster", {
-    //   type: "vector",
-    //   url: "pmtiles://clustered.pmtiles"
-    // });
 
     map.addSource("accidents-cluster", {
       type: "vector",
@@ -433,8 +321,6 @@ maplibregl.addProtocol("pmtiles", protocol.tile);
     });
 
 
-
-
     updateColorStyle();
 
 
@@ -500,57 +386,57 @@ maplibregl.addProtocol("pmtiles", protocol.tile);
     });
 
 
-map.addLayer({
-  id: "movebis",
-  type: "line",
-  source: "movebis",
-  "source-layer": "links",
-    layout: {
-    visibility: "none" // ⬅️ Start hidden
-  },
-  paint: {
-    "line-color": [
-      "interpolate",
-      ["linear"],
-      ["get", "avg_speed_kmh"],
-      12, "#e31a1c",    // red
-      18, "#fdcc8a",    // yellow
-      24, "#31a354"     // green
-    ],
-    "line-width": [
-      "interpolate",
-      ["linear"],
-      ["get", "visits"],
-      0, 0.5,
-      10, 2,
-      50, 4,
-      100, 8,
-      1000, 12
-    ]
-  }
-});
+    map.addLayer({
+      id: "movebis",
+      type: "line",
+      source: "movebis",
+      "source-layer": "links",
+      layout: {
+        visibility: "none" // ⬅️ Start hidden
+      },
+      paint: {
+        "line-color": [
+          "interpolate",
+          ["linear"],
+          ["get", "avg_speed_kmh"],
+          12, "#e31a1c",    // red
+          18, "#fdcc8a",    // yellow
+          24, "#31a354"     // green
+        ],
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["get", "visits"],
+          0, 0.5,
+          10, 2,
+          50, 4,
+          100, 8,
+          1000, 12
+        ]
+      }
+    });
 
-map.addLayer({
-  id: "hvs",
-  type: "line",
-  source: "hvs",
-  "source-layer": "lines",
-  layout: {
-    visibility: "none"
-  },
-  paint: {
-    "line-width": [
-      "interpolate",
-      ["linear"],
-      ["to-number", ["get", "annualTrafficFlow"]],
-      3000000, 2,
-      10000000, 4,
-      20000000, 8,
-      30000000, 16
-    ],
-    "line-color": "#222" // add a visible color if needed
-  }
-});
+    map.addLayer({
+      id: "hvs",
+      type: "line",
+      source: "hvs",
+      "source-layer": "lines",
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["to-number", ["get", "annualTrafficFlow"]],
+          3000000, 2,
+          10000000, 4,
+          20000000, 8,
+          30000000, 16
+        ],
+        "line-color": "#222" // add a visible color if needed
+      }
+    });
 
 
 
@@ -584,18 +470,6 @@ map.addLayer({
       }
     });
 
-    // map.on("zoom", () => {
-    //   const currentZoom = map.getZoom();
-    //   const legendSections = document.querySelectorAll(".legend-section");
-
-    //   legendSections.forEach(section => {
-    //     if (currentZoom < 14) {
-    //       section.style.display = "none";
-    //     } else {
-    //       section.style.display = "";
-    //     }
-    //   });
-    // });
 
     map.on("click", "mapillary-images-layer", function (e) {
       const feature = e.features[0];
@@ -643,29 +517,13 @@ map.addLayer({
     setupClusterTooltip("clusters-fine-layer");
     setupClusterTooltip("clusters-coarse-layer");
 
-    // map.on("mouseenter", "accident-clusters", (e) => {
-    //   map.getCanvas().style.cursor = "pointer";
-    //   const count = e.features[0].properties.point_count;
-    //   clusterPopup
-    //     .setLngLat(e.lngLat)
-    //     .setHTML(`<strong>${count} Unfälle</strong>`)
-    //     .addTo(map);
-    // });
-
-    // map.on("mouseleave", "accident-clusters", () => {
-    //   map.getCanvas().style.cursor = "";
-    //   clusterPopup.remove();
-    // });
 
     const popup = new maplibregl.Popup({
       closeButton: false,
       closeOnClick: false
     });
 
-    // map.on("mousemove", "accident-points", (e) => {
-    //   map.getCanvas().style.cursor = "pointer";
-    //   const feature = e.features[0];
-    //   const props = feature.properties;
+
     ACCIDENT_LAYERS.forEach(layerId => {
       map.on("mousemove", layerId, (e) => {
         map.getCanvas().style.cursor = "pointer";
@@ -745,10 +603,7 @@ map.addLayer({
       });
     });
 
-    // map.on("mouseleave", "accident-points", () => {
-    //   map.getCanvas().style.cursor = "";
-    //   popup.remove();
-    // });
+
     ACCIDENT_LAYERS.forEach(layerId => {
       map.on("mouseleave", layerId, () => {
         map.getCanvas().style.cursor = "";
@@ -758,82 +613,75 @@ map.addLayer({
 
 
 
-const movebisPopup = new maplibregl.Popup({
-  closeButton: false,
-  closeOnClick: false
-});
+    const movebisPopup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
 
-map.on("mousemove", "movebis", (e) => {
-  map.getCanvas().style.cursor = "pointer";
+    map.on("mousemove", "movebis", (e) => {
+      map.getCanvas().style.cursor = "pointer";
 
-  const feature = e.features[0];
-  const props = feature.properties;
+      const feature = e.features[0];
+      const props = feature.properties;
 
-  // Option 1: Just show all properties
-const content = Object.entries(props)
-  .map(([key, val]) => {
-    if (typeof val === "number" && !Number.isInteger(val)) {
-      val = val.toFixed(1);
-    }
-    return `<strong>${key}</strong>: ${val}`;
-  })
-  .join("<br/>");
+      // Option 1: Just show all properties
+      const content = Object.entries(props)
+        .map(([key, val]) => {
+          if (typeof val === "number" && !Number.isInteger(val)) {
+            val = val.toFixed(1);
+          }
+          return `<strong>${key}</strong>: ${val}`;
+        })
+        .join("<br/>");
 
-  movebisPopup
-    .setLngLat(e.lngLat)
-    .setHTML(`<div style="font-size: 12px;">${content}</div>`)
-    .addTo(map);
-});
+      movebisPopup
+        .setLngLat(e.lngLat)
+        .setHTML(`<div style="font-size: 12px;">${content}</div>`)
+        .addTo(map);
+    });
 
-map.on("mouseleave", "movebis", () => {
-  map.getCanvas().style.cursor = "";
-  movebisPopup.remove();
-});
-
-
-const hvsPopup = new maplibregl.Popup({
-  closeButton: false,
-  closeOnClick: false
-});
-
-map.on("mousemove", "hvs", (e) => {
-  map.getCanvas().style.cursor = "pointer";
-
-  const feature = e.features[0];
-  const props = feature.properties;
-
-    // console.log("annualTrafficFlow:", props.annualTrafficFlow, "→ type:", typeof props.annualTrafficFlow);
+    map.on("mouseleave", "movebis", () => {
+      map.getCanvas().style.cursor = "";
+      movebisPopup.remove();
+    });
 
 
-const flow = Number(props.annualTrafficFlow);
-const formattedFlow = isNaN(flow)
-  ? "?"
-  : `${(flow / 1_000_000).toFixed(1).replace(".", ",")} Mio`;
+    const hvsPopup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
 
-const content = `
-  <div style="font-size: 12px;">
-    <strong>HVS</strong><br/>
-    <strong>Annual Traffic:</strong> ${formattedFlow}
-  </div>
-`;
+    map.on("mousemove", "hvs", (e) => {
+      map.getCanvas().style.cursor = "pointer";
 
-  hvsPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-});
+      const feature = e.features[0];
+      const props = feature.properties;
 
-map.on("mouseleave", "hvs", () => {
-  map.getCanvas().style.cursor = "";
-  hvsPopup.remove();
-});
+      // console.log("annualTrafficFlow:", props.annualTrafficFlow, "→ type:", typeof props.annualTrafficFlow);
 
 
+      const flow = Number(props.annualTrafficFlow);
+      const formattedFlow = isNaN(flow)
+        ? "?"
+        : `${(flow / 1_000_000).toFixed(1).replace(".", ",")} Mio`;
+
+      const content = `
+        <div style="font-size: 12px;">
+          <strong>HVS</strong><br/>
+          <strong>Annual Traffic:</strong> ${formattedFlow}
+        </div>
+      `;
+
+      hvsPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+    });
+
+    map.on("mouseleave", "hvs", () => {
+      map.getCanvas().style.cursor = "";
+      hvsPopup.remove();
+    });
 
 
 
-    //     // Details-Toggle: Layer mit Buchstaben anzeigen/ausblenden
-    // document.getElementById("toggle-details").addEventListener("change", function (e) {
-    //   const visible = e.target.checked ? "visible" : "none";
-    //   map.setLayoutProperty("beteiligung-symbols", "visibility", visible);
-    // });
     document.getElementById("toggle-details").addEventListener("change", function (e) {
       const visible = e.target.checked ? "visible" : "none";
       SYMBOL_LAYERS.forEach(layerId => {
@@ -843,24 +691,6 @@ map.on("mouseleave", "hvs", () => {
       });
     });
 
-    // function updateLegendVisibilityByZoom() {
-
-    //   const zoom = map.getZoom();
-    //   const legend = document.querySelector(".legend");
-    //   if (!legend || legend.classList.contains("collapsed")) return; // ⛔ Skip update
-
-    //   if (!legend) return;
-
-    //   // Hol dir alle legend-Abschnitte außer Titel und Feature Count
-    //   const allSections = Array.from(legend.children).filter(child =>
-    //     !child.classList.contains("legend-title") &&
-    //     child.id !== "feature-count"
-    //   );
-
-    //   allSections.forEach(el => {
-    //     el.style.display = zoom < 11 ? "none" : "";
-    //   });
-    // }
 
     // Direkt beim Laden
     map.on("load", updateLegendVisibilityByZoom);
@@ -869,29 +699,6 @@ map.on("mouseleave", "hvs", () => {
     map.on("zoomend", updateLegendVisibilityByZoom);
 
 
-    // inside map.on("load", ...) right before updateLayerFilter();
-document.querySelector(".legend-title").addEventListener("click", (e) => {
-  if (e.target.classList.contains("info-icon")) return;
-  const legend = document.querySelector(".legend");
-  const arrow = document.querySelector('[data-arrow="legend-root"]');
-  const collapsed = legend.classList.toggle("collapsed");
-
-  if (collapsed) {
-    // Hide everything except title and feature count
-    Array.from(legend.children).forEach(child => {
-      const isTitle = child.classList.contains("legend-title");
-      const isFeatureCount = child.id === "feature-count";
-      if (!isTitle && !isFeatureCount) {
-        child.style.display = "none";
-      }
-    });
-  } else {
-    // Immediately show zoom-appropriate content
-    updateLegendVisibilityByZoom();
-  }
-
-  if (arrow) arrow.classList.toggle("open");
-});
 
 
     function updateLayerFilter() {
@@ -919,34 +726,46 @@ document.querySelector(".legend-title").addEventListener("click", (e) => {
       // ⬇️ Beginne mit Filter-Array
       let filter = ["all"];
 
-      if (uk_vals.length > 0) {
-        filter.push(["in", "UKATEGORIE", ...uk_vals]);
-      }
+      // if (uk_vals.length > 0) {
+      //   filter.push(["in", "UKATEGORIE", ...uk_vals]);
+      // }
+      filter.push(["in", "UKATEGORIE", ...uk_vals]);
 
-      if (uart_vals.length > 0) {
-        filter.push(["in", "UART", ...uart_vals]);
-      }
 
-      if (utyp_vals.length > 0) {
-        filter.push(["in", "UTYP1", ...utyp_vals]);
-      }
+      // if (uart_vals.length > 0) {
+      //   filter.push(["in", "UART", ...uart_vals]);
+      // }
+      filter.push(["in", "UART", ...uart_vals]);
+
+
+      // if (utyp_vals.length > 0) {
+      //   filter.push(["in", "UTYP1", ...utyp_vals]);
+      // }
+      filter.push(["in", "UTYP1", ...utyp_vals]);
+
 
       const ujahr_vals = Array.from(checkboxes)
         .filter(cb => cb.checked && cb.dataset.group === "UJAHR")
         .map(cb => parseInt(cb.value));
 
-      if (ujahr_vals.length > 0) {
-        filter.push(["in", "UJAHR", ...ujahr_vals]);
-      }
+      // if (ujahr_vals.length > 0) {
+      //   filter.push(["in", "UJAHR", ...ujahr_vals]);
+      // }
+      filter.push(["in", "UJAHR", ...ujahr_vals]);
 
 
-      //   console.log("Aktive Beteiligung-Checkboxen:");
-      // console.log(aktiveBeteiligungen);
-      // Beteiligungsfilter hinzufügen
-      if (aktiveBeteiligungen.length > 0) {
-        const beteiligungExpr = ["any", ...aktiveBeteiligungen.map(f => ["==", f, 1])];
-        filter.push(beteiligungExpr);
-      }
+
+      // if (aktiveBeteiligungen.length > 0) {
+      //   const beteiligungExpr = ["any", ...aktiveBeteiligungen.map(f => ["==", f, 1])];
+      //   filter.push(beteiligungExpr);
+      // }
+      const beteiligungExpr =
+        aktiveBeteiligungen.length > 0
+          ? ["any", ...aktiveBeteiligungen.map(f => ["==", f, 1])]
+          : ["==", "UKATEGORIE", -1]; // oder ein anderer safe-fail Filter
+
+      filter.push(beteiligungExpr);
+
 
       // ❗️Wenn alles leer: komplett ausblenden
       if (
@@ -958,9 +777,6 @@ document.querySelector(".legend-title").addEventListener("click", (e) => {
         filter = ["==", "UKATEGORIE", -1];
       }
 
-      // //   console.log("Aktiver Filter:", JSON.stringify(filter, null, 2));
-      // map.setFilter("accident-points", filter);
-      // map.setFilter("beteiligung-symbols", filter); // 👈 diese Zeile ergänzt die Emojis
 
       ACCIDENT_LAYERS.forEach(id => {
         if (map.getLayer(id)) map.setFilter(id, filter);
@@ -972,123 +788,43 @@ document.querySelector(".legend-title").addEventListener("click", (e) => {
       map.once("idle", updateVisibleFeatureCount);
     }
 
-// function updateLegendVisibilityByZoom() {
-//   const zoom = map.getZoom();
-//   const legend = document.querySelector(".legend");
+    // Funktion zur Aktualisierung der Sichtbarkeit der Legende
+    function updateLegendVisibilityByZoom() {
+      const zoom = map.getZoom();
+      const legend = document.querySelector(".legend");
+      if (!legend || legend.classList.contains("collapsed")) return;
 
-//   if (!legend || legend.classList.contains("collapsed")) return; // ✅ Skip if collapsed
+      const clusterLegendEl = document.getElementById("cluster-legend");
+      const movebisLegend = document.getElementById("movebis-legend");
+      const hvsLegend = document.getElementById("hvs-legend");
+      const mapillaryLegend = document.getElementById("mapillary-legend");
 
-//   const clusterLegendEl = document.getElementById("cluster-legend");
+      // Check visibility of layers
+      const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
+      const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
+      const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
 
-//   // Nur behalten: .legend-title, #feature-count, #cluster-legend
-//   Array.from(legend.children).forEach(el => {
-//     const isTitle = el.classList.contains("legend-title");
-//     const isFeatureCount = el.id === "feature-count";
-//     const isClusterLegend = el.id === "cluster-legend";
+      // Update visibility for special legends
+      if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
+      if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 13) ? "block" : "none";
+      if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
+      if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
 
-//     if (zoom < 11) {
-//       if (isTitle || isFeatureCount || isClusterLegend) {
-//         el.style.display = "";
-//       } else {
-//         el.style.display = "none";
-//       }
-//     } else {
-//       if (isClusterLegend) {
-//         el.style.display = "none";
-//       } else {
-//         el.style.display = "";
-//       }
-//     }
-//   });
-// }
+      // Hide/show regular groups depending on zoom
+      Array.from(legend.children).forEach(el => {
+        const isTitle = el.classList.contains("legend-title");
+        const isFeatureCount = el.id === "feature-count";
+        const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend, mapillaryLegend].includes(el);
 
-
-// function updateLegendVisibilityByZoom() {
-//   const zoom = map.getZoom();
-//   const legend = document.querySelector(".legend");
-//   if (!legend || legend.classList.contains("collapsed")) return;
-
-//   const clusterLegendEl = document.getElementById("cluster-legend");
-//   const movebisLegend = document.getElementById("movebis-legend");
-//   const hvsLegend = document.getElementById("hvs-legend");
-
-//   const isAtLeast = (val, min) => val >= min - 0.01;
-
-
-//   // Cluster legend: only at zoom < 11
-//   if (clusterLegendEl) {
-//     clusterLegendEl.style.display = zoom < 11 ? "" : "none";
-//   }
-
-//   // Movebis legend: only if layer is visible AND zoom >= 13
-//   if (movebisLegend) {
-//     const visible = map.getLayoutProperty("movebis", "visibility") === "visible";
-//     movebisLegend.style.display = (visible && zoom >= 13) ? "block" : "none";
-//   }
-
-//   // HVS legend: only if layer is visible AND zoom >= 11
-//   if (hvsLegend) {
-//     const visible = map.getLayoutProperty("hvs", "visibility") === "visible";
-//     hvsLegend.style.display = (visible && zoom >= 11) ? "block" : "none";
-//   }
-
-//   // Show or hide the other legend groups
-//   Array.from(legend.children).forEach(el => {
-//     const isTitle = el.classList.contains("legend-title");
-//     const isFeatureCount = el.id === "feature-count";
-//     const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend].includes(el);
-
-//     if (zoom < 11) {
-//       // Only show title, count, and special legends
-//       el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
-//     } else {
-//       if (!isSpecial) el.style.display = "";
-//     }
-//   });
-// }
-
-function updateLegendVisibilityByZoom() {
-  const zoom = map.getZoom();
-  const legend = document.querySelector(".legend");
-  if (!legend || legend.classList.contains("collapsed")) return;
-
-  const clusterLegendEl = document.getElementById("cluster-legend");
-  const movebisLegend = document.getElementById("movebis-legend");
-  const hvsLegend = document.getElementById("hvs-legend");
-  const mapillaryLegend = document.getElementById("mapillary-legend");
-
-  // Check visibility of layers
-  const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
-  const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
-  const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
-
-  // Update visibility for special legends
-  if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
-  if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 13) ? "block" : "none";
-  if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
-  if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
-
-  // Hide/show regular groups depending on zoom
-  Array.from(legend.children).forEach(el => {
-    const isTitle = el.classList.contains("legend-title");
-    const isFeatureCount = el.id === "feature-count";
-    const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend, mapillaryLegend].includes(el);
-
-    if (zoom < 11) {
-      el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
-    } else {
-      if (!isSpecial) el.style.display = "";
+        if (zoom < 11) {
+          el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
+        } else {
+          if (!isSpecial) el.style.display = "";
+        }
+      });
     }
-  });
-}
 
-
-
-
-
-
-
-
+    // Funktion zur Aktualisierung der Anzahl sichtbarer Features
     function updateVisibleFeatureCount() {
       const zoom = map.getZoom();
       let features = [];
@@ -1110,37 +846,45 @@ function updateLegendVisibilityByZoom() {
           `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
       }
     }
-
-
-
-    // function updateVisibleFeatureCount() {
-    //   // const features = map.queryRenderedFeatures({ layers: ["accident-points"] });
-    //   const features = map.queryRenderedFeatures({ layers: ACCIDENT_LAYERS });
-    //   const count = features.length;
-    //   const zoom = map.getZoom().toFixed(2);
-
-    //   document.getElementById("feature-count").innerHTML =
-    //     `Sichtbare Punkte: ${count.toLocaleString()}<br/>Zoomlevel: ${zoom}`;
-    // }
-
-    // Einklappbare Legende mit Pfeil
+    // // Einklappbare Legende mit Pfeil
     document.querySelectorAll(".legend-header").forEach(header => {
       header.addEventListener("click", (e) => {
-        // Wenn das Ziel ein <input> ist (z. B. der Radiobutton), abbrechen:
-        if (e.target.tagName === "INPUT") return;
+        // Klick auf ⓘ oder <input> ignorieren
+        if (e.target.tagName === "INPUT" || e.target.classList.contains("info-icon")) return;
 
         const key = header.dataset.toggle;
-        const section = document.querySelector(`.legend-items[data-section="${key}"]`);
-        const arrow = document.querySelector(`.toggle-arrow[data-arrow="${key}"]`);
-        if (section) section.classList.toggle("collapsed");
+        const arrow = header.querySelector(`.toggle-arrow[data-arrow="${key}"]`);
+
+        if (key === "legend-root") {
+          const legend = document.querySelector(".legend");
+          const collapsed = legend.classList.toggle("collapsed");
+
+          // Zeige/Verstecke alle anderen Elemente außer dem Titel & Feature-Count
+          Array.from(legend.children).forEach(child => {
+            const isTitle = child.classList.contains("legend-title");
+            const isFeatureCount = child.id === "feature-count";
+            if (!isTitle && !isFeatureCount) {
+              child.style.display = collapsed ? "none" : "";
+            }
+          });
+
+          if (!collapsed) {
+            updateLegendVisibilityByZoom();
+          }
+        } else {
+          const section = document.querySelector(`.legend-items[data-section="${key}"]`);
+          if (section) section.classList.toggle("collapsed");
+        }
+
         if (arrow) arrow.classList.toggle("open");
       });
     });
 
+
+
     document.querySelectorAll(".legend input[type=checkbox]").forEach(cb => {
       cb.addEventListener("change", () => {
         updateLayerFilter();
-        // requestAnimationFrame(updateVisibleFeatureCount); // 🧠 jetzt korrekt!
       });
     });
 
@@ -1150,8 +894,6 @@ function updateLegendVisibilityByZoom() {
     updateLayerFilter();
   });
 }
-
-
 
 
 
@@ -1182,9 +924,6 @@ function applyZoomLock() {
 }
 
 
-
-
-
 document.querySelectorAll(".basemap-thumb").forEach(thumb => {
   thumb.addEventListener("click", () => {
     const selectedMap = thumb.dataset.map;
@@ -1199,32 +938,6 @@ document.querySelectorAll(".basemap-thumb").forEach(thumb => {
   });
 });
 
-// document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
-//   const visible = e.target.checked ? "visible" : "none";
-//   map.setLayoutProperty("mapillary-images-layer", "visibility", visible);
-// });
-
-// document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   // Sichtbarkeit des Layers ändern
-//   map.setLayoutProperty("mapillary-images-layer", "visibility", checked ? "visible" : "none");
-
-//   if (checked) {
-//     // Zoom einschränken
-//     map.setMinZoom(14);
-//     map.setMaxZoom(14.99);
-
-//     // Falls außerhalb des gültigen Zooms, zurücksetzen
-//     const z = map.getZoom();
-//     if (z < 14) map.setZoom(14);
-//     else if (z > 14.99) map.setZoom(14.99);
-//   } else {
-//     // Ursprüngliche Zoomwerte wiederherstellen
-//     map.setMinZoom(originalMinZoom);
-//     map.setMaxZoom(originalMaxZoom);
-//   }
-// });
 
 document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
   const checked = e.target.checked;
@@ -1234,31 +947,8 @@ document.getElementById("toggle-mapillary").addEventListener("change", function 
   if (mapillaryLegend) mapillaryLegend.style.display = checked ? "block" : "none";
 
   applyZoomLock();
-  requestAnimationFrame(updateLegendVisibilityByZoom); 
+  // requestAnimationFrame(updateLegendVisibilityByZoom);
 });
-
-// document.getElementById("toggle-movebis").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   // Layer sichtbar machen
-//   map.setLayoutProperty("movebis", "visibility", checked ? "visible" : "none");
-
-//   // Zoomlock
-//   if (checked) {
-//     map.setMinZoom(13);
-//     map.setMaxZoom(originalMaxZoom);
-//     if (map.getZoom() < 13) map.setZoom(13);
-//   } else {
-//     map.setMinZoom(originalMinZoom);
-//     map.setMaxZoom(originalMaxZoom);
-//   }
-
-//   // Legende anzeigen/verstecken
-//   const movebisLegend = document.getElementById("movebis-legend");
-//   if (movebisLegend) {
-//     movebisLegend.style.display = checked ? "block" : "none";
-//   }
-// });
 
 document.getElementById("toggle-movebis").addEventListener("change", function (e) {
   const checked = e.target.checked;
@@ -1268,45 +958,8 @@ document.getElementById("toggle-movebis").addEventListener("change", function (e
   if (movebisLegend) movebisLegend.style.display = checked ? "block" : "none";
 
   applyZoomLock();
-  requestAnimationFrame(updateLegendVisibilityByZoom); 
+  // requestAnimationFrame(updateLegendVisibilityByZoom);
 });
-
-// document.getElementById("toggle-movebis").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-//   map.setLayoutProperty("movebis", "visibility", checked ? "visible" : "none");
-
-//   applyZoomLock();
-
-//   // Immediately sync legend visibility with current zoom
-//   requestAnimationFrame(updateLegendVisibilityByZoom);
-// });
-
-
-
-
-
-// document.getElementById("toggle-hvs").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("hvs", "visibility", checked ? "visible" : "none");
-
-//   // Zoomlock (OK)
-//   if (checked) {
-//     map.setMinZoom(11);
-//     map.setMaxZoom(originalMaxZoom);
-//     if (map.getZoom() < 11) map.setZoom(11);
-//   } else {
-//     map.setMinZoom(originalMinZoom);
-//     map.setMaxZoom(originalMaxZoom);
-//   }
-
-//   // 🚫 Problem: Are you referencing the wrong legend ID here?
-//   const hvsLegend = document.getElementById("hvs-legend");
-//   if (hvsLegend) {
-//     hvsLegend.style.display = checked ? "block" : "none";
-//   }
-// });
-
 
 document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   const checked = e.target.checked;
@@ -1316,7 +969,7 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   if (hvsLegend) hvsLegend.style.display = checked ? "block" : "none";
 
   applyZoomLock();
-  requestAnimationFrame(updateLegendVisibilityByZoom); 
+  // requestAnimationFrame(updateLegendVisibilityByZoom);
 });
 
 
