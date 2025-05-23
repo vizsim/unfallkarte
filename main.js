@@ -946,20 +946,72 @@ async function initMap() {
           acc[val] = (acc[val] || 0) + 1;
           return acc;
         }, {});
-
-
-
         document.querySelectorAll('.legend-item[data-group="UKATEGORIE"]').forEach(item => {
-  const val = parseInt(item.getAttribute('data-value'));
-  const count = countsByUKat[val] || 0;
+          const val = parseInt(item.getAttribute('data-value'));
+          const count = countsByUKat[val] || 0;
 
-  const badge = item.querySelector(".count-badge");
-  if (badge) {
-    badge.textContent = count > 0 ? `${count}` : "";
-  }
-});
+          const badge = item.querySelector(".count-badge");
+          if (badge) {
+            badge.textContent = count > 0 ? `${count}` : "";
+          }
+        });
 
-        
+        // UJAHR badge update
+        const countsByYear = features.reduce((acc, feat) => {
+          const val = feat.properties.UJAHR;
+          acc[val] = (acc[val] || 0) + 1;
+          return acc;
+        }, {});
+        document.querySelectorAll('.legend-item[data-group="UJAHR"]').forEach(item => {
+          const val = parseInt(item.getAttribute('data-value'));
+          const count = countsByYear[val] || 0;
+          const badge = item.querySelector(".count-badge");
+          if (badge) badge.textContent = count > 0 ? `${count}` : "";
+        });
+
+        // UTYP1 badge update
+        const countsByUTYP1 = features.reduce((acc, feat) => {
+          const val = feat.properties.UTYP1;
+          acc[val] = (acc[val] || 0) + 1;
+          return acc;
+        }, {});
+        document.querySelectorAll('.legend-item[data-group="UTYP1"]').forEach(item => {
+          const val = parseInt(item.getAttribute('data-value'));
+          const count = countsByUTYP1[val] || 0;
+          const badge = item.querySelector(".count-badge");
+          if (badge) badge.textContent = count > 0 ? `${count}` : "";
+        });
+
+
+        // UART badge update
+        const countsByUART = features.reduce((acc, feat) => {
+          const val = feat.properties.UART;
+          acc[val] = (acc[val] || 0) + 1;
+          return acc;
+        }, {});
+        document.querySelectorAll('.legend-item[data-group="UART"]').forEach(item => {
+          const val = parseInt(item.getAttribute('data-value'));
+          const count = countsByUART[val] || 0;
+          const badge = item.querySelector(".count-badge");
+          if (badge) badge.textContent = count > 0 ? `${count}` : "";
+        });
+
+        // BETEILIGUNG badge update
+        const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
+        const countsByBeteiligung = {};
+
+        for (const field of beteiligungFields) {
+          countsByBeteiligung[field] = features.filter(f => f.properties?.[field] === 1).length;
+        }
+
+        document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
+          const field = item.dataset.field;
+          const count = countsByBeteiligung[field] || 0;
+          const badge = item.querySelector(".count-badge");
+          if (badge) badge.textContent = count > 0 ? `${count}` : "";
+        });
+
+
 
 
 
