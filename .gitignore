@@ -5,6 +5,9 @@ config.js
 
 *.pmtiles
 
+# Ignore virtual environment
+unfallkarte_env/
+
 # !accidents_11-12.pmtiles
 # !accidents_12-13.pmtiles
 # !combined.pmtiles
