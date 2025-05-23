@@ -1,12 +1,13 @@
 config.js
 
-*:Zone.Identifier
+#*:Zone.Identifier
 
 
 *.pmtiles
 
 # Ignore virtual environment
 unfallkarte_env/
+accident_data/
 
 # !accidents_11-12.pmtiles
 # !accidents_12-13.pmtiles
