@@ -624,14 +624,24 @@ async function initMap() {
           UKATEGORIE: "Schwere",
           UART: "Unfallart",
           UTYP1: "Unfalltyp",
-          UJAHR: "Jahr"
+          UJAHR: "Jahr",
+
+          UMONAT: "Monat",
+          UWOCHENTAG: "Wochentag",
+          USTUNDE: "Stunde"
         };
 
-        const propsToShow = ["OBJECTID", "UKATEGORIE", "UJAHR", "UART", "UTYP1"];
+        const weekdayNames = ["?", "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+        const monthNames = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+
+        // const propsToShow = ["OBJECTID", "UKATEGORIE", "UJAHR", "UART", "UTYP1"];
+        const propsToShow = ["OBJECTID", "UKATEGORIE", "UJAHR", "UMONAT", "UWOCHENTAG", "USTUNDE", "UART", "UTYP1"];
 
         let rows = propsToShow.map(key => {
           const label = labels[key] || key;
           let value = props[key];
+          if (key === "UWOCHENTAG" && value != null) value = `${weekdayNames[value]} (${value})`;
+          if (key === "UMONAT" && value != null) value = `${monthNames[value]} (${value})`;
           if (translations[key] && value in translations[key]) {
             value = `${translations[key][value]} (${value})`;
           } else if (value == null) {
