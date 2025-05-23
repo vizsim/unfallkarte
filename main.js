@@ -25,6 +25,9 @@ const isLocalhost = location.hostname === "localhost";
 document.querySelector('[data-map="standard"]').style.backgroundImage =
   "url('./thumbs/thumb-standard.png')";
 
+  // document.querySelector('[data-map="standard"]').style.backgroundImage =
+  // "url('./thumbs/thumb-standard.png')";
+
 document.querySelector('[data-map="satellite"]').style.backgroundImage =
   "url('./thumbs/thumb-satellite.png')";
 const paintStyles = {
@@ -338,6 +341,19 @@ async function initMap() {
     minZoom: 6,
     maxZoom: 20
   });
+
+//   const selectedBaseStyle = localStorage.getItem("selectedBasemap") || "dataviz"; // Default
+// const styleUrl = `https://api.maptiler.com/maps/${selectedBaseStyle}/style.json?key=${MAPTILER_API_KEY}`;
+
+// window.map = new maplibregl.Map({
+//   container: "map",
+//   style: styleUrl,
+//   center: [13.634, 52.315],
+//   zoom: 11,
+//   minZoom: 6,
+//   maxZoom: 20
+// });
+
 
   originalMinZoom = map.getMinZoom();
   originalMaxZoom = map.getMaxZoom();
@@ -935,10 +951,6 @@ async function initMap() {
 
 
 
-
-
-
-
     document.getElementById("toggle-details").addEventListener("change", function (e) {
       const visible = e.target.checked ? "visible" : "none";
       SYMBOL_LAYERS.forEach(layerId => {
@@ -957,96 +969,6 @@ async function initMap() {
 
 
 
-
-    // function updateLayerFilter() {
-    //   const checkboxes = document.querySelectorAll(".legend input[type=checkbox]");
-
-    //   const beteiligungCheckboxes = Array.from(
-    //     document.querySelectorAll('input[data-field]')
-    //   );
-    //   const aktiveBeteiligungen = beteiligungCheckboxes
-    //     .filter(cb => cb.checked)
-    //     .map(cb => cb.dataset.field);
-
-    //   const uk_vals = Array.from(checkboxes)
-    //     .filter(cb => cb.checked && cb.dataset.group === "UKATEGORIE")
-    //     .map(cb => parseInt(cb.value));
-
-    //   const uart_vals = Array.from(checkboxes)
-    //     .filter(cb => cb.checked && cb.dataset.group === "UART")
-    //     .map(cb => parseInt(cb.value));
-
-    //   const utyp_vals = Array.from(checkboxes)
-    //     .filter(cb => cb.checked && cb.dataset.group === "UTYP1")
-    //     .map(cb => parseInt(cb.value));
-
-    //   // ⬇️ Beginne mit Filter-Array
-    //   let filter = ["all"];
-
-    //   // if (uk_vals.length > 0) {
-    //   //   filter.push(["in", "UKATEGORIE", ...uk_vals]);
-    //   // }
-    //   filter.push(["in", "UKATEGORIE", ...uk_vals]);
-
-
-    //   // if (uart_vals.length > 0) {
-    //   //   filter.push(["in", "UART", ...uart_vals]);
-    //   // }
-    //   filter.push(["in", "UART", ...uart_vals]);
-
-
-    //   // if (utyp_vals.length > 0) {
-    //   //   filter.push(["in", "UTYP1", ...utyp_vals]);
-    //   // }
-    //   filter.push(["in", "UTYP1", ...utyp_vals]);
-
-
-    //   const ujahr_vals = Array.from(checkboxes)
-    //     .filter(cb => cb.checked && cb.dataset.group === "UJAHR")
-    //     .map(cb => parseInt(cb.value));
-
-    //   // if (ujahr_vals.length > 0) {
-    //   //   filter.push(["in", "UJAHR", ...ujahr_vals]);
-    //   // }
-    //   filter.push(["in", "UJAHR", ...ujahr_vals]);
-
-
-
-    //   // if (aktiveBeteiligungen.length > 0) {
-    //   //   const beteiligungExpr = ["any", ...aktiveBeteiligungen.map(f => ["==", f, 1])];
-    //   //   filter.push(beteiligungExpr);
-    //   // }
-    //   const beteiligungExpr =
-    //     aktiveBeteiligungen.length > 0
-    //       ? ["any", ...aktiveBeteiligungen.map(f => ["==", f, 1])]
-    //       : ["==", "UKATEGORIE", -1]; // oder ein anderer safe-fail Filter
-
-    //   filter.push(beteiligungExpr);
-
-
-    //   // ❗️Wenn alles leer: komplett ausblenden
-    //   if (
-    //     uk_vals.length === 0 &&
-    //     uart_vals.length === 0 &&
-    //     utyp_vals.length === 0 &&
-    //     aktiveBeteiligungen.length === 0
-    //   ) {
-    //     filter = ["==", "UKATEGORIE", -1];
-    //   }
-
-
-    //   ACCIDENT_LAYERS.forEach(id => {
-    //     if (map.getLayer(id)) map.setFilter(id, filter);
-    //   });
-    //   SYMBOL_LAYERS.forEach(id => {
-    //     if (map.getLayer(id)) map.setFilter(id, filter);
-    //   });
-
-    //   map.once("idle", updateVisibleFeatureCount);
-    //   updatePermalink();
-    //   map.on("moveend", updatePermalink);
-    //   map.on("zoomend", updatePermalink);
-    // }
 
     // Funktion zur Aktualisierung der Sichtbarkeit der Legende
     function updateLegendVisibilityByZoom() {
@@ -1084,106 +1006,7 @@ async function initMap() {
       });
     }
 
-    // // Funktion zur Aktualisierung der Anzahl sichtbarer Features
-    // function updateVisibleFeatureCount() {
-    //   const zoom = map.getZoom();
-    //   let features = [];
 
-    //   if (zoom < 11) {
-    //     // Nutze Cluster-Layer
-    //     features = map.queryRenderedFeatures({ layers: ["clusters-fine-layer", "clusters-coarse-layer"] });
-
-    //     // Summe der cluster point_counts
-    //     const total = features.reduce((sum, feat) => sum + (feat.properties.point_count || 0), 0);
-
-    //     document.getElementById("feature-count").innerHTML =
-    //       `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
-    //   } else {
-    //     // Nutze Einzelpunkt-Layer
-    //     features = map.queryRenderedFeatures({ layers: ACCIDENT_LAYERS });
-
-    //     // counts for each cat
-    //     // Count per UKATEGORIE value
-    //     const countsByUKat = features.reduce((acc, feat) => {
-    //       const val = feat.properties.UKATEGORIE;
-    //       acc[val] = (acc[val] || 0) + 1;
-    //       return acc;
-    //     }, {});
-    //     document.querySelectorAll('.legend-item[data-group="UKATEGORIE"]').forEach(item => {
-    //       const val = parseInt(item.getAttribute('data-value'));
-    //       const count = countsByUKat[val] || 0;
-
-    //       const badge = item.querySelector(".count-badge");
-    //       if (badge) {
-    //         badge.textContent = count > 0 ? `${count}` : "";
-    //       }
-    //     });
-
-    //     // UJAHR badge update
-    //     const countsByYear = features.reduce((acc, feat) => {
-    //       const val = feat.properties.UJAHR;
-    //       acc[val] = (acc[val] || 0) + 1;
-    //       return acc;
-    //     }, {});
-    //     document.querySelectorAll('.legend-item[data-group="UJAHR"]').forEach(item => {
-    //       const val = parseInt(item.getAttribute('data-value'));
-    //       const count = countsByYear[val] || 0;
-    //       const badge = item.querySelector(".count-badge");
-    //       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    //     });
-
-    //     // UTYP1 badge update
-    //     const countsByUTYP1 = features.reduce((acc, feat) => {
-    //       const val = feat.properties.UTYP1;
-    //       acc[val] = (acc[val] || 0) + 1;
-    //       return acc;
-    //     }, {});
-    //     document.querySelectorAll('.legend-item[data-group="UTYP1"]').forEach(item => {
-    //       const val = parseInt(item.getAttribute('data-value'));
-    //       const count = countsByUTYP1[val] || 0;
-    //       const badge = item.querySelector(".count-badge");
-    //       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    //     });
-
-
-    //     // UART badge update
-    //     const countsByUART = features.reduce((acc, feat) => {
-    //       const val = feat.properties.UART;
-    //       acc[val] = (acc[val] || 0) + 1;
-    //       return acc;
-    //     }, {});
-    //     document.querySelectorAll('.legend-item[data-group="UART"]').forEach(item => {
-    //       const val = parseInt(item.getAttribute('data-value'));
-    //       const count = countsByUART[val] || 0;
-    //       const badge = item.querySelector(".count-badge");
-    //       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    //     });
-
-    //     // BETEILIGUNG badge update
-    //     const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
-    //     const countsByBeteiligung = {};
-
-    //     for (const field of beteiligungFields) {
-    //       countsByBeteiligung[field] = features.filter(f => f.properties?.[field] === 1).length;
-    //     }
-
-    //     document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
-    //       const field = item.dataset.field;
-    //       const count = countsByBeteiligung[field] || 0;
-    //       const badge = item.querySelector(".count-badge");
-    //       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    //     });
-
-
-
-
-
-
-
-    //     document.getElementById("feature-count").innerHTML =
-    //       `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
-    //   }
-    // }
     // // Einklappbare Legende mit Pfeil
     document.querySelectorAll(".legend-header").forEach(header => {
       header.addEventListener("click", (e) => {
@@ -1437,16 +1260,6 @@ document.querySelectorAll(".basemap-thumb").forEach(thumb => {
 });
 
 
-// document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-//   map.setLayoutProperty("mapillary-images-layer", "visibility", checked ? "visible" : "none");
-
-//   const mapillaryLegend = document.getElementById("mapillary-legend");
-//   if (mapillaryLegend) mapillaryLegend.style.display = checked ? "block" : "none";
-
-//   applyZoomLock();
-//   // requestAnimationFrame(updateLegendVisibilityByZoom);
-// });
 
 document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
   const checked = e.target.checked;
@@ -1459,34 +1272,22 @@ document.getElementById("toggle-movebis").addEventListener("change", function (e
   const checked = e.target.checked;
   map.setLayoutProperty("movebis", "visibility", checked ? "visible" : "none");
 
-  // const movebisLegend = document.getElementById("movebis-legend");
-  // if (movebisLegend) movebisLegend.style.display = checked ? "block" : "none";
-
   applyZoomLock();
   applyLegendVisibility();
-  // requestAnimationFrame(updateLegendVisibilityByZoom);
 });
 
 document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   const checked = e.target.checked;
   map.setLayoutProperty("hvs", "visibility", checked ? "visible" : "none");
 
-  // const hvsLegend = document.getElementById("hvs-legend");
-  // if (hvsLegend) hvsLegend.style.display = checked ? "block" : "none";
-
   applyZoomLock();
   applyLegendVisibility();
-  // requestAnimationFrame(updateLegendVisibilityByZoom);
 });
 
 document.getElementById("toggle-schools").addEventListener("change", function (e) {
   const checked = e.target.checked;
   map.setLayoutProperty("schools-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("schools-polygons", "visibility", checked ? "visible" : "none");
-
-  // // Optional: adjust legend
-  // const legend = document.getElementById("schools-legend");
-  // if (legend) legend.style.display = checked ? "block" : "none";
 
   applyZoomLock();
   applyLegendVisibility();
