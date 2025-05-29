@@ -679,6 +679,38 @@ async function initMap() {
     }, ACCIDENT_LAYERS[0]); // oder erster Layer
 
 
+    // Hillshade layer
+    map.addSource('hillshade', {
+      type: 'raster',
+      url: `https://api.maptiler.com/tiles/hillshades/tiles.json?key=${MAPTILER_API_KEY}`,
+      tileSize: 256
+    });
+
+    map.addLayer({
+      id: 'hillshade-layer',
+      type: 'raster',
+      source: 'hillshade',
+      layout: { visibility: 'visible' },
+      paint: {
+        'raster-opacity': 0.3
+      }
+    });
+
+    map.setLayoutProperty('hillshade-layer', 'visibility', 'none'); // Hillshade initial verstecken
+
+    // Terrain source
+    map.addSource('terrain', {
+      type: 'raster-dem',
+      url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${MAPTILER_API_KEY}`,
+      tileSize: 256,
+      encoding: 'mapbox'
+    });
+
+    // map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
+    map.setTerrain(null); // Terrain initial deaktivieren
+
+
+
 
     // mapillary 
     map.addLayer({
@@ -1295,4 +1327,18 @@ document.getElementById("toggle-schools").addEventListener("change", function (e
 
 
 
+
+    // Toggle logic
+    document.getElementById('toggleHillshade').addEventListener('change', (e) => {
+      const visibility = e.target.checked ? 'visible' : 'none';
+      map.setLayoutProperty('hillshade-layer', 'visibility', visibility);
+    });
+
+    document.getElementById('toggleTerrain').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
+      } else {
+        map.setTerrain(null);
+      }
+    });
 

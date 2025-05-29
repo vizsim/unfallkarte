@@ -205,14 +205,19 @@
     }
 
     /* ───── Basemap Thumbnails ───── */
-    #basemap-thumbnails {
+    /* #basemap-thumbnails {
       position: absolute;
       bottom: 10px;
       left: 10px;
       display: flex;
       gap: 8px;
       z-index: 2;
-    }
+    } */
+
+    #basemap-thumbnails {
+  display: flex;
+  gap: 8px;
+}
 
     .basemap-thumb {
       width: 60px;
@@ -229,6 +234,28 @@
     .basemap-thumb.selected {
       border: 2px solid #0077ff;
     }
+
+
+ 
+#terrain-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 4px 6px; /* weniger padding */
+  font-size: 12px; /* kleiner */
+  border-radius: 6px;
+  background: white;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  height: 60px;
+  box-sizing: border-box;
+}
+#terrain-controls label {
+    display: flex;
+  align-items: center; 
+ height: 50%; 
+}
+
+
 
     /* ───── Cluster Legend ───── */
     #cluster-legend {
@@ -250,6 +277,18 @@
       background-color: #0044cc;
       border-radius: 50%;
     }
+
+    /* #controls {
+      position: absolute;
+      z-index: 1;
+      background: white;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      font-family: sans-serif;
+    } */
+
   </style>
 </head>
 
@@ -389,7 +428,9 @@
         <input type="radio" name="color-style" value="UJAHR" />
         <strong>Jahr (UJAHR)</strong>
       </label>
-      <span class="toggle-arrow open" data-arrow="UJAHR"></span>
+      <!-- <span class="toggle-arrow open" data-arrow="UJAHR"></span> -->
+      <span class="toggle-arrow" data-arrow="UJAHR"></span>
+
     </div>
 
     <div class="legend-items collapsed" data-section="UJAHR">
@@ -773,11 +814,41 @@
   </div>
 
 
+  <!-- <div id="controls">
+  <label><input type="checkbox" id="toggleTerrain" checked> Terrain</label><br/>
+  <label><input type="checkbox" id="toggleHillshade" checked> Hillshade</label>
+</div>
+
+
   <div id="basemap-thumbnails">
     <div class="basemap-thumb selected" data-map="standard" title="Standard"></div>
-    <!-- <div class="basemap-thumb" data-map="streets" title="Streets"></div> -->
+    <div class="basemap-thumb" data-map="streets" title="Streets"></div> 
+    <div class="basemap-thumb" data-map="satellite" title="Satellit"></div>
+  </div> -->
+
+
+<!-- Gemeinsamer Container -->
+<!-- <div style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 12px; z-index: 2; font-family: sans-serif; align-items: flex-end;"> -->
+  <div style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 12px; z-index: 2; font-family: sans-serif; align-items: center;">
+
+  <!-- Basemap Thumbnails -->
+  <div id="basemap-thumbnails" style="display: flex; gap: 8px;">
+    <div class="basemap-thumb selected" data-map="standard" title="Standard"></div>
     <div class="basemap-thumb" data-map="satellite" title="Satellit"></div>
   </div>
+
+  <!-- Terrain/Hillshade -->
+  <div id="terrain-controls">
+    <label><input type="checkbox" id="toggleTerrain" /> Terrain</label>
+    <label><input type="checkbox" id="toggleHillshade" /> Hillshade</label>
+  </div>
+
+</div>
+
+
+
+
+  
   
 
 
