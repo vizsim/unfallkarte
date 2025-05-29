@@ -258,36 +258,38 @@
 
 
     /* ───── Cluster Legend ───── */
-    #cluster-legend {
-      margin-top: 12px;
-      font-size: 12px;
-      font-family: sans-serif;
-      display: grid;
-      row-gap: 6px;
-    }
 
-    .cluster-legend-entry {
-      display: grid;
-      grid-template-columns: 30px auto;
-      align-items: center;
-    }
 
-    .cluster-dot {
-      justify-self: center;
-      background-color: #0044cc;
-      border-radius: 50%;
-    }
+#cluster-legend {
+  display: grid;
+  row-gap: 4px; /* erhöht vertikalen Abstand */
+}
 
-    /* #controls {
-      position: absolute;
-      z-index: 1;
-      background: white;
-      padding: 10px;
-      margin: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      font-family: sans-serif;
-    } */
+.cluster-legend-entry {
+  display: grid;
+  grid-template-columns: 35px 1fr auto; /* Dot - Label - Spacer */
+  align-items: center;
+  column-gap: 6px;
+}
+
+.cluster-dot {
+  justify-self: center;
+  background-color: #999;
+  border-radius: 50%;
+  border: 0.5px solid #e6e6e6;
+  box-sizing: border-box;
+}
+
+
+.cluster-label {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.spacer {
+  width: 160px; /* Erzwingt Breite für rechte Spalte */
+}
+
 
   </style>
 </head>
@@ -752,57 +754,71 @@
     </div>
 
 
-    <div id="cluster-legend" style="display: none;">
-      <strong style="display: block; margin-bottom: 8px;">Cluster-Legende (ohne Filter)</strong>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 2px; height: 2px;"></div>
-        <div class="cluster-label">1 Unfall</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 4px; height: 4px;"></div>
-        <div class="cluster-label">2–9 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 6px; height: 6px;"></div>
-        <div class="cluster-label">10–49 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 8px; height: 8px;"></div>
-        <div class="cluster-label">50–99 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 10px; height: 10px;"></div>
-        <div class="cluster-label">100–199 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 12px; height: 12px;"></div>
-        <div class="cluster-label">200–499 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 14px; height: 14px;"></div>
-        <div class="cluster-label">500–999 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 18px; height: 18px;"></div>
-        <div class="cluster-label">1000–1999 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 22px; height: 22px;"></div>
-        <div class="cluster-label">2000–3999 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 24px; height: 24px;"></div>
-        <div class="cluster-label">4000–7999 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 26px; height: 26px;"></div>
-        <div class="cluster-label">8000–15999 Unfälle</div>
-      </div>
-      <div class="cluster-legend-entry">
-        <div class="cluster-dot" style="width: 26px; height: 26px;"></div>
-        <div class="cluster-label">16000+ Unfälle</div>
-      </div>
-    </div>
+<div id="cluster-legend">
+  <strong style="margin-bottom: 8px;">Cluster-Legende (ohne Filter)</strong>
+
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:4.8px; height:4.8px;"></div>
+    <div class="cluster-label">1 Unfall</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:9.6px; height:9.6px;"></div>
+    <div class="cluster-label">2–4 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:16.8px; height:16.8px;"></div>
+    <div class="cluster-label">5–10 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:19.2px; height:19.2px;"></div>
+    <div class="cluster-label">11–50 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:24px; height:24px;"></div>
+    <div class="cluster-label">51–100 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:26.4px; height:26.4px;"></div>
+    <div class="cluster-label">101–500 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:28.8px; height:28.8px;"></div>
+    <div class="cluster-label">501–1000 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:33.6px; height:33.6px;"></div>
+    <div class="cluster-label">1001–5000 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:36px; height:36px;"></div>
+    <div class="cluster-label">5001–10000 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:38.4px; height:38.4px;"></div>
+    <div class="cluster-label">10001–20000 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:43.2px; height:43.2px;"></div>
+    <div class="cluster-label">20001–40000 Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="cluster-legend-entry">
+    <div class="cluster-dot" style="width:48px; height:48px;"></div>
+    <div class="cluster-label">40001+ Unfälle</div>
+    <div class="spacer"></div>
+  </div>
+</div>
+
 
 
 

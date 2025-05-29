@@ -1,5 +1,11 @@
 import { setupPhotonGeocoder } from './geocoder.js';
 
+import { paintStyles, getCircleColorPaint } from './styleConfig.js';
+
+import { generatePieIcon } from './generatePieIcon.js';
+
+
+
 let MAPTILER_API_KEY = '';
 let MAPILLARY_TOKEN = '';
 
@@ -30,66 +36,7 @@ document.querySelector('[data-map="standard"]').style.backgroundImage =
 
 document.querySelector('[data-map="satellite"]').style.backgroundImage =
   "url('./thumbs/thumb-satellite.png')";
-const paintStyles = {
-  UKATEGORIE: {
-    field: "UKATEGORIE",
-    colors: {
-      1: "#e41a1c",
-      2: "#377eb8",
-      3: "#4daf4a",
-    }
-  },
-  UJAHR: {
-    field: "UJAHR",
-    colors: {
-      2017: "#f7fbff",
-      2018: "#deebf7",
-      2019: "#c6dbef",
-      2020: "#9ecae1",
-      2021: "#6baed6",
-      2022: "#4292c6",
-      2023: "#2171b5",
-    }
-  },
-  UART: {
-    field: "UART",
-    colors: {
-      1: "#1b9e77",
-      2: "#d95f02",
-      3: "#7570b3",
-      4: "#e7298a",
-      5: "#66a61e",
-      6: "#e6ab02",
-      7: "#a6761d",
-      8: "#666666",
-      9: "#1f78b4",
-      0: "#bbbbbb"
-    }
-  },
-  UTYP1: {
-    field: "UTYP1",
-    colors: {
-      1: "#8dd3c7",
-      2: "#ffffb3",
-      3: "#bebada",
-      4: "#fb8072",
-      5: "#80b1d3",
-      6: "#fdb462",
-      7: "#b3de69"
-    }
-  },
-  BETEILIGUNG: {
-    field: null,
-    colors: {
-      IstRad: "#1f78b4",
-      IstPKW: "#33a02c",
-      IstFuss: "#e31a1c",
-      IstKrad: "#ff7f00",
-      IstGkfz: "#a65628",
-      IstSonstig: "#6a3d9a"
-    }
-  }
-};
+
 
 
 
@@ -120,28 +67,6 @@ function updateLegendColors(activeKey) {
   });
 }
 
-
-// 3. Funktion zur Generierung der "match"-Expression
-function getCircleColorPaint(styleKey) {
-  const style = paintStyles[styleKey];
-  const matchExpr = ["case"];
-
-  if (styleKey === "BETEILIGUNG") {
-    for (const [field, color] of Object.entries(style.colors)) {
-      matchExpr.push(["==", ["get", field], 1], color);
-    }
-    matchExpr.push("#aaaaaa"); // default
-    return matchExpr;
-  }
-
-  // sonst normal match
-  const match = ["match", ["get", style.field]];
-  for (const [val, color] of Object.entries(style.colors)) {
-    match.push(parseInt(val), color);
-  }
-  match.push("#aaaaaa");
-  return match;
-}
 
 
 const ACCIDENT_LAYERS = ["accident-points-11-12", "accident-points-12-13"];
@@ -236,7 +161,7 @@ function updateVisibleFeatureCount() {
 
   if (zoom < 11) {
     // Nutze Cluster-Layer
-    features = map.queryRenderedFeatures({ layers: ["clusters-fine-layer", "clusters-coarse-layer"] });
+    features = map.queryRenderedFeatures({ layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"] });
 
     // Summe der cluster point_counts
     const total = features.reduce((sum, feat) => sum + (feat.properties.point_count || 0), 0);
@@ -364,6 +289,26 @@ async function initMap() {
 
     setupPhotonGeocoder(map); //
 
+
+
+// load piecharts
+    map.on("styleimagemissing", (e) => {
+  const id = e.id;
+  if (!id.startsWith("pie-")) return;
+
+  const parts = id.split("-");
+  if (parts.length !== 4) return;
+
+  const k1 = parseInt(parts[1], 10);
+  const k2 = parseInt(parts[2], 10);
+  const k3 = parseInt(parts[3], 10);
+
+  const image = generatePieIcon({ k1, k2, k3 });
+  if (image) {
+    map.addImage(id, image.data, { pixelRatio: 2 });
+  }
+});
+
     // // local / github setup
     //  const protocol = new pmtiles.Protocol();  
 
@@ -403,9 +348,14 @@ async function initMap() {
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_12-13.pmtiles"
     });
 
-    map.addSource("accidents-cluster", {
+    // map.addSource("accidents-cluster", {
+    //   type: "vector",
+    //   url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/combined.pmtiles"
+    // });
+
+        map.addSource("accidents-cluster", {
       type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/combined.pmtiles"
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/combined_may25_group.pmtiles"
     });
 
     map.addSource("satellite", {
@@ -503,67 +453,147 @@ async function initMap() {
 
     updateColorStyle();
 
+const sharedIconSizeExpression = [
+    "interpolate", ["linear"], [
+      "+",
+      ["get", "UKATEGORIE__1"],
+      ["get", "UKATEGORIE__2"],
+      ["get", "UKATEGORIE__3"]
+    ],
+    1, 0.1,
+    4, 0.2,
+    10, 0.35,
+    50, 0.4,
+    100, 0.5,
+    500, 0.55,
+    1000, 0.6,
+    5000, 0.7,
+    10000, 0.75,
+    20000, 0.8,
+    40000, 0.9
+  ];
 
-    // Feinere Cluster (Zoom 9–11)
+  // 🗂 Add cluster layers
+  const layers = [
+    { id: "pie-clusters-fine-layer", sourceLayer: "clusters_9_11", minzoom: 9, maxzoom: 11 },
+    { id: "pie-clusters-coarse-layer", sourceLayer: "clusters_6_8", minzoom: 6, maxzoom: 9 }
+  ];
+
+  for (const { id, sourceLayer, minzoom, maxzoom } of layers) {
     map.addLayer({
-      id: "clusters-fine-layer",
-      type: "circle", // oder symbol/fill, je nach Stil
+      id,
+      type: "symbol",
       source: "accidents-cluster",
-      "source-layer": "clusters_9_11", // <- Layername aus Tippecanoe
-      minzoom: 9,
-      maxzoom: 11,
-      paint: {
-        "circle-radius": [
-          "interpolate", ["linear"], ["get", "point_count"],
-          1, 2,
-          10, 4,
-          50, 6,
-          100, 8,
-          200, 10,
-          500, 12,
-          1000, 14,
-          2000, 18,
-          4000, 22
-        ],
-        "circle-color": "#0044cc",
-        "circle-opacity": 0.6
-      },
+      "source-layer": sourceLayer,
+      minzoom,
+      maxzoom,
       layout: {
-        "circle-sort-key": ["get", "point_count"] // optional – oder auch entfernen
+        "icon-image": [
+          "concat",
+          "pie-",
+          ["to-string", ["get", "UKATEGORIE__1"]], "-",
+          ["to-string", ["get", "UKATEGORIE__2"]], "-",
+          ["to-string", ["get", "UKATEGORIE__3"]]
+        ],
+        "icon-size": sharedIconSizeExpression,
+        "icon-allow-overlap": true,
+        "symbol-sort-key": [
+          "-", 
+          ["/", ["get", "UKATEGORIE__3"],
+            ["+", ["get", "UKATEGORIE__1"],
+                  ["get", "UKATEGORIE__2"],
+                  ["get", "UKATEGORIE__3"]]]
+        ]
       }
     });
+  }
+
+  // 🟡 Hover layer
+  map.addSource("hover-point", {
+    type: "geojson",
+    data: { type: "FeatureCollection", features: [] }
+  });
+
+  map.addLayer({
+    id: "hover-pie",
+    type: "symbol",
+    source: "hover-point",
+    layout: {
+      "icon-image": [
+        "concat",
+        "pie-",
+        ["to-string", ["get", "UKATEGORIE__1"]], "-",
+        ["to-string", ["get", "UKATEGORIE__2"]], "-",
+        ["to-string", ["get", "UKATEGORIE__3"]]
+      ],
+      "icon-size": 1,
+      "icon-allow-overlap": true
+    }
+  });
 
 
-    // Gröbere Cluster (Zoom 6–9)
-    map.addLayer({
-      id: "clusters-coarse-layer",
-      type: "circle",
-      source: "accidents-cluster",
-      "source-layer": "clusters_6_8",
-      minzoom: 6,
-      maxzoom: 9,
-      paint: {
-        "circle-radius": [
-          "interpolate", ["linear"], ["get", "point_count"],
-          1, 2,
-          10, 4,
-          50, 6,
-          100, 8,
-          200, 10,
-          500, 12,
-          1000, 14,
-          2000, 18,
-          4000, 22,
-          8000, 24,
-          16000, 26
-        ],
-        "circle-color": "#0044cc",
-        "circle-opacity": 0.6
-      },
-      layout: {
-        "circle-sort-key": ["get", "point_count"] // optional – oder auch entfernen
-      }
-    });
+
+
+    // // Feinere Cluster (Zoom 9–11)
+    // map.addLayer({
+    //   id: "clusters-fine-layer",
+    //   type: "circle", // oder symbol/fill, je nach Stil
+    //   source: "accidents-cluster",
+    //   "source-layer": "clusters_9_11", // <- Layername aus Tippecanoe
+    //   minzoom: 9,
+    //   maxzoom: 11,
+    //   paint: {
+    //     "circle-radius": [
+    //       "interpolate", ["linear"], ["get", "point_count"],
+    //       1, 2,
+    //       10, 4,
+    //       50, 6,
+    //       100, 8,
+    //       200, 10,
+    //       500, 12,
+    //       1000, 14,
+    //       2000, 18,
+    //       4000, 22
+    //     ],
+    //     "circle-color": "#0044cc",
+    //     "circle-opacity": 0.6
+    //   },
+    //   layout: {
+    //     "circle-sort-key": ["get", "point_count"] // optional – oder auch entfernen
+    //   }
+    // });
+
+
+    // // Gröbere Cluster (Zoom 6–9)
+    // map.addLayer({
+    //   id: "clusters-coarse-layer",
+    //   type: "circle",
+    //   source: "accidents-cluster",
+    //   "source-layer": "clusters_6_8",
+    //   minzoom: 6,
+    //   maxzoom: 9,
+    //   paint: {
+    //     "circle-radius": [
+    //       "interpolate", ["linear"], ["get", "point_count"],
+    //       1, 2,
+    //       10, 4,
+    //       50, 6,
+    //       100, 8,
+    //       200, 10,
+    //       500, 12,
+    //       1000, 14,
+    //       2000, 18,
+    //       4000, 22,
+    //       8000, 24,
+    //       16000, 26
+    //     ],
+    //     "circle-color": "#0044cc",
+    //     "circle-opacity": 0.6
+    //   },
+    //   layout: {
+    //     "circle-sort-key": ["get", "point_count"] // optional – oder auch entfernen
+    //   }
+    // });
 
 
     map.addLayer({
@@ -746,39 +776,88 @@ async function initMap() {
     });
 
 
+// /// Cluster-Tooltip
+//     const clusterPopup = new maplibregl.Popup({
+//       closeButton: false,
+//       closeOnClick: false
+//     });
 
-    const clusterPopup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
+//     function setupClusterTooltip(layerId) {
+//       map.on("mouseenter", layerId, (e) => {
+//         map.getCanvas().style.cursor = "pointer";
+//         const count = e.features?.[0]?.properties?.point_count;
+//         if (count) {
+//           clusterPopup
+//             .setLngLat(e.lngLat)
+//             .setHTML(`<strong>${count} Unfälle</strong>`)
+//             .addTo(map);
+//         }
+//       });
+
+//       map.on("mouseleave", layerId, () => {
+//         map.getCanvas().style.cursor = "";
+//         clusterPopup.remove();
+//       });
+//     }
+
+//     // Beide Cluster-Layer einbinden:
+//     setupClusterTooltip("clusters-fine-layer");
+//     setupClusterTooltip("clusters-coarse-layer");
+
+
+//     const popup = new maplibregl.Popup({
+//       closeButton: false,
+//       closeOnClick: false
+//     });
+
+
+// /// Cluster-Tooltip NEW
+  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+  let hoveredFeatureId = null;
+
+  map.on("mousemove", (e) => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
     });
 
-    function setupClusterTooltip(layerId) {
-      map.on("mouseenter", layerId, (e) => {
+    if (features.length > 0) {
+      const f = features[0];
+      const id = f.id || JSON.stringify(f.properties);
+
+      if (id !== hoveredFeatureId) {
+        hoveredFeatureId = id;
+
+        const k1 = f.properties.UKATEGORIE__1 || 0;
+        const k2 = f.properties.UKATEGORIE__2 || 0;
+        const k3 = f.properties.UKATEGORIE__3 || 0;
+        const total = k1 + k2 + k3;
+
+        const html = `
+          <div><strong>Anzahl nach Unfall-Kategorie</strong></div>
+          <table style="font-size:12px; border-collapse:collapse;">
+            <tr><td style="padding-right:8px;"><strong>Getötete</strong></td><td style="text-align:right;">${k1}</td></tr>
+            <tr><td style="padding-right:8px;"><strong>Schwerverletzte</strong></td><td style="text-align:right;">${k2}</td></tr>
+            <tr><td style="padding-right:8px;"><strong>Leichtverletzte</strong></td><td style="text-align:right;">${k3}</td></tr>
+            <tr><td style="padding-right:8px;"><strong>Gesamt</strong></td><td style="text-align:right;"><strong>${total}</strong></td></tr>
+          </table>
+        `;
+
         map.getCanvas().style.cursor = "pointer";
-        const count = e.features?.[0]?.properties?.point_count;
-        if (count) {
-          clusterPopup
-            .setLngLat(e.lngLat)
-            .setHTML(`<strong>${count} Unfälle</strong>`)
-            .addTo(map);
-        }
-      });
-
-      map.on("mouseleave", layerId, () => {
+        popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
+      }
+    } else {
+      if (hoveredFeatureId !== null) {
+        hoveredFeatureId = null;
+        popup.remove();
         map.getCanvas().style.cursor = "";
-        clusterPopup.remove();
-      });
+        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [] });
+      }
     }
-
-    // Beide Cluster-Layer einbinden:
-    setupClusterTooltip("clusters-fine-layer");
-    setupClusterTooltip("clusters-coarse-layer");
+  });
 
 
-    const popup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
+
 
 
     ACCIDENT_LAYERS.forEach(layerId => {

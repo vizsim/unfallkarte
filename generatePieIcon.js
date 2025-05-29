@@ -1,0 +1,60 @@
+// generatePieIcon.js
+const pixelRatio = 2;
+
+/**
+ * Generates a pie chart icon as ImageData for MapLibre.
+ * @param {Object} params
+ * @param {number} params.k1 - Value for first slice (red)
+ * @param {number} params.k2 - Value for second slice (blue)
+ * @param {number} params.k3 - Value for third slice (green)
+ * @returns {Object|null} Image object with width, height, size, and data (ImageData) or null if total = 0
+ */
+export function generatePieIcon({ k1, k2, k3 }) {
+  const total = k1 + k2 + k3;
+  if (total === 0) return null;
+
+  const size = total > 100 ? 64 : total > 10 ? 48 : 32;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size * pixelRatio;
+  const ctx = canvas.getContext("2d");
+
+  const center = (size * pixelRatio) / 2;
+  const radius = center;
+
+  const angles = [
+    (k1 / total) * 2 * Math.PI,
+    (k2 / total) * 2 * Math.PI,
+    (k3 / total) * 2 * Math.PI,
+  ];
+
+  const colors = [
+    "rgba(228,26,28,1)",   // red
+    "rgba(55,126,184,0.9)",// blue
+    "rgba(77,175,74,0.5)"  // green
+  ];
+
+  let start = 0;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, start, start + angles[i]);
+    ctx.closePath();
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+    start += angles[i];
+  }
+
+  // Optional border
+  ctx.beginPath();
+  ctx.arc(center, center, radius - 0.5 * pixelRatio, 0, 2 * Math.PI);
+  ctx.lineWidth = 0.8 * pixelRatio;
+  ctx.strokeStyle = "#e6e6e6";
+  ctx.stroke();
+
+  return {
+    width: size,
+    height: size,
+    size,
+    data: ctx.getImageData(0, 0, size * pixelRatio, size * pixelRatio),
+  };
+}
