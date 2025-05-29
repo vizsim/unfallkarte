@@ -6,6 +6,7 @@ config.js
 *.pmtiles
 *.geojson
 *.geojson.gz
+*.pbf
 
 # Ignore virtual environment
 unfallkarte_env/
