@@ -1134,23 +1134,26 @@ const maxspeedPopup = new maplibregl.Popup({
       const movebisLegend = document.getElementById("movebis-legend");
       const hvsLegend = document.getElementById("hvs-legend");
       const mapillaryLegend = document.getElementById("mapillary-legend");
+      const maxspeedLegend = document.getElementById("maxspeed-legend");
 
       // Check visibility of layers
       const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
       const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
       const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
+      const maxspeedVisible= map.getLayoutProperty("maxspeed", "visibility") === "visible";
 
       // Update visibility for special legends
       if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
-      if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 13) ? "block" : "none";
+      if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 11) ? "block" : "none";
       if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
+      if (maxspeedLegend) maxspeedLegend.style.display = (maxspeedVisible && zoom >= 11) ? "block" : "none";
       if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
 
       // Hide/show regular groups depending on zoom
       Array.from(legend.children).forEach(el => {
         const isTitle = el.classList.contains("legend-title");
         const isFeatureCount = el.id === "feature-count";
-        const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend, mapillaryLegend].includes(el);
+        const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend, mapillaryLegend, maxspeedLegend].includes(el);
 
         if (zoom < 11) {
           el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
