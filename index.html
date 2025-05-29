@@ -149,6 +149,7 @@
     #mapillary-legend,
     #movebis-legend,
     #hvs-legend,
+    #maxspeed-legend,
     #schools-legend {
       display: none;
     }
@@ -727,6 +728,28 @@
           Fahrzeuge/Jahr</div>
       </div>
     </div>
+
+
+<div style="margin-top: 6px;">
+  <label>
+    <input type="checkbox" id="toggle-maxspeed" />
+    Geschwindigkeitbegrenzung anzeigen
+    <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+  </label>
+</div>
+
+<div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+  <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
+  <div style="margin-top: 4px;">
+    <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤ 30 km/h</div>
+    <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span> 50 km/h</div>
+    <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥ 100 km/h</div>
+    <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span> kein Tempolimit</div>
+    <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span> (noch) keine Angabe in OSM</div>
+    
+  </div>
+</div>
+
 
 
 

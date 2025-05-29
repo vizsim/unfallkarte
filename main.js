@@ -333,6 +333,11 @@ async function initMap() {
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
     });
 
+    map.addSource("maxspeed", {
+      type: "vector",
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/processed_major_highways_germany_250528.pmtiles"
+    });
+
     map.addSource("schools", {
       type: "vector",
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/germany_osm_schools-25-05-09.pmtiles"
@@ -534,68 +539,6 @@ const sharedIconSizeExpression = [
 
 
 
-    // // Feinere Cluster (Zoom 9–11)
-    // map.addLayer({
-    //   id: "clusters-fine-layer",
-    //   type: "circle", // oder symbol/fill, je nach Stil
-    //   source: "accidents-cluster",
-    //   "source-layer": "clusters_9_11", // <- Layername aus Tippecanoe
-    //   minzoom: 9,
-    //   maxzoom: 11,
-    //   paint: {
-    //     "circle-radius": [
-    //       "interpolate", ["linear"], ["get", "point_count"],
-    //       1, 2,
-    //       10, 4,
-    //       50, 6,
-    //       100, 8,
-    //       200, 10,
-    //       500, 12,
-    //       1000, 14,
-    //       2000, 18,
-    //       4000, 22
-    //     ],
-    //     "circle-color": "#0044cc",
-    //     "circle-opacity": 0.6
-    //   },
-    //   layout: {
-    //     "circle-sort-key": ["get", "point_count"] // optional – oder auch entfernen
-    //   }
-    // });
-
-
-    // // Gröbere Cluster (Zoom 6–9)
-    // map.addLayer({
-    //   id: "clusters-coarse-layer",
-    //   type: "circle",
-    //   source: "accidents-cluster",
-    //   "source-layer": "clusters_6_8",
-    //   minzoom: 6,
-    //   maxzoom: 9,
-    //   paint: {
-    //     "circle-radius": [
-    //       "interpolate", ["linear"], ["get", "point_count"],
-    //       1, 2,
-    //       10, 4,
-    //       50, 6,
-    //       100, 8,
-    //       200, 10,
-    //       500, 12,
-    //       1000, 14,
-    //       2000, 18,
-    //       4000, 22,
-    //       8000, 24,
-    //       16000, 26
-    //     ],
-    //     "circle-color": "#0044cc",
-    //     "circle-opacity": 0.6
-    //   },
-    //   layout: {
-    //     "circle-sort-key": ["get", "point_count"] // optional – oder auch entfernen
-    //   }
-    // });
-
-
     map.addLayer({
       id: "movebis",
       type: "line",
@@ -647,6 +590,71 @@ const sharedIconSizeExpression = [
         "line-color": "#222" // add a visible color if needed
       }
     });
+
+
+
+const commonLineColor = [
+  "case",
+  // Explicit "None"
+  ["==", ["get", "maxspeed"], "None"], "#000000",
+
+  // DE:urban fallback → treat as 50
+  ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:urban"]],
+  "#fdcc8a",
+
+  // DE:rural fallback → treat as 100
+  ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:rural"]],
+  "#e31a1c",
+
+  // Null/missing maxspeed
+  ["!", ["has", "maxspeed"]], "#ff69b4",
+  ["==", ["get", "maxspeed"], null], "#ff69b4",
+
+  // Normal numeric range
+  [
+    "interpolate", ["linear"],
+    ["to-number", ["get", "maxspeed"]],
+    30, "#31a354",
+    50, "#fdcc8a",
+    100, "#e31a1c"
+  ]
+];
+
+const commonPaint = {
+  "line-width": 2.5,
+  "line-color": commonLineColor
+};
+
+map.addLayer({
+  id: "maxspeed-conditional",
+  type: "line",
+  source: "maxspeed",
+  "source-layer": "highways",
+  layout: { visibility: "none" },
+  filter: ["has", "maxspeed_conditional"],
+  paint: {
+    ...commonPaint,
+    "line-dasharray": [2, 2] // ⬅️ add dashed style for conditionals
+  }
+});
+
+map.addLayer({
+  id: "maxspeed",
+  type: "line",
+  source: "maxspeed",
+  "source-layer": "highways",
+  layout: { visibility: "none" },
+  filter: ["!", ["has", "maxspeed_conditional"]],
+  paint: commonPaint // ⬅️ solid lines, no dash
+});
+
+
+
+
+map.moveLayer("maxspeed-conditional");
+
+
+
 
 
     // Schulen POINTS
@@ -775,40 +783,6 @@ const sharedIconSizeExpression = [
       map.getCanvas().style.cursor = "";
     });
 
-
-// /// Cluster-Tooltip
-//     const clusterPopup = new maplibregl.Popup({
-//       closeButton: false,
-//       closeOnClick: false
-//     });
-
-//     function setupClusterTooltip(layerId) {
-//       map.on("mouseenter", layerId, (e) => {
-//         map.getCanvas().style.cursor = "pointer";
-//         const count = e.features?.[0]?.properties?.point_count;
-//         if (count) {
-//           clusterPopup
-//             .setLngLat(e.lngLat)
-//             .setHTML(`<strong>${count} Unfälle</strong>`)
-//             .addTo(map);
-//         }
-//       });
-
-//       map.on("mouseleave", layerId, () => {
-//         map.getCanvas().style.cursor = "";
-//         clusterPopup.remove();
-//       });
-//     }
-
-//     // Beide Cluster-Layer einbinden:
-//     setupClusterTooltip("clusters-fine-layer");
-//     setupClusterTooltip("clusters-coarse-layer");
-
-
-//     const popup = new maplibregl.Popup({
-//       closeButton: false,
-//       closeOnClick: false
-//     });
 
 
 // /// Cluster-Tooltip NEW
@@ -992,6 +966,8 @@ const sharedIconSizeExpression = [
     });
 
 
+    // HVS Popup
+
     const hvsPopup = new maplibregl.Popup({
       closeButton: false,
       closeOnClick: false
@@ -1025,6 +1001,73 @@ const sharedIconSizeExpression = [
       map.getCanvas().style.cursor = "";
       hvsPopup.remove();
     });
+
+
+// maxspeed Popup
+
+const maxspeedPopup = new maplibregl.Popup({
+  closeButton: false,
+  closeOnClick: false
+});
+
+// Apply to both layers
+["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
+  map.on("mousemove", layerId, (e) => {
+    map.getCanvas().style.cursor = "pointer";
+
+    const feature = e.features[0];
+    const props = feature.properties;
+
+    const speed = Number(props.maxspeed);
+    const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
+
+    const content = `
+      <div style="font-size: 12px;">
+        <strong>Maxspeed</strong><br/>
+        <table style="border-collapse: collapse;">
+          <tr><td><strong>maxspeed</strong></td><td>${formattedSpeed}</td></tr>
+          <tr><td><strong>maxspeed_orig</strong></td><td>${props.maxspeed || "-"}</td></tr>
+
+          <tr><td><strong>maxspeed_conditional</strong></td><td>${props.maxspeed_conditional || "-"}</td></tr>
+
+          <tr><td><strong>maxspeed:type</strong></td><td>${props.maxspeed_type || "-"}</td></tr>
+          <tr><td><strong>maxspeed:forward</strong></td><td>${props.maxspeed_forward || "-"}</td></tr>
+          <tr><td><strong>maxspeed:backward</strong></td><td>${props.maxspeed_backward || "-"}</td></tr>
+
+          <tr><td><strong>ref</strong></td><td>${props.ref || "-"}</td></tr>
+          <tr><td><strong>name</strong></td><td>${props.name || "-"}</td></tr>
+          <tr><td><strong>highway</strong></td><td>${props.highway || "-"}</td></tr>
+          <tr><td><strong>osm_id</strong></td><td>${props.osm_id || "-"}</td></tr>
+        </table>
+      </div>
+    `;
+
+    maxspeedPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+  });
+
+  map.on("mouseleave", layerId, () => {
+    map.getCanvas().style.cursor = "";
+    maxspeedPopup.remove();
+  });
+});
+
+
+["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
+  map.on("click", layerId, (e) => {
+    const feature = e.features[0];
+    const osmId = feature.properties.osm_id;
+
+    if (osmId) {
+      const url = `https://www.openstreetmap.org/way/${osmId}`;
+      window.open(url, "_blank");
+    }
+  });
+});
+
+
+
+
+    // Schulen Popup
 
 
     const schoolsPopup = new maplibregl.Popup({
@@ -1321,15 +1364,17 @@ function applyZoomLock() {
   const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
   const schoolsPointsVisible = map.getLayoutProperty("schools-points", "visibility") === "visible";
   const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
+  const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
 
   const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
 
   // Determine the strictest minZoom
   const minZooms = [];
   if (movebisVisible) minZooms.push(13);
-  if (schoolsVisible) minZooms.push(13);
+  if (schoolsVisible) minZooms.push(13); // TODO: should be 11 but need to fix pmtiles
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
+  if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
 
   const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
 
@@ -1346,7 +1391,7 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools", "hvs", "mapillary", "movebis"].forEach(key => {
+  ["schools", "hvs", "mapillary", "movebis", "maxspeed"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
@@ -1390,6 +1435,22 @@ document.getElementById("toggle-movebis").addEventListener("change", function (e
 document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   const checked = e.target.checked;
   map.setLayoutProperty("hvs", "visibility", checked ? "visible" : "none");
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
+document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  const visibility = checked ? "visible" : "none";
+
+  if (map.getLayer("maxspeed")) {
+    map.setLayoutProperty("maxspeed", "visibility", visibility);
+  }
+
+  if (map.getLayer("maxspeed-conditional")) {
+    map.setLayoutProperty("maxspeed-conditional", "visibility", visibility);
+  }
 
   applyZoomLock();
   applyLegendVisibility();
