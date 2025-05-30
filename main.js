@@ -353,14 +353,15 @@ async function initMap() {
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_12-13.pmtiles"
     });
 
-    // map.addSource("accidents-cluster", {
-    //   type: "vector",
-    //   url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/combined.pmtiles"
-    // });
 
-        map.addSource("accidents-cluster", {
+    map.addSource("accidents-cluster", {
       type: "vector",
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/combined_may25_group.pmtiles"
+    });
+
+    map.addSource("scenario1", {
+      type: "vector",
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/scenario1_cluster_accidents_ms100.pmtiles"
     });
 
     map.addSource("satellite", {
@@ -700,6 +701,24 @@ map.moveLayer("maxspeed-conditional");
           "#aaaaaa"                  // default/fallback
         ],
         "fill-opacity": 0.5,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+
+        // Scenario1
+    map.addLayer({
+      id: "scenario1",
+      type: "fill",
+      source: "scenario1",
+      "source-layer": "clusters", // again: tippecanoe `-l` name
+      filter: ["==", ["geometry-type"], "Polygon"],
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": 'orange',
+        "fill-opacity": 0.8,
         "fill-outline-color": "#1B4D3E"
       }
     });
@@ -1068,8 +1087,6 @@ const maxspeedPopup = new maplibregl.Popup({
 
 
     // Schulen Popup
-
-
     const schoolsPopup = new maplibregl.Popup({
       closeButton: false,
       closeOnClick: false
@@ -1102,6 +1119,46 @@ const maxspeedPopup = new maplibregl.Popup({
     // Enable popups for both points and polygons
     setupSchoolsPopup("schools-points");
     setupSchoolsPopup("schools-polygons");
+
+
+
+
+// Scenario1 Popup
+const scenario1Tooltip = new maplibregl.Popup({
+  closeButton: false,
+  closeOnClick: false
+});
+
+map.on("mousemove", "scenario1", (e) => {
+  const feature = e.features[0];
+  const props = feature.properties;
+
+  const content = `
+    <div style="font-size: 12px;">
+      <strong>Szenario 1</strong><br/>
+      ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
+      ${props.cluster_size !== undefined ? `Cluster-Größe: ${props.cluster_size}` : ""}
+    </div>
+  `;
+
+  scenario1Tooltip
+    .setLngLat(e.lngLat)
+    .setHTML(content)
+    .addTo(map);
+
+  map.getCanvas().style.cursor = "pointer";
+});
+
+map.on("mouseleave", "scenario1", () => {
+  scenario1Tooltip.remove();
+  map.getCanvas().style.cursor = "";
+});
+
+
+
+
+
+
 
 
 
@@ -1368,6 +1425,8 @@ function applyZoomLock() {
   const schoolsPointsVisible = map.getLayoutProperty("schools-points", "visibility") === "visible";
   const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
+  const scenario1Visible = map.getLayoutProperty("scenario1", "visibility") === "visible";
+
 
   const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
 
@@ -1378,6 +1437,7 @@ function applyZoomLock() {
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
   if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
+  if (scenario1Visible) minZooms.push(11); // ✅ NEW ZOOM LOCK
 
   const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
 
@@ -1394,7 +1454,7 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools", "hvs", "mapillary", "movebis", "maxspeed"].forEach(key => {
+  ["schools", "hvs", "mapillary", "movebis", "maxspeed", "scenario1"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
@@ -1442,6 +1502,17 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   applyZoomLock();
   applyLegendVisibility();
 });
+
+
+document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  map.setLayoutProperty("scenario1", "visibility", checked ? "visible" : "none");
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
+
 
 document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
   const checked = e.target.checked;
