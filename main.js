@@ -708,49 +708,49 @@ async function initMap() {
 
     // Scenario1
 
-// Polygon Layer: for zoom 11–14
-map.addLayer({
-  id: "scenario1-polys",
-  type: "fill",
-  source: "scenario1",
-  "source-layer": "scenario1-polys",  // ✅ correct name!
-  filter: ["==", ["geometry-type"], "Polygon"],
-  minzoom: 14,
-  layout: {
-    visibility: "none"
-  },
-  paint: {
-    "fill-color": "orange",
-    "fill-opacity": 0.8,
-    "fill-outline-color": "#1B4D3E"
-  }
-});
+    // Polygon Layer: for zoom 11–14
+    map.addLayer({
+      id: "scenario1-polys",
+      type: "fill",
+      source: "scenario1",
+      "source-layer": "scenario1-polys",  // ✅ correct name!
+      filter: ["==", ["geometry-type"], "Polygon"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "orange",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
 
-// Points Layer: for zoom 6–10
-map.addLayer({
-  id: "scenario1-points",
-  type: "circle",
-  source: "scenario1",
-  "source-layer": "scenario1-points",  // ✅ correct name!
-  //filter: ["has", "cluster_id"],       // ✅ optional but valid
-  filter: ["all"],
-  minzoom: 6,
-  maxzoom: 14,
-  layout: {
-    visibility: "none"
-  },
-  paint: {
-    "circle-color": "orange",
-    "circle-radius": [
-      "interpolate", ["linear"], ["zoom"],
-      6, 4,
-      10, 8
-    ],
-    "circle-opacity": 0.8,
-    "circle-stroke-color": "#1B4D3E",
-    "circle-stroke-width": 1
-  }
-});
+    // Points Layer: for zoom 6–10
+    map.addLayer({
+      id: "scenario1-points",
+      type: "circle",
+      source: "scenario1",
+      "source-layer": "scenario1-points",  // ✅ correct name!
+      //filter: ["has", "cluster_id"],       // ✅ optional but valid
+      filter: ["all"],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "orange",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
 
 
 
@@ -1082,10 +1082,16 @@ map.addLayer({
         ? "?"
         : `${(flow / 1_000_000).toFixed(1).replace(".", ",")} Mio`;
 
+      // Neue Zeile: geschätzter Tagesverkehr
+      const dailyFlow = isNaN(flow)
+        ? "?"
+        : `${(Math.round(flow / 365 / 1000) * 1000).toLocaleString("de-DE")} Fzg`;
+
       const content = `
         <div style="font-size: 12px;">
-          <strong>HVS</strong><br/>
-          <strong>Annual Traffic:</strong> ${formattedFlow}
+          <strong>Verkehrsmengen</strong><br/>
+          <strong>Annual Traffic:</strong> ${formattedFlow}<br/>
+          <strong>Est. daily Traffic:</strong> ~${dailyFlow}
         </div>
       `;
 
@@ -1200,18 +1206,18 @@ map.addLayer({
 
 
     // Scenario1 Popup
-// Tooltip instance (shared)
-const scenario1Tooltip = new maplibregl.Popup({
-  closeButton: false,
-  closeOnClick: false
-});
+    // Tooltip instance (shared)
+    const scenario1Tooltip = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
 
-// POLYGONS — hover tooltip
-map.on("mousemove", "scenario1-polys", (e) => {
-  const feature = e.features[0];
-  const props = feature.properties;
+    // POLYGONS — hover tooltip
+    map.on("mousemove", "scenario1-polys", (e) => {
+      const feature = e.features[0];
+      const props = feature.properties;
 
-  const html = `
+      const html = `
     <div style="font-size: 12px;">
       <strong>Szenario 1</strong><br/>
       ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
@@ -1219,90 +1225,90 @@ map.on("mousemove", "scenario1-polys", (e) => {
     </div>
   `;
 
-  scenario1Tooltip
-    .setLngLat(e.lngLat)
-    .setHTML(html)
-    .addTo(map);
+      scenario1Tooltip
+        .setLngLat(e.lngLat)
+        .setHTML(html)
+        .addTo(map);
 
-  map.getCanvas().style.cursor = "pointer";
-});
+      map.getCanvas().style.cursor = "pointer";
+    });
 
-map.on("mouseleave", "scenario1-polys", () => {
-  scenario1Tooltip.remove();
-  map.getCanvas().style.cursor = "";
-});
+    map.on("mouseleave", "scenario1-polys", () => {
+      scenario1Tooltip.remove();
+      map.getCanvas().style.cursor = "";
+    });
 
-// POINTS — also on hover (same tooltip)
-map.on("mousemove", "scenario1-points", (e) => {
-  const feature = e.features[0];
-  const props = feature.properties;
+    // POINTS — also on hover (same tooltip)
+    map.on("mousemove", "scenario1-points", (e) => {
+      const feature = e.features[0];
+      const props = feature.properties;
 
-  const html = Object.entries(props)
-    .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
-    .join("<br>");
+      const html = Object.entries(props)
+        .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+        .join("<br>");
 
-  scenario1Tooltip
-    .setLngLat(e.lngLat)
-    .setHTML(html)
-    .addTo(map);
+      scenario1Tooltip
+        .setLngLat(e.lngLat)
+        .setHTML(html)
+        .addTo(map);
 
-  map.getCanvas().style.cursor = "pointer";
-});
+      map.getCanvas().style.cursor = "pointer";
+    });
 
-map.on("mouseleave", "scenario1-points", () => {
-  scenario1Tooltip.remove();
-  map.getCanvas().style.cursor = "";
-});
+    map.on("mouseleave", "scenario1-points", () => {
+      scenario1Tooltip.remove();
+      map.getCanvas().style.cursor = "";
+    });
 
 
 
-//     const scenario1Tooltip = new maplibregl.Popup({
-//       closeButton: false,
-//       closeOnClick: false
-//     });
+    //     const scenario1Tooltip = new maplibregl.Popup({
+    //       closeButton: false,
+    //       closeOnClick: false
+    //     });
 
-//     map.on("mousemove", "scenario1-polys", (e) => {
-//       const feature = e.features[0];
-//       const props = feature.properties;
+    //     map.on("mousemove", "scenario1-polys", (e) => {
+    //       const feature = e.features[0];
+    //       const props = feature.properties;
 
-//       const content = `
-//     <div style="font-size: 12px;">
-//       <strong>Szenario 1</strong><br/>
-//       ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
-//       ${props.cluster_size !== undefined ? `Cluster-Größe: ${props.cluster_size}` : ""}
-//     </div>
-//   `;
+    //       const content = `
+    //     <div style="font-size: 12px;">
+    //       <strong>Szenario 1</strong><br/>
+    //       ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
+    //       ${props.cluster_size !== undefined ? `Cluster-Größe: ${props.cluster_size}` : ""}
+    //     </div>
+    //   `;
 
-//       scenario1Tooltip
-//         .setLngLat(e.lngLat)
-//         .setHTML(content)
-//         .addTo(map);
+    //       scenario1Tooltip
+    //         .setLngLat(e.lngLat)
+    //         .setHTML(content)
+    //         .addTo(map);
 
-//       map.getCanvas().style.cursor = "pointer";
-//     });
+    //       map.getCanvas().style.cursor = "pointer";
+    //     });
 
-//     map.on("mouseleave", "scenario1-poly", () => {
-//       scenario1Tooltip.remove();
-//       map.getCanvas().style.cursor = "";
-//     });
+    //     map.on("mouseleave", "scenario1-poly", () => {
+    //       scenario1Tooltip.remove();
+    //       map.getCanvas().style.cursor = "";
+    //     });
 
-//     // Scenario1-points Popup
+    //     // Scenario1-points Popup
 
-//     map.on("click", "scenario1-points", function (e) {
-//   const feature = e.features[0];
-//   const props = feature.properties;
+    //     map.on("click", "scenario1-points", function (e) {
+    //   const feature = e.features[0];
+    //   const props = feature.properties;
 
-//   // HTML aus allen Properties erzeugen
-//   const html = Object.entries(props)
-//     .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
-//     .join("<br>");
+    //   // HTML aus allen Properties erzeugen
+    //   const html = Object.entries(props)
+    //     .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+    //     .join("<br>");
 
-//   // Popup anzeigen
-//   new maplibregl.Popup()
-//     .setLngLat(feature.geometry.coordinates)
-//     .setHTML(html)
-//     .addTo(map);
-// });
+    //   // Popup anzeigen
+    //   new maplibregl.Popup()
+    //     .setLngLat(feature.geometry.coordinates)
+    //     .setHTML(html)
+    //     .addTo(map);
+    // });
 
 
 
