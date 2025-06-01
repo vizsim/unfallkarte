@@ -246,10 +246,6 @@ function updateVisibleFeatureCount() {
 
 
 
-
-
-
-
     document.getElementById("feature-count").innerHTML =
       `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
   }
@@ -361,7 +357,7 @@ async function initMap() {
 
     map.addSource("scenario1", {
       type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/scenario1_cluster_accidents_ms100_new.pmtiles"
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/scenario1_cluster_accidents_ms100.pmtiles"
     });
 
     map.addSource("satellite", {
@@ -880,6 +876,24 @@ async function initMap() {
 
 
 
+map.on("zoom", () => {
+  const section = document.getElementById("scenario-legend-section");
+  if (section) section.style.display = "block";
+});
+
+map.on('load', () => {
+  const legend = document.getElementById("scenario-legend-section");
+  if (legend) {
+    legend.style.display = "block";
+  }
+
+  map.on("zoom", () => {
+    legend.style.display = "block"; // force keep visible
+  });
+});
+
+
+
     // /// Cluster-Tooltip NEW
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
     let hoveredFeatureId = null;
@@ -1205,110 +1219,57 @@ async function initMap() {
 
 
 
-    // Scenario1 Popup
-    // Tooltip instance (shared)
-    const scenario1Tooltip = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
+    // Scenario1 Tooltip
 
-    // POLYGONS — hover tooltip
-    map.on("mousemove", "scenario1-polys", (e) => {
-      const feature = e.features[0];
-      const props = feature.properties;
 
-      const html = `
+function renderScenario1Tooltip(props) {
+  return `
     <div style="font-size: 12px;">
       <strong>Szenario 1</strong><br/>
-      ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
-      ${props.cluster_size !== undefined ? `Cluster-Größe: ${props.cluster_size}` : ""}
+      <table style="border-collapse: collapse;">
+        ${props.cluster_size !== undefined ? `<tr><td><strong>Cluster-Größe</strong></td><td>${props.cluster_size}</td></tr>` : ""}
+        ${props.UKATEGORIE__1 !== undefined ? `<tr><td><strong># Getötete</strong></td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
+        ${props.UKATEGORIE__2 !== undefined ? `<tr><td><strong># Schwerverletzte</strong></td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
+        ${props.UKATEGORIE__3 !== undefined ? `<tr><td><strong># Leichtverletzte</strong></td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
+      </table>
     </div>
   `;
-
-      scenario1Tooltip
-        .setLngLat(e.lngLat)
-        .setHTML(html)
-        .addTo(map);
-
-      map.getCanvas().style.cursor = "pointer";
-    });
-
-    map.on("mouseleave", "scenario1-polys", () => {
-      scenario1Tooltip.remove();
-      map.getCanvas().style.cursor = "";
-    });
-
-    // POINTS — also on hover (same tooltip)
-    map.on("mousemove", "scenario1-points", (e) => {
-      const feature = e.features[0];
-      const props = feature.properties;
-
-      const html = Object.entries(props)
-        .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
-        .join("<br>");
-
-      scenario1Tooltip
-        .setLngLat(e.lngLat)
-        .setHTML(html)
-        .addTo(map);
-
-      map.getCanvas().style.cursor = "pointer";
-    });
-
-    map.on("mouseleave", "scenario1-points", () => {
-      scenario1Tooltip.remove();
-      map.getCanvas().style.cursor = "";
-    });
+}
 
 
+const scenario1Tooltip = new maplibregl.Popup({
+  closeButton: false,
+  closeOnClick: false
+});
 
-    //     const scenario1Tooltip = new maplibregl.Popup({
-    //       closeButton: false,
-    //       closeOnClick: false
-    //     });
 
-    //     map.on("mousemove", "scenario1-polys", (e) => {
-    //       const feature = e.features[0];
-    //       const props = feature.properties;
+map.on("mousemove", "scenario1-polys", (e) => {
+  const feature = e.features[0];
+  const html = renderScenario1Tooltip(feature.properties);
 
-    //       const content = `
-    //     <div style="font-size: 12px;">
-    //       <strong>Szenario 1</strong><br/>
-    //       ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
-    //       ${props.cluster_size !== undefined ? `Cluster-Größe: ${props.cluster_size}` : ""}
-    //     </div>
-    //   `;
+  scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
+  map.getCanvas().style.cursor = "pointer";
+});
 
-    //       scenario1Tooltip
-    //         .setLngLat(e.lngLat)
-    //         .setHTML(content)
-    //         .addTo(map);
+map.on("mousemove", "scenario1-points", (e) => {
+  const feature = e.features[0];
+  const html = renderScenario1Tooltip(feature.properties);
 
-    //       map.getCanvas().style.cursor = "pointer";
-    //     });
+  scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
+  map.getCanvas().style.cursor = "pointer";
+});
 
-    //     map.on("mouseleave", "scenario1-poly", () => {
-    //       scenario1Tooltip.remove();
-    //       map.getCanvas().style.cursor = "";
-    //     });
 
-    //     // Scenario1-points Popup
+map.on("mouseleave", "scenario1-polys", () => {
+  scenario1Tooltip.remove();
+  map.getCanvas().style.cursor = "";
+});
 
-    //     map.on("click", "scenario1-points", function (e) {
-    //   const feature = e.features[0];
-    //   const props = feature.properties;
+map.on("mouseleave", "scenario1-points", () => {
+  scenario1Tooltip.remove();
+  map.getCanvas().style.cursor = "";
+});
 
-    //   // HTML aus allen Properties erzeugen
-    //   const html = Object.entries(props)
-    //     .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
-    //     .join("<br>");
-
-    //   // Popup anzeigen
-    //   new maplibregl.Popup()
-    //     .setLngLat(feature.geometry.coordinates)
-    //     .setHTML(html)
-    //     .addTo(map);
-    // });
 
 
 
@@ -1343,11 +1304,13 @@ async function initMap() {
       const legend = document.querySelector(".legend");
       if (!legend || legend.classList.contains("collapsed")) return;
 
-      const clusterLegendEl = document.getElementById("cluster-legend");
+      //const clusterLegendEl = document.getElementById("cluster-legend");
+      const clusterLegendEl = document.getElementById("cluster-legend-section");
       const movebisLegend = document.getElementById("movebis-legend");
       const hvsLegend = document.getElementById("hvs-legend");
       const mapillaryLegend = document.getElementById("mapillary-legend");
       const maxspeedLegend = document.getElementById("maxspeed-legend");
+      const scenarioLegendEl = document.getElementById("scenario-legend-section");
 
       // Check visibility of layers
       const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
@@ -1366,7 +1329,7 @@ async function initMap() {
       Array.from(legend.children).forEach(el => {
         const isTitle = el.classList.contains("legend-title");
         const isFeatureCount = el.id === "feature-count";
-        const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend, mapillaryLegend, maxspeedLegend].includes(el);
+        const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend, mapillaryLegend, maxspeedLegend, scenarioLegendEl].includes(el);
 
         if (zoom < 11) {
           el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
@@ -1770,3 +1733,9 @@ document.getElementById("toggle-scenario1").addEventListener("change", function 
     applyClusterSizeFilter(0);
   }
 });
+
+
+// map.on("zoom", () => {
+//   const section = document.getElementById("scenario-legend-section");
+//   if (section) section.style.display = "block";
+// });
