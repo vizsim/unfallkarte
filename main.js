@@ -31,8 +31,8 @@ const isLocalhost = location.hostname === "localhost";
 document.querySelector('[data-map="standard"]').style.backgroundImage =
   "url('./thumbs/thumb-standard.png')";
 
-  // document.querySelector('[data-map="standard"]').style.backgroundImage =
-  // "url('./thumbs/thumb-standard.png')";
+// document.querySelector('[data-map="standard"]').style.backgroundImage =
+// "url('./thumbs/thumb-standard.png')";
 
 document.querySelector('[data-map="satellite"]').style.backgroundImage =
   "url('./thumbs/thumb-satellite.png')";
@@ -128,15 +128,15 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
   // Hauptfilterlogik
   let filter = ["all"];
 
-filter.push(["in", "UKATEGORIE", ...(uk_vals.length > 0 ? uk_vals : [-1])]);
-filter.push(["in", "UART", ...(uart_vals.length > 0 ? uart_vals : [-1])]);
-filter.push(["in", "UTYP1", ...(utyp_vals.length > 0 ? utyp_vals : [-1])]);
-filter.push(["in", "UJAHR", ...(ujahr_vals.length > 0 ? ujahr_vals : [-1])]);
+  filter.push(["in", "UKATEGORIE", ...(uk_vals.length > 0 ? uk_vals : [-1])]);
+  filter.push(["in", "UART", ...(uart_vals.length > 0 ? uart_vals : [-1])]);
+  filter.push(["in", "UTYP1", ...(utyp_vals.length > 0 ? utyp_vals : [-1])]);
+  filter.push(["in", "UJAHR", ...(ujahr_vals.length > 0 ? ujahr_vals : [-1])]);
 
-const beteiligungExpr = beteiligungen.length > 0
-  ? ["any", ...beteiligungen.map(f => ["==", f, 1])]
-  : ["==", "UKATEGORIE", -1]; // "unschädlicher" Filter
-filter.push(beteiligungExpr);
+  const beteiligungExpr = beteiligungen.length > 0
+    ? ["any", ...beteiligungen.map(f => ["==", f, 1])]
+    : ["==", "UKATEGORIE", -1]; // "unschädlicher" Filter
+  filter.push(beteiligungExpr);
 
 
 
@@ -267,17 +267,17 @@ async function initMap() {
     maxZoom: 20
   });
 
-//   const selectedBaseStyle = localStorage.getItem("selectedBasemap") || "dataviz"; // Default
-// const styleUrl = `https://api.maptiler.com/maps/${selectedBaseStyle}/style.json?key=${MAPTILER_API_KEY}`;
+  //   const selectedBaseStyle = localStorage.getItem("selectedBasemap") || "dataviz"; // Default
+  // const styleUrl = `https://api.maptiler.com/maps/${selectedBaseStyle}/style.json?key=${MAPTILER_API_KEY}`;
 
-// window.map = new maplibregl.Map({
-//   container: "map",
-//   style: styleUrl,
-//   center: [13.634, 52.315],
-//   zoom: 11,
-//   minZoom: 6,
-//   maxZoom: 20
-// });
+  // window.map = new maplibregl.Map({
+  //   container: "map",
+  //   style: styleUrl,
+  //   center: [13.634, 52.315],
+  //   zoom: 11,
+  //   minZoom: 6,
+  //   maxZoom: 20
+  // });
 
 
   originalMinZoom = map.getMinZoom();
@@ -291,23 +291,23 @@ async function initMap() {
 
 
 
-// load piecharts
+    // load piecharts
     map.on("styleimagemissing", (e) => {
-  const id = e.id;
-  if (!id.startsWith("pie-")) return;
+      const id = e.id;
+      if (!id.startsWith("pie-")) return;
 
-  const parts = id.split("-");
-  if (parts.length !== 4) return;
+      const parts = id.split("-");
+      if (parts.length !== 4) return;
 
-  const k1 = parseInt(parts[1], 10);
-  const k2 = parseInt(parts[2], 10);
-  const k3 = parseInt(parts[3], 10);
+      const k1 = parseInt(parts[1], 10);
+      const k2 = parseInt(parts[2], 10);
+      const k3 = parseInt(parts[3], 10);
 
-  const image = generatePieIcon({ k1, k2, k3 });
-  if (image) {
-    map.addImage(id, image.data, { pixelRatio: 2 });
-  }
-});
+      const image = generatePieIcon({ k1, k2, k3 });
+      if (image) {
+        map.addImage(id, image.data, { pixelRatio: 2 });
+      }
+    });
 
     // // local / github setup
     //  const protocol = new pmtiles.Protocol();  
@@ -361,7 +361,7 @@ async function initMap() {
 
     map.addSource("scenario1", {
       type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/scenario1_cluster_accidents_ms100.pmtiles"
+      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/scenario1_cluster_accidents_ms100_new.pmtiles"
     });
 
     map.addSource("satellite", {
@@ -459,40 +459,71 @@ async function initMap() {
 
     updateColorStyle();
 
-const sharedIconSizeExpression = [
-    "interpolate", ["linear"], [
-      "+",
-      ["get", "UKATEGORIE__1"],
-      ["get", "UKATEGORIE__2"],
-      ["get", "UKATEGORIE__3"]
-    ],
-    1, 0.1,
-    4, 0.2,
-    10, 0.35,
-    50, 0.4,
-    100, 0.5,
-    500, 0.55,
-    1000, 0.6,
-    5000, 0.7,
-    10000, 0.75,
-    20000, 0.8,
-    40000, 0.9
-  ];
+    const sharedIconSizeExpression = [
+      "interpolate", ["linear"], [
+        "+",
+        ["get", "UKATEGORIE__1"],
+        ["get", "UKATEGORIE__2"],
+        ["get", "UKATEGORIE__3"]
+      ],
+      1, 0.1,
+      4, 0.2,
+      10, 0.35,
+      50, 0.4,
+      100, 0.5,
+      500, 0.55,
+      1000, 0.6,
+      5000, 0.7,
+      10000, 0.75,
+      20000, 0.8,
+      40000, 0.9
+    ];
 
-  // 🗂 Add cluster layers
-  const layers = [
-    { id: "pie-clusters-fine-layer", sourceLayer: "clusters_9_11", minzoom: 9, maxzoom: 11 },
-    { id: "pie-clusters-coarse-layer", sourceLayer: "clusters_6_8", minzoom: 6, maxzoom: 9 }
-  ];
+    // 🗂 Add cluster layers
+    const layers = [
+      { id: "pie-clusters-fine-layer", sourceLayer: "clusters_9_11", minzoom: 9, maxzoom: 11 },
+      { id: "pie-clusters-coarse-layer", sourceLayer: "clusters_6_8", minzoom: 6, maxzoom: 9 }
+    ];
 
-  for (const { id, sourceLayer, minzoom, maxzoom } of layers) {
+    for (const { id, sourceLayer, minzoom, maxzoom } of layers) {
+      map.addLayer({
+        id,
+        type: "symbol",
+        source: "accidents-cluster",
+        "source-layer": sourceLayer,
+        minzoom,
+        maxzoom,
+        layout: {
+          "icon-image": [
+            "concat",
+            "pie-",
+            ["to-string", ["get", "UKATEGORIE__1"]], "-",
+            ["to-string", ["get", "UKATEGORIE__2"]], "-",
+            ["to-string", ["get", "UKATEGORIE__3"]]
+          ],
+          "icon-size": sharedIconSizeExpression,
+          "icon-allow-overlap": true,
+          "symbol-sort-key": [
+            "-",
+            ["/", ["get", "UKATEGORIE__3"],
+              ["+", ["get", "UKATEGORIE__1"],
+                ["get", "UKATEGORIE__2"],
+                ["get", "UKATEGORIE__3"]]]
+          ]
+        }
+      });
+    }
+
+    // 🟡 Hover layer
+    map.addSource("hover-point", {
+      type: "geojson",
+      data: { type: "FeatureCollection", features: [] }
+    });
+
     map.addLayer({
-      id,
+      id: "hover-pie",
       type: "symbol",
-      source: "accidents-cluster",
-      "source-layer": sourceLayer,
-      minzoom,
-      maxzoom,
+      source: "hover-point",
       layout: {
         "icon-image": [
           "concat",
@@ -501,41 +532,10 @@ const sharedIconSizeExpression = [
           ["to-string", ["get", "UKATEGORIE__2"]], "-",
           ["to-string", ["get", "UKATEGORIE__3"]]
         ],
-        "icon-size": sharedIconSizeExpression,
-        "icon-allow-overlap": true,
-        "symbol-sort-key": [
-          "-", 
-          ["/", ["get", "UKATEGORIE__3"],
-            ["+", ["get", "UKATEGORIE__1"],
-                  ["get", "UKATEGORIE__2"],
-                  ["get", "UKATEGORIE__3"]]]
-        ]
+        "icon-size": 1,
+        "icon-allow-overlap": true
       }
     });
-  }
-
-  // 🟡 Hover layer
-  map.addSource("hover-point", {
-    type: "geojson",
-    data: { type: "FeatureCollection", features: [] }
-  });
-
-  map.addLayer({
-    id: "hover-pie",
-    type: "symbol",
-    source: "hover-point",
-    layout: {
-      "icon-image": [
-        "concat",
-        "pie-",
-        ["to-string", ["get", "UKATEGORIE__1"]], "-",
-        ["to-string", ["get", "UKATEGORIE__2"]], "-",
-        ["to-string", ["get", "UKATEGORIE__3"]]
-      ],
-      "icon-size": 1,
-      "icon-allow-overlap": true
-    }
-  });
 
 
 
@@ -594,65 +594,65 @@ const sharedIconSizeExpression = [
 
 
 
-const commonLineColor = [
-  "case",
-  // Explicit "None"
-  ["==", ["get", "maxspeed"], "None"], "#000000",
+    const commonLineColor = [
+      "case",
+      // Explicit "None"
+      ["==", ["get", "maxspeed"], "None"], "#000000",
 
-  // DE:urban fallback → treat as 50
-  ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:urban"]],
-  "#fdcc8a",
+      // DE:urban fallback → treat as 50
+      ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:urban"]],
+      "#fdcc8a",
 
-  // DE:rural fallback → treat as 100
-  ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:rural"]],
-  "#e31a1c",
+      // DE:rural fallback → treat as 100
+      ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:rural"]],
+      "#e31a1c",
 
-  // Null/missing maxspeed
-  ["!", ["has", "maxspeed"]], "#ff69b4",
-  ["==", ["get", "maxspeed"], null], "#ff69b4",
+      // Null/missing maxspeed
+      ["!", ["has", "maxspeed"]], "#ff69b4",
+      ["==", ["get", "maxspeed"], null], "#ff69b4",
 
-  // Normal numeric range
-  [
-    "interpolate", ["linear"],
-    ["to-number", ["get", "maxspeed"]],
-    30, "#31a354",
-    50, "#fdcc8a",
-    100, "#e31a1c"
-  ]
-];
+      // Normal numeric range
+      [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "maxspeed"]],
+        30, "#31a354",
+        50, "#fdcc8a",
+        100, "#e31a1c"
+      ]
+    ];
 
-const commonPaint = {
-  "line-width": 2.5,
-  "line-color": commonLineColor
-};
+    const commonPaint = {
+      "line-width": 2.5,
+      "line-color": commonLineColor
+    };
 
-map.addLayer({
-  id: "maxspeed-conditional",
-  type: "line",
-  source: "maxspeed",
-  "source-layer": "highways",
-  layout: { visibility: "none" },
-  filter: ["has", "maxspeed_conditional"],
-  paint: {
-    ...commonPaint,
-    "line-dasharray": [2, 2] // ⬅️ add dashed style for conditionals
-  }
-});
+    map.addLayer({
+      id: "maxspeed-conditional",
+      type: "line",
+      source: "maxspeed",
+      "source-layer": "highways",
+      layout: { visibility: "none" },
+      filter: ["has", "maxspeed_conditional"],
+      paint: {
+        ...commonPaint,
+        "line-dasharray": [2, 2] // ⬅️ add dashed style for conditionals
+      }
+    });
 
-map.addLayer({
-  id: "maxspeed",
-  type: "line",
-  source: "maxspeed",
-  "source-layer": "highways",
-  layout: { visibility: "none" },
-  filter: ["!", ["has", "maxspeed_conditional"]],
-  paint: commonPaint // ⬅️ solid lines, no dash
-});
-
-
+    map.addLayer({
+      id: "maxspeed",
+      type: "line",
+      source: "maxspeed",
+      "source-layer": "highways",
+      layout: { visibility: "none" },
+      filter: ["!", ["has", "maxspeed_conditional"]],
+      paint: commonPaint // ⬅️ solid lines, no dash
+    });
 
 
-map.moveLayer("maxspeed-conditional");
+
+
+    map.moveLayer("maxspeed-conditional");
 
 
 
@@ -706,22 +706,98 @@ map.moveLayer("maxspeed-conditional");
     });
 
 
-        // Scenario1
-    map.addLayer({
-      id: "scenario1",
-      type: "fill",
-      source: "scenario1",
-      "source-layer": "clusters", // again: tippecanoe `-l` name
-      filter: ["==", ["geometry-type"], "Polygon"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": 'orange',
-        "fill-opacity": 0.8,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
+    // Scenario1
+
+// Polygon Layer: for zoom 11–14
+map.addLayer({
+  id: "scenario1-polys",
+  type: "fill",
+  source: "scenario1",
+  "source-layer": "scenario1-polys",  // ✅ correct name!
+  filter: ["==", ["geometry-type"], "Polygon"],
+  minzoom: 14,
+  layout: {
+    visibility: "none"
+  },
+  paint: {
+    "fill-color": "orange",
+    "fill-opacity": 0.8,
+    "fill-outline-color": "#1B4D3E"
+  }
+});
+
+// Points Layer: for zoom 6–10
+map.addLayer({
+  id: "scenario1-points",
+  type: "circle",
+  source: "scenario1",
+  "source-layer": "scenario1-points",  // ✅ correct name!
+  //filter: ["has", "cluster_id"],       // ✅ optional but valid
+  filter: ["all"],
+  minzoom: 6,
+  maxzoom: 14,
+  layout: {
+    visibility: "none"
+  },
+  paint: {
+    "circle-color": "orange",
+    "circle-radius": [
+      "interpolate", ["linear"], ["zoom"],
+      6, 4,
+      10, 8
+    ],
+    "circle-opacity": 0.8,
+    "circle-stroke-color": "#1B4D3E",
+    "circle-stroke-width": 1
+  }
+});
+
+
+
+
+    // map.addLayer({
+    //   id: "scenario1",
+    //   type: "fill",
+    //   source: "scenario1",
+    //   "source-layer": "scenario1-polys", // again: tippecanoe `-l` name
+    //   filter: ["==", ["geometry-type"], "Polygon"],
+    //   minzoom: 14,
+    //   layout: {
+    //     visibility: "none"
+    //   },
+    //   paint: {
+    //     "fill-color": 'orange',
+    //     "fill-opacity": 0.8,
+    //     "fill-outline-color": "#1B4D3E"
+    //   }
+    // });
+
+    // map.addLayer({
+    //   id: "scenario1-points",
+    //   type: "circle",
+    //   source: "scenario1",
+    //   "source-layer": "clusters",
+    //   //filter: ["==", ["geometry-type"], "Point"],
+    //   //filter: ["all"],
+    //   filter: ["has", "cluster_id"],
+    //   minzoom: 6,
+    //   maxzoom: 14,
+    //   layout: {
+    //     visibility: "none"
+    //   },
+    //   paint: {
+    //     "circle-color": "orange",
+    //     "circle-radius": [
+    //       "interpolate", ["linear"], ["zoom"],
+    //       6, 4,
+    //       10, 8
+    //     ],
+    //     "circle-opacity": 0.8,
+    //     "circle-stroke-color": "#1B4D3E",
+    //     "circle-stroke-width": 1
+    //   }
+    // });
+
 
 
 
@@ -804,28 +880,28 @@ map.moveLayer("maxspeed-conditional");
 
 
 
-// /// Cluster-Tooltip NEW
-  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-  let hoveredFeatureId = null;
+    // /// Cluster-Tooltip NEW
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+    let hoveredFeatureId = null;
 
-  map.on("mousemove", (e) => {
-    const features = map.queryRenderedFeatures(e.point, {
-      layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
-    });
+    map.on("mousemove", (e) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
+      });
 
-    if (features.length > 0) {
-      const f = features[0];
-      const id = f.id || JSON.stringify(f.properties);
+      if (features.length > 0) {
+        const f = features[0];
+        const id = f.id || JSON.stringify(f.properties);
 
-      if (id !== hoveredFeatureId) {
-        hoveredFeatureId = id;
+        if (id !== hoveredFeatureId) {
+          hoveredFeatureId = id;
 
-        const k1 = f.properties.UKATEGORIE__1 || 0;
-        const k2 = f.properties.UKATEGORIE__2 || 0;
-        const k3 = f.properties.UKATEGORIE__3 || 0;
-        const total = k1 + k2 + k3;
+          const k1 = f.properties.UKATEGORIE__1 || 0;
+          const k2 = f.properties.UKATEGORIE__2 || 0;
+          const k3 = f.properties.UKATEGORIE__3 || 0;
+          const total = k1 + k2 + k3;
 
-        const html = `
+          const html = `
           <div><strong>Anzahl nach Unfall-Kategorie</strong></div>
           <table style="font-size:12px; border-collapse:collapse;">
             <tr><td style="padding-right:8px;"><strong>Getötete</strong></td><td style="text-align:right;">${k1}</td></tr>
@@ -835,19 +911,19 @@ map.moveLayer("maxspeed-conditional");
           </table>
         `;
 
-        map.getCanvas().style.cursor = "pointer";
-        popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
+          map.getCanvas().style.cursor = "pointer";
+          popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+          map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
+        }
+      } else {
+        if (hoveredFeatureId !== null) {
+          hoveredFeatureId = null;
+          popup.remove();
+          map.getCanvas().style.cursor = "";
+          map.getSource("hover-point").setData({ type: "FeatureCollection", features: [] });
+        }
       }
-    } else {
-      if (hoveredFeatureId !== null) {
-        hoveredFeatureId = null;
-        popup.remove();
-        map.getCanvas().style.cursor = "";
-        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [] });
-      }
-    }
-  });
+    });
 
 
 
@@ -1022,25 +1098,25 @@ map.moveLayer("maxspeed-conditional");
     });
 
 
-// maxspeed Popup
+    // maxspeed Popup
 
-const maxspeedPopup = new maplibregl.Popup({
-  closeButton: false,
-  closeOnClick: false
-});
+    const maxspeedPopup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
 
-// Apply to both layers
-["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
-  map.on("mousemove", layerId, (e) => {
-    map.getCanvas().style.cursor = "pointer";
+    // Apply to both layers
+    ["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
+      map.on("mousemove", layerId, (e) => {
+        map.getCanvas().style.cursor = "pointer";
 
-    const feature = e.features[0];
-    const props = feature.properties;
+        const feature = e.features[0];
+        const props = feature.properties;
 
-    const speed = Number(props.maxspeed);
-    const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
+        const speed = Number(props.maxspeed);
+        const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
 
-    const content = `
+        const content = `
       <div style="font-size: 12px;">
         <strong>Maxspeed</strong><br/>
         <table style="border-collapse: collapse;">
@@ -1061,27 +1137,27 @@ const maxspeedPopup = new maplibregl.Popup({
       </div>
     `;
 
-    maxspeedPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-  });
+        maxspeedPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+      });
 
-  map.on("mouseleave", layerId, () => {
-    map.getCanvas().style.cursor = "";
-    maxspeedPopup.remove();
-  });
-});
+      map.on("mouseleave", layerId, () => {
+        map.getCanvas().style.cursor = "";
+        maxspeedPopup.remove();
+      });
+    });
 
 
-["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
-  map.on("click", layerId, (e) => {
-    const feature = e.features[0];
-    const osmId = feature.properties.osm_id;
+    ["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
+      map.on("click", layerId, (e) => {
+        const feature = e.features[0];
+        const osmId = feature.properties.osm_id;
 
-    if (osmId) {
-      const url = `https://www.openstreetmap.org/way/${osmId}`;
-      window.open(url, "_blank");
-    }
-  });
-});
+        if (osmId) {
+          const url = `https://www.openstreetmap.org/way/${osmId}`;
+          window.open(url, "_blank");
+        }
+      });
+    });
 
 
 
@@ -1123,17 +1199,19 @@ const maxspeedPopup = new maplibregl.Popup({
 
 
 
-// Scenario1 Popup
+    // Scenario1 Popup
+// Tooltip instance (shared)
 const scenario1Tooltip = new maplibregl.Popup({
   closeButton: false,
   closeOnClick: false
 });
 
-map.on("mousemove", "scenario1", (e) => {
+// POLYGONS — hover tooltip
+map.on("mousemove", "scenario1-polys", (e) => {
   const feature = e.features[0];
   const props = feature.properties;
 
-  const content = `
+  const html = `
     <div style="font-size: 12px;">
       <strong>Szenario 1</strong><br/>
       ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
@@ -1143,16 +1221,88 @@ map.on("mousemove", "scenario1", (e) => {
 
   scenario1Tooltip
     .setLngLat(e.lngLat)
-    .setHTML(content)
+    .setHTML(html)
     .addTo(map);
 
   map.getCanvas().style.cursor = "pointer";
 });
 
-map.on("mouseleave", "scenario1", () => {
+map.on("mouseleave", "scenario1-polys", () => {
   scenario1Tooltip.remove();
   map.getCanvas().style.cursor = "";
 });
+
+// POINTS — also on hover (same tooltip)
+map.on("mousemove", "scenario1-points", (e) => {
+  const feature = e.features[0];
+  const props = feature.properties;
+
+  const html = Object.entries(props)
+    .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+    .join("<br>");
+
+  scenario1Tooltip
+    .setLngLat(e.lngLat)
+    .setHTML(html)
+    .addTo(map);
+
+  map.getCanvas().style.cursor = "pointer";
+});
+
+map.on("mouseleave", "scenario1-points", () => {
+  scenario1Tooltip.remove();
+  map.getCanvas().style.cursor = "";
+});
+
+
+
+//     const scenario1Tooltip = new maplibregl.Popup({
+//       closeButton: false,
+//       closeOnClick: false
+//     });
+
+//     map.on("mousemove", "scenario1-polys", (e) => {
+//       const feature = e.features[0];
+//       const props = feature.properties;
+
+//       const content = `
+//     <div style="font-size: 12px;">
+//       <strong>Szenario 1</strong><br/>
+//       ${props.cluster_id !== undefined ? `Cluster-ID: ${props.cluster_id}<br/>` : ""}
+//       ${props.cluster_size !== undefined ? `Cluster-Größe: ${props.cluster_size}` : ""}
+//     </div>
+//   `;
+
+//       scenario1Tooltip
+//         .setLngLat(e.lngLat)
+//         .setHTML(content)
+//         .addTo(map);
+
+//       map.getCanvas().style.cursor = "pointer";
+//     });
+
+//     map.on("mouseleave", "scenario1-poly", () => {
+//       scenario1Tooltip.remove();
+//       map.getCanvas().style.cursor = "";
+//     });
+
+//     // Scenario1-points Popup
+
+//     map.on("click", "scenario1-points", function (e) {
+//   const feature = e.features[0];
+//   const props = feature.properties;
+
+//   // HTML aus allen Properties erzeugen
+//   const html = Object.entries(props)
+//     .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+//     .join("<br>");
+
+//   // Popup anzeigen
+//   new maplibregl.Popup()
+//     .setLngLat(feature.geometry.coordinates)
+//     .setHTML(html)
+//     .addTo(map);
+// });
 
 
 
@@ -1197,7 +1347,7 @@ map.on("mouseleave", "scenario1", () => {
       const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
       const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
       const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
-      const maxspeedVisible= map.getLayoutProperty("maxspeed", "visibility") === "visible";
+      const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
 
       // Update visibility for special legends
       if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
@@ -1270,17 +1420,17 @@ map.on("mouseleave", "scenario1", () => {
 
   });
 
-map.on("idle", () => {
-  if (!isInitializing) return;
+  map.on("idle", () => {
+    if (!isInitializing) return;
 
-  console.log("🟢 Map ist idle – Permalink wird angewendet");
-  requestAnimationFrame(() => {
-    applyPermalink(); // Checkboxen setzen
-    map.on("moveend", updatePermalink);
-    map.on("zoomend", updatePermalink);
-    isInitializing = false;
+    console.log("🟢 Map ist idle – Permalink wird angewendet");
+    requestAnimationFrame(() => {
+      applyPermalink(); // Checkboxen setzen
+      map.on("moveend", updatePermalink);
+      map.on("zoomend", updatePermalink);
+      isInitializing = false;
+    });
   });
-});
 
 }
 
@@ -1314,13 +1464,13 @@ function applyPermalink() {
 
   // ⬇️ Wenn URL komplett leer ist → Redirect auf Default-URL mit allen aktiven Filtern
   if (!lat && !lng && !zoom && !style && filters.length === 0) {
-const defaultFilters = [
-  Object.keys(paintStyles.UKATEGORIE.colors).join("_"),
-  Object.keys(paintStyles.BETEILIGUNG.colors).join("_"),
-  Object.keys(paintStyles.UJAHR.colors).join("_"),
-  Object.keys(paintStyles.UTYP1.colors).join("_"),
-  Object.keys(paintStyles.UART.colors).join("_")
-];
+    const defaultFilters = [
+      Object.keys(paintStyles.UKATEGORIE.colors).join("_"),
+      Object.keys(paintStyles.BETEILIGUNG.colors).join("_"),
+      Object.keys(paintStyles.UJAHR.colors).join("_"),
+      Object.keys(paintStyles.UTYP1.colors).join("_"),
+      Object.keys(paintStyles.UART.colors).join("_")
+    ];
 
     Permalink.stringify({
       lat: 52.40709,
@@ -1374,7 +1524,7 @@ const defaultFilters = [
 
 
 function updatePermalink() {
-if (isInitializing) return;
+  if (isInitializing) return;
 
   const center = map.getCenter();
   const zoom = map.getZoom().toFixed(2);
@@ -1395,13 +1545,13 @@ if (isInitializing) return;
     .map(cb => cb.dataset.field)
     .join("_");
 
-const filterParam = [
-  ukat,
-  beteiligung,
-  ujahr,
-  utyp,
-  uart
-].join("|");
+  const filterParam = [
+    ukat,
+    beteiligung,
+    ujahr,
+    utyp,
+    uart
+  ].join("|");
 
   const params = new URLSearchParams({
     lat: center.lat.toFixed(5),
@@ -1425,7 +1575,8 @@ function applyZoomLock() {
   const schoolsPointsVisible = map.getLayoutProperty("schools-points", "visibility") === "visible";
   const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
-  const scenario1Visible = map.getLayoutProperty("scenario1", "visibility") === "visible";
+  const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
+
 
 
   const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
@@ -1504,13 +1655,18 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
 });
 
 
-document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  map.setLayoutProperty("scenario1", "visibility", checked ? "visible" : "none");
 
-  applyZoomLock();
-  applyLegendVisibility();
-});
+// document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
+//   map.setLayoutProperty("scenario1-polys", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario1-points", "visibility", checked ? "visible" : "none"); // ✅ HIER!
+
+//   applyZoomLock();
+//   applyLegendVisibility();
+// });
+
+
+
 
 
 
@@ -1542,17 +1698,69 @@ document.getElementById("toggle-schools").addEventListener("change", function (e
 
 
 
-    // Toggle logic
-    document.getElementById('toggleHillshade').addEventListener('change', (e) => {
-      const visibility = e.target.checked ? 'visible' : 'none';
-      map.setLayoutProperty('hillshade-layer', 'visibility', visibility);
-    });
+// Toggle logic
+document.getElementById('toggleHillshade').addEventListener('change', (e) => {
+  const visibility = e.target.checked ? 'visible' : 'none';
+  map.setLayoutProperty('hillshade-layer', 'visibility', visibility);
+});
 
-    document.getElementById('toggleTerrain').addEventListener('change', (e) => {
-      if (e.target.checked) {
-        map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
-      } else {
-        map.setTerrain(null);
-      }
-    });
+document.getElementById('toggleTerrain').addEventListener('change', (e) => {
+  if (e.target.checked) {
+    map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
+  } else {
+    map.setTerrain(null);
+  }
+});
 
+
+
+/// SLIDER !!
+
+const slider = document.getElementById("scenario1-slider");
+const sliderValue = document.getElementById("scenario1-slider-value");
+const sliderContainer = document.getElementById("scenario1-slider-container");
+
+function applyClusterSizeFilter(minSize) {
+  const value = parseInt(minSize, 10); // <<< Umwandlung nötig!
+  const filter = [">=", ["to-number", ["get", "cluster_size"]], value];
+
+  if (map.getLayer("scenario1-points")) {
+    map.setFilter("scenario1-points", filter);
+  }
+  if (map.getLayer("scenario1-polys")) {
+    map.setFilter("scenario1-polys", filter);
+  }
+}
+
+// // Event: Slider bewegt
+// slider.addEventListener("input", () => {
+//   const value = parseInt(slider.value, 10);
+//   sliderValue.textContent = value;
+//   applyClusterSizeFilter(value);
+// });
+
+slider.addEventListener("input", () => {
+  const value = parseInt(slider.value, 10);
+  sliderValue.textContent = value;
+  applyClusterSizeFilter(value);
+
+  const percent = ((value - slider.min) / (slider.max - slider.min)) * 100;
+  slider.style.setProperty("--progress", `${percent}%`);
+});
+
+// Checkbox zeigt/verbirgt die Layer UND den Slider
+document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+
+  map.setLayoutProperty("scenario1-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario1-polys", "visibility", checked ? "visible" : "none");
+
+  // Zeige oder verstecke den Slider
+  sliderContainer.style.display = checked ? "block" : "none";
+
+  // Filter initial anwenden
+  if (checked) {
+    //applyClusterSizeFilter(parseInt(slider.value, 10));
+    applyClusterSizeFilter(0);
+  }
+});
