@@ -102,6 +102,56 @@ export function setupAccidentPopups(map) {
 }
 
 
+export function setupAccClusterPopups(map) {
+  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+  let hoveredFeatureId = null;
+
+  map.on("mousemove", (e) => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
+    });
+
+    if (features.length > 0) {
+      const f = features[0];
+      const id = f.id || JSON.stringify(f.properties);
+
+      if (id !== hoveredFeatureId) {
+        hoveredFeatureId = id;
+
+        const k1 = f.properties.UKATEGORIE__1 || 0;
+        const k2 = f.properties.UKATEGORIE__2 || 0;
+        const k3 = f.properties.UKATEGORIE__3 || 0;
+        const total = k1 + k2 + k3;
+
+        const html = `
+          <div><strong>Anzahl nach Unfall-Kategorie</strong></div>
+          <table style="font-size:12px; border-collapse:collapse;">
+            <tr><td style="padding-right:8px;"><strong>Getötete</strong></td><td style="text-align:right;">${k1}</td></tr>
+            <tr><td style="padding-right:8px;"><strong>Schwerverletzte</strong></td><td style="text-align:right;">${k2}</td></tr>
+            <tr><td style="padding-right:8px;"><strong>Leichtverletzte</strong></td><td style="text-align:right;">${k3}</td></tr>
+            <tr><td style="padding-right:8px;"><strong>Gesamt</strong></td><td style="text-align:right;"><strong>${total}</strong></td></tr>
+          </table>
+        `;
+
+        map.getCanvas().style.cursor = "pointer";
+        popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
+      }
+    } else {
+      if (hoveredFeatureId !== null) {
+        hoveredFeatureId = null;
+        popup.remove();
+        map.getCanvas().style.cursor = "";
+        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [] });
+      }
+    }
+  });
+}
+
+
+
+
+
 export function setupMovebisPopups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 

@@ -6,12 +6,15 @@ import { generatePieIcon } from './generatePieIcon.js';
 
 import {
   setupAccidentPopups,
+  setupAccClusterPopups,
   setupMovebisPopups,
   setupHVSPopups,
   setupMaxspeedPopups,
   setupSchoolsPopups,
   setupScenario1Popups
 } from './popupHandlers.js';
+
+import { addSourcesAndLayers } from "./addSourcesAndLayers.js";
 
 
 
@@ -21,7 +24,6 @@ let MAPILLARY_TOKEN = '';
 let originalMinZoom = 6;
 let originalMaxZoom = 20;
 
-//let isInitializing = true;  // oben im Skript definieren
 const isInitializingRef = { value: true }; // für Permalink-Module etc.
 
 const isLocalhost = location.hostname === "localhost";
@@ -164,7 +166,6 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
   map.once("idle", updateVisibleFeatureCount);
 
   if (shouldUpdatePermalink && !isInitializingRef.value) {
-    //updatePermalink();
     updatePermalink(map, isInitializingRef);
   }
 }
@@ -324,521 +325,19 @@ async function initMap() {
     maplibregl.addProtocol("pmtiles", protocol.tile);
 
 
-    // load sources
-    map.addSource("movebis", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/movebis_speed_germany_2020_min10cnt.pmtiles"
-    });
-
-    map.addSource("hvs", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/Hauptverkehrstraßennetz.pmtiles"
-    });
-
-    map.addSource("maxspeed", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/processed_major_highways_germany_250528.pmtiles"
-    });
-
-    map.addSource("schools", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/germany_osm_schools-25-05-09.pmtiles"
-    });
-
-    map.addSource("accidents_11-12", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_11-12.pmtiles"
-    });
-
-    map.addSource("accidents_12-13", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/accidents_12-13.pmtiles"
-    });
-
-
-    map.addSource("accidents-cluster", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/combined_may25_group.pmtiles"
-    });
-
-    map.addSource("scenario1", {
-      type: "vector",
-      url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/scenario1_cluster_accidents_ms100.pmtiles"
-    });
-
-    map.addSource("mapillary-images", {
-      type: "vector",
-      tiles: [
-        `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`
-      ],
-      minzoom: 14,
-      maxzoom: 14.99
-    });
-
-    map.addSource("satellite", {
-      type: "raster",
-      tiles: [
-        `https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${MAPTILER_API_KEY}`
-      ],
-      tileSize: 256,
-      attribution: "© MapTiler"
-    });
-
-
-    map.addSource('hillshade', {
-      type: 'raster',
-      url: `https://api.maptiler.com/tiles/hillshades/tiles.json?key=${MAPTILER_API_KEY}`,
-      tileSize: 256
-    });
-
-    // Terrain source
-    map.addSource('terrain', {
-      type: 'raster-dem',
-      url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${MAPTILER_API_KEY}`,
-      tileSize: 256,
-      encoding: 'mapbox'
-    });
-
-
-    // add layers
-
-    function addAccidentLayers({ idSuffix, sourceId, minzoom, maxzoom }) {
-      // Punkte-Layer
-      map.addLayer({
-        id: `accident-points-${idSuffix}`,
-        type: "circle",
-        source: sourceId,
-        "source-layer": "accidents",
-        minzoom,
-        maxzoom,
-        paint: {
-          "circle-radius": 6,
-          "circle-color": [
-            "match",
-            ["get", "UKATEGORIE"],
-            1, "#e41a1c",
-            2, "#377eb8",
-            3, "#4daf4a",
-            "#aaaaaa"
-          ],
-          "circle-opacity": 0.6,
-          "circle-stroke-color": "#000",
-          "circle-stroke-width": 0.5
-        }
-      });
-
-      // Beteiligungs-Labels
-      map.addLayer({
-        id: `beteiligung-symbols-${idSuffix}`,
-        type: "symbol",
-        source: sourceId,
-        "source-layer": "accidents",
-        minzoom,
-        maxzoom,
-        layout: {
-          "text-field": ["concat",
-            ["case", ["==", ["get", "IstRad"], 1], "R", ""],
-            ["case", ["all", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1]], ", ", ""],
-            ["case", ["==", ["get", "IstPKW"], 1], "P", ""],
-            ["case", ["any", ["all", ["==", ["get", "IstFuss"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1]]]], ", ", ""],
-            ["case", ["==", ["get", "IstFuss"], 1], "F", ""],
-            ["case", ["any", ["all", ["==", ["get", "IstKrad"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1]]]], ", ", ""],
-            ["case", ["==", ["get", "IstKrad"], 1], "K", ""],
-            ["case", ["any", ["all", ["==", ["get", "IstGkfz"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1], ["==", ["get", "IstKrad"], 1]]]], ", ", ""],
-            ["case", ["==", ["get", "IstGkfz"], 1], "G", ""],
-            ["case", ["any", ["all", ["==", ["get", "IstSonstig"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1], ["==", ["get", "IstKrad"], 1], ["==", ["get", "IstGkfz"], 1]]]], ", ", ""],
-            ["case", ["==", ["get", "IstSonstig"], 1], "S", ""]
-          ],
-          "text-size": 14,
-          "text-offset": [0, 0],
-          "text-anchor": "top",
-          "text-allow-overlap": true,
-          "text-ignore-placement": true,
-          "visibility": "visible"
-        },
-        paint: {
-          "text-color": "#000"
-        }
-      });
-    }
-
-    addAccidentLayers({
-      idSuffix: "11-12",
-      sourceId: "accidents_11-12",
-      minzoom: 11,
-      maxzoom: 12
-    });
-
-    addAccidentLayers({
-      idSuffix: "12-13",
-      sourceId: "accidents_12-13",
-      minzoom: 12,
-      maxzoom: 20.1
+    // load sources and layers
+    addSourcesAndLayers(map, {
+      MAPILLARY_TOKEN,
+      MAPTILER_API_KEY
     });
 
 
     updateColorStyle();
 
-    const sharedIconSizeExpression = [
-      "interpolate", ["linear"], [
-        "+",
-        ["get", "UKATEGORIE__1"],
-        ["get", "UKATEGORIE__2"],
-        ["get", "UKATEGORIE__3"]
-      ],
-      1, 0.1,
-      4, 0.2,
-      10, 0.35,
-      50, 0.4,
-      100, 0.5,
-      500, 0.55,
-      1000, 0.6,
-      5000, 0.7,
-      10000, 0.75,
-      20000, 0.8,
-      40000, 0.9
-    ];
-
-    // Add cluster layers (pie charts)
-    const layers = [
-      { id: "pie-clusters-fine-layer", sourceLayer: "clusters_9_11", minzoom: 9, maxzoom: 11 },
-      { id: "pie-clusters-coarse-layer", sourceLayer: "clusters_6_8", minzoom: 6, maxzoom: 9 }
-    ];
-
-    for (const { id, sourceLayer, minzoom, maxzoom } of layers) {
-      map.addLayer({
-        id,
-        type: "symbol",
-        source: "accidents-cluster",
-        "source-layer": sourceLayer,
-        minzoom,
-        maxzoom,
-        layout: {
-          "icon-image": [
-            "concat",
-            "pie-",
-            ["to-string", ["get", "UKATEGORIE__1"]], "-",
-            ["to-string", ["get", "UKATEGORIE__2"]], "-",
-            ["to-string", ["get", "UKATEGORIE__3"]]
-          ],
-          "icon-size": sharedIconSizeExpression,
-          "icon-allow-overlap": true,
-          "symbol-sort-key": [
-            "-",
-            ["/", ["get", "UKATEGORIE__3"],
-              ["+", ["get", "UKATEGORIE__1"],
-                ["get", "UKATEGORIE__2"],
-                ["get", "UKATEGORIE__3"]]]
-          ]
-        }
-      });
-    }
-
-    // 🟡 Hover layer
-    map.addSource("hover-point", {
-      type: "geojson",
-      data: { type: "FeatureCollection", features: [] }
-    });
-
-    map.addLayer({
-      id: "hover-pie",
-      type: "symbol",
-      source: "hover-point",
-      layout: {
-        "icon-image": [
-          "concat",
-          "pie-",
-          ["to-string", ["get", "UKATEGORIE__1"]], "-",
-          ["to-string", ["get", "UKATEGORIE__2"]], "-",
-          ["to-string", ["get", "UKATEGORIE__3"]]
-        ],
-        "icon-size": 1,
-        "icon-allow-overlap": true
-      }
-    });
+    addMapillaryInteractivity(map);
 
 
-
-    // Movebis and HVS layers
-    map.addLayer({
-      id: "movebis",
-      type: "line",
-      source: "movebis",
-      "source-layer": "links",
-      layout: {
-        visibility: "none" // ⬅️ Start hidden
-      },
-      paint: {
-        "line-color": [
-          "interpolate",
-          ["linear"],
-          ["get", "avg_speed_kmh"],
-          12, "#e31a1c",    // red
-          18, "#fdcc8a",    // yellow
-          24, "#31a354"     // green
-        ],
-        "line-width": [
-          "interpolate",
-          ["linear"],
-          ["get", "visits"],
-          0, 0.5,
-          10, 2,
-          50, 4,
-          100, 8,
-          1000, 12
-        ]
-      }
-    });
-
-    map.addLayer({
-      id: "hvs",
-      type: "line",
-      source: "hvs",
-      "source-layer": "lines",
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "line-width": [
-          "interpolate",
-          ["linear"],
-          ["to-number", ["get", "annualTrafficFlow"]],
-          3000000, 2,
-          10000000, 4,
-          20000000, 8,
-          30000000, 16
-        ],
-        "line-color": "#222" // add a visible color if needed
-      }
-    });
-
-
-    // Maxspeed layers
-
-    const commonLineColor = [
-      "case",
-      // Explicit "None"
-      ["==", ["get", "maxspeed"], "None"], "#000000",
-
-      // DE:urban fallback → treat as 50
-      ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:urban"]],
-      "#fdcc8a",
-
-      // DE:rural fallback → treat as 100
-      ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:rural"]],
-      "#e31a1c",
-
-      // Null/missing maxspeed
-      ["!", ["has", "maxspeed"]], "#ff69b4",
-      ["==", ["get", "maxspeed"], null], "#ff69b4",
-
-      // Normal numeric range
-      [
-        "interpolate", ["linear"],
-        ["to-number", ["get", "maxspeed"]],
-        30, "#31a354",
-        50, "#fdcc8a",
-        100, "#e31a1c"
-      ]
-    ];
-
-    const commonPaint = {
-      "line-width": 2.5,
-      "line-color": commonLineColor
-    };
-
-    map.addLayer({
-      id: "maxspeed-conditional",
-      type: "line",
-      source: "maxspeed",
-      "source-layer": "highways",
-      layout: { visibility: "none" },
-      filter: ["has", "maxspeed_conditional"],
-      paint: {
-        ...commonPaint,
-        "line-dasharray": [2, 2] // ⬅️ add dashed style for conditionals
-      }
-    });
-
-    map.addLayer({
-      id: "maxspeed",
-      type: "line",
-      source: "maxspeed",
-      "source-layer": "highways",
-      layout: { visibility: "none" },
-      filter: ["!", ["has", "maxspeed_conditional"]],
-      paint: commonPaint // ⬅️ solid lines, no dash
-    });
-
-
-
-
-    map.moveLayer("maxspeed-conditional");
-
-
-
-
-
-    // Schulen POINTS
-    map.addLayer({
-      id: "schools-points",
-      type: "circle",
-      source: "schools",
-      "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
-      filter: ["==", ["geometry-type"], "Point"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "circle-radius": 6,
-        "circle-color": [
-          "match",
-          ["get", "amenity"],
-          "school", "#0074D9",       // blue
-          "kindergarten", "#2ECC40", // green
-          "#aaaaaa"                  // default/fallback
-        ],
-        "circle-stroke-color": "#ffffff",
-        "circle-stroke-width": 1
-      }
-    });
-
-    // Schulen POLYGONS
-    map.addLayer({
-      id: "schools-polygons",
-      type: "fill",
-      source: "schools",
-      "source-layer": "germany_osm_schools", // again: tippecanoe `-l` name
-      filter: ["==", ["geometry-type"], "Polygon"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": [
-          "match",
-          ["get", "amenity"],
-          "school", "#0074D9",       // blue
-          "kindergarten", "#2ECC40", // green
-          "#aaaaaa"                  // default/fallback
-        ],
-        "fill-opacity": 0.5,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
-
-
-    // Scenario1
-
-    // Polygon Layer: for zoom 11–14
-    map.addLayer({
-      id: "scenario1-polys",
-      type: "fill",
-      source: "scenario1",
-      "source-layer": "scenario1-polys",  // ✅ correct name!
-      filter: ["==", ["geometry-type"], "Polygon"],
-      minzoom: 14,
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": "orange",
-        "fill-opacity": 0.8,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
-
-    // Points Layer: for zoom 6–10
-    map.addLayer({
-      id: "scenario1-points",
-      type: "circle",
-      source: "scenario1",
-      "source-layer": "scenario1-points",  // ✅ correct name!
-      //filter: ["has", "cluster_id"],       // ✅ optional but valid
-      filter: ["all"],
-      minzoom: 6,
-      maxzoom: 14,
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "circle-color": "orange",
-        "circle-radius": [
-          "interpolate", ["linear"], ["zoom"],
-          6, 4,
-          10, 8
-        ],
-        "circle-opacity": 0.8,
-        "circle-stroke-color": "#1B4D3E",
-        "circle-stroke-width": 1
-      }
-    });
-
-
-
-
-
-    // add satellite layer
-    map.addLayer({
-      id: "satellite-layer",
-      type: "raster",
-      source: "satellite",
-      layout: { visibility: "none" }
-    }, LAYERS.accidents[0]); // oder erster Layer
-
-
-    // add Hillshade layer
-    map.addLayer({
-      id: 'hillshade-layer',
-      type: 'raster',
-      source: 'hillshade',
-      layout: { visibility: 'visible' },
-      paint: {
-        'raster-opacity': 0.3
-      }
-    });
-
-    map.setLayoutProperty('hillshade-layer', 'visibility', 'none'); // Hillshade initial verstecken
-
-    // map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
-    map.setTerrain(null); // Terrain initial deaktivieren
-
-
-
-
-    // mapillary 
-    map.addLayer({
-      id: "mapillary-images-layer",
-      type: "circle",
-      source: "mapillary-images",
-      "source-layer": "image",
-      paint: {
-        "circle-radius": 3,
-        "circle-color": "#00b955"
-      },
-      layout: {
-        visibility: "none"
-      }
-    });
-
-
-    map.on("click", "mapillary-images-layer", function (e) {
-      const feature = e.features[0];
-      const imageId = feature.properties.id;
-
-      if (imageId) {
-        const url = `https://www.mapillary.com/app/?pKey=${imageId}&focus=photo`;
-        window.open(url, "_blank");
-      }
-    });
-
-    map.on("mouseenter", "mapillary-images-layer", () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", "mapillary-images-layer", () => {
-      map.getCanvas().style.cursor = "";
-    });
-
-
+    /// random stuff 
 
     map.on("zoom", () => {
       const section = document.getElementById("scenario-legend-section");
@@ -858,55 +357,31 @@ async function initMap() {
 
 
 
-    // /// Cluster-Tooltip NEW
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-    let hoveredFeatureId = null;
 
-    map.on("mousemove", (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
+
+    function addMapillaryInteractivity(map) {
+      map.on("click", "mapillary-images-layer", (e) => {
+        const feature = e.features?.[0];
+        const imageId = feature?.properties?.id;
+        if (imageId) {
+          window.open(`https://www.mapillary.com/app/?pKey=${imageId}&focus=photo`, "_blank");
+        }
       });
 
-      if (features.length > 0) {
-        const f = features[0];
-        const id = f.id || JSON.stringify(f.properties);
+      map.on("mouseenter", "mapillary-images-layer", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "mapillary-images-layer", () => {
+        map.getCanvas().style.cursor = "";
+      });
+    }
 
-        if (id !== hoveredFeatureId) {
-          hoveredFeatureId = id;
-
-          const k1 = f.properties.UKATEGORIE__1 || 0;
-          const k2 = f.properties.UKATEGORIE__2 || 0;
-          const k3 = f.properties.UKATEGORIE__3 || 0;
-          const total = k1 + k2 + k3;
-
-          const html = `
-          <div><strong>Anzahl nach Unfall-Kategorie</strong></div>
-          <table style="font-size:12px; border-collapse:collapse;">
-            <tr><td style="padding-right:8px;"><strong>Getötete</strong></td><td style="text-align:right;">${k1}</td></tr>
-            <tr><td style="padding-right:8px;"><strong>Schwerverletzte</strong></td><td style="text-align:right;">${k2}</td></tr>
-            <tr><td style="padding-right:8px;"><strong>Leichtverletzte</strong></td><td style="text-align:right;">${k3}</td></tr>
-            <tr><td style="padding-right:8px;"><strong>Gesamt</strong></td><td style="text-align:right;"><strong>${total}</strong></td></tr>
-          </table>
-        `;
-
-          map.getCanvas().style.cursor = "pointer";
-          popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-          map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
-        }
-      } else {
-        if (hoveredFeatureId !== null) {
-          hoveredFeatureId = null;
-          popup.remove();
-          map.getCanvas().style.cursor = "";
-          map.getSource("hover-point").setData({ type: "FeatureCollection", features: [] });
-        }
-      }
-    });
 
 
 
     // popups / tooltips
     setupAccidentPopups(map);
+    setupAccClusterPopups(map);
     setupMovebisPopups(map);
     setupHVSPopups(map);
     setupMaxspeedPopups(map);
