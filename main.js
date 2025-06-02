@@ -4,6 +4,15 @@ import { paintStyles, getCircleColorPaint } from './styleConfig.js';
 
 import { generatePieIcon } from './generatePieIcon.js';
 
+import {
+  setupAccidentPopups,
+  setupMovebisPopups,
+  setupHVSPopups,
+  setupMaxspeedPopups,
+  setupSchoolsPopups,
+  setupScenario1Popups
+} from './popupHandlers.js';
+
 
 
 let MAPTILER_API_KEY = '';
@@ -71,8 +80,13 @@ function updateLegendColors(activeKey) {
 
 
 
-const ACCIDENT_LAYERS = ["accident-points-11-12", "accident-points-12-13"];
-const SYMBOL_LAYERS = ["beteiligung-symbols-11-12", "beteiligung-symbols-12-13"];
+
+const LAYERS = {
+  accidents: ["accident-points-11-12", "accident-points-12-13"],
+  symbols: ["beteiligung-symbols-11-12", "beteiligung-symbols-12-13"],
+  clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
+};
+
 
 // 4. Farbwechsel anwenden
 function updateColorStyle() {
@@ -80,7 +94,7 @@ function updateColorStyle() {
 
   const colorExpr = getCircleColorPaint(selected);
 
-  ACCIDENT_LAYERS.forEach(layerId => {
+  LAYERS.accidents.forEach(layerId => {
     if (map.getLayer(layerId)) {
       map.setPaintProperty(layerId, "circle-color", colorExpr);
       map.setPaintProperty(layerId, "circle-opacity", 0.6);
@@ -92,7 +106,7 @@ function updateColorStyle() {
   const detailsChecked = document.getElementById("toggle-details").checked;
   // map.setLayoutProperty("beteiligung-symbols", "visibility", detailsChecked ? "visible" : "none");
 
-  SYMBOL_LAYERS.forEach(layerId => {
+  LAYERS.symbols.forEach(layerId => {
     if (map.getLayer(layerId)) {
       map.setLayoutProperty(layerId, "visibility", detailsChecked ? "visible" : "none");
     }
@@ -143,7 +157,7 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
 
 
   // Filter anwenden
-  [...ACCIDENT_LAYERS, ...SYMBOL_LAYERS].forEach(layerId => {
+  [...LAYERS.accidents, ...LAYERS.symbols].forEach(layerId => {
     if (map.getLayer(layerId)) map.setFilter(layerId, filter);
   });
 
@@ -164,7 +178,7 @@ function updateVisibleFeatureCount() {
 
   if (zoom < 11) {
     // Nutze Cluster-Layer
-    features = map.queryRenderedFeatures({ layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"] });
+    features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
 
     // Summe der cluster point_counts
     const total = features.reduce((sum, feat) => sum + (feat.properties.point_count || 0), 0);
@@ -173,7 +187,7 @@ function updateVisibleFeatureCount() {
       `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
   } else {
     // Nutze Einzelpunkt-Layer
-    features = map.queryRenderedFeatures({ layers: ACCIDENT_LAYERS });
+    features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
 
     // counts for each cat
     // Count per UKATEGORIE value
@@ -769,7 +783,7 @@ async function initMap() {
       type: "raster",
       source: "satellite",
       layout: { visibility: "none" }
-    }, ACCIDENT_LAYERS[0]); // oder erster Layer
+    }, LAYERS.accidents[0]); // oder erster Layer
 
 
     // add Hillshade layer
@@ -891,347 +905,19 @@ async function initMap() {
 
 
 
-
-
-    ACCIDENT_LAYERS.forEach(layerId => {
-      map.on("mousemove", layerId, (e) => {
-        map.getCanvas().style.cursor = "pointer";
-        const feature = e.features[0];
-        const props = feature.properties;
-
-
-        const translations = {
-          UKATEGORIE: {
-            1: "Getötete",
-            2: "Schwerverletzte",
-            3: "Leichtverletzte"
-          },
-          UART: {
-            1: "Anfahrend/ruhend",
-            2: "Vorausfahrend/wartend",
-            3: "Seitlich gleiche Richtung",
-            4: "Entgegenkommend",
-            5: "Einbiegend/kreuzend",
-            6: "Fußgänger",
-            7: "Fahrbahnhindernis",
-            8: "Abkommen rechts",
-            9: "Abkommen links",
-            0: "Sonstiger Unfall"
-          },
-          UTYP1: {
-            1: "Fahrunfall",
-            2: "Abbiegeunfall",
-            3: "Einbiegen/Kreuzen",
-            4: "Fußgänger (Überschreiten)",
-            5: "Ruhender Verkehr",
-            6: "Längsverkehr",
-            7: "Sonstiger Unfall"
-          }
-        };
-
-        const labels = {
-          OBJECTID: "Unfall-ID",
-          UKATEGORIE: "Schwere",
-          UART: "Unfallart",
-          UTYP1: "Unfalltyp",
-          UJAHR: "Jahr",
-
-          UMONAT: "Monat",
-          UWOCHENTAG: "Wochentag",
-          USTUNDE: "Stunde"
-        };
-
-        const weekdayNames = ["?", "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
-        const monthNames = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-
-        // const propsToShow = ["OBJECTID", "UKATEGORIE", "UJAHR", "UART", "UTYP1"];
-        const propsToShow = ["OBJECTID", "UKATEGORIE", "UJAHR", "UMONAT", "UWOCHENTAG", "USTUNDE", "UART", "UTYP1"];
-
-        let rows = propsToShow.map(key => {
-          const label = labels[key] || key;
-          let value = props[key];
-          if (key === "UWOCHENTAG" && value != null) value = `${weekdayNames[value]} (${value})`;
-          if (key === "UMONAT" && value != null) value = `${monthNames[value]} (${value})`;
-          if (translations[key] && value in translations[key]) {
-            value = `${translations[key][value]} (${value})`;
-          } else if (value == null) {
-            value = "?";
-          }
-          return `<tr><td><strong>${label}</strong></td><td>${value}</td></tr>`;
-        }).join("");
-
-        const beteiligungLabels = {
-          IstRad: "Fahrrad",
-          IstPKW: "Pkw",
-          IstFuss: "Fußgänger",
-          IstKrad: "Kraftrad",
-          IstGkfz: "Güterkraftfahrzeug (GKFZ)",
-          IstSonstig: "Sonstige"
-        };
-
-        const beteiligte = Object.entries(beteiligungLabels)
-          .filter(([key]) => props[key] === 1)
-          .map(([, label]) => label);
-
-        if (beteiligte.length > 0) {
-          rows += `<tr><td><strong>Beteiligung</strong></td><td>${beteiligte.join(", ")}</td></tr>`;
-        }
-
-        const content = `<table style="border-collapse: collapse; font-size: 12px;">${rows}</table>`;
-        popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-      });
-    });
-
-
-    ACCIDENT_LAYERS.forEach(layerId => {
-      map.on("mouseleave", layerId, () => {
-        map.getCanvas().style.cursor = "";
-        popup.remove();
-      });
-    });
-
-
-
-    const movebisPopup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
-
-    map.on("mousemove", "movebis", (e) => {
-      map.getCanvas().style.cursor = "pointer";
-
-      const feature = e.features[0];
-      const props = feature.properties;
-
-      // Option 1: Just show all properties
-      const content = Object.entries(props)
-        .map(([key, val]) => {
-          if (typeof val === "number" && !Number.isInteger(val)) {
-            val = val.toFixed(1);
-          }
-          return `<strong>${key}</strong>: ${val}`;
-        })
-        .join("<br/>");
-
-      movebisPopup
-        .setLngLat(e.lngLat)
-        .setHTML(`<div style="font-size: 12px;">${content}</div>`)
-        .addTo(map);
-    });
-
-    map.on("mouseleave", "movebis", () => {
-      map.getCanvas().style.cursor = "";
-      movebisPopup.remove();
-    });
-
-
-    // HVS Popup
-
-    const hvsPopup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
-
-    map.on("mousemove", "hvs", (e) => {
-      map.getCanvas().style.cursor = "pointer";
-
-      const feature = e.features[0];
-      const props = feature.properties;
-
-      // console.log("annualTrafficFlow:", props.annualTrafficFlow, "→ type:", typeof props.annualTrafficFlow);
-
-
-      const flow = Number(props.annualTrafficFlow);
-      const formattedFlow = isNaN(flow)
-        ? "?"
-        : `${(flow / 1_000_000).toFixed(1).replace(".", ",")} Mio`;
-
-      // Neue Zeile: geschätzter Tagesverkehr
-      const dailyFlow = isNaN(flow)
-        ? "?"
-        : `${(Math.round(flow / 365 / 1000) * 1000).toLocaleString("de-DE")} Fzg`;
-
-      const content = `
-        <div style="font-size: 12px;">
-          <strong>Verkehrsmengen</strong><br/>
-          <strong>Annual Traffic:</strong> ${formattedFlow}<br/>
-          <strong>Est. daily Traffic:</strong> ~${dailyFlow}
-        </div>
-      `;
-
-      hvsPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-    });
-
-    map.on("mouseleave", "hvs", () => {
-      map.getCanvas().style.cursor = "";
-      hvsPopup.remove();
-    });
-
-
-    // maxspeed Popup
-
-    const maxspeedPopup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
-
-    // Apply to both layers
-    ["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
-      map.on("mousemove", layerId, (e) => {
-        map.getCanvas().style.cursor = "pointer";
-
-        const feature = e.features[0];
-        const props = feature.properties;
-
-        const speed = Number(props.maxspeed);
-        const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
-
-        const content = `
-      <div style="font-size: 12px;">
-        <strong>Maxspeed</strong><br/>
-        <table style="border-collapse: collapse;">
-          <tr><td><strong>maxspeed</strong></td><td>${formattedSpeed}</td></tr>
-          <tr><td><strong>maxspeed_orig</strong></td><td>${props.maxspeed || "-"}</td></tr>
-
-          <tr><td><strong>maxspeed_conditional</strong></td><td>${props.maxspeed_conditional || "-"}</td></tr>
-
-          <tr><td><strong>maxspeed:type</strong></td><td>${props.maxspeed_type || "-"}</td></tr>
-          <tr><td><strong>maxspeed:forward</strong></td><td>${props.maxspeed_forward || "-"}</td></tr>
-          <tr><td><strong>maxspeed:backward</strong></td><td>${props.maxspeed_backward || "-"}</td></tr>
-
-          <tr><td><strong>ref</strong></td><td>${props.ref || "-"}</td></tr>
-          <tr><td><strong>name</strong></td><td>${props.name || "-"}</td></tr>
-          <tr><td><strong>highway</strong></td><td>${props.highway || "-"}</td></tr>
-          <tr><td><strong>osm_id</strong></td><td>${props.osm_id || "-"}</td></tr>
-        </table>
-      </div>
-    `;
-
-        maxspeedPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-      });
-
-      map.on("mouseleave", layerId, () => {
-        map.getCanvas().style.cursor = "";
-        maxspeedPopup.remove();
-      });
-    });
-
-
-    ["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
-      map.on("click", layerId, (e) => {
-        const feature = e.features[0];
-        const osmId = feature.properties.osm_id;
-
-        if (osmId) {
-          const url = `https://www.openstreetmap.org/way/${osmId}`;
-          window.open(url, "_blank");
-        }
-      });
-    });
-
-
-
-
-    // Schulen Popup
-    const schoolsPopup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
-
-    function setupSchoolsPopup(layerId) {
-      map.on("mouseenter", layerId, (e) => {
-        map.getCanvas().style.cursor = "pointer";
-        const props = e.features[0].properties;
-
-        const content = `
-      <table style="font-size:12px; border-collapse:collapse;">
-        ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
-        ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
-        ${props.isced_level ? `<tr><td><strong>ISCED</strong></td><td>${props.isced_level}</td></tr>` : ""}
-        ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
-        ${props.osm_id ? `<tr><td><strong>OSM ID</strong></td><td>${props.osm_id}</td></tr>` : ""}
-      </table>
-    `;
-
-        schoolsPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-      });
-
-      map.on("mouseleave", layerId, () => {
-        map.getCanvas().style.cursor = "";
-        schoolsPopup.remove();
-      });
-    }
-
-    // Enable popups for both points and polygons
-    setupSchoolsPopup("schools-points");
-    setupSchoolsPopup("schools-polygons");
-
-
-
-
-    // Scenario1 Tooltip
-
-
-    function renderScenario1Tooltip(props) {
-      return `
-    <div style="font-size: 12px;">
-      <strong>Szenario 1</strong><br/>
-      <table style="border-collapse: collapse;">
-        ${props.cluster_size !== undefined ? `<tr><td><strong>Cluster-Größe</strong></td><td>${props.cluster_size}</td></tr>` : ""}
-        ${props.UKATEGORIE__1 !== undefined ? `<tr><td><strong># Getötete</strong></td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
-        ${props.UKATEGORIE__2 !== undefined ? `<tr><td><strong># Schwerverletzte</strong></td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
-        ${props.UKATEGORIE__3 !== undefined ? `<tr><td><strong># Leichtverletzte</strong></td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
-      </table>
-    </div>
-  `;
-    }
-
-
-    const scenario1Tooltip = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
-
-
-    map.on("mousemove", "scenario1-polys", (e) => {
-      const feature = e.features[0];
-      const html = renderScenario1Tooltip(feature.properties);
-
-      scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
-      map.getCanvas().style.cursor = "pointer";
-    });
-
-    map.on("mousemove", "scenario1-points", (e) => {
-      const feature = e.features[0];
-      const html = renderScenario1Tooltip(feature.properties);
-
-      scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
-      map.getCanvas().style.cursor = "pointer";
-    });
-
-
-    map.on("mouseleave", "scenario1-polys", () => {
-      scenario1Tooltip.remove();
-      map.getCanvas().style.cursor = "";
-    });
-
-    map.on("mouseleave", "scenario1-points", () => {
-      scenario1Tooltip.remove();
-      map.getCanvas().style.cursor = "";
-    });
-
-
-
-
-
-
-
+    // popups / tooltips
+    setupAccidentPopups(map);
+    setupMovebisPopups(map);
+    setupHVSPopups(map);
+    setupMaxspeedPopups(map);
+    setupSchoolsPopups(map);
+    setupScenario1Popups(map);
 
 
 
     document.getElementById("toggle-details").addEventListener("change", function (e) {
       const visible = e.target.checked ? "visible" : "none";
-      SYMBOL_LAYERS.forEach(layerId => {
+      LAYERS.symbols.forEach(layerId => {
         if (map.getLayer(layerId)) {
           map.setLayoutProperty(layerId, "visibility", visible);
         }
@@ -1356,10 +1042,6 @@ async function initMap() {
 
 // /// Permalink-stuff
 import { Permalink, applyPermalink, updatePermalink } from './permalink.js';
-
-
-
-
 
 
 
@@ -1516,12 +1198,6 @@ function applyClusterSizeFilter(minSize) {
   }
 }
 
-// // Event: Slider bewegt
-// slider.addEventListener("input", () => {
-//   const value = parseInt(slider.value, 10);
-//   sliderValue.textContent = value;
-//   applyClusterSizeFilter(value);
-// });
 
 slider.addEventListener("input", () => {
   const value = parseInt(slider.value, 10);
@@ -1549,8 +1225,3 @@ document.getElementById("toggle-scenario1").addEventListener("change", function 
   }
 });
 
-
-// map.on("zoom", () => {
-//   const section = document.getElementById("scenario-legend-section");
-//   if (section) section.style.display = "block";
-// });
