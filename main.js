@@ -406,6 +406,19 @@ async function initMap() {
     });
 
 
+// Cluster-Checkbox auf korrekten Zustand setzen
+const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
+if (clusterCheckbox) {
+  const layerId = "pie-clusters-fine-layer";
+  map.once("idle", () => {
+    if (map.getLayer(layerId)) {
+      const isVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
+      clusterCheckbox.checked = isVisible;
+    }
+  });
+}
+
+
     updateColorStyle();
     updateVisibleFeatureCount(); 
 
@@ -626,7 +639,29 @@ document.querySelectorAll('.section-checkbox').forEach(sectionCb => {
 
   // ⬅ Abschnitts-Checkbox klickt alle enthaltenen Checkboxen an/aus
   sectionCb.addEventListener('change', () => {
-    const checked = sectionCb.checked;
+  const checked = sectionCb.checked;
+
+  // Custom logic for cluster section
+  if (sectionId === "cluster") {
+    const visibility = checked ? "visible" : "none";
+    LAYERS.clusters.forEach(layerId => {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, "visibility", visibility);
+      }
+    });
+    return; // skip checkbox syncing for clusters
+  }
+
+      // ✅ Scenario block logic
+    if (sectionId === "scenario") {
+      itemCheckboxes.forEach(cb => {
+        cb.checked = checked;
+        cb.dispatchEvent(new Event("change")); // trigger updates (layer + slider)
+      });
+      return;
+    }
+
+  // regular behavior
     itemCheckboxes.forEach(cb => cb.checked = checked);
     sectionCb.indeterminate = false;
     updateLayerFilter(); // ← wichtig!
@@ -665,6 +700,8 @@ document.querySelectorAll('.section-checkbox').forEach(sectionCb => {
     sectionCb.indeterminate = true;
   }
 });
+
+
 
 
 

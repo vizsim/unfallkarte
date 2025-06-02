@@ -402,13 +402,19 @@
 
     <!-- Sektion X: Bei Zoom < 11 -->
 
-
-    <div class="legend-section" , id="cluster-legend-section">
+    <div class="legend-section" data-section="cluster" id="cluster-legend-section">
       <div class="legend-section-divider"></div>
-      <div class="legend-section-title">Cluster-Legende (ohne Filter)</div>
+      <div class="legend-section-title" data-section-id="cluster"
+        style="display: flex; align-items: center; justify-content: space-between;">
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <!-- <input type="checkbox" class="section-checkbox" data-section="cluster" checked /> -->
+          <input type="checkbox" class="section-checkbox" data-section="cluster" />
+          Cluster-Legende (ohne Filter)
+        </label>
+        <span class="toggle-arrow section-arrow open" data-arrow="cluster"></span>
+      </div>
 
-
-      <div id="cluster-legend">
+      <div class="legend-section-content">
         <div class="cluster-legend-entry">
           <div class="cluster-dot" style="width:4.8px; height:4.8px;"></div>
           <div class="cluster-label">1 Unfall</div>
@@ -447,10 +453,12 @@
 
 
 
+
+
     <!-- Sektion 2: Cluster / Szenarien -->
 
     <!-- Szenario 1 -->
-    <div class="legend-section scenario-legend-section" id="scenario-legend-section-1">
+    <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-1">
       <div class="legend-section-title">Unfall-Szenarien (Cluster)</div>
 
 
@@ -470,7 +478,38 @@
 
       </div>
       <div class="legend-section-divider"></div>
+    </div> -->
+
+
+    <div class="legend-section scenario-legend-section" data-section="scenario">
+      <div class="legend-section-title" data-section-id="scenario"
+        style="display: flex; align-items: center; justify-content: space-between;">
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" class="section-checkbox" data-section="scenario" checked />
+          Unfall-Szenarien (Cluster)
+        </label>
+        <span class="toggle-arrow section-arrow open" data-arrow="scenario"></span>
+      </div>
+
+      <div class="legend-section-content">
+        <div style="margin-top: 6px;">
+          <label style="margin-left: 10px;">
+            <input type="checkbox" id="toggle-scenario1" />
+            Sc1: Unfall-Häufungen bei Tempo100 anzeigen
+            <span class="info-icon"
+              title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+          </label>
+          <div id="scenario1-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+            <label for="scenario1-slider">Min. Cluster-Größe: <span id="scenario1-slider-value">3</span></label><br>
+            <input type="range" id="scenario1-slider" min="3" max="20" step="1" value="3" />
+          </div>
+        </div>
+
+      </div>
+      <div class="legend-section-divider"></div>
     </div>
+
+
 
     <!-- Szenario 2 -->
     <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-2">
