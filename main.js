@@ -35,6 +35,7 @@ const isLocalhost = location.hostname === "localhost";
     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
     initMap();
+
   } catch (err) {
     console.error("❌ Konfig konnte nicht geladen werden:", err);
   }
@@ -282,6 +283,7 @@ async function initMap() {
   });
 
 
+
   originalMinZoom = map.getMinZoom();
   originalMaxZoom = map.getMaxZoom();
 
@@ -336,25 +338,22 @@ async function initMap() {
 
     addMapillaryInteractivity(map);
 
+    map.once("load", updateLegendVisibilityByZoom);
+    map.on("zoomend", updateLegendVisibilityByZoom); // Danach bei jedem Zoom
 
-    /// random stuff 
 
-    map.on("zoom", () => {
-      const section = document.getElementById("scenario-legend-section");
-      if (section) section.style.display = "block";
-    });
+    function updateScenarioLegendVisibility() {
+      const legendBox = document.querySelector(".legend");
+      const isCollapsed = legendBox.classList.contains("collapsed");
 
-    map.on('load', () => {
-      const legend = document.getElementById("scenario-legend-section");
-      if (legend) {
-        legend.style.display = "block";
-      }
-
-      map.on("zoom", () => {
-        legend.style.display = "block"; // force keep visible
+      document.querySelectorAll(".scenario-legend-section").forEach(section => {
+        section.style.display = isCollapsed ? "none" : "block";
       });
-    });
+    }
 
+
+    map.on("zoom", updateScenarioLegendVisibility);
+    map.on("load", updateScenarioLegendVisibility);
 
 
 
@@ -400,11 +399,11 @@ async function initMap() {
     });
 
 
-    // Direkt beim Laden
-    map.on("load", updateLegendVisibilityByZoom);
+    // // Direkt beim Laden
+    // map.on("load", updateLegendVisibilityByZoom);
 
-    // Und bei jedem Zoomwechsel
-    map.on("zoomend", updateLegendVisibilityByZoom);
+    // // Und bei jedem Zoomwechsel
+    // map.on("zoomend", updateLegendVisibilityByZoom);
 
 
 
@@ -421,7 +420,7 @@ async function initMap() {
       const hvsLegend = document.getElementById("hvs-legend");
       const mapillaryLegend = document.getElementById("mapillary-legend");
       const maxspeedLegend = document.getElementById("maxspeed-legend");
-      const scenarioLegendEl = document.getElementById("scenario-legend-section");
+      // const scenarioLegendEl = document.getElementById("scenario-legend-section");
 
       // Check visibility of layers
       const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
@@ -430,17 +429,29 @@ async function initMap() {
       const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
 
       // Update visibility for special legends
-      if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
+      // if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
+        if (clusterLegendEl) { clusterLegendEl.style.display = zoom < 11 ? "block" : "none";}
       if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 11) ? "block" : "none";
       if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
       if (maxspeedLegend) maxspeedLegend.style.display = (maxspeedVisible && zoom >= 11) ? "block" : "none";
       if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
+      // if (scenarioLegendEl) {
+      //   scenarioLegendEl.style.display = "block"; // ← explizit sichtbar machen
+      // }
 
-      // Hide/show regular groups depending on zoom
+      // // Hide/show regular groups depending on zoom
       Array.from(legend.children).forEach(el => {
         const isTitle = el.classList.contains("legend-title");
         const isFeatureCount = el.id === "feature-count";
-        const isSpecial = [clusterLegendEl, movebisLegend, hvsLegend, mapillaryLegend, maxspeedLegend, scenarioLegendEl].includes(el);
+        const scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
+        const isSpecial = [
+          clusterLegendEl,
+          movebisLegend,
+          hvsLegend,
+          mapillaryLegend,
+          maxspeedLegend,
+          ...scenarioSections
+        ].includes(el);
 
         if (zoom < 11) {
           el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
@@ -448,6 +459,8 @@ async function initMap() {
           if (!isSpecial) el.style.display = "";
         }
       });
+      
+
     }
 
 
@@ -468,14 +481,19 @@ async function initMap() {
           Array.from(legend.children).forEach(child => {
             const isTitle = child.classList.contains("legend-title");
             const isFeatureCount = child.id === "feature-count";
-            if (!isTitle && !isFeatureCount) {
-              child.style.display = collapsed ? "none" : "";
-            }
+            // if (!isTitle && !isFeatureCount) {
+            //   child.style.display = collapsed ? "none" : "";
+            // }
+            const alwaysVisible = isTitle || isFeatureCount;
+            child.style.display = collapsed && !alwaysVisible ? "none" : "";
+
           });
 
           if (!collapsed) {
             updateLegendVisibilityByZoom();
+            updateScenarioLegendVisibility();
           }
+
         } else {
           const section = document.querySelector(`.legend-items[data-section="${key}"]`);
           if (section) section.classList.toggle("collapsed");
