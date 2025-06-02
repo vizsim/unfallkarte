@@ -9,7 +9,7 @@
   <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.css' />
 
   <link rel="stylesheet" href="style.css" />
-  
+
 </head>
 
 <body>
@@ -25,375 +25,381 @@
           <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
         </div>
       </div>
-      <span class="toggle-arrow open" data-arrow="legend-root"></span>
+      <!-- <span class="toggle-arrow open" data-arrow="legend-root"></span> -->
+      <span class="toggle-arrow toggle-root open" data-arrow="legend-root"></span>
     </div>
 
     <div class="legend-section-divider"></div>
+
     <!-- Sektion 1: Unfälle einzeln -->
-    <div class="legend-section">
-      <div class="legend-section-title">Unfälle einzeln</div>
-
-      <!-- <div class="legend-subsection-divider"></div> -->
-
-      <div class="legend-header" data-toggle="UKATEGORIE">
-        <label style="flex-grow: 1;">
-          <input type="radio" name="color-style" value="UKATEGORIE" checked />
-          <strong>Schweregrad (UKATEGORIE)</strong>
-        </label>
-        <span class="toggle-arrow open" data-arrow="UKATEGORIE"></span>
+    <div class="legend-section" data-section="einzeln">
+      <div class="legend-section-title section-toggle" data-section-id="einzeln"
+        style="display: flex; align-items: center; justify-content: space-between;">
+        <span>Unfälle einzeln</span>
+        <span class="toggle-arrow section-arrow open" data-arrow="einzeln"></span>
       </div>
+      <div class="legend-section-content">
+        <!-- <div class="legend-subsection-divider"></div> -->
 
-      <div class="legend-items" data-section="UKATEGORIE">
-
-        <label class="legend-item" data-group="UKATEGORIE" data-value="1">
-          <input type="checkbox" value="1" data-group="UKATEGORIE" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span>
-            Getötete
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UKATEGORIE" data-value="2">
-          <input type="checkbox" value="2" data-group="UKATEGORIE" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span>
-            Schwerverletzte
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UKATEGORIE" data-value="3">
-          <input type="checkbox" value="3" data-group="UKATEGORIE" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span>
-            Leichtverletzte
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-
-      </div>
-
-
-      <div class="legend-section">
-        <!-- <div class="legend-section-divider"></div> -->
-        <div class="legend-subsection-divider"></div>
-        <div class="legend-header" data-toggle="beteiligung">
+        <div class="legend-header" data-toggle="UKATEGORIE">
           <label style="flex-grow: 1;">
-            <input type="radio" name="color-style" value="BETEILIGUNG" />
-            <strong>Beteiligung (IstRad, IstPKW, ...)</strong>
+            <input type="radio" name="color-style" value="UKATEGORIE" checked />
+            <strong>Schweregrad (UKATEGORIE)</strong>
           </label>
-          <span class="toggle-arrow open" data-arrow="beteiligung"></span>
+          <span class="toggle-arrow open" data-arrow="UKATEGORIE"></span>
+        </div>
+
+        <div class="legend-items" data-section="UKATEGORIE">
+
+          <label class="legend-item" data-group="UKATEGORIE" data-value="1">
+            <input type="checkbox" value="1" data-group="UKATEGORIE" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span>
+              Getötete
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UKATEGORIE" data-value="2">
+            <input type="checkbox" value="2" data-group="UKATEGORIE" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span>
+              Schwerverletzte
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UKATEGORIE" data-value="3">
+            <input type="checkbox" value="3" data-group="UKATEGORIE" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span>
+              Leichtverletzte
+            </div>
+            <span class="count-badge"></span>
+          </label>
 
 
         </div>
 
-        <div class="legend-items" data-section="beteiligung">
-          <div style="margin: 6px 0 6px 16px;">
-            <label>
-              <input type="checkbox" id="toggle-details" />
-              Beteiligungsdetails anzeigen
+
+        <div class="legend-section">
+          <!-- <div class="legend-section-divider"></div> -->
+          <div class="legend-subsection-divider"></div>
+          <div class="legend-header" data-toggle="beteiligung">
+            <label style="flex-grow: 1;">
+              <input type="radio" name="color-style" value="BETEILIGUNG" />
+              <strong>Beteiligung (IstRad, IstPKW, ...)</strong>
             </label>
+            <span class="toggle-arrow open" data-arrow="beteiligung"></span>
+
+
           </div>
 
-          <label class="legend-item" data-group="BETEILIGUNG" data-field="IstRad">
-            <input type="checkbox" data-field="IstRad" checked />
+          <div class="legend-items" data-section="beteiligung">
+            <div style="margin: 6px 0 6px 16px;">
+              <label>
+                <input type="checkbox" id="toggle-details" />
+                Beteiligungsdetails anzeigen
+              </label>
+            </div>
+
+            <label class="legend-item" data-group="BETEILIGUNG" data-field="IstRad">
+              <input type="checkbox" data-field="IstRad" checked />
+              <div class="label-wrapper">
+                <span class="color-box"></span> Fahrrad
+              </div>
+              <span class="count-badge"></span>
+            </label>
+
+            <label class="legend-item" data-group="BETEILIGUNG" data-field="IstPKW">
+              <input type="checkbox" data-field="IstPKW" checked />
+              <div class="label-wrapper">
+                <span class="color-box"></span> Pkw
+              </div>
+              <span class="count-badge"></span>
+            </label>
+
+            <label class="legend-item" data-group="BETEILIGUNG" data-field="IstFuss">
+              <input type="checkbox" data-field="IstFuss" checked />
+              <div class="label-wrapper">
+                <span class="color-box"></span> Fußgänger
+              </div>
+              <span class="count-badge"></span>
+            </label>
+
+            <label class="legend-item" data-group="BETEILIGUNG" data-field="IstKrad">
+              <input type="checkbox" data-field="IstKrad" checked />
+              <div class="label-wrapper">
+                <span class="color-box"></span> Kraftrad
+              </div>
+              <span class="count-badge"></span>
+            </label>
+
+            <label class="legend-item" data-group="BETEILIGUNG" data-field="IstGkfz">
+              <input type="checkbox" data-field="IstGkfz" checked />
+              <div class="label-wrapper">
+                <span class="color-box"></span> Güterkraftfahrzeug (GKFZ)
+              </div>
+              <span class="count-badge"></span>
+            </label>
+
+            <label class="legend-item" data-group="BETEILIGUNG" data-field="IstSonstig">
+              <input type="checkbox" data-field="IstSonstig" checked />
+              <div class="label-wrapper">
+                <span class="color-box"></span> Sonstige
+              </div>
+              <span class="count-badge"></span>
+            </label>
+          </div>
+        </div>
+
+
+        <!-- <div class="legend-section-divider"></div> -->
+        <div class="legend-subsection-divider"></div>
+
+        <div class="legend-header" data-toggle="UJAHR">
+          <label style="flex-grow: 1;">
+            <input type="radio" name="color-style" value="UJAHR" />
+            <strong>Jahr (UJAHR)</strong>
+          </label>
+          <!-- <span class="toggle-arrow open" data-arrow="UJAHR"></span> -->
+          <span class="toggle-arrow" data-arrow="UJAHR"></span>
+
+        </div>
+
+        <div class="legend-items collapsed" data-section="UJAHR">
+          <label class="legend-item" data-group="UJAHR" data-value="2017">
+            <input type="checkbox" value="2017" data-group="UJAHR" checked />
             <div class="label-wrapper">
-              <span class="color-box"></span> Fahrrad
+              <span class="color-box"></span> 2017
             </div>
             <span class="count-badge"></span>
           </label>
 
-          <label class="legend-item" data-group="BETEILIGUNG" data-field="IstPKW">
-            <input type="checkbox" data-field="IstPKW" checked />
+          <label class="legend-item" data-group="UJAHR" data-value="2018">
+            <input type="checkbox" value="2018" data-group="UJAHR" checked />
             <div class="label-wrapper">
-              <span class="color-box"></span> Pkw
+              <span class="color-box"></span> 2018
             </div>
             <span class="count-badge"></span>
           </label>
 
-          <label class="legend-item" data-group="BETEILIGUNG" data-field="IstFuss">
-            <input type="checkbox" data-field="IstFuss" checked />
+          <label class="legend-item" data-group="UJAHR" data-value="2019">
+            <input type="checkbox" value="2019" data-group="UJAHR" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> 2019
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UJAHR" data-value="2020">
+            <input type="checkbox" value="2020" data-group="UJAHR" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> 2020
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UJAHR" data-value="2021">
+            <input type="checkbox" value="2021" data-group="UJAHR" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> 2021
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UJAHR" data-value="2022">
+            <input type="checkbox" value="2022" data-group="UJAHR" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> 2022
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UJAHR" data-value="2023">
+            <input type="checkbox" value="2023" data-group="UJAHR" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> 2023
+            </div>
+            <span class="count-badge"></span>
+          </label>
+        </div>
+
+
+        <!-- <div class="legend-section-divider"></div> -->
+        <div class="legend-subsection-divider"></div>
+
+        <div class="legend-header" data-toggle="UTYP1">
+          <label style="flex-grow: 1;">
+            <input type="radio" name="color-style" value="UTYP1" />
+            <strong>Unfalltyp (UTYP1)</strong>
+          </label>
+          <span class="toggle-arrow" data-arrow="UTYP1"></span>
+        </div>
+
+        <div class="legend-items collapsed" data-section="UTYP1">
+          <label class="legend-item" data-group="UTYP1" data-value="1">
+            <input type="checkbox" value="1" data-group="UTYP1" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Fahrunfall
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UTYP1" data-value="2">
+            <input type="checkbox" value="2" data-group="UTYP1" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Abbiegeunfall
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UTYP1" data-value="3">
+            <input type="checkbox" value="3" data-group="UTYP1" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Einbiegen/Kreuzen
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UTYP1" data-value="4">
+            <input type="checkbox" value="4" data-group="UTYP1" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Fußgänger (Überschreiten)
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UTYP1" data-value="5">
+            <input type="checkbox" value="5" data-group="UTYP1" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Ruhender Verkehr
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UTYP1" data-value="6">
+            <input type="checkbox" value="6" data-group="UTYP1" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Längsverkehr
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UTYP1" data-value="7">
+            <input type="checkbox" value="7" data-group="UTYP1" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Sonstiger Unfall
+            </div>
+            <span class="count-badge"></span>
+          </label>
+        </div>
+
+
+        <!-- <div class="legend-section-divider"></div> -->
+        <div class="legend-subsection-divider"></div>
+
+        <div class="legend-header" data-toggle="UART">
+          <label style="flex-grow: 1;">
+            <input type="radio" name="color-style" value="UART" />
+            <strong>Unfallart (UART)</strong>
+          </label>
+          <span class="toggle-arrow" data-arrow="UART"></span>
+        </div>
+
+        <div class="legend-items collapsed" data-section="UART">
+          <label class="legend-item" data-group="UART" data-value="1">
+            <input type="checkbox" value="1" data-group="UART" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Anfahrend/ruhend
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UART" data-value="2">
+            <input type="checkbox" value="2" data-group="UART" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Vorausfahrend/wartend
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UART" data-value="3">
+            <input type="checkbox" value="3" data-group="UART" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Seitlich gleiche Richtung
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UART" data-value="4">
+            <input type="checkbox" value="4" data-group="UART" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Entgegenkommend
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UART" data-value="5">
+            <input type="checkbox" value="5" data-group="UART" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Einbiegend/kreuzend
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UART" data-value="6">
+            <input type="checkbox" value="6" data-group="UART" checked />
             <div class="label-wrapper">
               <span class="color-box"></span> Fußgänger
             </div>
             <span class="count-badge"></span>
           </label>
 
-          <label class="legend-item" data-group="BETEILIGUNG" data-field="IstKrad">
-            <input type="checkbox" data-field="IstKrad" checked />
+          <label class="legend-item" data-group="UART" data-value="7">
+            <input type="checkbox" value="7" data-group="UART" checked />
             <div class="label-wrapper">
-              <span class="color-box"></span> Kraftrad
+              <span class="color-box"></span> Fahrbahnhindernis
             </div>
             <span class="count-badge"></span>
           </label>
 
-          <label class="legend-item" data-group="BETEILIGUNG" data-field="IstGkfz">
-            <input type="checkbox" data-field="IstGkfz" checked />
+          <label class="legend-item" data-group="UART" data-value="8">
+            <input type="checkbox" value="8" data-group="UART" checked />
             <div class="label-wrapper">
-              <span class="color-box"></span> Güterkraftfahrzeug (GKFZ)
+              <span class="color-box"></span> Abkommen rechts
             </div>
             <span class="count-badge"></span>
           </label>
 
-          <label class="legend-item" data-group="BETEILIGUNG" data-field="IstSonstig">
-            <input type="checkbox" data-field="IstSonstig" checked />
+          <label class="legend-item" data-group="UART" data-value="9">
+            <input type="checkbox" value="9" data-group="UART" checked />
             <div class="label-wrapper">
-              <span class="color-box"></span> Sonstige
+              <span class="color-box"></span> Abkommen links
+            </div>
+            <span class="count-badge"></span>
+          </label>
+
+          <label class="legend-item" data-group="UART" data-value="0">
+            <input type="checkbox" value="0" data-group="UART" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> Sonstiger Unfall
             </div>
             <span class="count-badge"></span>
           </label>
         </div>
-      </div>
-
-
-      <!-- <div class="legend-section-divider"></div> -->
-      <div class="legend-subsection-divider"></div>
-
-      <div class="legend-header" data-toggle="UJAHR">
-        <label style="flex-grow: 1;">
-          <input type="radio" name="color-style" value="UJAHR" />
-          <strong>Jahr (UJAHR)</strong>
-        </label>
-        <!-- <span class="toggle-arrow open" data-arrow="UJAHR"></span> -->
-        <span class="toggle-arrow" data-arrow="UJAHR"></span>
 
       </div>
-
-      <div class="legend-items collapsed" data-section="UJAHR">
-        <label class="legend-item" data-group="UJAHR" data-value="2017">
-          <input type="checkbox" value="2017" data-group="UJAHR" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> 2017
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UJAHR" data-value="2018">
-          <input type="checkbox" value="2018" data-group="UJAHR" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> 2018
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UJAHR" data-value="2019">
-          <input type="checkbox" value="2019" data-group="UJAHR" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> 2019
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UJAHR" data-value="2020">
-          <input type="checkbox" value="2020" data-group="UJAHR" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> 2020
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UJAHR" data-value="2021">
-          <input type="checkbox" value="2021" data-group="UJAHR" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> 2021
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UJAHR" data-value="2022">
-          <input type="checkbox" value="2022" data-group="UJAHR" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> 2022
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UJAHR" data-value="2023">
-          <input type="checkbox" value="2023" data-group="UJAHR" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> 2023
-          </div>
-          <span class="count-badge"></span>
-        </label>
-      </div>
-
-
-      <!-- <div class="legend-section-divider"></div> -->
-      <div class="legend-subsection-divider"></div>
-
-      <div class="legend-header" data-toggle="UTYP1">
-        <label style="flex-grow: 1;">
-          <input type="radio" name="color-style" value="UTYP1" />
-          <strong>Unfalltyp (UTYP1)</strong>
-        </label>
-        <span class="toggle-arrow" data-arrow="UTYP1"></span>
-      </div>
-
-      <div class="legend-items collapsed" data-section="UTYP1">
-        <label class="legend-item" data-group="UTYP1" data-value="1">
-          <input type="checkbox" value="1" data-group="UTYP1" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Fahrunfall
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UTYP1" data-value="2">
-          <input type="checkbox" value="2" data-group="UTYP1" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Abbiegeunfall
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UTYP1" data-value="3">
-          <input type="checkbox" value="3" data-group="UTYP1" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Einbiegen/Kreuzen
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UTYP1" data-value="4">
-          <input type="checkbox" value="4" data-group="UTYP1" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Fußgänger (Überschreiten)
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UTYP1" data-value="5">
-          <input type="checkbox" value="5" data-group="UTYP1" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Ruhender Verkehr
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UTYP1" data-value="6">
-          <input type="checkbox" value="6" data-group="UTYP1" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Längsverkehr
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UTYP1" data-value="7">
-          <input type="checkbox" value="7" data-group="UTYP1" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Sonstiger Unfall
-          </div>
-          <span class="count-badge"></span>
-        </label>
-      </div>
-
-
-      <!-- <div class="legend-section-divider"></div> -->
-      <div class="legend-subsection-divider"></div>
-
-      <div class="legend-header" data-toggle="UART">
-        <label style="flex-grow: 1;">
-          <input type="radio" name="color-style" value="UART" />
-          <strong>Unfallart (UART)</strong>
-        </label>
-        <span class="toggle-arrow" data-arrow="UART"></span>
-      </div>
-
-      <div class="legend-items collapsed" data-section="UART">
-        <label class="legend-item" data-group="UART" data-value="1">
-          <input type="checkbox" value="1" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Anfahrend/ruhend
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="2">
-          <input type="checkbox" value="2" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Vorausfahrend/wartend
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="3">
-          <input type="checkbox" value="3" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Seitlich gleiche Richtung
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="4">
-          <input type="checkbox" value="4" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Entgegenkommend
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="5">
-          <input type="checkbox" value="5" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Einbiegend/kreuzend
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="6">
-          <input type="checkbox" value="6" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Fußgänger
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="7">
-          <input type="checkbox" value="7" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Fahrbahnhindernis
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="8">
-          <input type="checkbox" value="8" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Abkommen rechts
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="9">
-          <input type="checkbox" value="9" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Abkommen links
-          </div>
-          <span class="count-badge"></span>
-        </label>
-
-        <label class="legend-item" data-group="UART" data-value="0">
-          <input type="checkbox" value="0" data-group="UART" checked />
-          <div class="label-wrapper">
-            <span class="color-box"></span> Sonstiger Unfall
-          </div>
-          <span class="count-badge"></span>
-        </label>
-      </div>
-
     </div>
-
 
     <div class="legend-section-divider"></div>
 
 
 
     <!-- Sektion X: Bei Zoom < 11 -->
-    
 
-    <div class="legend-section", id="cluster-legend-section">
+
+    <div class="legend-section" , id="cluster-legend-section">
       <div class="legend-section-divider"></div>
       <div class="legend-section-title">Cluster-Legende (ohne Filter)</div>
 
@@ -438,8 +444,8 @@
 
 
     <!-- Sektion 2: Cluster / Szenarien -->
-     
-     <!-- Szenario 1 -->
+
+    <!-- Szenario 1 -->
     <div class="legend-section scenario-legend-section" id="scenario-legend-section-1">
       <div class="legend-section-title">Unfall-Szenarien (Cluster)</div>
 
@@ -462,8 +468,8 @@
       <div class="legend-section-divider"></div>
     </div>
 
-      <!-- Szenario 2 -->
-  <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-2">
+    <!-- Szenario 2 -->
+    <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-2">
     ...
   </div> -->
 
@@ -476,135 +482,151 @@
 
 
     <!-- Sektion 3: Kontext -->
-    <div class="legend-section">
-      <div class="legend-section-title">Kontext</div>
-
-      <div style="margin-top: 6px;">
-        <label>
-          <input type="checkbox" id="toggle-mapillary" />
-          Mapillary-Bilder anzeigen
-          <span class="info-icon" title="Quelle: Mapillary Coverage – Lizenz: CC BY-SA 4.0">ⓘ</span>
-        </label>
+    <div class="legend-section" data-section="kontext">
+      <div class="legend-section-title section-toggle" data-section-id="kontext"
+        style="display: flex; align-items: center; justify-content: space-between;">
+        <span>Kontext</span>
+        <span class="toggle-arrow section-arrow open" data-arrow="kontext"></span>
       </div>
+      <div class="legend-section-content">
 
-      <div id="mapillary-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-        <strong>Mapillary Bilder</strong><br />
-        <span style="display:inline-block;width:12px;height:12px;background:#00b955;margin-right:6px;"></span>
-        Bildpunkt
-      </div>
 
-      <div style="margin-top: 6px;">
-        <label>
-          <input type="checkbox" id="toggle-movebis" />
-          Stadtradeln 2020 anzeigen
-          <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
-        </label>
-      </div>
-      <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-        <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
-        <div style="margin-top: 4px;">
-          <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span> ≤
-            12
-            km/h</div>
-          <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span> ≈
-            18
-            km/h</div>
-          <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span> ≥
-            24
-            km/h</div>
+
+        <!-- <div class="legend-section">
+      <div class="legend-section-title">Kontext</div> -->
+
+        <div style="margin-top: 6px;">
+          <label>
+            <input type="checkbox" id="toggle-mapillary" />
+            Mapillary-Bilder anzeigen
+            <span class="info-icon" title="Quelle: Mapillary Coverage – Lizenz: CC BY-SA 4.0">ⓘ</span>
+          </label>
         </div>
 
-        <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
-        <div style="margin-top: 4px;">
-          <div><span
-              style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-            wenige (≤ 10)</div>
-          <div><span
-              style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-            mittel (≈ 100)</div>
-          <div><span
-              style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-            viele (≥ 1000)</div>
+        <div id="mapillary-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <strong>Mapillary Bilder</strong><br />
+          <span style="display:inline-block;width:12px;height:12px;background:#00b955;margin-right:6px;"></span>
+          Bildpunkt
         </div>
-      </div>
 
-
-      <div style="margin-top: 6px;">
-        <label>
-          <input type="checkbox" id="toggle-hvs" />
-          Verkehrsmengen anzeigen
-          <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
-        </label>
-      </div>
-      <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-        <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
-        <div style="margin-top: 4px;">
-          <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3
-            Mio
-            Fahrzeuge/Jahr</div>
-          <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6
-            Mio
-            Fahrzeuge/Jahr</div>
-          <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10
-            Mio
-            Fahrzeuge/Jahr</div>
+        <div style="margin-top: 6px;">
+          <label>
+            <input type="checkbox" id="toggle-movebis" />
+            Stadtradeln 2020 anzeigen
+            <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
+          </label>
         </div>
-      </div>
-
-
-      <div style="margin-top: 6px;">
-        <label>
-          <input type="checkbox" id="toggle-maxspeed" />
-          Geschwindigkeitbegrenzung anzeigen
-          <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
-        </label>
-      </div>
-
-      <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-        <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
-        <div style="margin-top: 4px;">
-          <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤
-            30
-            km/h</div>
-          <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span> 50
-            km/h</div>
-          <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥
-            100
-            km/h</div>
-          <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span>
-            kein
-            Tempolimit</div>
-          <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span>
-            (noch) keine Angabe in OSM</div>
-
-        </div>
-      </div>
-
-
-
-
-      <div style="margin-top: 6px;">
-        <label>
-          <input type="checkbox" id="toggle-schools" />
-          Schulen/Kindergärten anzeigen
-          <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
-        </label>
-      </div>
-      <div id="schools-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-        <div><strong>Typen</strong></div>
-        <div style="margin-top: 4px;">
-          <div>
-            <span
-              style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
-            Schule
+        <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
+          <div style="margin-top: 4px;">
+            <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span>
+              ≤
+              12
+              km/h</div>
+            <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span>
+              ≈
+              18
+              km/h</div>
+            <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span>
+              ≥
+              24
+              km/h</div>
           </div>
-          <div>
-            <span
-              style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
-            Kindergarten
+
+          <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
+          <div style="margin-top: 4px;">
+            <div><span
+                style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+              wenige (≤ 10)</div>
+            <div><span
+                style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+              mittel (≈ 100)</div>
+            <div><span
+                style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+              viele (≥ 1000)</div>
           </div>
         </div>
+
+
+        <div style="margin-top: 6px;">
+          <label>
+            <input type="checkbox" id="toggle-hvs" />
+            Verkehrsmengen anzeigen
+            <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
+          </label>
+        </div>
+        <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
+          <div style="margin-top: 4px;">
+            <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3
+              Mio
+              Fahrzeuge/Jahr</div>
+            <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6
+              Mio
+              Fahrzeuge/Jahr</div>
+            <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10
+              Mio
+              Fahrzeuge/Jahr</div>
+          </div>
+        </div>
+
+
+        <div style="margin-top: 6px;">
+          <label>
+            <input type="checkbox" id="toggle-maxspeed" />
+            Geschwindigkeitbegrenzung anzeigen
+            <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+          </label>
+        </div>
+
+        <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
+          <div style="margin-top: 4px;">
+            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤
+              30
+              km/h</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
+              50
+              km/h</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥
+              100
+              km/h</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span>
+              kein
+              Tempolimit</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span>
+              (noch) keine Angabe in OSM</div>
+
+          </div>
+        </div>
+
+
+
+
+        <div style="margin-top: 6px;">
+          <label>
+            <input type="checkbox" id="toggle-schools" />
+            Schulen/Kindergärten anzeigen
+            <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+          </label>
+        </div>
+        <div id="schools-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div><strong>Typen</strong></div>
+          <div style="margin-top: 4px;">
+            <div>
+              <span
+                style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
+              Schule
+            </div>
+            <div>
+              <span
+                style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
+              Kindergarten
+            </div>
+          </div>
+        </div>
       </div>
+
     </div>
 
 

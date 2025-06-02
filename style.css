@@ -155,7 +155,7 @@ body {
 }
 
 /* ───── Toggle Arrows ───── */
-.toggle-arrow {
+/* .toggle-arrow {
     display: inline-block;
     width: 6px;
     height: 6px;
@@ -175,6 +175,65 @@ body {
     height: 14px;
     border-width: 5px;
     margin-left: auto;
+} */
+
+/* Basis-Pfeil-Logik */
+.toggle-arrow {
+  display: inline-block;
+  transform: rotate(135deg);
+  transition: transform 0.2s ease;
+}
+
+/* Offener Zustand */
+.toggle-arrow.open {
+  transform: rotate(45deg);
+}
+
+
+/* Großer Root-Pfeil (nur bei legend-root) */
+[data-arrow="legend-root"] {
+  width: 14px !important;
+  height: 14px !important;
+  border-right: 5px solid #000 !important;
+  border-bottom: 5px solid #000 !important;
+  margin-left: auto;
+}
+
+
+/* Mittlere Section-Pfeile */
+.section-arrow {
+  width: 10px;
+  height: 10px;
+  border-right: 4px solid #000;
+  border-bottom: 4px solid #000;
+  margin-left: 8px;
+}
+
+
+/* Kleine Pfeile bei legend-header */
+.legend-header .toggle-arrow {
+  width: 6px;
+  height: 6px;
+  border-right: 3px solid #000;
+  border-bottom: 3px solid #000;
+  margin-left: 6px;
+}
+
+
+
+
+
+/* Einklappbare Sektionen */
+.legend-section.collapsed .legend-section-content {
+  display: none;
+}
+
+/* Optional: Abstand für .legend-section-title selbst */
+.legend-section-title {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 6px;
 }
 
 

@@ -572,12 +572,40 @@ async function initMap() {
     });
 
 
+//     document.querySelectorAll(".section-toggle").forEach(toggle => {
+//   toggle.addEventListener("click", () => {
+//     const key = toggle.dataset.sectionToggle;
+//     const section = document.querySelector(`.legend-section[data-section="${key}"]`);
+//     const arrow = toggle.querySelector(`.toggle-arrow[data-arrow="${key}"]`);
+
+//     if (section) section.classList.toggle("collapsed");
+//     if (arrow) arrow.classList.toggle("open");
+//   });
+// });
+
+
+
 
     document.querySelectorAll(".legend input[type=checkbox]").forEach(cb => {
       cb.addEventListener("change", () => {
         updateLayerFilter();
       });
     });
+
+
+// Einklappbare ganze legend-section (z. B. „Unfälle einzeln“) per Titelzeile
+document.querySelectorAll(".section-toggle").forEach(toggle => {
+  toggle.addEventListener("click", () => {
+    const sectionId = toggle.dataset.sectionId;
+    const section = toggle.closest(".legend-section");
+    const arrow = toggle.querySelector(`.toggle-arrow[data-arrow="${sectionId}"]`);
+
+    if (section) section.classList.toggle("collapsed");
+    if (arrow) arrow.classList.toggle("open");
+  });
+});
+
+
 
     map.on("moveend", updateVisibleFeatureCount);
     map.on("zoomend", updateVisibleFeatureCount);
