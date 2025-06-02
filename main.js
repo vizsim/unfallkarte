@@ -12,12 +12,14 @@ let MAPILLARY_TOKEN = '';
 let originalMinZoom = 6;
 let originalMaxZoom = 20;
 
-let isInitializing = true;  // oben im Skript definieren
+//let isInitializing = true;  // oben im Skript definieren
+const isInitializingRef = { value: true }; // für Permalink-Module etc.
 
 const isLocalhost = location.hostname === "localhost";
 
 (async () => {
   try {
+    // handle the config import based on the environment  for the api keys
     const config = await import(isLocalhost ? './config.js' : './config.public.js');
     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
@@ -117,7 +119,7 @@ function getSelectedBeteiligungen() {
 }
 
 function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
-  if (isInitializing && !force) return;
+  if (isInitializingRef.value && !force) return;
 
   const uk_vals = getSelectedCheckboxValues("UKATEGORIE");
   const uart_vals = getSelectedCheckboxValues("UART");
@@ -147,8 +149,9 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
 
   map.once("idle", updateVisibleFeatureCount);
 
-  if (shouldUpdatePermalink && !isInitializing) {
-    updatePermalink();
+  if (shouldUpdatePermalink && !isInitializingRef.value) {
+    //updatePermalink();
+    updatePermalink(map, isInitializingRef);
   }
 }
 
@@ -263,29 +266,17 @@ async function initMap() {
     maxZoom: 20
   });
 
-  //   const selectedBaseStyle = localStorage.getItem("selectedBasemap") || "dataviz"; // Default
-  // const styleUrl = `https://api.maptiler.com/maps/${selectedBaseStyle}/style.json?key=${MAPTILER_API_KEY}`;
-
-  // window.map = new maplibregl.Map({
-  //   container: "map",
-  //   style: styleUrl,
-  //   center: [13.634, 52.315],
-  //   zoom: 11,
-  //   minZoom: 6,
-  //   maxZoom: 20
-  // });
-
 
   originalMinZoom = map.getMinZoom();
   originalMaxZoom = map.getMaxZoom();
 
 
 
+  /// load MAP
   map.on("load", () => {
 
-    setupPhotonGeocoder(map); //
-
-
+    // load geocoder
+    setupPhotonGeocoder(map);
 
     // load piecharts
     map.on("styleimagemissing", (e) => {
@@ -319,6 +310,7 @@ async function initMap() {
     maplibregl.addProtocol("pmtiles", protocol.tile);
 
 
+    // load sources
     map.addSource("movebis", {
       type: "vector",
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/movebis_speed_germany_2020_min10cnt.pmtiles"
@@ -360,6 +352,15 @@ async function initMap() {
       url: "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/scenario1_cluster_accidents_ms100.pmtiles"
     });
 
+    map.addSource("mapillary-images", {
+      type: "vector",
+      tiles: [
+        `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`
+      ],
+      minzoom: 14,
+      maxzoom: 14.99
+    });
+
     map.addSource("satellite", {
       type: "raster",
       tiles: [
@@ -369,14 +370,23 @@ async function initMap() {
       attribution: "© MapTiler"
     });
 
-    map.addSource("mapillary-images", {
-      type: "vector",
-      tiles: [
-        `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`
-      ],
-      minzoom: 14,
-      maxzoom: 14.99
+
+    map.addSource('hillshade', {
+      type: 'raster',
+      url: `https://api.maptiler.com/tiles/hillshades/tiles.json?key=${MAPTILER_API_KEY}`,
+      tileSize: 256
     });
+
+    // Terrain source
+    map.addSource('terrain', {
+      type: 'raster-dem',
+      url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${MAPTILER_API_KEY}`,
+      tileSize: 256,
+      encoding: 'mapbox'
+    });
+
+
+    // add layers
 
     function addAccidentLayers({ idSuffix, sourceId, minzoom, maxzoom }) {
       // Punkte-Layer
@@ -475,7 +485,7 @@ async function initMap() {
       40000, 0.9
     ];
 
-    // 🗂 Add cluster layers
+    // Add cluster layers (pie charts)
     const layers = [
       { id: "pie-clusters-fine-layer", sourceLayer: "clusters_9_11", minzoom: 9, maxzoom: 11 },
       { id: "pie-clusters-coarse-layer", sourceLayer: "clusters_6_8", minzoom: 6, maxzoom: 9 }
@@ -535,7 +545,7 @@ async function initMap() {
 
 
 
-
+    // Movebis and HVS layers
     map.addLayer({
       id: "movebis",
       type: "line",
@@ -589,6 +599,7 @@ async function initMap() {
     });
 
 
+    // Maxspeed layers
 
     const commonLineColor = [
       "case",
@@ -751,55 +762,8 @@ async function initMap() {
 
 
 
-    // map.addLayer({
-    //   id: "scenario1",
-    //   type: "fill",
-    //   source: "scenario1",
-    //   "source-layer": "scenario1-polys", // again: tippecanoe `-l` name
-    //   filter: ["==", ["geometry-type"], "Polygon"],
-    //   minzoom: 14,
-    //   layout: {
-    //     visibility: "none"
-    //   },
-    //   paint: {
-    //     "fill-color": 'orange',
-    //     "fill-opacity": 0.8,
-    //     "fill-outline-color": "#1B4D3E"
-    //   }
-    // });
 
-    // map.addLayer({
-    //   id: "scenario1-points",
-    //   type: "circle",
-    //   source: "scenario1",
-    //   "source-layer": "clusters",
-    //   //filter: ["==", ["geometry-type"], "Point"],
-    //   //filter: ["all"],
-    //   filter: ["has", "cluster_id"],
-    //   minzoom: 6,
-    //   maxzoom: 14,
-    //   layout: {
-    //     visibility: "none"
-    //   },
-    //   paint: {
-    //     "circle-color": "orange",
-    //     "circle-radius": [
-    //       "interpolate", ["linear"], ["zoom"],
-    //       6, 4,
-    //       10, 8
-    //     ],
-    //     "circle-opacity": 0.8,
-    //     "circle-stroke-color": "#1B4D3E",
-    //     "circle-stroke-width": 1
-    //   }
-    // });
-
-
-
-
-
-
-    // satellite
+    // add satellite layer
     map.addLayer({
       id: "satellite-layer",
       type: "raster",
@@ -808,13 +772,7 @@ async function initMap() {
     }, ACCIDENT_LAYERS[0]); // oder erster Layer
 
 
-    // Hillshade layer
-    map.addSource('hillshade', {
-      type: 'raster',
-      url: `https://api.maptiler.com/tiles/hillshades/tiles.json?key=${MAPTILER_API_KEY}`,
-      tileSize: 256
-    });
-
+    // add Hillshade layer
     map.addLayer({
       id: 'hillshade-layer',
       type: 'raster',
@@ -826,14 +784,6 @@ async function initMap() {
     });
 
     map.setLayoutProperty('hillshade-layer', 'visibility', 'none'); // Hillshade initial verstecken
-
-    // Terrain source
-    map.addSource('terrain', {
-      type: 'raster-dem',
-      url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${MAPTILER_API_KEY}`,
-      tileSize: 256,
-      encoding: 'mapbox'
-    });
 
     // map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
     map.setTerrain(null); // Terrain initial deaktivieren
@@ -876,21 +826,21 @@ async function initMap() {
 
 
 
-map.on("zoom", () => {
-  const section = document.getElementById("scenario-legend-section");
-  if (section) section.style.display = "block";
-});
+    map.on("zoom", () => {
+      const section = document.getElementById("scenario-legend-section");
+      if (section) section.style.display = "block";
+    });
 
-map.on('load', () => {
-  const legend = document.getElementById("scenario-legend-section");
-  if (legend) {
-    legend.style.display = "block";
-  }
+    map.on('load', () => {
+      const legend = document.getElementById("scenario-legend-section");
+      if (legend) {
+        legend.style.display = "block";
+      }
 
-  map.on("zoom", () => {
-    legend.style.display = "block"; // force keep visible
-  });
-});
+      map.on("zoom", () => {
+        legend.style.display = "block"; // force keep visible
+      });
+    });
 
 
 
@@ -1222,8 +1172,8 @@ map.on('load', () => {
     // Scenario1 Tooltip
 
 
-function renderScenario1Tooltip(props) {
-  return `
+    function renderScenario1Tooltip(props) {
+      return `
     <div style="font-size: 12px;">
       <strong>Szenario 1</strong><br/>
       <table style="border-collapse: collapse;">
@@ -1234,41 +1184,41 @@ function renderScenario1Tooltip(props) {
       </table>
     </div>
   `;
-}
+    }
 
 
-const scenario1Tooltip = new maplibregl.Popup({
-  closeButton: false,
-  closeOnClick: false
-});
+    const scenario1Tooltip = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
 
 
-map.on("mousemove", "scenario1-polys", (e) => {
-  const feature = e.features[0];
-  const html = renderScenario1Tooltip(feature.properties);
+    map.on("mousemove", "scenario1-polys", (e) => {
+      const feature = e.features[0];
+      const html = renderScenario1Tooltip(feature.properties);
 
-  scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
-  map.getCanvas().style.cursor = "pointer";
-});
+      scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      map.getCanvas().style.cursor = "pointer";
+    });
 
-map.on("mousemove", "scenario1-points", (e) => {
-  const feature = e.features[0];
-  const html = renderScenario1Tooltip(feature.properties);
+    map.on("mousemove", "scenario1-points", (e) => {
+      const feature = e.features[0];
+      const html = renderScenario1Tooltip(feature.properties);
 
-  scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
-  map.getCanvas().style.cursor = "pointer";
-});
+      scenario1Tooltip.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      map.getCanvas().style.cursor = "pointer";
+    });
 
 
-map.on("mouseleave", "scenario1-polys", () => {
-  scenario1Tooltip.remove();
-  map.getCanvas().style.cursor = "";
-});
+    map.on("mouseleave", "scenario1-polys", () => {
+      scenario1Tooltip.remove();
+      map.getCanvas().style.cursor = "";
+    });
 
-map.on("mouseleave", "scenario1-points", () => {
-  scenario1Tooltip.remove();
-  map.getCanvas().style.cursor = "";
-});
+    map.on("mouseleave", "scenario1-points", () => {
+      scenario1Tooltip.remove();
+      map.getCanvas().style.cursor = "";
+    });
 
 
 
@@ -1389,153 +1339,31 @@ map.on("mouseleave", "scenario1-points", () => {
 
   });
 
+  /// idle MAP
   map.on("idle", () => {
-    if (!isInitializing) return;
+    if (!isInitializingRef.value) return;
 
     console.log("🟢 Map ist idle – Permalink wird angewendet");
     requestAnimationFrame(() => {
-      applyPermalink(); // Checkboxen setzen
-      map.on("moveend", updatePermalink);
-      map.on("zoomend", updatePermalink);
-      isInitializing = false;
+      applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
+      map.on("moveend", () => updatePermalink(map, isInitializingRef));
+      map.on("zoomend", () => updatePermalink(map, isInitializingRef));
+      isInitializingRef.value = false;
     });
   });
 
 }
 
-
-
-const Permalink = {
-  parse() {
-    const params = new URLSearchParams(window.location.search);
-    return {
-      lat: parseFloat(params.get("lat")),
-      lng: parseFloat(params.get("lng")),
-      zoom: parseFloat(params.get("zoom")),
-      style: params.get("style"),
-      filters: params.get("filters")?.split("|") || []
-    };
-  },
-  stringify({ lat, lng, zoom, style, filters }) {
-    const params = new URLSearchParams({
-      lat: lat.toFixed(5),
-      lng: lng.toFixed(5),
-      zoom: zoom.toFixed(2),
-      style,
-      filters: filters.join("|")
-    });
-    history.replaceState(null, "", `?${params.toString()}`);
-  }
-};
-
-function applyPermalink() {
-  const { lat, lng, zoom, style, filters } = Permalink.parse();
-
-  // ⬇️ Wenn URL komplett leer ist → Redirect auf Default-URL mit allen aktiven Filtern
-  if (!lat && !lng && !zoom && !style && filters.length === 0) {
-    const defaultFilters = [
-      Object.keys(paintStyles.UKATEGORIE.colors).join("_"),
-      Object.keys(paintStyles.BETEILIGUNG.colors).join("_"),
-      Object.keys(paintStyles.UJAHR.colors).join("_"),
-      Object.keys(paintStyles.UTYP1.colors).join("_"),
-      Object.keys(paintStyles.UART.colors).join("_")
-    ];
-
-    Permalink.stringify({
-      lat: 52.40709,
-      lng: 12.54972,
-      zoom: 12.00,
-      style: "UKATEGORIE",
-      filters: defaultFilters
-    });
-
-    return; // Nach Redirect abbrechen – applyPermalink wird erneut aufgerufen
-  }
-
-  isInitializing = true;
-
-  // const [ukat, ujahr, uart, utyp, beteiligung] = filters;
-  const [ukat, beteiligung, ujahr, utyp, uart] = filters;
-
-  if (!isNaN(lat) && !isNaN(lng)) map.setCenter([lng, lat]);
-  if (!isNaN(zoom)) map.setZoom(zoom);
-  if (style) {
-    document.querySelector(`input[name="color-style"][value="${style}"]`)?.click();
-  }
-
-  // Reset
-  document.querySelectorAll('.legend input[type=checkbox], .legend input[data-field]').forEach(cb => {
-    cb.checked = false;
-  });
-
-  ukat?.split("_").forEach(val => {
-    document.querySelector(`input[data-group="UKATEGORIE"][value="${val}"]`)?.click();
-  });
-  ujahr?.split("_").forEach(val => {
-    document.querySelector(`input[data-group="UJAHR"][value="${val}"]`)?.click();
-  });
-  uart?.split("_").forEach(val => {
-    document.querySelector(`input[data-group="UART"][value="${val}"]`)?.click();
-  });
-  utyp?.split("_").forEach(val => {
-    document.querySelector(`input[data-group="UTYP1"][value="${val}"]`)?.click();
-  });
-  beteiligung?.split("_").forEach(field => {
-    document.querySelector(`input[data-field="${field}"]`)?.click();
-  });
-
-  updateLayerFilter(false, true);
-  updateVisibleFeatureCount();
-
-  setTimeout(() => (isInitializing = false), 0);
-}
-
-
-
-function updatePermalink() {
-  if (isInitializing) return;
-
-  const center = map.getCenter();
-  const zoom = map.getZoom().toFixed(2);
-  const style = document.querySelector('input[name="color-style"]:checked')?.value;
-
-  const getCheckedValues = selector =>
-    Array.from(document.querySelectorAll(selector))
-      .filter(cb => cb.checked)
-      .map(cb => cb.value)
-      .join("_");
-
-  const ukat = getCheckedValues('input[type=checkbox][data-group="UKATEGORIE"]');
-  const ujahr = getCheckedValues('input[type=checkbox][data-group="UJAHR"]');
-  const utyp = getCheckedValues('input[type=checkbox][data-group="UTYP1"]');
-  const uart = getCheckedValues('input[type=checkbox][data-group="UART"]');
-  const beteiligung = Array.from(document.querySelectorAll('input[data-field]'))
-    .filter(cb => cb.checked)
-    .map(cb => cb.dataset.field)
-    .join("_");
-
-  const filterParam = [
-    ukat,
-    beteiligung,
-    ujahr,
-    utyp,
-    uart
-  ].join("|");
-
-  const params = new URLSearchParams({
-    lat: center.lat.toFixed(5),
-    lng: center.lng.toFixed(5),
-    zoom,
-    style,
-    filters: filterParam
-  });
-
-  history.replaceState(null, "", `?${params.toString()}`);
-}
+// /// Permalink-stuff
+import { Permalink, applyPermalink, updatePermalink } from './permalink.js';
 
 
 
 
+
+
+
+/// Zoom Lock stuff
 
 function applyZoomLock() {
   const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
@@ -1544,7 +1372,7 @@ function applyZoomLock() {
   const schoolsPointsVisible = map.getLayoutProperty("schools-points", "visibility") === "visible";
   const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
-  const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
+  //const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
 
 
 
@@ -1557,7 +1385,7 @@ function applyZoomLock() {
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
   if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
-  if (scenario1Visible) minZooms.push(11); // ✅ NEW ZOOM LOCK
+  // if (scenario1Visible) minZooms.push(11); // ✅ NEW ZOOM LOCK
 
   const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
 
@@ -1584,6 +1412,9 @@ function applyLegendVisibility() {
 }
 
 
+
+// Event-Listeners
+
 document.querySelectorAll(".basemap-thumb").forEach(thumb => {
   thumb.addEventListener("click", () => {
     const selectedMap = thumb.dataset.map;
@@ -1604,7 +1435,7 @@ document.getElementById("toggle-mapillary").addEventListener("change", function 
   const checked = e.target.checked;
   map.setLayoutProperty("mapillary-images-layer", "visibility", checked ? "visible" : "none");
   applyZoomLock();
-  applyLegendVisibility(); // 🧼 handles the legend!
+  applyLegendVisibility(); //  handles the legend!
 });
 
 document.getElementById("toggle-movebis").addEventListener("change", function (e) {
@@ -1622,22 +1453,6 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   applyZoomLock();
   applyLegendVisibility();
 });
-
-
-
-// document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-//   map.setLayoutProperty("scenario1-polys", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario1-points", "visibility", checked ? "visible" : "none"); // ✅ HIER!
-
-//   applyZoomLock();
-//   applyLegendVisibility();
-// });
-
-
-
-
-
 
 document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
   const checked = e.target.checked;
@@ -1667,7 +1482,7 @@ document.getElementById("toggle-schools").addEventListener("change", function (e
 
 
 
-// Toggle logic
+// Toggle logic for Hillshade and Terrain
 document.getElementById('toggleHillshade').addEventListener('change', (e) => {
   const visibility = e.target.checked ? 'visible' : 'none';
   map.setLayoutProperty('hillshade-layer', 'visibility', visibility);
