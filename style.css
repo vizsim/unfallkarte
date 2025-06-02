@@ -69,7 +69,7 @@ body {
 
 .legend-subsection-divider {
     border-top: 1px solid #ddd;
-    margin: 8px 0;
+    margin: 2px 0;
     margin-left: 16px;
     /* Einrückung nach rechts */
     width: calc(100% - 16px);
@@ -84,6 +84,10 @@ body {
 .legend-items.collapsed {
     display: none;
 }
+
+/* .legend-items.collapsed + .legend-subsection-divider {
+  margin: 2px 0;
+} */
 
 .legend-item {
     display: flex;
@@ -104,9 +108,9 @@ body {
 }
 
 
-.legend-section {
+/* .legend-section {
     margin-top: 10px;
-}
+} */
 
 .legend-section-title {
     font-weight: bold;
@@ -153,8 +157,8 @@ body {
 /* ───── Toggle Arrows ───── */
 .toggle-arrow {
     display: inline-block;
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-right: 4px solid #000;
     border-bottom: 4px solid #000;
     transform: rotate(135deg);
@@ -198,6 +202,13 @@ body {
     margin-top: 10px;
     font-size: 11px;
     color: #333;
+}
+
+/* ────────────── zoomlock ────────────── */
+.zoom-lock {
+  font-size: 0.8em;
+  vertical-align: middle;
+  opacity: 0.8;
 }
 
 /* ────────────── Photon Geocoder ────────────── */

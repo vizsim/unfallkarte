@@ -24,6 +24,8 @@ let MAPILLARY_TOKEN = '';
 let originalMinZoom = 6;
 let originalMaxZoom = 20;
 
+let currentZoomLock = null;
+
 const isInitializingRef = { value: true }; // für Permalink-Module etc.
 
 const isLocalhost = location.hostname === "localhost";
@@ -173,102 +175,168 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
 
 
 
-// Funktion zur Aktualisierung der Anzahl sichtbarer Features
+// // Funktion zur Aktualisierung der Anzahl sichtbarer Features
+// function updateVisibleFeatureCount() {
+//   const zoom = map.getZoom();
+//   let features = [];
+
+//   if (zoom < 11) {
+//     // Nutze Cluster-Layer
+//     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
+
+//     // Summe der cluster point_counts
+//     const total = features.reduce((sum, feat) => sum + (feat.properties.point_count || 0), 0);
+
+//     // document.getElementById("feature-count").innerHTML =
+//     //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
+//      document.getElementById("feature-count").innerHTML =
+//    `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}${currentZoomLock ? ` [Zoom🔒: ${currentZoomLock}]` : ''}`;  //Zoom🔒:
+
+//   } else {
+//     // Nutze Einzelpunkt-Layer
+//     features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
+
+//     // counts for each cat
+//     // Count per UKATEGORIE value
+//     const countsByUKat = features.reduce((acc, feat) => {
+//       const val = feat.properties.UKATEGORIE;
+//       acc[val] = (acc[val] || 0) + 1;
+//       return acc;
+//     }, {});
+//     document.querySelectorAll('.legend-item[data-group="UKATEGORIE"]').forEach(item => {
+//       const val = parseInt(item.getAttribute('data-value'));
+//       const count = countsByUKat[val] || 0;
+
+//       const badge = item.querySelector(".count-badge");
+//       if (badge) {
+//         badge.textContent = count > 0 ? `${count}` : "";
+//       }
+//     });
+
+//     // UJAHR badge update
+//     const countsByYear = features.reduce((acc, feat) => {
+//       const val = feat.properties.UJAHR;
+//       acc[val] = (acc[val] || 0) + 1;
+//       return acc;
+//     }, {});
+//     document.querySelectorAll('.legend-item[data-group="UJAHR"]').forEach(item => {
+//       const val = parseInt(item.getAttribute('data-value'));
+//       const count = countsByYear[val] || 0;
+//       const badge = item.querySelector(".count-badge");
+//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
+//     });
+
+//     // UTYP1 badge update
+//     const countsByUTYP1 = features.reduce((acc, feat) => {
+//       const val = feat.properties.UTYP1;
+//       acc[val] = (acc[val] || 0) + 1;
+//       return acc;
+//     }, {});
+//     document.querySelectorAll('.legend-item[data-group="UTYP1"]').forEach(item => {
+//       const val = parseInt(item.getAttribute('data-value'));
+//       const count = countsByUTYP1[val] || 0;
+//       const badge = item.querySelector(".count-badge");
+//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
+//     });
+
+
+//     // UART badge update
+//     const countsByUART = features.reduce((acc, feat) => {
+//       const val = feat.properties.UART;
+//       acc[val] = (acc[val] || 0) + 1;
+//       return acc;
+//     }, {});
+//     document.querySelectorAll('.legend-item[data-group="UART"]').forEach(item => {
+//       const val = parseInt(item.getAttribute('data-value'));
+//       const count = countsByUART[val] || 0;
+//       const badge = item.querySelector(".count-badge");
+//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
+//     });
+
+//     // BETEILIGUNG badge update
+//     const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
+//     const countsByBeteiligung = {};
+
+//     for (const field of beteiligungFields) {
+//       countsByBeteiligung[field] = features.filter(f => f.properties?.[field] === 1).length;
+//     }
+
+//     document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
+//       const field = item.dataset.field;
+//       const count = countsByBeteiligung[field] || 0;
+//       const badge = item.querySelector(".count-badge");
+//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
+//     });
+
+
+
+//     // document.getElementById("feature-count").innerHTML =
+//     //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
+//      document.getElementById("feature-count").innerHTML =
+//    `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}${currentZoomLock ? ` [Zoom🔒: ${currentZoomLock}]` : ''}`;
+
+//   }
+// }
+
 function updateVisibleFeatureCount() {
   const zoom = map.getZoom();
   let features = [];
 
+  const zoomLockText = currentZoomLock
+    ? `<span class="zoom-lock">🔒 ${currentZoomLock}</span>`
+    : "";
+
+  const zoomText = `Zoomlevel: ${zoom.toFixed(2)}${zoomLockText ? ` [${zoomLockText}]` : ""}`;
+
   if (zoom < 11) {
-    // Nutze Cluster-Layer
     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
-
-    // Summe der cluster point_counts
-    const total = features.reduce((sum, feat) => sum + (feat.properties.point_count || 0), 0);
+    const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
 
     document.getElementById("feature-count").innerHTML =
-      `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
-  } else {
-    // Nutze Einzelpunkt-Layer
-    features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
-
-    // counts for each cat
-    // Count per UKATEGORIE value
-    const countsByUKat = features.reduce((acc, feat) => {
-      const val = feat.properties.UKATEGORIE;
-      acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {});
-    document.querySelectorAll('.legend-item[data-group="UKATEGORIE"]').forEach(item => {
-      const val = parseInt(item.getAttribute('data-value'));
-      const count = countsByUKat[val] || 0;
-
-      const badge = item.querySelector(".count-badge");
-      if (badge) {
-        badge.textContent = count > 0 ? `${count}` : "";
-      }
-    });
-
-    // UJAHR badge update
-    const countsByYear = features.reduce((acc, feat) => {
-      const val = feat.properties.UJAHR;
-      acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {});
-    document.querySelectorAll('.legend-item[data-group="UJAHR"]').forEach(item => {
-      const val = parseInt(item.getAttribute('data-value'));
-      const count = countsByYear[val] || 0;
-      const badge = item.querySelector(".count-badge");
-      if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    });
-
-    // UTYP1 badge update
-    const countsByUTYP1 = features.reduce((acc, feat) => {
-      const val = feat.properties.UTYP1;
-      acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {});
-    document.querySelectorAll('.legend-item[data-group="UTYP1"]').forEach(item => {
-      const val = parseInt(item.getAttribute('data-value'));
-      const count = countsByUTYP1[val] || 0;
-      const badge = item.querySelector(".count-badge");
-      if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    });
-
-
-    // UART badge update
-    const countsByUART = features.reduce((acc, feat) => {
-      const val = feat.properties.UART;
-      acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {});
-    document.querySelectorAll('.legend-item[data-group="UART"]').forEach(item => {
-      const val = parseInt(item.getAttribute('data-value'));
-      const count = countsByUART[val] || 0;
-      const badge = item.querySelector(".count-badge");
-      if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    });
-
-    // BETEILIGUNG badge update
-    const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
-    const countsByBeteiligung = {};
-
-    for (const field of beteiligungFields) {
-      countsByBeteiligung[field] = features.filter(f => f.properties?.[field] === 1).length;
-    }
-
-    document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
-      const field = item.dataset.field;
-      const count = countsByBeteiligung[field] || 0;
-      const badge = item.querySelector(".count-badge");
-      if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    });
-
-
-
-    document.getElementById("feature-count").innerHTML =
-      `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
+      `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
+    return;
   }
+
+  features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
+
+  // Zähle nach beliebigem Property
+  function updateBadges(features, property, selectorFn = v => v) {
+    const counts = features.reduce((acc, f) => {
+      const val = selectorFn(f.properties[property]);
+      if (val !== undefined) acc[val] = (acc[val] || 0) + 1;
+      return acc;
+    }, {});
+    document.querySelectorAll(`.legend-item[data-group="${property}"]`).forEach(item => {
+      const val = item.getAttribute("data-value") ?? item.dataset.field;
+      const count = counts[val] || 0;
+      const badge = item.querySelector(".count-badge");
+      if (badge) badge.textContent = count > 0 ? `${count}` : "";
+    });
+  }
+
+  updateBadges(features, "UKATEGORIE", v => parseInt(v));
+  updateBadges(features, "UJAHR", v => parseInt(v));
+  updateBadges(features, "UTYP1", v => parseInt(v));
+  updateBadges(features, "UART", v => parseInt(v));
+
+  // Beteiligung ist ein Sonderfall
+  const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
+  const beteiligungCounts = {};
+  for (const field of beteiligungFields) {
+    beteiligungCounts[field] = features.filter(f => f.properties?.[field] === 1).length;
+  }
+  document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
+    const field = item.dataset.field;
+    const count = beteiligungCounts[field] || 0;
+    const badge = item.querySelector(".count-badge");
+    if (badge) badge.textContent = count > 0 ? `${count}` : "";
+  });
+
+  document.getElementById("feature-count").innerHTML =
+    `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
 }
+
+
 
 
 async function initMap() {
@@ -541,6 +609,9 @@ import { Permalink, applyPermalink, updatePermalink } from './permalink.js';
 /// Zoom Lock stuff
 
 function applyZoomLock() {
+
+  // currentZoomLock = strictestMinZoom;
+
   const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
   const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
   const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
@@ -562,7 +633,10 @@ function applyZoomLock() {
   if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
   // if (scenario1Visible) minZooms.push(11); // ✅ NEW ZOOM LOCK
 
+  // const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
   const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
+  currentZoomLock = minZooms.length > 0 ? strictestMinZoom : null;
+
 
   map.setMinZoom(strictestMinZoom);
   map.setMaxZoom(mapillaryVisible ? 14.99 : originalMaxZoom);
