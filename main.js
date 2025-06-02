@@ -363,6 +363,10 @@ async function initMap() {
     // load geocoder
     setupPhotonGeocoder(map);
 
+    //   // ⬅ Compass-Control hier einfügen
+    // const compass = new mapboxControls.CompassControl({ size: 36 });
+    // map.addControl(compass, 'top-right');
+
     // load piecharts
     map.on("styleimagemissing", (e) => {
       const id = e.id;
@@ -403,6 +407,7 @@ async function initMap() {
 
 
     updateColorStyle();
+    updateVisibleFeatureCount(); 
 
     addMapillaryInteractivity(map);
 
@@ -593,17 +598,76 @@ async function initMap() {
     });
 
 
-// Einklappbare ganze legend-section (z. B. „Unfälle einzeln“) per Titelzeile
-document.querySelectorAll(".section-toggle").forEach(toggle => {
-  toggle.addEventListener("click", () => {
-    const sectionId = toggle.dataset.sectionId;
-    const section = toggle.closest(".legend-section");
-    const arrow = toggle.querySelector(`.toggle-arrow[data-arrow="${sectionId}"]`);
 
-    if (section) section.classList.toggle("collapsed");
-    if (arrow) arrow.classList.toggle("open");
+
+
+document.querySelectorAll('.section-arrow').forEach(arrow => {
+  arrow.addEventListener('click', () => {
+    const sectionId = arrow.dataset.arrow;
+    const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
+    if (!section) return;
+
+    const content = section.querySelector('.legend-section-content');
+    const isOpen = arrow.classList.contains('open');
+
+    arrow.classList.toggle('open', !isOpen);
+    section.classList.toggle('collapsed', isOpen);
   });
 });
+
+
+document.querySelectorAll('.section-checkbox').forEach(sectionCb => {
+  const sectionId = sectionCb.dataset.section;
+  const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
+  if (!section) return;
+
+  // const itemCheckboxes = section.querySelectorAll('input[type="checkbox"]:not(.section-checkbox)');
+  const itemCheckboxes = section.querySelectorAll('input[type="checkbox"]:not(.section-checkbox):not(#toggle-details)');
+
+  // ⬅ Abschnitts-Checkbox klickt alle enthaltenen Checkboxen an/aus
+  sectionCb.addEventListener('change', () => {
+    const checked = sectionCb.checked;
+    itemCheckboxes.forEach(cb => cb.checked = checked);
+    sectionCb.indeterminate = false;
+    updateLayerFilter(); // ← wichtig!
+  });
+
+  // ⬅ Reagiere auf Änderungen in enthaltenen Checkboxen
+  itemCheckboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      const checkedCount = Array.from(itemCheckboxes).filter(c => c.checked).length;
+
+      if (checkedCount === 0) {
+        sectionCb.checked = false;
+        sectionCb.indeterminate = false;
+      } else if (checkedCount === itemCheckboxes.length) {
+        sectionCb.checked = true;
+        sectionCb.indeterminate = false;
+      } else {
+        sectionCb.checked = false;
+        sectionCb.indeterminate = true;
+      }
+
+      updateLayerFilter(); // ← wichtig!
+    });
+  });
+
+  // ⬅ Initial synchronisieren
+  const checkedCount = Array.from(itemCheckboxes).filter(c => c.checked).length;
+  if (checkedCount === 0) {
+    sectionCb.checked = false;
+    sectionCb.indeterminate = false;
+  } else if (checkedCount === itemCheckboxes.length) {
+    sectionCb.checked = true;
+    sectionCb.indeterminate = false;
+  } else {
+    sectionCb.checked = false;
+    sectionCb.indeterminate = true;
+  }
+});
+
+
+
 
 
 

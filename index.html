@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:,">
   <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.css' />
+  <!-- <link rel="stylesheet" href="https://unpkg.com/@mapbox-controls/compass/dist/compass.css"/> -->
 
   <link rel="stylesheet" href="style.css" />
 
@@ -33,9 +34,12 @@
 
     <!-- Sektion 1: Unfälle einzeln -->
     <div class="legend-section" data-section="einzeln">
-      <div class="legend-section-title section-toggle" data-section-id="einzeln"
+      <div class="legend-section-title" data-section-id="einzeln"
         style="display: flex; align-items: center; justify-content: space-between;">
-        <span>Unfälle einzeln</span>
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" class="section-checkbox" data-section="einzeln" checked />
+          Unfälle einzeln
+        </label>
         <span class="toggle-arrow section-arrow open" data-arrow="einzeln"></span>
       </div>
       <div class="legend-section-content">
@@ -451,7 +455,7 @@
 
 
       <div style="margin-top: 6px;">
-        <label>
+        <label style="margin-left: 10px;">
           <input type="checkbox" id="toggle-scenario1" />
 
           Sc1: Unfall-Häufungen bei Tempo100 anzeigen
@@ -496,7 +500,7 @@
       <div class="legend-section-title">Kontext</div> -->
 
         <div style="margin-top: 6px;">
-          <label>
+          <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-mapillary" />
             Mapillary-Bilder anzeigen
             <span class="info-icon" title="Quelle: Mapillary Coverage – Lizenz: CC BY-SA 4.0">ⓘ</span>
@@ -510,7 +514,7 @@
         </div>
 
         <div style="margin-top: 6px;">
-          <label>
+          <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-movebis" />
             Stadtradeln 2020 anzeigen
             <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
@@ -549,7 +553,7 @@
 
 
         <div style="margin-top: 6px;">
-          <label>
+          <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-hvs" />
             Verkehrsmengen anzeigen
             <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
@@ -572,7 +576,7 @@
 
 
         <div style="margin-top: 6px;">
-          <label>
+          <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-maxspeed" />
             Geschwindigkeitbegrenzung anzeigen
             <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
@@ -604,7 +608,7 @@
 
 
         <div style="margin-top: 6px;">
-          <label>
+          <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-schools" />
             Schulen/Kindergärten anzeigen
             <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
@@ -677,6 +681,10 @@
 
   <script src="https://unpkg.com/maplibre-gl@5.5.0/dist/maplibre-gl.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
+  <!-- <script src="https://unpkg.com/@mapbox-controls/compass@3.0.0/src/index.js"></script>  -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@mapbox-controls/compass@3.0.0/src/index.min.js"></script>  -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@mapbox-controls/compass@3.0.0/dist/compass.umd.min.js"></script> -->
+
   <script type="module" src="./main.js"></script>
 </body>
 
