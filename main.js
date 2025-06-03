@@ -11,6 +11,7 @@ import {
   setupHVSPopups,
   setupMaxspeedPopups,
   setupSchoolsPopups,
+  // setupMapillaryPopups,
   setupScenario1Popups
 } from './popupHandlers.js';
 
@@ -193,7 +194,7 @@ function updateVisibleFeatureCount() {
     //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
 
     document.getElementById("feature-count").innerHTML =
-  `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
+      `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
    <div>${zoomText}</div>`;
     return;
   }
@@ -235,9 +236,9 @@ function updateVisibleFeatureCount() {
 
   // document.getElementById("feature-count").innerHTML =
   //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
-  
+
   document.getElementById("feature-count").innerHTML =
-  `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
+    `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
    <div>${zoomText}</div>`;
 
 }
@@ -270,22 +271,22 @@ async function initMap() {
     setupPhotonGeocoder(map);
 
     // add NavigationControl
-const nav = new maplibregl.NavigationControl();
+    const nav = new maplibregl.NavigationControl();
 
-// ⚠️ Nicht über addControl platzieren:
-const customNavContainer = document.getElementById("custom-nav-control");
-customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
+    // ⚠️ Nicht über addControl platzieren:
+    const customNavContainer = document.getElementById("custom-nav-control");
+    customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
 
-// Kompass-Reset aktivieren:
-setTimeout(() => {
-  const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
-  if (compass) {
-    compass.addEventListener('click', () => {
-      map.setPitch(0);
-      map.easeTo({ bearing: 0 });
-    });
-  }
-}, 100);
+    // Kompass-Reset aktivieren:
+    setTimeout(() => {
+      const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
+      if (compass) {
+        compass.addEventListener('click', () => {
+          map.setPitch(0);
+          map.easeTo({ bearing: 0 });
+        });
+      }
+    }, 100);
 
 
     // load piecharts
@@ -327,21 +328,21 @@ setTimeout(() => {
     });
 
 
-// Cluster-Checkbox auf korrekten Zustand setzen
-const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
-if (clusterCheckbox) {
-  const layerId = "pie-clusters-fine-layer";
-  map.once("idle", () => {
-    if (map.getLayer(layerId)) {
-      const isVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
-      clusterCheckbox.checked = isVisible;
+    // Cluster-Checkbox auf korrekten Zustand setzen
+    const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
+    if (clusterCheckbox) {
+      const layerId = "pie-clusters-fine-layer";
+      map.once("idle", () => {
+        if (map.getLayer(layerId)) {
+          const isVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
+          clusterCheckbox.checked = isVisible;
+        }
+      });
     }
-  });
-}
 
 
     updateColorStyle();
-    updateVisibleFeatureCount(); 
+    updateVisibleFeatureCount();
 
     addMapillaryInteractivity(map);
 
@@ -383,6 +384,36 @@ if (clusterCheckbox) {
     }
 
 
+    /// // Mapillary Filter-Checkboxen
+    const toggleMapillary = document.getElementById("toggle-mapillary");
+    const mapillaryFilterOptions = document.getElementById("mapillary-filter-options");
+    const cbPano = document.getElementById("mapillary-pano");
+    const cbNonPano = document.getElementById("mapillary-nonpano");
+
+    toggleMapillary.addEventListener("change", () => {
+      const checked = toggleMapillary.checked;
+        mapillaryFilterOptions.style.display = checked ? "block" : "none";
+      cbPano.checked = checked;
+      cbNonPano.checked = checked;
+      toggleMapillary.indeterminate = false;
+      updateMapillaryFilter();
+    });
+
+
+
+    [cbPano, cbNonPano].forEach(cb => {
+      cb.addEventListener("change", () => {
+        const both = cbPano.checked && cbNonPano.checked;
+        const none = !cbPano.checked && !cbNonPano.checked;
+
+        toggleMapillary.checked = both;
+        toggleMapillary.indeterminate = !both && !none;
+
+        updateMapillaryFilter();
+      });
+    });
+
+
 
 
     // popups / tooltips
@@ -392,6 +423,7 @@ if (clusterCheckbox) {
     setupHVSPopups(map);
     setupMaxspeedPopups(map);
     setupSchoolsPopups(map);
+    // setupMapillaryPopups(map);
     setupScenario1Popups(map);
 
 
@@ -432,12 +464,15 @@ if (clusterCheckbox) {
       // Check visibility of layers
       const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
       const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
-      const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
+      // const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
+      const mapillaryVisible =
+        map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible" ||
+        map.getLayoutProperty("mapillary-images-halo", "visibility") === "visible";
       const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
 
       // Update visibility for special legends
       // if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
-        if (clusterLegendEl) { clusterLegendEl.style.display = zoom < 11 ? "block" : "none";}
+      if (clusterLegendEl) { clusterLegendEl.style.display = zoom < 11 ? "block" : "none"; }
       if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 11) ? "block" : "none";
       if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
       if (maxspeedLegend) maxspeedLegend.style.display = (maxspeedVisible && zoom >= 11) ? "block" : "none";
@@ -466,7 +501,7 @@ if (clusterCheckbox) {
           if (!isSpecial) el.style.display = "";
         }
       });
-      
+
 
     }
 
@@ -511,17 +546,6 @@ if (clusterCheckbox) {
     });
 
 
-//     document.querySelectorAll(".section-toggle").forEach(toggle => {
-//   toggle.addEventListener("click", () => {
-//     const key = toggle.dataset.sectionToggle;
-//     const section = document.querySelector(`.legend-section[data-section="${key}"]`);
-//     const arrow = toggle.querySelector(`.toggle-arrow[data-arrow="${key}"]`);
-
-//     if (section) section.classList.toggle("collapsed");
-//     if (arrow) arrow.classList.toggle("open");
-//   });
-// });
-
 
 
 
@@ -535,64 +559,81 @@ if (clusterCheckbox) {
 
 
 
-document.querySelectorAll('.section-arrow').forEach(arrow => {
-  arrow.addEventListener('click', () => {
-    const sectionId = arrow.dataset.arrow;
-    const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
-    if (!section) return;
+    document.querySelectorAll('.section-arrow').forEach(arrow => {
+      arrow.addEventListener('click', () => {
+        const sectionId = arrow.dataset.arrow;
+        const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
+        if (!section) return;
 
-    const content = section.querySelector('.legend-section-content');
-    const isOpen = arrow.classList.contains('open');
+        const content = section.querySelector('.legend-section-content');
+        const isOpen = arrow.classList.contains('open');
 
-    arrow.classList.toggle('open', !isOpen);
-    section.classList.toggle('collapsed', isOpen);
-  });
-});
-
-
-document.querySelectorAll('.section-checkbox').forEach(sectionCb => {
-  const sectionId = sectionCb.dataset.section;
-  const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
-  if (!section) return;
-
-  // const itemCheckboxes = section.querySelectorAll('input[type="checkbox"]:not(.section-checkbox)');
-  const itemCheckboxes = section.querySelectorAll('input[type="checkbox"]:not(.section-checkbox):not(#toggle-details)');
-
-  // ⬅ Abschnitts-Checkbox klickt alle enthaltenen Checkboxen an/aus
-  sectionCb.addEventListener('change', () => {
-  const checked = sectionCb.checked;
-
-  // Custom logic for cluster section
-  if (sectionId === "cluster") {
-    const visibility = checked ? "visible" : "none";
-    LAYERS.clusters.forEach(layerId => {
-      if (map.getLayer(layerId)) {
-        map.setLayoutProperty(layerId, "visibility", visibility);
-      }
-    });
-    return; // skip checkbox syncing for clusters
-  }
-
-      // ✅ Scenario block logic
-    if (sectionId === "scenario") {
-      itemCheckboxes.forEach(cb => {
-        cb.checked = checked;
-        cb.dispatchEvent(new Event("change")); // trigger updates (layer + slider)
+        arrow.classList.toggle('open', !isOpen);
+        section.classList.toggle('collapsed', isOpen);
       });
-      return;
-    }
+    });
 
-  // regular behavior
-    itemCheckboxes.forEach(cb => cb.checked = checked);
-    sectionCb.indeterminate = false;
-    updateLayerFilter(); // ← wichtig!
-  });
 
-  // ⬅ Reagiere auf Änderungen in enthaltenen Checkboxen
-  itemCheckboxes.forEach(cb => {
-    cb.addEventListener('change', () => {
+    document.querySelectorAll('.section-checkbox').forEach(sectionCb => {
+      const sectionId = sectionCb.dataset.section;
+      const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
+      if (!section) return;
+
+      // const itemCheckboxes = section.querySelectorAll('input[type="checkbox"]:not(.section-checkbox)');
+      const itemCheckboxes = section.querySelectorAll('input[type="checkbox"]:not(.section-checkbox):not(#toggle-details)');
+
+      // ⬅ Abschnitts-Checkbox klickt alle enthaltenen Checkboxen an/aus
+      sectionCb.addEventListener('change', () => {
+        const checked = sectionCb.checked;
+
+        // Custom logic for cluster section
+        if (sectionId === "cluster") {
+          const visibility = checked ? "visible" : "none";
+          LAYERS.clusters.forEach(layerId => {
+            if (map.getLayer(layerId)) {
+              map.setLayoutProperty(layerId, "visibility", visibility);
+            }
+          });
+          return; // skip checkbox syncing for clusters
+        }
+
+        // ✅ Scenario block logic
+        if (sectionId === "scenario") {
+          itemCheckboxes.forEach(cb => {
+            cb.checked = checked;
+            cb.dispatchEvent(new Event("change")); // trigger updates (layer + slider)
+          });
+          return;
+        }
+
+        // regular behavior
+        itemCheckboxes.forEach(cb => cb.checked = checked);
+        sectionCb.indeterminate = false;
+        updateLayerFilter(); // ← wichtig!
+      });
+
+      // ⬅ Reagiere auf Änderungen in enthaltenen Checkboxen
+      itemCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const checkedCount = Array.from(itemCheckboxes).filter(c => c.checked).length;
+
+          if (checkedCount === 0) {
+            sectionCb.checked = false;
+            sectionCb.indeterminate = false;
+          } else if (checkedCount === itemCheckboxes.length) {
+            sectionCb.checked = true;
+            sectionCb.indeterminate = false;
+          } else {
+            sectionCb.checked = false;
+            sectionCb.indeterminate = true;
+          }
+
+          updateLayerFilter(); // ← wichtig!
+        });
+      });
+
+      // ⬅ Initial synchronisieren
       const checkedCount = Array.from(itemCheckboxes).filter(c => c.checked).length;
-
       if (checkedCount === 0) {
         sectionCb.checked = false;
         sectionCb.indeterminate = false;
@@ -603,24 +644,7 @@ document.querySelectorAll('.section-checkbox').forEach(sectionCb => {
         sectionCb.checked = false;
         sectionCb.indeterminate = true;
       }
-
-      updateLayerFilter(); // ← wichtig!
     });
-  });
-
-  // ⬅ Initial synchronisieren
-  const checkedCount = Array.from(itemCheckboxes).filter(c => c.checked).length;
-  if (checkedCount === 0) {
-    sectionCb.checked = false;
-    sectionCb.indeterminate = false;
-  } else if (checkedCount === itemCheckboxes.length) {
-    sectionCb.checked = true;
-    sectionCb.indeterminate = false;
-  } else {
-    sectionCb.checked = false;
-    sectionCb.indeterminate = true;
-  }
-});
 
 
 
@@ -689,15 +713,15 @@ function applyZoomLock() {
 
 
   map.setMinZoom(strictestMinZoom);
-  map.setMaxZoom(mapillaryVisible ? 14.99 : originalMaxZoom);
+  // map.setMaxZoom(mapillaryVisible ? 14.99 : originalMaxZoom);
 
   // Adjust current zoom if it's below the required minimum
   const z = map.getZoom();
   if (z < strictestMinZoom) {
     map.setZoom(strictestMinZoom);
-  } else if (mapillaryVisible && z > 14.99) {
-    map.setZoom(14.99);
-  }
+  } //else if (mapillaryVisible && z > 14.99) {
+  //   map.setZoom(14.99);
+  // }
 }
 
 function applyLegendVisibility() {
@@ -709,6 +733,49 @@ function applyLegendVisibility() {
     }
   });
 }
+
+
+
+
+
+function updateMapillaryFilter() {
+  const cbPano = document.getElementById("mapillary-pano");
+  const cbNonPano = document.getElementById("mapillary-nonpano");
+  const filterOptions = document.getElementById("mapillary-filter-options");
+
+  const showPano = cbPano.checked;
+  const showNonPano = cbNonPano.checked;
+
+  let baseFilter = ["any"];
+  if (showPano) baseFilter.push(["==", ["to-string", ["get", "is_pano"]], "true"]);
+  if (showNonPano) baseFilter.push(["==", ["to-string", ["get", "is_pano"]], "false"]);
+
+  if (baseFilter.length === 1) baseFilter = ["==", "id", "__never__"];
+
+  if (map.getLayer("mapillary-images-layer")) {
+    map.setFilter("mapillary-images-layer", baseFilter);
+  }
+
+  if (map.getLayer("mapillary-images-halo")) {
+    const haloFilter = showPano
+      ? ["==", ["to-string", ["get", "is_pano"]], "true"]
+      : ["==", "id", "__never__"];
+    map.setFilter("mapillary-images-halo", haloFilter);
+    map.setLayoutProperty("mapillary-images-halo", "visibility", showPano ? "visible" : "none");
+  }
+
+  const anyChecked = showPano || showNonPano;
+  map.setLayoutProperty("mapillary-images-layer", "visibility", anyChecked ? "visible" : "none");
+
+  filterOptions.style.display = anyChecked ? "block" : "none";
+
+  applyZoomLock();
+  applyLegendVisibility();
+}
+
+
+
+
 
 
 
@@ -730,12 +797,7 @@ document.querySelectorAll(".basemap-thumb").forEach(thumb => {
 
 
 
-document.getElementById("toggle-mapillary").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  map.setLayoutProperty("mapillary-images-layer", "visibility", checked ? "visible" : "none");
-  applyZoomLock();
-  applyLegendVisibility(); //  handles the legend!
-});
+
 
 document.getElementById("toggle-movebis").addEventListener("change", function (e) {
   const checked = e.target.checked;
@@ -753,21 +815,7 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   applyLegendVisibility();
 });
 
-// document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-//   const visibility = checked ? "visible" : "none";
 
-//   if (map.getLayer("maxspeed")) {
-//     map.setLayoutProperty("maxspeed", "visibility", visibility);
-//   }
-
-//   if (map.getLayer("maxspeed-conditional")) {
-//     map.setLayoutProperty("maxspeed-conditional", "visibility", visibility);
-//   }
-
-//   applyZoomLock();
-//   applyLegendVisibility();
-// });
 
 document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
   const checked = e.target.checked;

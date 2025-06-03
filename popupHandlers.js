@@ -296,6 +296,40 @@ export function setupSchoolsPopups(map) {
     handleLayer("schools-polygons");
 }
 
+
+// export function setupMapillaryPopups(map) {
+//   const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+//   map.on("mousemove", "mapillary-images-layer", (e) => {
+//     map.getCanvas().style.cursor = "pointer";
+//     const props = e.features[0].properties;
+
+//     // Dynamically list all properties
+//     const rows = Object.entries(props).map(([key, val]) => {
+//       return `<tr><td><strong>${key}</strong></td><td>${val ?? "-"}</td></tr>`;
+//     }).join("");
+
+//     const content = `
+//       <div style="font-size: 12px;">
+//         <strong>Mapillary Punkt</strong>
+//         <table style="border-collapse: collapse; margin-top: 4px;">
+//           ${rows}
+//         </table>
+//       </div>
+//     `;
+
+//     popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+//   });
+
+//   map.on("mouseleave", "mapillary-images-layer", () => {
+//     map.getCanvas().style.cursor = "";
+//     popup.remove();
+//   });
+// }
+
+
+
+
 export function setupScenario1Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 

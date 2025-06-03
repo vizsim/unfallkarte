@@ -535,10 +535,6 @@
       <div class="legend-section-content">
 
 
-
-        <!-- <div class="legend-section">
-      <div class="legend-section-title">Kontext</div> -->
-
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-mapillary" />
@@ -547,11 +543,20 @@
           </label>
         </div>
 
-        <div id="mapillary-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <strong>Mapillary Bilder</strong><br />
-          <span style="display:inline-block;width:12px;height:12px;background:#00b955;margin-right:6px;"></span>
-          Bildpunkt
+        <div id="mapillary-filter-options" style="display: none; margin-left: 32px; margin-top: 6px;">
+          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <input type="checkbox" id="mapillary-nonpano" />
+            <span style="width: 12px; height: 12px; background: #00b955; border-radius: 2px;"></span>
+            normale Bilder
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="mapillary-pano" />
+            <span style="width: 12px; height: 12px; background: #0077ff; border-radius: 2px;"></span>
+            Panorama-Bilder
+          </label>
         </div>
+
 
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
@@ -643,7 +648,8 @@
               unter Bedingungen
             </div> -->
             <div>
-              <span style="display: inline-block;width: 24px;height: 3px;margin-right: 6px;background-image: repeating-linear-gradient(to right,#999 0,#999 3.5px,transparent 3.5px,transparent 7px);"></span>
+              <span
+                style="display: inline-block;width: 24px;height: 3px;margin-right: 6px;background-image: repeating-linear-gradient(to right,#999 0,#999 3.5px,transparent 3.5px,transparent 7px);"></span>
               bedingte Geschwindigkeitsbegrenzung
             </div>
             <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span>
