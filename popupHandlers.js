@@ -103,27 +103,27 @@ export function setupAccidentPopups(map) {
 
 
 export function setupAccClusterPopups(map) {
-  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-  let hoveredFeatureId = null;
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+    let hoveredFeatureId = null;
 
-  map.on("mousemove", (e) => {
-    const features = map.queryRenderedFeatures(e.point, {
-      layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
-    });
+    map.on("mousemove", (e) => {
+        const features = map.queryRenderedFeatures(e.point, {
+            layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
+        });
 
-    if (features.length > 0) {
-      const f = features[0];
-      const id = f.id || JSON.stringify(f.properties);
+        if (features.length > 0) {
+            const f = features[0];
+            const id = f.id || JSON.stringify(f.properties);
 
-      if (id !== hoveredFeatureId) {
-        hoveredFeatureId = id;
+            if (id !== hoveredFeatureId) {
+                hoveredFeatureId = id;
 
-        const k1 = f.properties.UKATEGORIE__1 || 0;
-        const k2 = f.properties.UKATEGORIE__2 || 0;
-        const k3 = f.properties.UKATEGORIE__3 || 0;
-        const total = k1 + k2 + k3;
+                const k1 = f.properties.UKATEGORIE__1 || 0;
+                const k2 = f.properties.UKATEGORIE__2 || 0;
+                const k3 = f.properties.UKATEGORIE__3 || 0;
+                const total = k1 + k2 + k3;
 
-        const html = `
+                const html = `
           <div><strong>Anzahl nach Unfall-Kategorie</strong></div>
           <table style="font-size:12px; border-collapse:collapse;">
             <tr><td style="padding-right:8px;"><strong>Getötete</strong></td><td style="text-align:right;">${k1}</td></tr>
@@ -133,19 +133,19 @@ export function setupAccClusterPopups(map) {
           </table>
         `;
 
-        map.getCanvas().style.cursor = "pointer";
-        popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
-      }
-    } else {
-      if (hoveredFeatureId !== null) {
-        hoveredFeatureId = null;
-        popup.remove();
-        map.getCanvas().style.cursor = "";
-        map.getSource("hover-point").setData({ type: "FeatureCollection", features: [] });
-      }
-    }
-  });
+                map.getCanvas().style.cursor = "pointer";
+                popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+                map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
+            }
+        } else {
+            if (hoveredFeatureId !== null) {
+                hoveredFeatureId = null;
+                popup.remove();
+                map.getCanvas().style.cursor = "";
+                map.getSource("hover-point").setData({ type: "FeatureCollection", features: [] });
+            }
+        }
+    });
 }
 
 
@@ -220,18 +220,24 @@ export function setupHVSPopups(map) {
 export function setupMaxspeedPopups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
-    ["maxspeed", "maxspeed-conditional"].forEach((layerId) => {
+    ["maxspeed",
+        "maxspeed-conditional",
+        "maxspeed-forward",
+        "maxspeed-backward",
+        "maxspeed-conditional-forward",
+        "maxspeed-conditional-backward"
+    ].forEach((layerId) => {
         map.on("mousemove", layerId, (e) => {
             map.getCanvas().style.cursor = "pointer";
             const props = e.features[0].properties;
-            const speed = Number(props.maxspeed);
-            const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
-
+            // const speed = Number(props.maxspeed);
+            // const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
+                //  <tr><td><strong>maxspeed</strong></td><td>${formattedSpeed}</td></tr> 
             const content = `
             <div style="font-size: 12px;">
             <strong>OSM (insb. maxspeed infos)</strong><br/>
             <table style="border-collapse: collapse;">
-                <tr><td><strong>maxspeed</strong></td><td>${formattedSpeed}</td></tr>
+                <tr><td><strong>maxspeed</strong></td><td>${props.maxspeed || "-"}</td></tr>
                 <tr><td><strong>maxspeed:conditional</strong></td><td>${props.maxspeed_conditional || "-"}</td></tr>
                 <tr><td><strong>maxspeed:type</strong></td><td>${props.maxspeed_type || "-"}</td></tr>
                 <tr><td><strong>maxspeed:forward</strong></td><td>${props.maxspeed_forward || "-"}</td></tr>

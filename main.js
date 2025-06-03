@@ -753,21 +753,46 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   applyLegendVisibility();
 });
 
+// document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
+//   const visibility = checked ? "visible" : "none";
+
+//   if (map.getLayer("maxspeed")) {
+//     map.setLayoutProperty("maxspeed", "visibility", visibility);
+//   }
+
+//   if (map.getLayer("maxspeed-conditional")) {
+//     map.setLayoutProperty("maxspeed-conditional", "visibility", visibility);
+//   }
+
+//   applyZoomLock();
+//   applyLegendVisibility();
+// });
+
 document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
   const checked = e.target.checked;
   const visibility = checked ? "visible" : "none";
 
-  if (map.getLayer("maxspeed")) {
-    map.setLayoutProperty("maxspeed", "visibility", visibility);
-  }
+  const layerIds = [
+    "maxspeed",
+    "maxspeed-conditional",
+    "maxspeed-forward",
+    "maxspeed-backward",
+    "maxspeed-conditional-forward",
+    "maxspeed-conditional-backward"
+  ];
 
-  if (map.getLayer("maxspeed-conditional")) {
-    map.setLayoutProperty("maxspeed-conditional", "visibility", visibility);
-  }
+  layerIds.forEach(id => {
+    if (map.getLayer(id)) {
+      map.setLayoutProperty(id, "visibility", visibility);
+    }
+  });
 
   applyZoomLock();
   applyLegendVisibility();
 });
+
+
 
 document.getElementById("toggle-schools").addEventListener("change", function (e) {
   const checked = e.target.checked;

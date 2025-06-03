@@ -268,38 +268,99 @@ function addHvsLayer(map) {
 
 
 
-// Maxspeed layers
+// // Maxspeed layers
+
 function addMaxspeedLayers(map) {
-  const commonLineColor = [
-    "case",
-    // Explicit "None"
-    ["==", ["get", "maxspeed"], "None"], "#000000",
+  const offsetForward = 3;
+  const offsetBackward = -3;
 
-    // DE:urban fallback → treat as 50
-    ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:urban"]],
-    "#fdcc8a",
+  // Create dynamic color expression based on the given property
+  function makeLineColorExpression(property) {
+    return [
+      "case",
+      ["==", ["get", property], "None"], "#000000",
+      ["all", ["!", ["has", property]], ["==", ["get", "maxspeed_type"], "DE:urban"]], "#fdcc8a",
+      ["all", ["!", ["has", property]], ["==", ["get", "maxspeed_type"], "DE:rural"]], "#e31a1c",
+      ["!", ["has", property]], "#ff69b4",
+      ["==", ["get", property], null], "#ff69b4",
+      [
+        "interpolate", ["linear"],
+        ["to-number", ["get", property]],
+        30, "#31a354",
+        50, "#fdcc8a",
+        100, "#e31a1c"
+      ]
+    ];
+  }
 
-    // DE:rural fallback → treat as 100
-    ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:rural"]],
-    "#e31a1c",
+  // Create paint object with optional dash and offset
+  function makePaint(property, isDashed, offset) {
+    const paint = {
+      "line-width": 2.5,
+      "line-color": makeLineColorExpression(property)
+    };
+    if (isDashed) paint["line-dasharray"] = [2, 2];
+    if (offset !== 0) paint["line-offset"] = offset;
+    return paint;
+  }
 
-    // Null/missing maxspeed
-    ["!", ["has", "maxspeed"]], "#ff69b4",
-    ["==", ["get", "maxspeed"], null], "#ff69b4",
+  // --- Conditional lines (directional)
+  map.addLayer({
+    id: "maxspeed-conditional-forward",
+    type: "line",
+    source: "maxspeed",
+    "source-layer": "highways",
+    layout: { visibility: "none" },
+    filter: ["all", ["has", "maxspeed_forward"], ["has", "maxspeed_conditional"]],
+    paint: makePaint("maxspeed_forward", true, offsetForward)
+  });
 
-    [
-      "interpolate", ["linear"],
-      ["to-number", ["get", "maxspeed"]],
-      30, "#31a354",
-      50, "#fdcc8a",
-      100, "#e31a1c"
-    ]
-  ];
+  map.addLayer({
+    id: "maxspeed-conditional-backward",
+    type: "line",
+    source: "maxspeed",
+    "source-layer": "highways",
+    layout: { visibility: "none" },
+    filter: ["all", ["has", "maxspeed_backward"], ["has", "maxspeed_conditional"]],
+    paint: makePaint("maxspeed_backward", true, offsetBackward)
+  });
 
-  const commonPaint = {
-    "line-width": 2.5,
-    "line-color": commonLineColor
-  };
+  // --- Regular lines (directional)
+  map.addLayer({
+    id: "maxspeed-forward",
+    type: "line",
+    source: "maxspeed",
+    "source-layer": "highways",
+    layout: { visibility: "none" },
+    filter: ["all", ["has", "maxspeed_forward"], ["!", ["has", "maxspeed_conditional"]]],
+    paint: makePaint("maxspeed_forward", false, offsetForward)
+  });
+
+  map.addLayer({
+    id: "maxspeed-backward",
+    type: "line",
+    source: "maxspeed",
+    "source-layer": "highways",
+    layout: { visibility: "none" },
+    filter: ["all", ["has", "maxspeed_backward"], ["!", ["has", "maxspeed_conditional"]]],
+    paint: makePaint("maxspeed_backward", false, offsetBackward)
+  });
+
+  // --- Default (centered, no directional tags)
+  map.addLayer({
+    id: "maxspeed",
+    type: "line",
+    source: "maxspeed",
+    "source-layer": "highways",
+    layout: { visibility: "none" },
+    filter: [
+      "all",
+      ["!", ["has", "maxspeed_forward"]],
+      ["!", ["has", "maxspeed_backward"]],
+      ["!", ["has", "maxspeed_conditional"]]
+    ],
+    paint: makePaint("maxspeed", false, 0)
+  });
 
   map.addLayer({
     id: "maxspeed-conditional",
@@ -307,26 +368,81 @@ function addMaxspeedLayers(map) {
     source: "maxspeed",
     "source-layer": "highways",
     layout: { visibility: "none" },
-    filter: ["has", "maxspeed_conditional"],
-    paint: {
-      ...commonPaint,
-      "line-dasharray": [2, 2] // add dashed style for conditionals
-    }
+    filter: [
+      "all",
+      ["!", ["has", "maxspeed_forward"]],
+      ["!", ["has", "maxspeed_backward"]],
+      ["has", "maxspeed_conditional"]
+    ],
+    paint: makePaint("maxspeed", true, 0)
   });
 
-  map.addLayer({
-    id: "maxspeed",
-    type: "line",
-    source: "maxspeed",
-    "source-layer": "highways",
-    layout: { visibility: "none" },
-    filter: ["!", ["has", "maxspeed_conditional"]],
-    paint: commonPaint // solid lines, no dash
-  });
-
-  // Optional: reorder the conditional layer above others
-  map.moveLayer("maxspeed-conditional");
+  // --- Ensure visibility priority (move conditionals above others)
+  map.moveLayer("maxspeed-conditional-forward");
+  map.moveLayer("maxspeed-conditional-backward");
 }
+
+
+
+
+// function addMaxspeedLayers(map) {
+//   const commonLineColor = [
+//     "case",
+//     // Explicit "None"
+//     ["==", ["get", "maxspeed"], "None"], "#000000",
+
+//     // DE:urban fallback → treat as 50
+//     ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:urban"]],
+//     "#fdcc8a",
+
+//     // DE:rural fallback → treat as 100
+//     ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:rural"]],
+//     "#e31a1c",
+
+//     // Null/missing maxspeed
+//     ["!", ["has", "maxspeed"]], "#ff69b4",
+//     ["==", ["get", "maxspeed"], null], "#ff69b4",
+
+//     [
+//       "interpolate", ["linear"],
+//       ["to-number", ["get", "maxspeed"]],
+//       30, "#31a354",
+//       50, "#fdcc8a",
+//       100, "#e31a1c"
+//     ]
+//   ];
+
+//   const commonPaint = {
+//     "line-width": 2.5,
+//     "line-color": commonLineColor
+//   };
+
+//   map.addLayer({
+//     id: "maxspeed-conditional",
+//     type: "line",
+//     source: "maxspeed",
+//     "source-layer": "highways",
+//     layout: { visibility: "none" },
+//     filter: ["has", "maxspeed_conditional"],
+//     paint: {
+//       ...commonPaint,
+//       "line-dasharray": [2, 2] // add dashed style for conditionals
+//     }
+//   });
+
+//   map.addLayer({
+//     id: "maxspeed",
+//     type: "line",
+//     source: "maxspeed",
+//     "source-layer": "highways",
+//     layout: { visibility: "none" },
+//     filter: ["!", ["has", "maxspeed_conditional"]],
+//     paint: commonPaint // solid lines, no dash
+//   });
+
+//   // Optional: reorder the conditional layer above others
+//   map.moveLayer("maxspeed-conditional");
+// }
 
 
 
