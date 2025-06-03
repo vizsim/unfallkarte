@@ -1,3 +1,5 @@
+![Status: Experimental](https://img.shields.io/badge/Status-Experimental-red)
+
 # 🚧 Unfallkarte (Deutschland)
 
 **Interaktive Webkarte** zur Darstellung und Erkundung von Verkehrsunfällen in Deutschland. Die Daten stammen aus dem [Unfallatlas des Statistischen Bundesamtes (Destatis)](https://unfallatlas.statistikportal.de/).
