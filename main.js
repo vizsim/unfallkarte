@@ -269,9 +269,24 @@ async function initMap() {
     // load geocoder
     setupPhotonGeocoder(map);
 
-    //   // ⬅ Compass-Control hier einfügen
-    // const compass = new mapboxControls.CompassControl({ size: 36 });
-    // map.addControl(compass, 'top-right');
+    // add NavigationControl
+const nav = new maplibregl.NavigationControl();
+
+// ⚠️ Nicht über addControl platzieren:
+const customNavContainer = document.getElementById("custom-nav-control");
+customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
+
+// Kompass-Reset aktivieren:
+setTimeout(() => {
+  const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
+  if (compass) {
+    compass.addEventListener('click', () => {
+      map.setPitch(0);
+      map.easeTo({ bearing: 0 });
+    });
+  }
+}, 100);
+
 
     // load piecharts
     map.on("styleimagemissing", (e) => {

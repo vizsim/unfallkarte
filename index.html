@@ -711,23 +711,20 @@
 
 
   <!-- Gemeinsamer Container -->
-  <!-- <div style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 12px; z-index: 2; font-family: sans-serif; align-items: flex-end;"> -->
-  <div
-    style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 12px; z-index: 2; font-family: sans-serif; align-items: center;">
+<div id="bottom-left-ui-container">
+  <div id="custom-nav-control"></div>
 
-    <!-- Basemap Thumbnails -->
-    <div id="basemap-thumbnails" style="display: flex; gap: 8px;">
-      <div class="basemap-thumb selected" data-map="standard" title="Standard"></div>
-      <div class="basemap-thumb" data-map="satellite" title="Satellit"></div>
-    </div>
-
-    <!-- Terrain/Hillshade -->
-    <div id="terrain-controls">
-      <label><input type="checkbox" id="toggleTerrain" /> Terrain</label>
-      <label><input type="checkbox" id="toggleHillshade" /> Hillshade</label>
-    </div>
-
+  <div id="basemap-thumbnails">
+    <div class="basemap-thumb selected" data-map="standard" title="Standard"></div>
+    <div class="basemap-thumb" data-map="satellite" title="Satellit"></div>
   </div>
+
+  <div id="terrain-controls">
+    <label><input type="checkbox" id="toggleTerrain" /> Terrain</label>
+    <label><input type="checkbox" id="toggleHillshade" /> Hillshade</label>
+  </div>
+</div>
+
 
 
 
