@@ -257,11 +257,22 @@ body {
 
 
 /* ────────────── Feature Count ────────────── */
+
 #feature-count {
-    margin-top: 10px;
-    font-size: 11px;
-    color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.3;
 }
+
+#feature-count-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
 
 /* ────────────── zoomlock ────────────── */
 .zoom-lock {

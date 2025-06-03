@@ -175,109 +175,6 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
 
 
 
-// // Funktion zur Aktualisierung der Anzahl sichtbarer Features
-// function updateVisibleFeatureCount() {
-//   const zoom = map.getZoom();
-//   let features = [];
-
-//   if (zoom < 11) {
-//     // Nutze Cluster-Layer
-//     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
-
-//     // Summe der cluster point_counts
-//     const total = features.reduce((sum, feat) => sum + (feat.properties.point_count || 0), 0);
-
-//     // document.getElementById("feature-count").innerHTML =
-//     //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
-//      document.getElementById("feature-count").innerHTML =
-//    `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}${currentZoomLock ? ` [Zoom🔒: ${currentZoomLock}]` : ''}`;  //Zoom🔒:
-
-//   } else {
-//     // Nutze Einzelpunkt-Layer
-//     features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
-
-//     // counts for each cat
-//     // Count per UKATEGORIE value
-//     const countsByUKat = features.reduce((acc, feat) => {
-//       const val = feat.properties.UKATEGORIE;
-//       acc[val] = (acc[val] || 0) + 1;
-//       return acc;
-//     }, {});
-//     document.querySelectorAll('.legend-item[data-group="UKATEGORIE"]').forEach(item => {
-//       const val = parseInt(item.getAttribute('data-value'));
-//       const count = countsByUKat[val] || 0;
-
-//       const badge = item.querySelector(".count-badge");
-//       if (badge) {
-//         badge.textContent = count > 0 ? `${count}` : "";
-//       }
-//     });
-
-//     // UJAHR badge update
-//     const countsByYear = features.reduce((acc, feat) => {
-//       const val = feat.properties.UJAHR;
-//       acc[val] = (acc[val] || 0) + 1;
-//       return acc;
-//     }, {});
-//     document.querySelectorAll('.legend-item[data-group="UJAHR"]').forEach(item => {
-//       const val = parseInt(item.getAttribute('data-value'));
-//       const count = countsByYear[val] || 0;
-//       const badge = item.querySelector(".count-badge");
-//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-//     });
-
-//     // UTYP1 badge update
-//     const countsByUTYP1 = features.reduce((acc, feat) => {
-//       const val = feat.properties.UTYP1;
-//       acc[val] = (acc[val] || 0) + 1;
-//       return acc;
-//     }, {});
-//     document.querySelectorAll('.legend-item[data-group="UTYP1"]').forEach(item => {
-//       const val = parseInt(item.getAttribute('data-value'));
-//       const count = countsByUTYP1[val] || 0;
-//       const badge = item.querySelector(".count-badge");
-//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-//     });
-
-
-//     // UART badge update
-//     const countsByUART = features.reduce((acc, feat) => {
-//       const val = feat.properties.UART;
-//       acc[val] = (acc[val] || 0) + 1;
-//       return acc;
-//     }, {});
-//     document.querySelectorAll('.legend-item[data-group="UART"]').forEach(item => {
-//       const val = parseInt(item.getAttribute('data-value'));
-//       const count = countsByUART[val] || 0;
-//       const badge = item.querySelector(".count-badge");
-//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-//     });
-
-//     // BETEILIGUNG badge update
-//     const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
-//     const countsByBeteiligung = {};
-
-//     for (const field of beteiligungFields) {
-//       countsByBeteiligung[field] = features.filter(f => f.properties?.[field] === 1).length;
-//     }
-
-//     document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
-//       const field = item.dataset.field;
-//       const count = countsByBeteiligung[field] || 0;
-//       const badge = item.querySelector(".count-badge");
-//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-//     });
-
-
-
-//     // document.getElementById("feature-count").innerHTML =
-//     //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}`;
-//      document.getElementById("feature-count").innerHTML =
-//    `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>Zoomlevel: ${zoom.toFixed(2)}${currentZoomLock ? ` [Zoom🔒: ${currentZoomLock}]` : ''}`;
-
-//   }
-// }
-
 function updateVisibleFeatureCount() {
   const zoom = map.getZoom();
   let features = [];
@@ -292,8 +189,12 @@ function updateVisibleFeatureCount() {
     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
     const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
 
+    // document.getElementById("feature-count").innerHTML =
+    //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
+
     document.getElementById("feature-count").innerHTML =
-      `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
+  `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
+   <div>${zoomText}</div>`;
     return;
   }
 
@@ -332,8 +233,13 @@ function updateVisibleFeatureCount() {
     if (badge) badge.textContent = count > 0 ? `${count}` : "";
   });
 
+  // document.getElementById("feature-count").innerHTML =
+  //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
+  
   document.getElementById("feature-count").innerHTML =
-    `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
+  `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
+   <div>${zoomText}</div>`;
+
 }
 
 
@@ -528,7 +434,7 @@ if (clusterCheckbox) {
       // // Hide/show regular groups depending on zoom
       Array.from(legend.children).forEach(el => {
         const isTitle = el.classList.contains("legend-title");
-        const isFeatureCount = el.id === "feature-count";
+        const isFeatureCount = el.id === "feature-count-wrapper";
         const scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
         const isSpecial = [
           clusterLegendEl,
@@ -566,7 +472,7 @@ if (clusterCheckbox) {
           // Zeige/Verstecke alle anderen Elemente außer dem Titel & Feature-Count
           Array.from(legend.children).forEach(child => {
             const isTitle = child.classList.contains("legend-title");
-            const isFeatureCount = child.id === "feature-count";
+            const isFeatureCount = child.id === "feature-count-wrapper";
             // if (!isTitle && !isFeatureCount) {
             //   child.style.display = collapsed ? "none" : "";
             // }
