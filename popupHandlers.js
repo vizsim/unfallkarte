@@ -39,7 +39,9 @@ const monthNames = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "
 export function setupAccidentPopups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
-    const layers = ["accident-points-11-12", "accident-points-12-13"];
+    // const layers = ["accident-points-11-12", "accident-points-12-13"];
+    const layers = ["accident-points"];
+
 
     layers.forEach(layerId => {
         map.on("mousemove", layerId, (e) => {
