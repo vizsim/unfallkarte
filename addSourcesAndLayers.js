@@ -18,8 +18,12 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // addPMTilesSource("schools", "germany_osm_schools-25-05-09.pmtiles");
   addPMTilesSource("schools", "germany_osm_schools_full_25-05-09.pmtiles "); //new no drops
   
-  addPMTilesSource("accidents_11-12", "accidents_11-12.pmtiles");
-  addPMTilesSource("accidents_12-13", "accidents_12-13.pmtiles");
+  // addPMTilesSource("accidents_11-12", "accidents_11-12.pmtiles");
+  // addPMTilesSource("accidents_12-13", "accidents_12-13.pmtiles");
+  addPMTilesSource("accidents_single", "accidents_single.pmtiles");
+
+
+
   addPMTilesSource("accidents-cluster", "combined_may25_group.pmtiles");
   addPMTilesSource("scenario1", "scenario1_cluster_accidents_ms100.pmtiles");
 
@@ -71,6 +75,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // LAYERS – ggf. aufräumen/splitten später (siehe vorherige Ideen)
 
   function addAccidentLayersToMap(map) {
+
     // function add({ idSuffix, sourceId, minzoom, maxzoom }) {
     //   map.addLayer({
     //     id: `accident-points-${idSuffix}`,
@@ -80,7 +85,17 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
     //     minzoom,
     //     maxzoom,
     //     paint: {
-    //       "circle-radius": 6,
+    //       "circle-radius": [
+    //         "interpolate", // interpolate ciclesize based on zoom
+    //         ["linear"],
+    //         ["zoom"],
+    //         0, 3,      // zoom 0: radius 3
+    //         12, 4,     // zoom 12: radius 4
+    //         14, 7,
+    //         16, 10,
+    //         18, 14,
+    //         19, 30
+    //       ],
     //       "circle-color": [
     //         "match",
     //         ["get", "UKATEGORIE"],
@@ -91,13 +106,54 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
     //       ],
     //       "circle-opacity": 0.6,
     //       "circle-stroke-color": "#000",
-    //       "circle-stroke-width": 0.5
+    //       "circle-stroke-width": 0.1
     //     }
     //   });
 
-    function add({ idSuffix, sourceId, minzoom, maxzoom }) {
+
+
+    //   map.addLayer({
+    //     id: `beteiligung-symbols-${idSuffix}`,
+    //     type: "symbol",
+    //     source: sourceId,
+    //     "source-layer": "accidents",
+    //     minzoom,
+    //     maxzoom,
+    //     layout: {
+    //       "text-field": ["concat",
+    //         ["case", ["==", ["get", "IstRad"], 1], "R", ""],
+    //         ["case", ["all", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1]], ", ", ""],
+    //         ["case", ["==", ["get", "IstPKW"], 1], "P", ""],
+    //         ["case", ["any", ["all", ["==", ["get", "IstFuss"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1]]]], ", ", ""],
+    //         ["case", ["==", ["get", "IstFuss"], 1], "F", ""],
+    //         ["case", ["any", ["all", ["==", ["get", "IstKrad"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1]]]], ", ", ""],
+    //         ["case", ["==", ["get", "IstKrad"], 1], "K", ""],
+    //         ["case", ["any", ["all", ["==", ["get", "IstGkfz"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1], ["==", ["get", "IstKrad"], 1]]]], ", ", ""],
+    //         ["case", ["==", ["get", "IstGkfz"], 1], "G", ""],
+    //         ["case", ["any", ["all", ["==", ["get", "IstSonstig"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1], ["==", ["get", "IstKrad"], 1], ["==", ["get", "IstGkfz"], 1]]]], ", ", ""],
+    //         ["case", ["==", ["get", "IstSonstig"], 1], "S", ""]
+    //       ],
+    //       "text-size": 14,
+    //       "text-offset": [0, 0],
+    //       "text-anchor": "top",
+    //       "text-allow-overlap": true,
+    //       "text-ignore-placement": true,
+    //       "visibility": "visible"
+    //     },
+    //     paint: {
+    //       "text-color": "#000"
+    //     }
+    //   });
+    // }
+
+    // add({ idSuffix: "11-12", sourceId: "accidents_11-12", minzoom: 11, maxzoom: 12 });
+    // add({ idSuffix: "12-13", sourceId: "accidents_12-13", minzoom: 12, maxzoom: 20.1 });
+
+
+
+        function add({sourceId, minzoom, maxzoom }) {
       map.addLayer({
-        id: `accident-points-${idSuffix}`,
+        id: `accident-points`,
         type: "circle",
         source: sourceId,
         "source-layer": "accidents",
@@ -132,7 +188,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
 
       map.addLayer({
-        id: `beteiligung-symbols-${idSuffix}`,
+        id: `beteiligung-symbols`,
         type: "symbol",
         source: sourceId,
         "source-layer": "accidents",
@@ -165,8 +221,13 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       });
     }
 
-    add({ idSuffix: "11-12", sourceId: "accidents_11-12", minzoom: 11, maxzoom: 12 });
-    add({ idSuffix: "12-13", sourceId: "accidents_12-13", minzoom: 12, maxzoom: 20.1 });
+    // add({ idSuffix: "11-12", sourceId: "accidents_11-12", minzoom: 11, maxzoom: 12 });
+    // add({ idSuffix: "12-13", sourceId: "accidents_12-13", minzoom: 12, maxzoom: 20.1 });
+
+    add({sourceId: "accidents_single",minzoom: 11,maxzoom: 20.1});
+
+
+
   }
 
 
@@ -747,7 +808,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       type: "raster",
       source: "satellite",
       layout: { visibility: "none" }
-    }, "accident-points-11-12"); // insert below accident points layer
+    }, "accident-points"); // insert below accident points layer
 
     // Hillshade layer
     map.addLayer({

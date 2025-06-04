@@ -88,8 +88,10 @@ function updateLegendColors(activeKey) {
 
 
 const LAYERS = {
-  accidents: ["accident-points-11-12", "accident-points-12-13"],
-  symbols: ["beteiligung-symbols-11-12", "beteiligung-symbols-12-13"],
+  // accidents: ["accident-points-11-12", "accident-points-12-13"],
+  // symbols: ["beteiligung-symbols-11-12", "beteiligung-symbols-12-13"],
+    accidents: ["accident-points"],
+  symbols: ["beteiligung-symbols"],
   clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
 };
 
@@ -664,7 +666,7 @@ async function initMap() {
   map.on("idle", () => {
     if (!isInitializingRef.value) return;
 
-    console.log("🟢 Map ist idle – Permalink wird angewendet");
+    // console.log("🟢 Map ist idle – Permalink wird angewendet");
     requestAnimationFrame(() => {
       applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
       map.on("moveend", () => updatePermalink(map, isInitializingRef));
