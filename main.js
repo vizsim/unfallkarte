@@ -12,7 +12,9 @@ import {
   setupMaxspeedPopups,
   setupSchoolsPopups,
   // setupMapillaryPopups,
-  setupScenario1Popups
+  setupScenario1Popups,
+  setupScenario2Popups
+
 } from './popupHandlers.js';
 
 import { addSourcesAndLayers } from "./addSourcesAndLayers.js";
@@ -365,7 +367,12 @@ async function initMap() {
     map.on("zoom", updateScenarioLegendVisibility);
     map.on("load", updateScenarioLegendVisibility);
 
-
+// map.on('click', function(e) {
+//   const features = map.queryRenderedFeatures(e.point, {
+//     layers: ["scenario2-points"]
+//   });
+//   console.log("Clicked features:", features);
+// });
 
 
     function addMapillaryInteractivity(map) {
@@ -427,6 +434,7 @@ async function initMap() {
     setupSchoolsPopups(map);
     // setupMapillaryPopups(map);
     setupScenario1Popups(map);
+    setupScenario2Popups(map);
 
 
 
@@ -727,7 +735,7 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools", "hvs", "mapillary", "movebis", "maxspeed", "scenario1"].forEach(key => {
+  ["schools", "hvs", "mapillary", "movebis", "maxspeed", "scenario1", "scenario2"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
@@ -872,7 +880,7 @@ document.getElementById('toggleTerrain').addEventListener('change', (e) => {
 
 
 
-/// SLIDER !!
+/// SLIDER !! SCENARIO 1
 
 const slider = document.getElementById("scenario1-slider");
 const sliderValue = document.getElementById("scenario1-slider-value");
@@ -916,4 +924,50 @@ document.getElementById("toggle-scenario1").addEventListener("change", function 
     applyClusterSizeFilter(0);
   }
 });
+
+
+// Scenario 2 slider logic
+
+const slider2 = document.getElementById("scenario2-slider");
+const sliderValue2 = document.getElementById("scenario2-slider-value");
+const sliderContainer2 = document.getElementById("scenario2-slider-container");
+
+function applyScenario2ClusterSizeFilter(minSize) {
+  const value = parseInt(minSize, 10);
+  const filter = [">=", ["to-number", ["get", "biped_counts"]], value];
+
+  if (map.getLayer("scenario2-points")) {
+    map.setFilter("scenario2-points", filter);
+  }
+  if (map.getLayer("scenario2-polys")) {
+    map.setFilter("scenario2-polys", filter);
+  }
+}
+
+slider2.addEventListener("input", () => {
+  const value = parseInt(slider2.value, 10);
+  sliderValue2.textContent = value;
+  applyScenario2ClusterSizeFilter(value);
+
+  const percent = ((value - slider2.min) / (slider2.max - slider2.min)) * 100;
+  slider2.style.setProperty("--progress", `${percent}%`);
+});
+
+// Checkbox shows/hides the layers AND the slider
+document.getElementById("toggle-scenario2").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+
+  map.setLayoutProperty("scenario2-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario2-polys", "visibility", checked ? "visible" : "none");
+
+  // Show or hide the slider
+  sliderContainer2.style.display = checked ? "block" : "none";
+
+  // Apply filter initially
+  if (checked) {
+    applyScenario2ClusterSizeFilter(0);
+  }
+});
+
+
 

@@ -361,3 +361,38 @@ export function setupScenario1Popups(map) {
     });
 }
 
+
+export function setupScenario2Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const renderScenario2Tooltip = (props) => `
+        <div style="font-size: 12px;">
+          <strong>Szenario 2</strong><br/>
+          <table style="border-collapse: collapse;">
+            ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
+            ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
+            ${props.source_layer ? `<tr><td><strong>Source Layer</strong></td><td>${props.source_layer}</td></tr>` : ""}
+            ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
+            ${props.oid ? `<tr><td><strong>OID</strong></td><td>${props.oid}</td></tr>` : ""}
+            ${props.total_count !== undefined ? `<tr><td><strong>Total Count</strong></td><td>${props.total_count}</td></tr>` : ""}
+            ${props.biped_counts !== undefined ? `<tr><td><strong>Biped Count</strong></td><td>${props.biped_counts}</td></tr>` : ""}
+            ${props.bike_count !== undefined ? `<tr><td><strong>Bike Count</strong></td><td>${props.bike_count}</td></tr>` : ""}
+            ${props.ped_count !== undefined ? `<tr><td><strong>Ped Count</strong></td><td>${props.ped_count}</td></tr>` : ""}
+          </table>
+        </div>
+      `;
+
+    ["scenario2-polys", "scenario2-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario2Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+    });
+}
+

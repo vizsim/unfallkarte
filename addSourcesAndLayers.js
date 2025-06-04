@@ -17,7 +17,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   addPMTilesSource("maxspeed", "processed_major_highways_germany_250528.pmtiles");
   // addPMTilesSource("schools", "germany_osm_schools-25-05-09.pmtiles");
   addPMTilesSource("schools", "germany_osm_schools_full_25-05-09.pmtiles "); //new no drops
-  
+
   // addPMTilesSource("accidents_11-12", "accidents_11-12.pmtiles");
   // addPMTilesSource("accidents_12-13", "accidents_12-13.pmtiles");
   addPMTilesSource("accidents_single", "accidents_single.pmtiles");
@@ -26,6 +26,9 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
   addPMTilesSource("accidents-cluster", "combined_may25_group.pmtiles");
   addPMTilesSource("scenario1", "scenario1_cluster_accidents_ms100.pmtiles");
+
+  addPMTilesSource("scenario2", "scenario2_accidents_close2schools.pmtiles");
+
 
 
 
@@ -151,7 +154,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
 
 
-        function add({sourceId, minzoom, maxzoom }) {
+    function add({ sourceId, minzoom, maxzoom }) {
       map.addLayer({
         id: `accident-points`,
         type: "circle",
@@ -224,7 +227,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
     // add({ idSuffix: "11-12", sourceId: "accidents_11-12", minzoom: 11, maxzoom: 12 });
     // add({ idSuffix: "12-13", sourceId: "accidents_12-13", minzoom: 12, maxzoom: 20.1 });
 
-    add({sourceId: "accidents_single",minzoom: 11,maxzoom: 20.1});
+    add({ sourceId: "accidents_single", minzoom: 11, maxzoom: 20.1 });
 
 
 
@@ -631,7 +634,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
     });
   }
 
-  // add Scenario1 layers
+  // add Scenario1 layers (tempo100)
   function addScenario1Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({
@@ -678,6 +681,62 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   }
 
 
+  // add Scenario2 layers (school)
+  function addScenario2Layers(map) {
+    // Polygon Layer: zoom 14+
+    map.addLayer({
+      id: "scenario2-polys",
+      type: "fill",
+      source: "scenario2",
+      "source-layer": "scenario2-polys",
+      // filter: ["==", ["geometry-type"], "Polygon"],
+filter: ["all",
+  ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
+  ["==", ["geometry-type"], "Polygon"]
+],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "orange",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // Points Layer: zoom 6–14
+    map.addLayer({
+      id: "scenario2-points",
+      type: "circle",
+      source: "scenario2",
+      "source-layer": "scenario2-points",
+filter: ["all",
+  ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
+  ["==", ["geometry-type"], "Point"]
+],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "orange",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
+  }
+
+
+
+
 
   addAccidentLayersToMap(map);
   addAccidentClusterLayers(map);
@@ -686,6 +745,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   addMaxspeedLayers(map);
   addSchoolsLayer(map);
   addScenario1Layers(map);
+  addScenario2Layers(map);
 
 
 
