@@ -15,7 +15,9 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   addPMTilesSource("movebis", "movebis_speed_germany_2020_min10cnt.pmtiles");
   addPMTilesSource("hvs", "Hauptverkehrstraßennetz.pmtiles");
   addPMTilesSource("maxspeed", "processed_major_highways_germany_250528.pmtiles");
-  addPMTilesSource("schools", "germany_osm_schools-25-05-09.pmtiles");
+  // addPMTilesSource("schools", "germany_osm_schools-25-05-09.pmtiles");
+  addPMTilesSource("schools", "germany_osm_schools_full_25-05-09.pmtiles "); //new no drops
+  
   addPMTilesSource("accidents_11-12", "accidents_11-12.pmtiles");
   addPMTilesSource("accidents_12-13", "accidents_12-13.pmtiles");
   addPMTilesSource("accidents-cluster", "combined_may25_group.pmtiles");
