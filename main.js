@@ -701,7 +701,7 @@ function applyZoomLock() {
   // Determine the strictest minZoom
   const minZooms = [];
   if (movebisVisible) minZooms.push(13);
-  if (schoolsVisible) minZooms.push(13); // TODO: should be 11 but need to fix pmtiles
+  if (schoolsVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
   if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK

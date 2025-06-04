@@ -69,6 +69,30 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // LAYERS – ggf. aufräumen/splitten später (siehe vorherige Ideen)
 
   function addAccidentLayersToMap(map) {
+    // function add({ idSuffix, sourceId, minzoom, maxzoom }) {
+    //   map.addLayer({
+    //     id: `accident-points-${idSuffix}`,
+    //     type: "circle",
+    //     source: sourceId,
+    //     "source-layer": "accidents",
+    //     minzoom,
+    //     maxzoom,
+    //     paint: {
+    //       "circle-radius": 6,
+    //       "circle-color": [
+    //         "match",
+    //         ["get", "UKATEGORIE"],
+    //         1, "#e41a1c",
+    //         2, "#377eb8",
+    //         3, "#4daf4a",
+    //         "#aaaaaa"
+    //       ],
+    //       "circle-opacity": 0.6,
+    //       "circle-stroke-color": "#000",
+    //       "circle-stroke-width": 0.5
+    //     }
+    //   });
+
     function add({ idSuffix, sourceId, minzoom, maxzoom }) {
       map.addLayer({
         id: `accident-points-${idSuffix}`,
@@ -78,7 +102,17 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
         minzoom,
         maxzoom,
         paint: {
-          "circle-radius": 6,
+          "circle-radius": [
+            "interpolate", // interpolate ciclesize based on zoom
+            ["linear"],
+            ["zoom"],
+            0, 3,      // zoom 0: radius 3
+            12, 4,     // zoom 12: radius 4
+            14, 7,
+            16, 10,
+            18, 14,
+            19, 30
+          ],
           "circle-color": [
             "match",
             ["get", "UKATEGORIE"],
@@ -89,9 +123,11 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
           ],
           "circle-opacity": 0.6,
           "circle-stroke-color": "#000",
-          "circle-stroke-width": 0.5
+          "circle-stroke-width": 0.1
         }
       });
+
+
 
       map.addLayer({
         id: `beteiligung-symbols-${idSuffix}`,
@@ -450,28 +486,63 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // add Schools layer
   function addSchoolsLayer(map) {
     // Schulen POINTS
+    // map.addLayer({
+    //   id: "schools-points",
+    //   type: "circle",
+    //   source: "schools",
+    //   "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
+    //   filter: ["==", ["geometry-type"], "Point"],
+    //   layout: {
+    //     visibility: "none"
+    //   },
+    //   paint: {
+    //     "circle-radius": 6,
+    //     "circle-color": [
+    //       "match",
+    //       ["get", "amenity"],
+    //       "school", "#0074D9",       // blue
+    //       "kindergarten", "#2ECC40", // green
+    //       "#aaaaaa"                  // default/fallback
+    //     ],
+    //     "circle-stroke-color": "#ffffff",
+    //     "circle-stroke-width": 1
+    //   }
+    // });
+
     map.addLayer({
       id: "schools-points",
-      type: "circle",
+      type: "symbol",
       source: "schools",
       "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
       filter: ["==", ["geometry-type"], "Point"],
       layout: {
-        visibility: "none"
+        visibility: "none",
+        "icon-image": "home",  // Maki-Icon
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, 0.6,
+          14, 1,
+          16, 1.7
+        ],
+        "icon-allow-overlap": true //,
+        // "icon-ignore-placement": true,
+        // "icon-optional": true
       },
       paint: {
-        "circle-radius": 6,
-        "circle-color": [
+        "icon-color": [
           "match",
           ["get", "amenity"],
           "school", "#0074D9",       // blue
           "kindergarten", "#2ECC40", // green
           "#aaaaaa"                  // default/fallback
         ],
-        "circle-stroke-color": "#ffffff",
-        "circle-stroke-width": 1
+        "icon-opacity": 0.5
       }
     });
+
+
 
     // Schulen POLYGONS
     map.addLayer({
@@ -576,92 +647,92 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   //   });
   // }
 
-//   function addMapillaryLayer(map) {
-//   map.addLayer({
-//     id: "mapillary-images-layer",
-//     type: "circle",
-//     source: "mapillary-images",
-//     "source-layer": "image",
-//     minzoom: 14,
-//     maxzoom: 20,
-//     layout: {
-//       visibility: "none"
-//     },
-//     paint: {
-//       // Corrected color switch with to-string()
-//       "circle-color": [
-//         "match",
-//         ["to-string", ["get", "is_pano"]],
-//         "true", "#0077ff",   // pano
-//         "false", "#00b955",  // non-pano
-//         "#999999"            // fallback
-//       ],
-//       // Larger radius if zoom > 16
-//       "circle-radius": [
-//         "interpolate", ["linear"], ["zoom"],
-//         14, 3,
-//         16, 4,
-//         17, 5
-//       ]
-//     }
-//   });
-// }
+  //   function addMapillaryLayer(map) {
+  //   map.addLayer({
+  //     id: "mapillary-images-layer",
+  //     type: "circle",
+  //     source: "mapillary-images",
+  //     "source-layer": "image",
+  //     minzoom: 14,
+  //     maxzoom: 20,
+  //     layout: {
+  //       visibility: "none"
+  //     },
+  //     paint: {
+  //       // Corrected color switch with to-string()
+  //       "circle-color": [
+  //         "match",
+  //         ["to-string", ["get", "is_pano"]],
+  //         "true", "#0077ff",   // pano
+  //         "false", "#00b955",  // non-pano
+  //         "#999999"            // fallback
+  //       ],
+  //       // Larger radius if zoom > 16
+  //       "circle-radius": [
+  //         "interpolate", ["linear"], ["zoom"],
+  //         14, 3,
+  //         16, 4,
+  //         17, 5
+  //       ]
+  //     }
+  //   });
+  // }
 
-function addMapillaryLayer(map) {
-  // ⬇️ Soft halo for pano
-  map.addLayer({
-    id: "mapillary-images-halo",
-    type: "circle",
-    source: "mapillary-images",
-    "source-layer": "image",
-    minzoom: 14,
-    maxzoom: 21,
-    layout: {
-      visibility: "none"
-    },
-    filter: ["==", ["to-string", ["get", "is_pano"]], "true"],
-    paint: {
-      "circle-color": "#0077ff",
-      "circle-radius": [
-        "interpolate", ["linear"], ["zoom"],
-        14, 6,
-        15, 8,
-        17, 10
-      ],
-      "circle-opacity": 0.3
-    }
-  });
+  function addMapillaryLayer(map) {
+    // ⬇️ Soft halo for pano
+    map.addLayer({
+      id: "mapillary-images-halo",
+      type: "circle",
+      source: "mapillary-images",
+      "source-layer": "image",
+      minzoom: 14,
+      maxzoom: 21,
+      layout: {
+        visibility: "none"
+      },
+      filter: ["==", ["to-string", ["get", "is_pano"]], "true"],
+      paint: {
+        "circle-color": "#0077ff",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          14, 6,
+          15, 8,
+          17, 10
+        ],
+        "circle-opacity": 0.3
+      }
+    });
 
-  // ⬆️ Main circle on top
-  map.addLayer({
-    id: "mapillary-images-layer",
-    type: "circle",
-    source: "mapillary-images",
-    "source-layer": "image",
-    minzoom: 14,
-    maxzoom: 21,
-    layout: {
-      visibility: "none"
-    },
-    paint: {
-      "circle-color": [
-        "match",
-        ["to-string", ["get", "is_pano"]],
-        "true", "#0077ff",
-        "false", "#00b955",
-        "#999999"
-      ],
-      "circle-radius": [
-        "interpolate", ["linear"], ["zoom"],
-        14, 3,
-        16, 4,
-        17, 5
-      ]
-    }
-  });
-}
+    // ⬆️ Main circle on top
+    map.addLayer({
+      id: "mapillary-images-layer",
+      type: "circle",
+      source: "mapillary-images",
+      "source-layer": "image",
+      minzoom: 14,
+      maxzoom: 21,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": [
+          "match",
+          ["to-string", ["get", "is_pano"]],
+          "true", "#0077ff",
+          "false", "#00b955",
+          "#999999"
+        ],
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          14, 3,
+          16, 4,
+          17, 5
+        ]
+      }
+    });
+  }
 
-// map.moveLayer("mapillary-images-halo", "mapillary-images-layer");
+  // map.moveLayer("mapillary-images-halo", "mapillary-images-layer");
   addMapillaryLayer(map);
 
 
