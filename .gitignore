@@ -12,6 +12,7 @@ config.js
 # Ignore virtual environment
 unfallkarte_env/
 accident_data/
+schrott/
 
 # !accidents_11-12.pmtiles
 # !accidents_12-13.pmtiles
