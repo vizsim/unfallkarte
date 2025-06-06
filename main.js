@@ -13,7 +13,8 @@ import {
   setupSchoolsPopups,
   // setupMapillaryPopups,
   setupScenario1Popups,
-  setupScenario2Popups
+  setupScenario2Popups,
+  setupScenario3Popups
 
 } from './popupHandlers.js';
 
@@ -435,6 +436,7 @@ async function initMap() {
     // setupMapillaryPopups(map);
     setupScenario1Popups(map);
     setupScenario2Popups(map);
+    setupScenario3Popups(map);
 
 
 
@@ -967,6 +969,23 @@ document.getElementById("toggle-scenario2").addEventListener("change", function 
   if (checked) {
     applyScenario2ClusterSizeFilter(0);
   }
+});
+
+
+// Checkbox shows/hides the layers AND the slider
+document.getElementById("toggle-scenario3").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+
+  map.setLayoutProperty("scenario3-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario3-polys", "visibility", checked ? "visible" : "none");
+
+  // Show or hide the slider
+  //sliderContainer3.style.display = checked ? "block" : "none";
+
+  // // Apply filter initially
+  // if (checked) {
+  //   applyScenario3ClusterSizeFilter(0);
+  // }
 });
 
 

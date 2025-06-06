@@ -396,3 +396,33 @@ export function setupScenario2Popups(map) {
     });
 }
 
+
+// Scenario 3 popups
+export function setupScenario3Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const renderScenario3Tooltip = (props) => `
+        <div style="font-size: 12px;">
+          <strong>Szenario 3</strong><br/>
+          <table style="border-collapse: collapse;">
+            <tr><td><strong>maxspeed</strong></td><td>${props.maxspeed ?? "-"}</td></tr>
+            <tr><td><strong>Name</strong></td><td>${props.name ?? "-"}</td></tr>
+            <tr><td><strong>Länge (m)</strong></td><td>${props.length_m !== undefined ? Number(props.length_m).toFixed(2) : "-"}</td></tr>
+          </table>
+        </div>
+      `;
+
+    ["scenario3-polys", "scenario3-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario3Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+    });
+}
+

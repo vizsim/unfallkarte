@@ -501,7 +501,8 @@
               title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
           <div id="scenario1-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
-            <label for="scenario1-slider">Min. Anzahl Unfälle (Cluster-Größe): <span id="scenario1-slider-value">3</span></label><br>
+            <label for="scenario1-slider">Min. Anzahl Unfälle (Cluster-Größe): <span
+                id="scenario1-slider-value">3</span></label><br>
             <input type="range" id="scenario1-slider" min="3" max="20" step="1" value="3" />
           </div>
         </div>
@@ -510,15 +511,32 @@
       <div class="legend-section-content">
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
-        <input type="checkbox" id="toggle-scenario2" />
-        Sc2: Unfall-Häufungen an Schulen/Kita anzeigen (ab 2020)
-        <span class="info-icon"
-          title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+            <input type="checkbox" id="toggle-scenario2" />
+            Sc2: Unfall-Häufungen an Schulen/Kita anzeigen (ab 2020)
+            <span class="info-icon"
+              title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
           <div id="scenario2-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
-        <label for="scenario2-slider">Min. Anzahl Unfälle je Umfeld (50m): <span id="scenario2-slider-value">3</span></label><br>
-        <input type="range" id="scenario2-slider" min="3" max="20" step="1" value="3" />
+            <label for="scenario2-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
+                id="scenario2-slider-value">3</span></label><br>
+            <input type="range" id="scenario2-slider" min="3" max="20" step="1" value="3" />
           </div>
+        </div>
+      </div>
+
+      <div class="legend-section-content">
+        <div style="margin-top: 6px;">
+          <label style="margin-left: 10px;">
+            <input type="checkbox" id="toggle-scenario3" />
+            Sc3: Kurze Tempo50 Segmente (< 400m) zw. Tempo30 Segmenten anzeigen
+            <span class="info-icon"
+              title="Quelle: OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+          </label>
+          <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+            <label for="scenario3-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
+                id="scenario3-slider-value">3</span></label><br>
+            <input type="range" id="scenario3-slider" min="3" max="20" step="1" value="3" />
+          </div> -->
         </div>
       </div>
 
