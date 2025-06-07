@@ -9,7 +9,7 @@ config.js
 *.pbf
 *.fgb
 *.json
-#config_mapillary_privat.json
+*.gpkg
 
 # Ignore virtual environment
 unfallkarte_env/
