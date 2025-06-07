@@ -8,11 +8,15 @@ config.js
 *.geojson.gz
 *.pbf
 *.fgb
+*.json
+#config_mapillary_privat.json
 
 # Ignore virtual environment
 unfallkarte_env/
 accident_data/
 schrott/
+
+
 
 # !accidents_11-12.pmtiles
 # !accidents_12-13.pmtiles
