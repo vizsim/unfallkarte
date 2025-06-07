@@ -484,7 +484,11 @@ async function initMap() {
       const mapillaryVisible =
         map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible" ||
         map.getLayoutProperty("mapillary-images-halo", "visibility") === "visible";
-      const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
+      
+      //const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
+      const maxspeedVisible =
+        map.getLayoutProperty("maxspeed", "visibility") === "visible" ||
+        map.getLayoutProperty("maxspeed_minor", "visibility") === "visible";
 
       // Update visibility for special legends
       // if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
@@ -746,7 +750,7 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools","health", "hvs", "mapillary", "movebis", "maxspeed", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
+  ["schools","health", "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
@@ -848,7 +852,13 @@ document.getElementById("toggle-maxspeed").addEventListener("change", function (
     "maxspeed-forward",
     "maxspeed-backward",
     "maxspeed-conditional-forward",
-    "maxspeed-conditional-backward"
+    "maxspeed-conditional-backward",
+    "maxspeed_minor",
+    "maxspeed_minor-conditional",
+    "maxspeed_minor-forward",
+    "maxspeed_minor-backward",
+    "maxspeed_minor-conditional-forward",
+    "maxspeed_minor-conditional-backward"
   ];
 
   layerIds.forEach(id => {

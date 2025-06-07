@@ -15,6 +15,10 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   addPMTilesSource("movebis", "movebis_speed_germany_2020_min10cnt.pmtiles");
   addPMTilesSource("hvs", "Hauptverkehrstraßennetz.pmtiles");
   addPMTilesSource("maxspeed", "processed_major_highways_germany_250528.pmtiles");
+
+  addPMTilesSource("maxspeed_minor", "processed_minor_highways_germany_250528.pmtiles");
+
+
   // addPMTilesSource("schools", "germany_osm_schools-25-05-09.pmtiles");
   //addPMTilesSource("schools", "germany_osm_schools_full_25-05-09.pmtiles "); //new no drops
   addPMTilesSource("schools", "processed_schools_germany_250528.pmtiles"); //new no drops
@@ -83,81 +87,6 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // LAYERS – ggf. aufräumen/splitten später (siehe vorherige Ideen)
 
   function addAccidentLayersToMap(map) {
-
-    // function add({ idSuffix, sourceId, minzoom, maxzoom }) {
-    //   map.addLayer({
-    //     id: `accident-points-${idSuffix}`,
-    //     type: "circle",
-    //     source: sourceId,
-    //     "source-layer": "accidents",
-    //     minzoom,
-    //     maxzoom,
-    //     paint: {
-    //       "circle-radius": [
-    //         "interpolate", // interpolate ciclesize based on zoom
-    //         ["linear"],
-    //         ["zoom"],
-    //         0, 3,      // zoom 0: radius 3
-    //         12, 4,     // zoom 12: radius 4
-    //         14, 7,
-    //         16, 10,
-    //         18, 14,
-    //         19, 30
-    //       ],
-    //       "circle-color": [
-    //         "match",
-    //         ["get", "UKATEGORIE"],
-    //         1, "#e41a1c",
-    //         2, "#377eb8",
-    //         3, "#4daf4a",
-    //         "#aaaaaa"
-    //       ],
-    //       "circle-opacity": 0.6,
-    //       "circle-stroke-color": "#000",
-    //       "circle-stroke-width": 0.1
-    //     }
-    //   });
-
-
-
-    //   map.addLayer({
-    //     id: `beteiligung-symbols-${idSuffix}`,
-    //     type: "symbol",
-    //     source: sourceId,
-    //     "source-layer": "accidents",
-    //     minzoom,
-    //     maxzoom,
-    //     layout: {
-    //       "text-field": ["concat",
-    //         ["case", ["==", ["get", "IstRad"], 1], "R", ""],
-    //         ["case", ["all", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1]], ", ", ""],
-    //         ["case", ["==", ["get", "IstPKW"], 1], "P", ""],
-    //         ["case", ["any", ["all", ["==", ["get", "IstFuss"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1]]]], ", ", ""],
-    //         ["case", ["==", ["get", "IstFuss"], 1], "F", ""],
-    //         ["case", ["any", ["all", ["==", ["get", "IstKrad"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1]]]], ", ", ""],
-    //         ["case", ["==", ["get", "IstKrad"], 1], "K", ""],
-    //         ["case", ["any", ["all", ["==", ["get", "IstGkfz"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1], ["==", ["get", "IstKrad"], 1]]]], ", ", ""],
-    //         ["case", ["==", ["get", "IstGkfz"], 1], "G", ""],
-    //         ["case", ["any", ["all", ["==", ["get", "IstSonstig"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1], ["==", ["get", "IstKrad"], 1], ["==", ["get", "IstGkfz"], 1]]]], ", ", ""],
-    //         ["case", ["==", ["get", "IstSonstig"], 1], "S", ""]
-    //       ],
-    //       "text-size": 14,
-    //       "text-offset": [0, 0],
-    //       "text-anchor": "top",
-    //       "text-allow-overlap": true,
-    //       "text-ignore-placement": true,
-    //       "visibility": "visible"
-    //     },
-    //     paint: {
-    //       "text-color": "#000"
-    //     }
-    //   });
-    // }
-
-    // add({ idSuffix: "11-12", sourceId: "accidents_11-12", minzoom: 11, maxzoom: 12 });
-    // add({ idSuffix: "12-13", sourceId: "accidents_12-13", minzoom: 12, maxzoom: 20.1 });
-
-
 
     function add({ sourceId, minzoom, maxzoom }) {
       map.addLayer({
@@ -404,7 +333,15 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
     // Create paint object with optional dash and offset
     function makePaint(property, isDashed, offset) {
       const paint = {
-        "line-width": 2.5,
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, 2.5,    // Zoom 10 → width 2.5
+          17, 3,    // Zoom 17 → still 2.5
+          18, 6,      // Zoom 18 → grow
+          20, 10       // Zoom 20 → even wider
+        ],
         "line-color": makeLineColorExpression(property)
       };
       if (isDashed) paint["line-dasharray"] = [2, 2];
@@ -492,65 +429,129 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
 
 
+  // // Maxspeed layers MINOR
 
-  // function addMaxspeedLayers(map) {
-  //   const commonLineColor = [
-  //     "case",
-  //     // Explicit "None"
-  //     ["==", ["get", "maxspeed"], "None"], "#000000",
+  function addMaxspeedMinorLayers(map) {
+    const offsetForward = 3;
+    const offsetBackward = -3;
 
-  //     // DE:urban fallback → treat as 50
-  //     ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:urban"]],
-  //     "#fdcc8a",
+    // Create dynamic color expression based on the given property
+    function makeLineColorExpression(property) {
+      return [
+        "case",
+        ["==", ["get", property], "None"], "#000000",
+        ["all", ["!", ["has", property]], ["==", ["get", "maxspeed_type"], "DE:urban"]], "#fdcc8a",
+        ["all", ["!", ["has", property]], ["==", ["get", "maxspeed_type"], "DE:rural"]], "#e31a1c",
+        ["!", ["has", property]], "#ff69b4",
+        ["==", ["get", property], null], "#ff69b4",
+        [
+          "interpolate", ["linear"],
+          ["to-number", ["get", property]],
+          30, "#31a354",
+          50, "#fdcc8a",
+          100, "#e31a1c"
+        ]
+      ];
+    }
 
-  //     // DE:rural fallback → treat as 100
-  //     ["all", ["!", ["has", "maxspeed"]], ["==", ["get", "maxspeed_type"], "DE:rural"]],
-  //     "#e31a1c",
+    // Create paint object with optional dash and offset
+    function makePaint(property, isDashed, offset) {
+      const paint = {
+        "line-width": 1.5,
+        "line-color": makeLineColorExpression(property)
+      };
+      if (isDashed) paint["line-dasharray"] = [2, 2];
+      if (offset !== 0) paint["line-offset"] = offset;
+      return paint;
+    }
 
-  //     // Null/missing maxspeed
-  //     ["!", ["has", "maxspeed"]], "#ff69b4",
-  //     ["==", ["get", "maxspeed"], null], "#ff69b4",
+    const minzoom_minor = 15; // minzoom for minor highways
+    // --- Conditional lines (directional)
+    map.addLayer({
+      id: "maxspeed_minor-conditional-forward",
+      type: "line",
+      source: "maxspeed_minor",
+      "source-layer": "highways_minor",
+      layout: { visibility: "none" },
+      filter: ["all", ["has", "maxspeed_forward"], ["has", "maxspeed_conditional"]],
+      minzoom: minzoom_minor,
+      paint: makePaint("maxspeed_forward", true, offsetForward)
+    });
 
-  //     [
-  //       "interpolate", ["linear"],
-  //       ["to-number", ["get", "maxspeed"]],
-  //       30, "#31a354",
-  //       50, "#fdcc8a",
-  //       100, "#e31a1c"
-  //     ]
-  //   ];
+    map.addLayer({
+      id: "maxspeed_minor-conditional-backward",
+      type: "line",
+      source: "maxspeed_minor",
+      "source-layer": "highways_minor",
+      layout: { visibility: "none" },
+      filter: ["all", ["has", "maxspeed_backward"], ["has", "maxspeed_conditional"]],
+      minzoom: minzoom_minor,
+      paint: makePaint("maxspeed_backward", true, offsetBackward)
+    });
 
-  //   const commonPaint = {
-  //     "line-width": 2.5,
-  //     "line-color": commonLineColor
-  //   };
+    // --- Regular lines (directional)
+    map.addLayer({
+      id: "maxspeed_minor-forward",
+      type: "line",
+      source: "maxspeed_minor",
+      "source-layer": "highways_minor",
+      layout: { visibility: "none" },
+      filter: ["all", ["has", "maxspeed_forward"], ["!", ["has", "maxspeed_conditional"]]],
+      minzoom: minzoom_minor,
+      paint: makePaint("maxspeed_forward", false, offsetForward)
+    });
 
-  //   map.addLayer({
-  //     id: "maxspeed-conditional",
-  //     type: "line",
-  //     source: "maxspeed",
-  //     "source-layer": "highways",
-  //     layout: { visibility: "none" },
-  //     filter: ["has", "maxspeed_conditional"],
-  //     paint: {
-  //       ...commonPaint,
-  //       "line-dasharray": [2, 2] // add dashed style for conditionals
-  //     }
-  //   });
+    map.addLayer({
+      id: "maxspeed_minor-backward",
+      type: "line",
+      source: "maxspeed_minor",
+      "source-layer": "highways_minor",
+      layout: { visibility: "none" },
+      filter: ["all", ["has", "maxspeed_backward"], ["!", ["has", "maxspeed_conditional"]]],
+      minzoom: minzoom_minor,
+      paint: makePaint("maxspeed_backward", false, offsetBackward)
+    });
 
-  //   map.addLayer({
-  //     id: "maxspeed",
-  //     type: "line",
-  //     source: "maxspeed",
-  //     "source-layer": "highways",
-  //     layout: { visibility: "none" },
-  //     filter: ["!", ["has", "maxspeed_conditional"]],
-  //     paint: commonPaint // solid lines, no dash
-  //   });
+    // --- Default (centered, no directional tags)
+    map.addLayer({
+      id: "maxspeed_minor",
+      type: "line",
+      source: "maxspeed_minor",
+      "source-layer": "highways_minor",
+      layout: { visibility: "none" },
+      filter: [
+        "all",
+        ["!", ["has", "maxspeed_forward"]],
+        ["!", ["has", "maxspeed_backward"]],
+        ["!", ["has", "maxspeed_conditional"]]
+      ],
+      minzoom: minzoom_minor,
+      paint: makePaint("maxspeed", false, 0)
+    });
 
-  //   // Optional: reorder the conditional layer above others
-  //   map.moveLayer("maxspeed-conditional");
-  // }
+    map.addLayer({
+      id: "maxspeed_minor-conditional",
+      type: "line",
+      source: "maxspeed_minor",
+      "source-layer": "highways_minor",
+      layout: { visibility: "none" },
+      filter: [
+        "all",
+        ["!", ["has", "maxspeed_forward"]],
+        ["!", ["has", "maxspeed_backward"]],
+        ["has", "maxspeed_conditional"]
+      ],
+      minzoom: minzoom_minor,
+      paint: makePaint("maxspeed", true, 0)
+    });
+
+    // --- Ensure visibility priority (move conditionals above others)
+    map.moveLayer("maxspeed_minor-conditional-forward");
+    map.moveLayer("maxspeed_minor-conditional-backward");
+  }
+
+
+
 
 
 
@@ -643,23 +644,23 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       },
       paint: {
         "icon-color": [
-        "case",
-        // Gruppe 1: Medizinisch
-        ["==", ["get", "amenity"], "hospital"], "#D62728",
-        ["==", ["get", "amenity"], "clinic"], "#D62728",
-        ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
-        ["==", ["get", "healthcare:speciality"], "psychiatry"], "#D62728",
+          "case",
+          // Gruppe 1: Medizinisch
+          ["==", ["get", "amenity"], "hospital"], "#D62728",
+          ["==", ["get", "amenity"], "clinic"], "#D62728",
+          ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
+          ["==", ["get", "healthcare:speciality"], "psychiatry"], "#D62728",
 
-        // Gruppe 3: Pflege / Senioren
-        ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
-        ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
-        ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
+          // Gruppe 3: Pflege / Senioren
+          ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
+          ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
+          ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
 
-        // Gruppe 4: Behindertenhilfe
-        ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
+          // Gruppe 4: Behindertenhilfe
+          ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
 
-        "#aaaaaa"
-      ],
+          "#aaaaaa"
+        ],
         "icon-opacity": 0.5
       }
     });
@@ -677,20 +678,20 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       paint: {
         "fill-color": [
           "case",
-        // Gruppe 1: Medizinisch
-        ["==", ["get", "amenity"], "hospital"], "#D62728",
-        ["==", ["get", "amenity"], "clinic"], "#D62728",
-        ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
+          // Gruppe 1: Medizinisch
+          ["==", ["get", "amenity"], "hospital"], "#D62728",
+          ["==", ["get", "amenity"], "clinic"], "#D62728",
+          ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
 
-        // Gruppe 2: Psychisch
-        ["==", ["get", "healthcare:speciality"], "psychiatry"], "#9467BD",
-        // Gruppe 3: Pflege / Senioren
-        ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
-        ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
-        ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
+          // Gruppe 2: Psychisch
+          ["==", ["get", "healthcare:speciality"], "psychiatry"], "#9467BD",
+          // Gruppe 3: Pflege / Senioren
+          ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
+          ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
+          ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
 
-        // Gruppe 4: Behindertenhilfe
-        ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
+          // Gruppe 4: Behindertenhilfe
+          ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
 
           "#aaaaaa"
         ],
@@ -908,6 +909,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   addMovebisLayer(map);
   addHvsLayer(map);
   addMaxspeedLayers(map);
+  addMaxspeedMinorLayers(map);
   addSchoolsLayer(map);
   addHealthLayer(map);
   addScenario1Layers(map);

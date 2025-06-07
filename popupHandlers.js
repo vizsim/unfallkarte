@@ -227,7 +227,13 @@ export function setupMaxspeedPopups(map) {
         "maxspeed-forward",
         "maxspeed-backward",
         "maxspeed-conditional-forward",
-        "maxspeed-conditional-backward"
+        "maxspeed-conditional-backward",
+            "maxspeed_minor",
+    "maxspeed_minor-conditional",
+    "maxspeed_minor-forward",
+    "maxspeed_minor-backward",
+    "maxspeed_minor-conditional-forward",
+    "maxspeed_minor-conditional-backward"
     ].forEach((layerId) => {
         map.on("mousemove", layerId, (e) => {
             map.getCanvas().style.cursor = "pointer";
