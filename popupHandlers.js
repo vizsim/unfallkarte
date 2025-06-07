@@ -298,6 +298,41 @@ export function setupSchoolsPopups(map) {
     handleLayer("schools-polygons");
 }
 
+export function setupHealthPopups(map) {
+  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+  const handleLayer = (layerId) => {
+    map.on("mouseenter", layerId, (e) => {
+      map.getCanvas().style.cursor = "pointer";
+      const props = e.features[0].properties;
+
+      const content = `
+        <table style="font-size:12px; border-collapse:collapse;">
+          ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
+          ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
+          ${props.healthcare ? `<tr><td><strong>Healthcare</strong></td><td>${props.healthcare}</td></tr>` : ""}
+          ${props["healthcare:speciality"] ? `<tr><td><strong>Fachgebiet</strong></td><td>${props["healthcare:speciality"]}</td></tr>` : ""}
+          ${props.social_facility ? `<tr><td><strong>Einrichtung</strong></td><td>${props.social_facility}</td></tr>` : ""}
+          ${props["social_facility:for"] ? `<tr><td><strong>Zielgruppe</strong></td><td>${props["social_facility:for"]}</td></tr>` : ""}
+          ${props.operator ? `<tr><td><strong>Träger</strong></td><td>${props.operator}</td></tr>` : ""}
+          ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
+          ${props.osm_id ? `<tr><td><strong>OSM ID</strong></td><td>${props.osm_id}</td></tr>` : ""}
+        </table>
+      `;
+
+      popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+    });
+
+    map.on("mouseleave", layerId, () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+  };
+
+  handleLayer("health-points");
+  handleLayer("health-polygons");
+}
+
 
 // export function setupMapillaryPopups(map) {
 //   const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });

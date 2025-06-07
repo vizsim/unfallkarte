@@ -19,6 +19,8 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   //addPMTilesSource("schools", "germany_osm_schools_full_25-05-09.pmtiles "); //new no drops
   addPMTilesSource("schools", "processed_schools_germany_250528.pmtiles"); //new no drops
 
+  addPMTilesSource("health", "processed_health_germany_250528.pmtiles"); //new no drops
+
   // addPMTilesSource("accidents_11-12", "accidents_11-12.pmtiles");
   // addPMTilesSource("accidents_12-13", "accidents_12-13.pmtiles");
   addPMTilesSource("accidents_single", "accidents_single.pmtiles");
@@ -555,28 +557,6 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // add Schools layer
   function addSchoolsLayer(map) {
     // Schulen POINTS
-    // map.addLayer({
-    //   id: "schools-points",
-    //   type: "circle",
-    //   source: "schools",
-    //   "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
-    //   filter: ["==", ["geometry-type"], "Point"],
-    //   layout: {
-    //     visibility: "none"
-    //   },
-    //   paint: {
-    //     "circle-radius": 6,
-    //     "circle-color": [
-    //       "match",
-    //       ["get", "amenity"],
-    //       "school", "#0074D9",       // blue
-    //       "kindergarten", "#2ECC40", // green
-    //       "#aaaaaa"                  // default/fallback
-    //     ],
-    //     "circle-stroke-color": "#ffffff",
-    //     "circle-stroke-width": 1
-    //   }
-    // });
 
     map.addLayer({
       id: "schools-points",
@@ -611,8 +591,6 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       }
     });
 
-
-
     // Schulen POLYGONS
     map.addLayer({
       id: "schools-polygons",
@@ -636,6 +614,94 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       }
     });
   }
+
+
+  // add health layer
+  function addHealthLayer(map) {
+    // health POINTS
+
+    map.addLayer({
+      id: "health-points",
+      type: "symbol",
+      source: "health",
+      "source-layer": "germany_osm_health", // must match tippecanoe `-l` name
+      filter: ["==", ["geometry-type"], "Point"],
+      layout: {
+        visibility: "none",
+        "icon-image": "home",  // Maki-Icon
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, 0.6,
+          14, 1,
+          16, 1.7
+        ],
+        "icon-allow-overlap": true //,
+        // "icon-ignore-placement": true,
+        // "icon-optional": true
+      },
+      paint: {
+        "icon-color": [
+        "case",
+        // Gruppe 1: Medizinisch
+        ["==", ["get", "amenity"], "hospital"], "#D62728",
+        ["==", ["get", "amenity"], "clinic"], "#D62728",
+        ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
+        ["==", ["get", "healthcare:speciality"], "psychiatry"], "#D62728",
+
+        // Gruppe 3: Pflege / Senioren
+        ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
+        ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
+        ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
+
+        // Gruppe 4: Behindertenhilfe
+        ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
+
+        "#aaaaaa"
+      ],
+        "icon-opacity": 0.5
+      }
+    });
+
+    // health POLYGONS
+    map.addLayer({
+      id: "health-polygons",
+      type: "fill",
+      source: "health",
+      "source-layer": "germany_osm_health",
+      filter: ["==", ["geometry-type"], "Polygon"],
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": [
+          "case",
+        // Gruppe 1: Medizinisch
+        ["==", ["get", "amenity"], "hospital"], "#D62728",
+        ["==", ["get", "amenity"], "clinic"], "#D62728",
+        ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
+
+        // Gruppe 2: Psychisch
+        ["==", ["get", "healthcare:speciality"], "psychiatry"], "#9467BD",
+        // Gruppe 3: Pflege / Senioren
+        ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
+        ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
+        ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
+
+        // Gruppe 4: Behindertenhilfe
+        ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
+
+          "#aaaaaa"
+        ],
+        "fill-opacity": 0.5,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+  }
+
+
+
 
   // add Scenario1 layers (tempo100)
   function addScenario1Layers(map) {
@@ -693,10 +759,10 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       source: "scenario2",
       "source-layer": "scenario2-polys",
       // filter: ["==", ["geometry-type"], "Polygon"],
-filter: ["all",
-  ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
-  ["==", ["geometry-type"], "Polygon"]
-],
+      filter: ["all",
+        ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
+        ["==", ["geometry-type"], "Polygon"]
+      ],
       minzoom: 14,
       layout: {
         visibility: "none"
@@ -714,10 +780,10 @@ filter: ["all",
       type: "circle",
       source: "scenario2",
       "source-layer": "scenario2-points",
-filter: ["all",
-  ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
-  ["==", ["geometry-type"], "Point"]
-],
+      filter: ["all",
+        ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
+        ["==", ["geometry-type"], "Point"]
+      ],
       minzoom: 6,
       maxzoom: 14,
       layout: {
@@ -738,7 +804,7 @@ filter: ["all",
   }
 
 
-    // add Scenario3 layers (school)
+  // add Scenario3 layers (school)
   function addScenario3Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({
@@ -747,7 +813,7 @@ filter: ["all",
       source: "scenario3",
       "source-layer": "scenario3-polys",
       // filter: ["==", ["geometry-type"], "Polygon"],
-filter: ["all"],
+      filter: ["all"],
       minzoom: 14,
       layout: {
         visibility: "none"
@@ -765,7 +831,7 @@ filter: ["all"],
       type: "circle",
       source: "scenario3",
       "source-layer": "scenario3-points",
-filter: ["all"],
+      filter: ["all"],
       minzoom: 6,
       maxzoom: 14,
       layout: {
@@ -786,7 +852,7 @@ filter: ["all"],
   }
 
 
-      // add Scenario4 layers (missing tempo30)
+  // add Scenario4 layers (missing tempo30)
   function addScenario4Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({
@@ -795,7 +861,7 @@ filter: ["all"],
       source: "scenario4",
       "source-layer": "scenario4-polys",
       // filter: ["==", ["geometry-type"], "Polygon"],
-filter: ["all"],
+      filter: ["all"],
       minzoom: 14,
       layout: {
         visibility: "none"
@@ -813,7 +879,7 @@ filter: ["all"],
       type: "circle",
       source: "scenario4",
       "source-layer": "scenario4-points",
-filter: ["all"],
+      filter: ["all"],
       minzoom: 6,
       maxzoom: 14,
       layout: {
@@ -843,6 +909,7 @@ filter: ["all"],
   addHvsLayer(map);
   addMaxspeedLayers(map);
   addSchoolsLayer(map);
+  addHealthLayer(map);
   addScenario1Layers(map);
   addScenario2Layers(map);
   addScenario3Layers(map);

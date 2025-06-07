@@ -11,6 +11,7 @@ import {
   setupHVSPopups,
   setupMaxspeedPopups,
   setupSchoolsPopups,
+  setupHealthPopups,
   // setupMapillaryPopups,
   setupScenario1Popups,
   setupScenario2Popups,
@@ -434,6 +435,7 @@ async function initMap() {
     setupHVSPopups(map);
     setupMaxspeedPopups(map);
     setupSchoolsPopups(map);
+    setupHealthPopups(map);
     // setupMapillaryPopups(map);
     setupScenario1Popups(map);
     setupScenario2Popups(map);
@@ -705,17 +707,22 @@ function applyZoomLock() {
   const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
   const schoolsPointsVisible = map.getLayoutProperty("schools-points", "visibility") === "visible";
   const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
+  const healthPointsVisible = map.getLayoutProperty("health-points", "visibility") === "visible";
+  const healthPolygonsVisible = map.getLayoutProperty("health-polygons", "visibility") === "visible";
+
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
   //const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
 
 
 
   const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
+  const healthVisible = healthPointsVisible || healthPolygonsVisible;
 
   // Determine the strictest minZoom
   const minZooms = [];
   if (movebisVisible) minZooms.push(13);
   if (schoolsVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
+  if (healthVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
   if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
@@ -739,7 +746,7 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools", "hvs", "mapillary", "movebis", "maxspeed", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
+  ["schools","health", "hvs", "mapillary", "movebis", "maxspeed", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
@@ -860,6 +867,15 @@ document.getElementById("toggle-schools").addEventListener("change", function (e
   const checked = e.target.checked;
   map.setLayoutProperty("schools-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("schools-polygons", "visibility", checked ? "visible" : "none");
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
+document.getElementById("toggle-health").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  map.setLayoutProperty("health-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("health-polygons", "visibility", checked ? "visible" : "none");
 
   applyZoomLock();
   applyLegendVisibility();
