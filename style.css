@@ -476,3 +476,11 @@ body {
     visibility: visible !important;
     opacity: 1 !important;
 }
+
+
+.legend-section-subtitle {
+  font-weight: 600;
+  font-size: 12px;
+  margin: 12px 10px 4px 10px;
+  color: #333;
+}

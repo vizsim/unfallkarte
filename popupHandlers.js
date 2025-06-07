@@ -234,7 +234,7 @@ export function setupMaxspeedPopups(map) {
             const props = e.features[0].properties;
             // const speed = Number(props.maxspeed);
             // const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
-                //  <tr><td><strong>maxspeed</strong></td><td>${formattedSpeed}</td></tr> 
+            //  <tr><td><strong>maxspeed</strong></td><td>${formattedSpeed}</td></tr> 
             const content = `
             <div style="font-size: 12px;">
             <strong>OSM (insb. maxspeed infos)</strong><br/>
@@ -426,3 +426,40 @@ export function setupScenario3Popups(map) {
     });
 }
 
+
+// Scenario 4 popups
+export function setupScenario4Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const renderScenario4Tooltip = (props) => `
+        <div style="font-size: 12px;">
+          <strong>Szenario 4</strong><br/>
+          <table style="border-collapse: collapse;">
+            <tr><td><strong>ID</strong></td><td>${props.id ?? "-"}</td></tr>
+            <tr><td><strong>ID</strong></td><td>${props.image_id ?? "-"}</td></tr>
+            <tr><td><strong>First Seen At</strong></td><td>${props.first_seen_at ?? "-"}</td></tr>
+            <tr><td><strong>Last Seen At</strong></td><td>${props.last_seen_at ?? "-"}</td></tr>
+            <tr><td><strong>Value</strong></td><td>${props.value ?? "-"}</td></tr>
+            <tr><td><strong>Has 30 Intersection</strong></td><td>${props.has_30_intersection === true ? "Ja" : props.has_30_intersection === false ? "Nein" : "-"}</td></tr>
+          </table>
+        </div>
+      `;
+
+    ["scenario4-polys", "scenario4-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario4Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+
+        map.on("click", layerId, (e) => {
+            const image_id = e.features[0].properties.image_id;
+            if (image_id) window.open(`https://www.mapillary.com/app/?pKey=${image_id}&trafficSign[]=regulatory--maximum-speed-limit-30--g1`, "_blank");
+        });
+    });
+}

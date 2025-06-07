@@ -14,7 +14,8 @@ import {
   // setupMapillaryPopups,
   setupScenario1Popups,
   setupScenario2Popups,
-  setupScenario3Popups
+  setupScenario3Popups,
+  setupScenario4Popups
 
 } from './popupHandlers.js';
 
@@ -93,7 +94,7 @@ function updateLegendColors(activeKey) {
 const LAYERS = {
   // accidents: ["accident-points-11-12", "accident-points-12-13"],
   // symbols: ["beteiligung-symbols-11-12", "beteiligung-symbols-12-13"],
-    accidents: ["accident-points"],
+  accidents: ["accident-points"],
   symbols: ["beteiligung-symbols"],
   clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
 };
@@ -368,12 +369,12 @@ async function initMap() {
     map.on("zoom", updateScenarioLegendVisibility);
     map.on("load", updateScenarioLegendVisibility);
 
-// map.on('click', function(e) {
-//   const features = map.queryRenderedFeatures(e.point, {
-//     layers: ["scenario2-points"]
-//   });
-//   console.log("Clicked features:", features);
-// });
+    // map.on('click', function(e) {
+    //   const features = map.queryRenderedFeatures(e.point, {
+    //     layers: ["scenario2-points"]
+    //   });
+    //   console.log("Clicked features:", features);
+    // });
 
 
     function addMapillaryInteractivity(map) {
@@ -402,7 +403,7 @@ async function initMap() {
 
     toggleMapillary.addEventListener("change", () => {
       const checked = toggleMapillary.checked;
-        mapillaryFilterOptions.style.display = checked ? "block" : "none";
+      mapillaryFilterOptions.style.display = checked ? "block" : "none";
       cbPano.checked = checked;
       cbNonPano.checked = checked;
       toggleMapillary.indeterminate = false;
@@ -437,6 +438,7 @@ async function initMap() {
     setupScenario1Popups(map);
     setupScenario2Popups(map);
     setupScenario3Popups(map);
+    setupScenario4Popups(map);
 
 
 
@@ -737,7 +739,7 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools", "hvs", "mapillary", "movebis", "maxspeed", "scenario1", "scenario2"].forEach(key => {
+  ["schools", "hvs", "mapillary", "movebis", "maxspeed", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
@@ -978,6 +980,23 @@ document.getElementById("toggle-scenario3").addEventListener("change", function 
 
   map.setLayoutProperty("scenario3-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario3-polys", "visibility", checked ? "visible" : "none");
+
+  // Show or hide the slider
+  //sliderContainer3.style.display = checked ? "block" : "none";
+
+  // // Apply filter initially
+  // if (checked) {
+  //   applyScenario3ClusterSizeFilter(0);
+  // }
+});
+
+
+// Checkbox shows/hides the layers AND the slider
+document.getElementById("toggle-scenario4").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+
+  map.setLayoutProperty("scenario4-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario4-polys", "visibility", checked ? "visible" : "none");
 
   // Show or hide the slider
   //sliderContainer3.style.display = checked ? "block" : "none";

@@ -29,6 +29,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
   addPMTilesSource("scenario2", "scenario2_accidents_close2schools.pmtiles");
   addPMTilesSource("scenario3", "scenario3_tempo30_conti.pmtiles");
+  addPMTilesSource("scenario4", "scenario4_tempo30missing.pmtiles");
 
 
 
@@ -784,6 +785,54 @@ filter: ["all"],
   }
 
 
+      // add Scenario4 layers (missing tempo30)
+  function addScenario4Layers(map) {
+    // Polygon Layer: zoom 14+
+    map.addLayer({
+      id: "scenario4-polys",
+      type: "fill",
+      source: "scenario4",
+      "source-layer": "scenario4-polys",
+      // filter: ["==", ["geometry-type"], "Polygon"],
+filter: ["all"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "orange",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // Points Layer: zoom 6–14
+    map.addLayer({
+      id: "scenario4-points",
+      type: "circle",
+      source: "scenario4",
+      "source-layer": "scenario4-points",
+filter: ["all"],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "orange",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
+  }
+
+
 
 
 
@@ -796,6 +845,7 @@ filter: ["all"],
   addScenario1Layers(map);
   addScenario2Layers(map);
   addScenario3Layers(map);
+  addScenario4Layers(map);
 
 
 

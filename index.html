@@ -487,12 +487,15 @@
         style="display: flex; align-items: center; justify-content: space-between;">
         <label style="display: flex; align-items: center; gap: 6px;">
           <input type="checkbox" class="section-checkbox" data-section="scenario" checked />
-          Unfall-Szenarien (Cluster)
+          Szenarien
         </label>
         <span class="toggle-arrow section-arrow open" data-arrow="scenario"></span>
       </div>
 
+
       <div class="legend-section-content">
+        <div class="legend-section-subtitle">Unfallszenarien</div>
+
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario1" />
@@ -506,9 +509,7 @@
             <input type="range" id="scenario1-slider" min="3" max="20" step="1" value="3" />
           </div>
         </div>
-      </div>
 
-      <div class="legend-section-content">
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario2" />
@@ -524,12 +525,16 @@
         </div>
       </div>
 
+
+
+
       <div class="legend-section-content">
+        <div class="legend-section-subtitle">Straßenszenarien</div>
+
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario3" />
-            Sc3: Kurze Tempo50 Segmente (< 400m) zw. Tempo30 Segmenten anzeigen
-            <span class="info-icon"
+            Sc3: Kurze Tempo50 Segmente (< 400m) zw. Tempo30 Segmenten anzeigen <span class="info-icon"
               title="Quelle: OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
           <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
@@ -538,16 +543,30 @@
             <input type="range" id="scenario3-slider" min="3" max="20" step="1" value="3" />
           </div> -->
         </div>
+      <!-- </div> -->
+
+      <div style="margin-top: 6px;">
+        <label style="margin-left: 10px;">
+          <input type="checkbox" id="toggle-scenario4" />
+          Sc4: Kein OSM-Tempo30-Segment trotz Mapillary trafficsign (nur Berlin!) anzeigen <span class="info-icon"
+            title="Quelle: Mapillary – Lizenz: Terms of Use (mapillary.com/legal/terms) & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+        </label>
+        <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <label for="scenario3-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
+              id="scenario3-slider-value">3</span></label><br>
+          <input type="range" id="scenario3-slider" min="3" max="20" step="1" value="3" />
+        </div> -->
       </div>
-
-
-      <div class="legend-section-divider"></div>
     </div>
 
 
+    <div class="legend-section-divider"></div>
+  </div>
 
-    <!-- Szenario 2 -->
-    <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-2">
+
+
+  <!-- Szenario 2 -->
+  <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-2">
     ...
   </div> -->
 
@@ -555,192 +574,191 @@
 
 
 
-    <!-- <div class="legend-section-divider"></div> -->
-    <!-- <div class="legend-section-divider"></div> -->
+  <!-- <div class="legend-section-divider"></div> -->
+  <!-- <div class="legend-section-divider"></div> -->
 
 
-    <!-- Sektion 3: Kontext -->
-    <div class="legend-section" data-section="kontext">
-      <div class="legend-section-title section-toggle" data-section-id="kontext"
-        style="display: flex; align-items: center; justify-content: space-between;">
-        <span>Kontext</span>
-        <span class="toggle-arrow section-arrow open" data-arrow="kontext"></span>
+  <!-- Sektion 3: Kontext -->
+  <div class="legend-section" data-section="kontext">
+    <div class="legend-section-title section-toggle" data-section-id="kontext"
+      style="display: flex; align-items: center; justify-content: space-between;">
+      <span>Kontext</span>
+      <span class="toggle-arrow section-arrow open" data-arrow="kontext"></span>
+    </div>
+    <div class="legend-section-content">
+
+
+      <div style="margin-top: 6px;">
+        <label style="margin-left: 10px;">
+          <input type="checkbox" id="toggle-mapillary" />
+          Mapillary-Bilder anzeigen
+          <span class="info-icon" title="Quelle: Mapillary Coverage – Lizenz: CC BY-SA 4.0">ⓘ</span>
+        </label>
       </div>
-      <div class="legend-section-content">
+
+      <div id="mapillary-filter-options" style="display: none; margin-left: 32px; margin-top: 6px;">
+        <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <input type="checkbox" id="mapillary-nonpano" />
+          <span style="width: 12px; height: 12px; background: #00b955; border-radius: 2px;"></span>
+          normale Bilder
+        </label>
+
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" id="mapillary-pano" />
+          <span style="width: 12px; height: 12px; background: #0077ff; border-radius: 2px;"></span>
+          Panorama-Bilder
+        </label>
+      </div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-mapillary" />
-            Mapillary-Bilder anzeigen
-            <span class="info-icon" title="Quelle: Mapillary Coverage – Lizenz: CC BY-SA 4.0">ⓘ</span>
-          </label>
+      <div style="margin-top: 6px;">
+        <label style="margin-left: 10px;">
+          <input type="checkbox" id="toggle-movebis" />
+          Stadtradeln 2020 anzeigen
+          <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
+        </label>
+      </div>
+      <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
+        <div style="margin-top: 4px;">
+          <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span>
+            ≤
+            12
+            km/h</div>
+          <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span>
+            ≈
+            18
+            km/h</div>
+          <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span>
+            ≥
+            24
+            km/h</div>
         </div>
 
-        <div id="mapillary-filter-options" style="display: none; margin-left: 32px; margin-top: 6px;">
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <input type="checkbox" id="mapillary-nonpano" />
-            <span style="width: 12px; height: 12px; background: #00b955; border-radius: 2px;"></span>
-            normale Bilder
-          </label>
-
-          <label style="display: flex; align-items: center; gap: 6px;">
-            <input type="checkbox" id="mapillary-pano" />
-            <span style="width: 12px; height: 12px; background: #0077ff; border-radius: 2px;"></span>
-            Panorama-Bilder
-          </label>
+        <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
+        <div style="margin-top: 4px;">
+          <div><span
+              style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+            wenige (≤ 10)</div>
+          <div><span
+              style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+            mittel (≈ 100)</div>
+          <div><span
+              style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span>
+            viele (≥ 1000)</div>
         </div>
+      </div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-movebis" />
-            Stadtradeln 2020 anzeigen
-            <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
-          </label>
+      <div style="margin-top: 6px;">
+        <label style="margin-left: 10px;">
+          <input type="checkbox" id="toggle-hvs" />
+          Verkehrsmengen anzeigen
+          <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
+        </label>
+      </div>
+      <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
+        <div style="margin-top: 4px;">
+          <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3
+            Mio
+            Fahrzeuge/Jahr</div>
+          <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6
+            Mio
+            Fahrzeuge/Jahr</div>
+          <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10
+            Mio
+            Fahrzeuge/Jahr</div>
         </div>
-        <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span>
-              ≤
-              12
-              km/h</div>
-            <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span>
-              ≈
-              18
-              km/h</div>
-            <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span>
-              ≥
-              24
-              km/h</div>
-          </div>
-
-          <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span
-                style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-              wenige (≤ 10)</div>
-            <div><span
-                style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-              mittel (≈ 100)</div>
-            <div><span
-                style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-              viele (≥ 1000)</div>
-          </div>
-        </div>
+      </div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-hvs" />
-            Verkehrsmengen anzeigen
-            <span class="info-icon" title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
-          </label>
-        </div>
-        <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3
-              Mio
-              Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6
-              Mio
-              Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10
-              Mio
-              Fahrzeuge/Jahr</div>
-          </div>
-        </div>
+      <div style="margin-top: 6px;">
+        <label style="margin-left: 10px;">
+          <input type="checkbox" id="toggle-maxspeed" />
+          Geschwindigkeitbegrenzung anzeigen
+          <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+        </label>
+      </div>
 
-
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-maxspeed" />
-            Geschwindigkeitbegrenzung anzeigen
-            <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
-          </label>
-        </div>
-
-        <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤
-              30
-              km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
-              50
-              km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥
-              100
-              km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span>
-              kein
-              Tempolimit</div>
-            <!-- <div><span
+      <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
+        <div style="margin-top: 4px;">
+          <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤
+            30
+            km/h</div>
+          <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
+            50
+            km/h</div>
+          <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥
+            100
+            km/h</div>
+          <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span>
+            kein
+            Tempolimit</div>
+          <!-- <div><span
                 style="display:inline-block;width:24px;height:3px;margin-right:6px;border-top:3px dashed #999;"></span>
               unter Bedingungen
             </div> -->
-            <div>
-              <span
-                style="display: inline-block;width: 24px;height: 3px;margin-right: 6px;background-image: repeating-linear-gradient(to right,#999 0,#999 3.5px,transparent 3.5px,transparent 7px);"></span>
-              bedingte Geschwindigkeitsbegrenzung
-            </div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span>
-              (noch) keine Angabe in OSM</div>
-
-
+          <div>
+            <span
+              style="display: inline-block;width: 24px;height: 3px;margin-right: 6px;background-image: repeating-linear-gradient(to right,#999 0,#999 3.5px,transparent 3.5px,transparent 7px);"></span>
+            bedingte Geschwindigkeitsbegrenzung
           </div>
-        </div>
+          <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span>
+            (noch) keine Angabe in OSM</div>
 
 
-
-
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-schools" />
-            Schulen/Kindergärten anzeigen
-            <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
-          </label>
-        </div>
-        <div id="schools-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Typen</strong></div>
-          <div style="margin-top: 4px;">
-            <div>
-              <span
-                style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
-              Schule
-            </div>
-            <div>
-              <span
-                style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
-              Kindergarten
-            </div>
-          </div>
         </div>
       </div>
 
-    </div>
 
 
 
-
-
-    <div class="legend-section-divider"></div>
-
-
-
-    <div id="feature-count-wrapper"
-      style="margin-top:10px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-      <div id="feature-count">
-        Sichtbare Punkte: ...
-        <div>Zoomlevel: ...</div>
+      <div style="margin-top: 6px;">
+        <label style="margin-left: 10px;">
+          <input type="checkbox" id="toggle-schools" />
+          Schulen/Kindergärten anzeigen
+          <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+        </label>
       </div>
-      <a href="https://github.com/vizsim/unfallkarte/issues" target="_blank" title="Fehler melden oder Feedback geben">
-        <img src="https://img.shields.io/badge/Status-Experimental-red" alt="Status: Experimental"
-          style="height: 20px;">
-      </a>
+      <div id="schools-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div><strong>Typen</strong></div>
+        <div style="margin-top: 4px;">
+          <div>
+            <span
+              style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
+            Schule
+          </div>
+          <div>
+            <span
+              style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
+            Kindergarten
+          </div>
+        </div>
+      </div>
     </div>
+
+  </div>
+
+
+
+
+
+  <div class="legend-section-divider"></div>
+
+
+
+  <div id="feature-count-wrapper"
+    style="margin-top:10px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+    <div id="feature-count">
+      Sichtbare Punkte: ...
+      <div>Zoomlevel: ...</div>
+    </div>
+    <a href="https://github.com/vizsim/unfallkarte/issues" target="_blank" title="Fehler melden oder Feedback geben">
+      <img src="https://img.shields.io/badge/Status-Experimental-red" alt="Status: Experimental" style="height: 20px;">
+    </a>
+  </div>
 
 
   </div>
