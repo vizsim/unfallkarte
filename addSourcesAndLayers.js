@@ -306,8 +306,24 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // // Maxspeed layers
 
   function addMaxspeedLayers(map) {
-    const offsetForward = 3;
-    const offsetBackward = -3;
+    // const offsetForward = 3;
+    // const offsetBackward = -3;
+
+
+    function getZoomBasedOffset(direction) {
+  const factor = direction === "forward" ? 1 : -1;
+
+  return [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    10, factor * 1,    // bei Zoom 10: kleiner Abstand
+    14, factor * 2,    // mittlerer Zoom: mehr Abstand
+    18, factor * 5,    // starker Zoom: mehr Abstand
+    20, factor * 8     // maximaler Zoom: großer Abstand
+  ];
+}
+
 
     // Create dynamic color expression based on the given property
     function makeLineColorExpression(property) {
@@ -321,31 +337,36 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
         [
           "interpolate", ["linear"],
           ["to-number", ["get", property]],
+          10, "#006400",   // dunkelgrün
           30, "#31a354",
           50, "#fdcc8a",
-          100, "#e31a1c"
+          100, "#e31a1c",
+          140, "#8B0000"   // dunkelrot
         ]
       ];
     }
 
     // Create paint object with optional dash and offset
-    function makePaint(property, isDashed, offset) {
-      const paint = {
-        "line-width": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          10, 2.5,    // Zoom 10 → width 2.5
-          17, 3,    // Zoom 17 → still 2.5
-          18, 6,      // Zoom 18 → grow
-          20, 10       // Zoom 20 → even wider
-        ],
-        "line-color": makeLineColorExpression(property)
-      };
-      if (isDashed) paint["line-dasharray"] = [2, 2];
-      if (offset !== 0) paint["line-offset"] = offset;
-      return paint;
-    }
+function makePaint(property, isDashed, direction = null) {
+  const paint = {
+    "line-width": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      10, 2.5,
+      17, 3,
+      18, 6,
+      20, 10
+    ],
+    "line-color": makeLineColorExpression(property)
+  };
+
+  if (isDashed) paint["line-dasharray"] = [2, 2];
+  if (direction) paint["line-offset"] = getZoomBasedOffset(direction);
+
+  return paint;
+}
+
 
     // --- Conditional lines (directional)
     map.addLayer({
@@ -355,7 +376,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       "source-layer": "highways",
       layout: { visibility: "none" },
       filter: ["all", ["has", "maxspeed_forward"], ["has", "maxspeed_conditional"]],
-      paint: makePaint("maxspeed_forward", true, offsetForward)
+      paint: makePaint("maxspeed_forward", true, "forward")
     });
 
     map.addLayer({
@@ -365,7 +386,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       "source-layer": "highways",
       layout: { visibility: "none" },
       filter: ["all", ["has", "maxspeed_backward"], ["has", "maxspeed_conditional"]],
-      paint: makePaint("maxspeed_backward", true, offsetBackward)
+      paint: makePaint("maxspeed_backward", true, "backward")
     });
 
     // --- Regular lines (directional)
@@ -376,7 +397,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       "source-layer": "highways",
       layout: { visibility: "none" },
       filter: ["all", ["has", "maxspeed_forward"], ["!", ["has", "maxspeed_conditional"]]],
-      paint: makePaint("maxspeed_forward", false, offsetForward)
+      paint: makePaint("maxspeed_forward", false, "forward")
     });
 
     map.addLayer({
@@ -386,7 +407,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       "source-layer": "highways",
       layout: { visibility: "none" },
       filter: ["all", ["has", "maxspeed_backward"], ["!", ["has", "maxspeed_conditional"]]],
-      paint: makePaint("maxspeed_backward", false, offsetBackward)
+      paint: makePaint("maxspeed_backward", false, "backward")
     });
 
     // --- Default (centered, no directional tags)
@@ -430,8 +451,8 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   // // Maxspeed layers MINOR
 
   function addMaxspeedMinorLayers(map) {
-    const offsetForward = 3;
-    const offsetBackward = -3;
+    const offsetForward = 2.5;
+    const offsetBackward = -2.5;
 
     // Create dynamic color expression based on the given property
     function makeLineColorExpression(property) {
@@ -445,9 +466,11 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
         [
           "interpolate", ["linear"],
           ["to-number", ["get", property]],
+          10, "#006400",   // dunkelgrün
           30, "#31a354",
           50, "#fdcc8a",
-          100, "#e31a1c"
+          100, "#e31a1c",
+          140, "#8B0000"   // dunkelrot
         ]
       ];
     }
@@ -455,7 +478,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
     // Create paint object with optional dash and offset
     function makePaint(property, isDashed, offset) {
       const paint = {
-        "line-width": 1.5,
+        "line-width": 1.8,
         "line-color": makeLineColorExpression(property)
       };
       if (isDashed) paint["line-dasharray"] = [2, 2];
@@ -463,7 +486,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
       return paint;
     }
 
-    const minzoom_minor = 15; // minzoom for minor highways
+    const minzoom_minor = 14.5; // minzoom for minor highways
     // --- Conditional lines (directional)
     map.addLayer({
       id: "maxspeed_minor-conditional-forward",
