@@ -14,19 +14,17 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
   addPMTilesSource("movebis", "movebis_speed_germany_2020_min10cnt.pmtiles");
   addPMTilesSource("hvs", "Hauptverkehrstraßennetz.pmtiles");
-  addPMTilesSource("maxspeed", "processed_major_highways_germany_250528.pmtiles");
 
+  addPMTilesSource("maxspeed", "processed_major_highways_germany_250528.pmtiles");
   addPMTilesSource("maxspeed_minor", "processed_minor_highways_germany_250528.pmtiles");
 
 
-  // addPMTilesSource("schools", "germany_osm_schools-25-05-09.pmtiles");
-  //addPMTilesSource("schools", "germany_osm_schools_full_25-05-09.pmtiles "); //new no drops
-  addPMTilesSource("schools", "processed_schools_germany_250528.pmtiles"); //new no drops
 
-  addPMTilesSource("health", "processed_health_germany_250528.pmtiles"); //new no drops
+  addPMTilesSource("schools", "processed_schools_germany_250528.pmtiles"); 
+  addPMTilesSource("health", "processed_health_germany_250528.pmtiles"); 
+  addPMTilesSource("playgrounds", "processed_playgrounds_germany_250528.pmtiles"); 
 
-  // addPMTilesSource("accidents_11-12", "accidents_11-12.pmtiles");
-  // addPMTilesSource("accidents_12-13", "accidents_12-13.pmtiles");
+
   addPMTilesSource("accidents_single", "accidents_single.pmtiles");
 
 
@@ -703,6 +701,69 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
 
 
+    // add playgrounds layer
+  function addPlaygroundsLayer(map) {
+    // playgrounds POINTS
+
+    map.addLayer({
+      id: "playgrounds-points",
+      type: "symbol",
+      source: "playgrounds",
+      "source-layer": "germany_osm_playgrounds", // must match tippecanoe `-l` name
+      filter: ["==", ["geometry-type"], "Point"],
+      layout: {
+        visibility: "none",
+        "icon-image": "playground",  // Maki-Icon
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, 0.6,
+          14, 1,
+          16, 1.7
+        ],
+        "icon-allow-overlap": true //,
+        // "icon-ignore-placement": true,
+        // "icon-optional": true
+      },
+      paint: {
+        "icon-color": [
+          "case",
+          // playgrounds
+          ["==", ["get", "amenity"], "playground"], "green",
+          ["==", ["get", "leisure"], "playground"], "green",
+          "#aaaaaa"
+        ],
+        "icon-opacity": 0.5
+      }
+    });
+
+    // playgrounds POLYGONS
+    map.addLayer({
+      id: "playgrounds-polygons",
+      type: "fill",
+      source: "playgrounds",
+      "source-layer": "germany_osm_playgrounds",
+      filter: ["==", ["geometry-type"], "Polygon"],
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": [
+          "case",
+          // playgrounds
+          ["==", ["get", "amenity"], "playground"], "green",
+          ["==", ["get", "leisure"], "playground"], "green",
+          "#aaaaaa"
+        ],
+        "fill-opacity": 0.5,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+  }
+
+
+
 
   // add Scenario1 layers (tempo100)
   function addScenario1Layers(map) {
@@ -906,12 +967,17 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
   addAccidentLayersToMap(map);
   addAccidentClusterLayers(map);
+
   addMovebisLayer(map);
   addHvsLayer(map);
+
   addMaxspeedLayers(map);
   addMaxspeedMinorLayers(map);
+
   addSchoolsLayer(map);
   addHealthLayer(map);
+  addPlaygroundsLayer(map);
+
   addScenario1Layers(map);
   addScenario2Layers(map);
   addScenario3Layers(map);

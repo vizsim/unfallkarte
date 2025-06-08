@@ -340,6 +340,40 @@ export function setupHealthPopups(map) {
 }
 
 
+export function setupPlaygroundsPopups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const handleLayer = (layerId) => {
+        map.on("mouseenter", layerId, (e) => {
+            map.getCanvas().style.cursor = "pointer";
+            const props = e.features[0].properties;
+
+            const content = `
+                <table style="font-size:12px; border-collapse:collapse;">
+                    ${props.leisure ? `<tr><td><strong>Leisure</strong></td><td>${props.leisure}</td></tr>` : ""}
+                    ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
+                    ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
+                    ${props.playground ? `<tr><td><strong>Playground Type</strong></td><td>${props.playground}</td></tr>` : ""}
+                    ${props.operator ? `<tr><td><strong>Träger</strong></td><td>${props.operator}</td></tr>` : ""}
+                    ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
+                    ${props.osm_id ? `<tr><td><strong>OSM ID</strong></td><td>${props.osm_id}</td></tr>` : ""}
+                </table>
+            `;
+
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+        });
+
+        map.on("mouseleave", layerId, () => {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+        });
+    };
+
+    handleLayer("playgrounds-points");
+    handleLayer("playgrounds-polygons");
+}
+
+
 // export function setupMapillaryPopups(map) {
 //   const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 

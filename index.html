@@ -577,7 +577,6 @@
     <!-- <div class="legend-section-divider"></div> -->
     <!-- <div class="legend-section-divider"></div> -->
 
-
     <!-- Sektion 3: Kontext -->
     <div class="legend-section" data-section="kontext">
       <div class="legend-section-title section-toggle" data-section-id="kontext"
@@ -587,6 +586,7 @@
       </div>
       <div class="legend-section-content">
 
+        <div class="legend-section-subtitle">Helper/Straßenfotos</div>
 
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
@@ -602,7 +602,6 @@
             <span style="width: 12px; height: 12px; background: #00b955; border-radius: 2px;"></span>
             normale Bilder
           </label>
-
           <label style="display: flex; align-items: center; gap: 6px;">
             <input type="checkbox" id="mapillary-pano" />
             <span style="width: 12px; height: 12px; background: #0077ff; border-radius: 2px;"></span>
@@ -611,44 +610,30 @@
         </div>
 
 
-        <div style="margin-top: 6px;">
+
+        <div class="legend-section-subtitle" style="margin-top: 12px;">Straßen & Verkehr</div>
+
+                <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-movebis" />
-            Stadtradeln 2020 anzeigen
-            <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
+            <input type="checkbox" id="toggle-maxspeed" />
+            Geschwindigkeitbegrenzung anzeigen
+            <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
         </div>
-        <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
+        <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
           <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span>
-              ≤
-              12
-              km/h</div>
-            <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span>
-              ≈
-              18
-              km/h</div>
-            <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span>
-              ≥
-              24
-              km/h</div>
-          </div>
-
-          <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span
-                style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-              wenige (≤ 10)</div>
-            <div><span
-                style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-              mittel (≈ 100)</div>
-            <div><span
-                style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span>
-              viele (≥ 1000)</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤ 30 km/h</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span> 50 km/h</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥ 100 km/h</div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span> kein Tempolimit</div>
+            <div>
+              <span style="display: inline-block;width: 24px;height: 3px;margin-right: 6px;background-image: repeating-linear-gradient(to right,#999 0,#999 3.5px,transparent 3.5px,transparent 7px);"></span>
+              bedingte Geschwindigkeitsbegrenzung
+            </div>
+            <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span> (noch) keine Angabe in OSM</div>
           </div>
         </div>
-
 
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
@@ -660,61 +645,36 @@
         <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
           <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
           <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3
-              Mio
-              Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6
-              Mio
-              Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10
-              Mio
-              Fahrzeuge/Jahr</div>
+            <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3 Mio Fahrzeuge/Jahr</div>
+            <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6 Mio Fahrzeuge/Jahr</div>
+            <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10 Mio Fahrzeuge/Jahr</div>
           </div>
         </div>
 
 
-        <div style="margin-top: 6px;">
+                <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-maxspeed" />
-            Geschwindigkeitbegrenzung anzeigen
-            <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+            <input type="checkbox" id="toggle-movebis" />
+            Stadtradeln 2020 anzeigen
+            <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
           </label>
         </div>
-
-        <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
+        <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
           <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤
-              30
-              km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
-              50
-              km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥
-              100
-              km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span>
-              kein
-              Tempolimit</div>
-            <!-- <div><span
-                style="display:inline-block;width:24px;height:3px;margin-right:6px;border-top:3px dashed #999;"></span>
-              unter Bedingungen
-            </div> -->
-            <div>
-              <span
-                style="display: inline-block;width: 24px;height: 3px;margin-right: 6px;background-image: repeating-linear-gradient(to right,#999 0,#999 3.5px,transparent 3.5px,transparent 7px);"></span>
-              bedingte Geschwindigkeitsbegrenzung
-            </div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span>
-              (noch) keine Angabe in OSM</div>
-
-
+            <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span> ≤ 12 km/h</div>
+            <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span> ≈ 18 km/h</div>
+            <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span> ≥ 24 km/h</div>
+          </div>
+          <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
+          <div style="margin-top: 4px;">
+            <div><span style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span> wenige (≤ 10)</div>
+            <div><span style="display:inline-block;width:24px;height:4px;background:#999;vertical-align:middle;margin-right:6px;"></span> mittel (≈ 100)</div>
+            <div><span style="display:inline-block;width:24px;height:8px;background:#999;vertical-align:middle;margin-right:6px;"></span> viele (≥ 1000)</div>
           </div>
         </div>
 
-
-
-
+        <div class="legend-section-subtitle" style="margin-top: 12px;">Orte & Einrichtungen</div>
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-schools" />
@@ -723,22 +683,17 @@
           </label>
         </div>
         <div id="schools-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Typen</strong></div>
           <div style="margin-top: 4px;">
             <div>
-              <span
-                style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
+              <span style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
               Schule
             </div>
             <div>
-              <span
-                style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
+              <span style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
               Kindergarten
             </div>
           </div>
         </div>
-
-
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-health" />
@@ -746,34 +701,39 @@
             <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
         </div>
-
-
         <div id="health-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Typen</strong></div>
           <div style="margin-top: 4px;">
             <div>
-              <span
-                style="display:inline-block;width:12px;height:12px;background:#D62728;border-radius:50%;margin-right:6px;"></span>
+              <span style="display:inline-block;width:12px;height:12px;background:#D62728;border-radius:50%;margin-right:6px;"></span>
               Medizinische Einrichtungen (Krankenhaus, Klinik, Reha)
             </div>
             <div>
-              <span
-                style="display:inline-block;width:12px;height:12px;background:#17BECF;border-radius:50%;margin-right:6px;"></span>
+              <span style="display:inline-block;width:12px;height:12px;background:#17BECF;border-radius:50%;margin-right:6px;"></span>
               Pflege & Senioren (Pflegeheim, Betreutes Wohnen)
             </div>
             <div>
-              <span
-                style="display:inline-block;width:12px;height:12px;background:#BCBD22;border-radius:50%;margin-right:6px;"></span>
+              <span style="display:inline-block;width:12px;height:12px;background:#BCBD22;border-radius:50%;margin-right:6px;"></span>
               Einrichtungen für Menschen mit Behinderung
             </div>
           </div>
         </div>
-
-
-
+        <div style="margin-top: 6px;">
+          <label style="margin-left: 10px;">
+            <input type="checkbox" id="toggle-playgrounds" />
+            Spielplätze anzeigen
+            <span class="info-icon" title="Quelle: © OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+          </label>
+        </div>
+        <div id="playgrounds-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div style="margin-top: 4px;">
+            <div>
+              <span style="display:inline-block;width:12px;height:12px;background:green;border-radius:50%;margin-right:6px;"></span>
+              Spielplätze
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
 
 
 

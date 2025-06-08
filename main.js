@@ -12,6 +12,7 @@ import {
   setupMaxspeedPopups,
   setupSchoolsPopups,
   setupHealthPopups,
+  setupPlaygroundsPopups,
   // setupMapillaryPopups,
   setupScenario1Popups,
   setupScenario2Popups,
@@ -436,6 +437,7 @@ async function initMap() {
     setupMaxspeedPopups(map);
     setupSchoolsPopups(map);
     setupHealthPopups(map);
+    setupPlaygroundsPopups(map);
     // setupMapillaryPopups(map);
     setupScenario1Popups(map);
     setupScenario2Popups(map);
@@ -713,6 +715,8 @@ function applyZoomLock() {
   const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
   const healthPointsVisible = map.getLayoutProperty("health-points", "visibility") === "visible";
   const healthPolygonsVisible = map.getLayoutProperty("health-polygons", "visibility") === "visible";
+  const playgroundsPointsVisible = map.getLayoutProperty("health-points", "visibility") === "visible";
+  const playgroundsPolygonsVisible = map.getLayoutProperty("health-polygons", "visibility") === "visible";
 
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
   //const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
@@ -721,12 +725,14 @@ function applyZoomLock() {
 
   const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
   const healthVisible = healthPointsVisible || healthPolygonsVisible;
+  const playgroundsVisible = playgroundsPointsVisible || playgroundsPolygonsVisible;
 
   // Determine the strictest minZoom
   const minZooms = [];
   if (movebisVisible) minZooms.push(13);
   if (schoolsVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
   if (healthVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
+  if (playgroundsVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
   if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
@@ -750,15 +756,14 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools","health", "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
+  ["schools","health","playgrounds", "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
       legend.style.display = toggle.checked ? "block" : "none";
     }
-  });
+  }); 
 }
-
 
 
 
@@ -886,6 +891,15 @@ document.getElementById("toggle-health").addEventListener("change", function (e)
   const checked = e.target.checked;
   map.setLayoutProperty("health-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("health-polygons", "visibility", checked ? "visible" : "none");
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
+document.getElementById("toggle-playgrounds").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  map.setLayoutProperty("playgrounds-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("playgrounds-polygons", "visibility", checked ? "visible" : "none");
 
   applyZoomLock();
   applyLegendVisibility();
