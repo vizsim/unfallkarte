@@ -281,7 +281,7 @@ async function initMap() {
     container: "map",
     style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
     center: [13.634, 52.315],
-    zoom: 11,
+    zoom: 12,
     minZoom: 6,
     maxZoom: 20
   });
@@ -524,6 +524,14 @@ async function initMap() {
       // if (scenarioLegendEl) {
       //   scenarioLegendEl.style.display = "block"; // ← explizit sichtbar machen
       // }
+
+      // 🔧 Synchronisiere Cluster-Checkbox basierend auf Layer-Sichtbarkeit
+      const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
+      if (clusterCheckbox) {
+        const layerId = "pie-clusters-fine-layer";
+        const isLayerVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
+        clusterCheckbox.checked = isLayerVisible;
+      }
 
       // // Hide/show regular groups depending on zoom
       Array.from(legend.children).forEach(el => {
@@ -827,7 +835,11 @@ function updateMapillaryFilter() {
 
 
 
-
+document.querySelectorAll('input[name="color-style"]').forEach(rb => {
+  rb.addEventListener("change", () => {
+    updatePermalink(map, isInitializingRef);
+  });
+});
 
 
 
