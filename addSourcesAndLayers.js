@@ -35,6 +35,7 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
   addPMTilesSource("scenario2", "scenario2_accidents_close2schools.pmtiles");
   addPMTilesSource("scenario3", "scenario3_tempo30_conti.pmtiles");
   addPMTilesSource("scenario4", "scenario4_tempo30missing.pmtiles");
+  addPMTilesSource("scenario6", "scenario6_tempo50_30mbuffer_schulen.pmtiles");
 
 
 
@@ -985,6 +986,74 @@ function makePaint(property, isDashed, direction = null) {
   }
 
 
+    // add Scenario6 layers (missing tempo30)
+  function addScenario6Layers(map) {
+    // Polygon Layer: zoom 14+
+    map.addLayer({
+      id: "scenario6-polys",
+      type: "fill",
+      source: "scenario6",
+      "source-layer": "scenario6-polys",
+      // filter: ["==", ["geometry-type"], "Polygon"],
+      filter: ["all"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "orange",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // Points Layer: zoom 6–14
+    map.addLayer({
+      id: "scenario6-points",
+      type: "circle",
+      source: "scenario6",
+      "source-layer": "scenario6-points",
+      filter: ["all"],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "orange",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
+
+
+        // Polygon Layer LINKS: zoom 14+
+    map.addLayer({
+      id: "scenario6-polys2",
+      type: "fill",
+      source: "scenario6",
+      "source-layer": "scenario6-polys2",
+      // filter: ["==", ["geometry-type"], "Polygon"],
+      filter: ["all"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "red",
+        "fill-opacity": 0.2,
+        "fill-outline-color": "red"
+      }
+    });
+  }
+
+
 
 
 
@@ -1005,6 +1074,7 @@ function makePaint(property, isDashed, direction = null) {
   addScenario2Layers(map);
   addScenario3Layers(map);
   addScenario4Layers(map);
+  addScenario6Layers(map);
 
 
 

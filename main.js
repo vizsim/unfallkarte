@@ -17,7 +17,8 @@ import {
   setupScenario1Popups,
   setupScenario2Popups,
   setupScenario3Popups,
-  setupScenario4Popups
+  setupScenario4Popups,
+  setupScenario6Popups
 
 } from './popupHandlers.js';
 
@@ -43,6 +44,26 @@ const isLocalhost = location.hostname === "localhost";
     const config = await import(isLocalhost ? './config.js' : './config.public.js');
     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
+
+
+    (function redirectToCompactPermalink() {
+      const url = new URL(window.location.href);
+      const searchParams = url.searchParams;
+
+      // If there's no compact `p` param, and any old ones exist, wipe them
+      const legacyParams = ["lat", "lng", "zoom", "style", "filters", "scenarios"];
+      const hasLegacy = legacyParams.some(param => searchParams.has(param));
+
+      if (!searchParams.has("p") && hasLegacy) {
+        // Remove all legacy params
+        legacyParams.forEach(param => searchParams.delete(param));
+        url.search = searchParams.toString(); // Apply cleaned query
+        history.replaceState(null, "", url.toString());
+      }
+    })();
+
+
+
     initMap();
 
   } catch (err) {
@@ -443,6 +464,7 @@ async function initMap() {
     setupScenario2Popups(map);
     setupScenario3Popups(map);
     setupScenario4Popups(map);
+    setupScenario6Popups(map);
 
 
 
@@ -486,7 +508,7 @@ async function initMap() {
       const mapillaryVisible =
         map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible" ||
         map.getLayoutProperty("mapillary-images-halo", "visibility") === "visible";
-      
+
       //const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
       const maxspeedVisible =
         map.getLayoutProperty("maxspeed", "visibility") === "visible" ||
@@ -756,13 +778,13 @@ function applyZoomLock() {
 }
 
 function applyLegendVisibility() {
-  ["schools","health","playgrounds", "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "scenario1", "scenario2", "scenario3", "scenario4"].forEach(key => {
+  ["schools", "health", "playgrounds", "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "scenario1", "scenario2", "scenario3", "scenario4", "scenario6"].forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
     const legend = document.getElementById(`${key}-legend`);
     if (toggle && legend) {
       legend.style.display = toggle.checked ? "block" : "none";
     }
-  }); 
+  });
 }
 
 
@@ -1037,6 +1059,24 @@ document.getElementById("toggle-scenario4").addEventListener("change", function 
 
   map.setLayoutProperty("scenario4-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario4-polys", "visibility", checked ? "visible" : "none");
+
+  // Show or hide the slider
+  //sliderContainer3.style.display = checked ? "block" : "none";
+
+  // // Apply filter initially
+  // if (checked) {
+  //   applyScenario3ClusterSizeFilter(0);
+  // }
+});
+
+
+// Checkbox shows/hides the layers AND the slider
+document.getElementById("toggle-scenario6").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+
+  map.setLayoutProperty("scenario6-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario6-polys", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario6-polys2", "visibility", checked ? "visible" : "none");
 
   // Show or hide the slider
   //sliderContainer3.style.display = checked ? "block" : "none";

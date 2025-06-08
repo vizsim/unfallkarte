@@ -538,3 +538,35 @@ export function setupScenario4Popups(map) {
         });
     });
 }
+
+
+
+// Scenario 6 popups
+export function setupScenario6Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const renderScenario6Tooltip = (props) => `
+        <div style="font-size: 12px;">
+          <strong>Szenario 6</strong><br/>
+          <table style="border-collapse: collapse;">
+            ${props.oid ? `<tr><td><strong>OID</strong></td><td>${props.oid}</td></tr>` : ""}
+            ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
+            ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
+          </table>
+        </div>
+      `;
+
+    ["scenario6-polys", "scenario6-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario6Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+
+    });
+}
