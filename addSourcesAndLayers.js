@@ -81,6 +81,12 @@ export function addSourcesAndLayers(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) 
 
 
 
+  // set up the z-order anchors for layers TODO nicly later....
+// const BASE_Z_ANCHOR = "satellite";       // bottom-most
+// const MID_Z_ANCHOR = "scenario1-polys";        // main data above base
+// const TOP_Z_ANCHOR = "accident-points";              // top overlays
+
+
 
 
   // LAYERS – ggf. aufräumen/splitten später (siehe vorherige Ideen)
@@ -1002,7 +1008,7 @@ function makePaint(property, isDashed, direction = null) {
       },
       paint: {
         "fill-color": "orange",
-        "fill-opacity": 0.8,
+        "fill-opacity": 0.4,
         "fill-outline-color": "#1B4D3E"
       }
     });
@@ -1036,39 +1042,57 @@ function makePaint(property, isDashed, direction = null) {
         // Polygon Layer LINKS: zoom 14+
     map.addLayer({
       id: "scenario6-polys2",
-      type: "fill",
+      type: "line",
       source: "scenario6",
       "source-layer": "scenario6-polys2",
-      // filter: ["==", ["geometry-type"], "Polygon"],
       filter: ["all"],
       minzoom: 14,
       layout: {
-        visibility: "none"
+      visibility: "none"
       },
       paint: {
-        "fill-color": "red",
-        "fill-opacity": 0.2,
-        "fill-outline-color": "red"
+      "line-color": "red",
+      "line-width": 2
       }
+   // }, "maxspeed"); // put below the maxspeed layer
     });
+
   }
 
 
 
 
 
-  addAccidentLayersToMap(map);
-  addAccidentClusterLayers(map);
+  // addAccidentLayersToMap(map);
+  // addAccidentClusterLayers(map);
 
-  addMovebisLayer(map);
-  addHvsLayer(map);
+  // addMovebisLayer(map);
+  // addHvsLayer(map);
 
-  addMaxspeedLayers(map);
-  addMaxspeedMinorLayers(map);
+  // addMaxspeedLayers(map);
+  // addMaxspeedMinorLayers(map);
+
+  // addSchoolsLayer(map);
+  // addHealthLayer(map);
+  // addPlaygroundsLayer(map);
+
+  // addScenario1Layers(map);
+  // addScenario2Layers(map);
+  // addScenario3Layers(map);
+  // addScenario4Layers(map);
+  // addScenario6Layers(map);
+  
+
+  // change the map order
+
 
   addSchoolsLayer(map);
   addHealthLayer(map);
   addPlaygroundsLayer(map);
+
+
+  addAccidentLayersToMap(map);
+  addAccidentClusterLayers(map);
 
   addScenario1Layers(map);
   addScenario2Layers(map);
@@ -1076,59 +1100,16 @@ function makePaint(property, isDashed, direction = null) {
   addScenario4Layers(map);
   addScenario6Layers(map);
 
+  addMaxspeedLayers(map);
+  addMaxspeedMinorLayers(map);
+  addMovebisLayer(map);
+  addHvsLayer(map);
+
+  
 
 
 
-  // function addMapillaryLayer(map) {
-  //   // Mapillary image points
-  //   map.addLayer({
-  //     id: "mapillary-images-layer",
-  //     type: "circle",
-  //     source: "mapillary-images",
-  //     "source-layer": "image",
-  //     minzoom: 14,
-  //     // maxzoom: 14.99
-  //     maxzoom: 20,
-  //     layout: {
-  //       visibility: "none"
-  //     },
-  //     paint: {
-  //       "circle-radius": 3,
-  //       "circle-color": "#00b955"
-  //     }
-  //   });
-  // }
 
-  //   function addMapillaryLayer(map) {
-  //   map.addLayer({
-  //     id: "mapillary-images-layer",
-  //     type: "circle",
-  //     source: "mapillary-images",
-  //     "source-layer": "image",
-  //     minzoom: 14,
-  //     maxzoom: 20,
-  //     layout: {
-  //       visibility: "none"
-  //     },
-  //     paint: {
-  //       // Corrected color switch with to-string()
-  //       "circle-color": [
-  //         "match",
-  //         ["to-string", ["get", "is_pano"]],
-  //         "true", "#0077ff",   // pano
-  //         "false", "#00b955",  // non-pano
-  //         "#999999"            // fallback
-  //       ],
-  //       // Larger radius if zoom > 16
-  //       "circle-radius": [
-  //         "interpolate", ["linear"], ["zoom"],
-  //         14, 3,
-  //         16, 4,
-  //         17, 5
-  //       ]
-  //     }
-  //   });
-  // }
 
   function addMapillaryLayer(map) {
     // ⬇️ Soft halo for pano
