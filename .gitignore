@@ -11,6 +11,9 @@ config.js
 *.json
 *.gpkg
 
+# But keep JSON files in the project root (main) folder
+!/*.json
+
 # Ignore virtual environment
 unfallkarte_env/
 accident_data/

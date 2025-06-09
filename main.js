@@ -277,9 +277,18 @@ function updateVisibleFeatureCount() {
 
 async function initMap() {
 
+
+  /// somehow this is needed to load the pmtiles protocol
+const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
+maplibregl.addProtocol("pmtiles", protocol.tile);
+
+
   window.map = new maplibregl.Map({
     container: "map",
-    style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
+    // style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
+    //style: "./style_test_neu_fixed.json", // <-- your local Positron style 
+    style: "./style_test_neu_fixed_maputnik.json", // <-- your local Positron style
     center: [13.634, 52.315],
     zoom: 12,
     minZoom: 6,
