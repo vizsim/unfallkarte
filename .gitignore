@@ -11,6 +11,10 @@ config.js
 *.json
 *.gpkg
 
+*.parquet 
+
+
+
 # But keep JSON files in the project root (main) folder
 !/*.json
 
