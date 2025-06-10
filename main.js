@@ -1,9 +1,21 @@
-import { setupPhotonGeocoder } from './geocoder.js';
 
+
+// 📦 Geocoder & Styles
+import { setupPhotonGeocoder } from './geocoder.js';
 import { paintStyles, getCircleColorPaint } from './styleConfig.js';
 
-import { setupPieChartImageGeneration } from './generatePieIcon.js';
+// 📦 Kartenfunktionen
+import { addSources } from "./addSources.js";
+import { loadAllIcons } from "./loadAllIcons.js";
+import { addLayers } from "./addLayers.js";
 
+// 📦 UI & Interaktion
+import { setupBaseLayerControls } from './ui/setupBaseLayerControls.js';
+import { setupLayerToggles } from './ui/setupLayerToggles.js';
+// import { setupScenarioControls } from './ui/setupScenarioControls.js';
+// import { updateVisibleFeatureCount } from './ui/featureCounter.js';
+
+// 📦 Popups
 import {
   setupAccidentPopups,
   setupAccClusterPopups,
@@ -21,12 +33,7 @@ import {
   setupScenario6Popups
 } from './popupHandlers.js';
 
-import { addSources } from "./addSources.js";
-import { loadAllIcons } from "./loadAllIcons.js";
-import { addLayers } from "./addLayers.js";
-
-import { setupMapillary } from "./useMapillary.js";
-
+// 📦 Legende
 import {
   updateLegendVisibilityByZoom,
   applyLegendVisibility,
@@ -37,15 +44,18 @@ import {
   setupLegendSectionCheckboxes
 } from './legendHandlers.js';
 
-import { Permalink, applyPermalink, updatePermalink, cleanupLegacyPermalink } from './permalink.js';
+// 📦 Permalink
+import {
+  Permalink,
+  applyPermalink,
+  updatePermalink,
+  cleanupLegacyPermalink
+} from './permalink.js';
 
-import { setupBaseLayerControls } from './ui/setupBaseLayerControls.js';
-import { setupLayerToggles } from './ui/setupLayerToggles.js';
-// import { setupScenarioControls } from './ui/setupScenarioControls.js';
+// 📦 Sonstiges
+import { setupPieChartImageGeneration } from './generatePieIcon.js';
+import { setupMapillary } from "./useMapillary.js";
 
-
-// someday we need this
-//import { updateVisibleFeatureCount } from './ui/featureCounter.js';
 
 
 
@@ -67,22 +77,14 @@ export const LAYERS = {
   clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
 };
 
-
-
 document.querySelector('[data-map="standard"]').style.backgroundImage =
   "url('./thumbs/thumb-standard.png')";
-
-// document.querySelector('[data-map="standard"]').style.backgroundImage =
-// "url('./thumbs/thumb-standard.png')";
 
 document.querySelector('[data-map="satellite"]').style.backgroundImage =
   "url('./thumbs/thumb-satellite.png')";
 
 
-//Event-Listener für Radiobuttons
-document.querySelectorAll('input[name="color-style"]').forEach(rb => {
-  rb.addEventListener("change", updateColorStyle);
-});
+
 
 
 
@@ -125,112 +127,29 @@ async function initMap() {
   originalMinZoom = map.getMinZoom();
   originalMaxZoom = map.getMaxZoom();
 
+  // const map = await createBaseMap();                // 1. Karte erzeugen
 
 
   /// load MAP
   map.on("load", () => {
 
-    setupPhotonGeocoder(map);
-    addNavigationControl(map);
-    setupPieChartImageGeneration(map); // für styleimagemissing
+    initializeMapModules(map) ;               // 2. Module initialisieren
 
-    // maplibregl.addProtocol("pmtiles", protocol.tile);
+    setupUI(map);                                     // 3. UI & Layer-Toggles
+    
+    setupLegend(map);                          // 4. Legende initialisieren 
 
-    addSources(map, { MAPILLARY_TOKEN, MAPTILER_API_KEY });
-    // await loadAllIcons(map);
-    addLayers(map);
+    setupMapillary(map, {applyZoomLock,applyLegendVisibility});
 
-    setupLayerToggles(map, applyZoomLock, applyLegendVisibility);
-
-
-    setupLegendClusterCheckboxSync(map);
-    setupLegendToggleHandlers();
-    setupLegendSectionCheckboxes(updateLayerFilter);
-
-    updateColorStyle();
-    updateVisibleFeatureCount();
-
-
-    setupMapillary(map, {
-      applyZoomLock,
-      applyLegendVisibility
-    });
+    setupPopups(map);                          // 5. Popups initialisieren
 
     map.once("load", updateLegendVisibilityByZoom);
-    // map.on("zoomend", updateLegendVisibilityByZoom);
-    map.on("zoomend", () => updateLegendVisibilityByZoom(map));
-    map.on("moveend", () => updateLegendVisibilityByZoom(map));
-
-    map.on("zoom", updateScenarioLegendVisibility);
-    map.on("load", updateScenarioLegendVisibility);
-
-
-    // popups / tooltips
-    setupAccidentPopups(map);
-    setupAccClusterPopups(map);
-    setupMovebisPopups(map);
-    setupHVSPopups(map);
-    setupMaxspeedPopups(map);
-    setupSchoolsPopups(map);
-    setupHealthPopups(map);
-    setupPlaygroundsPopups(map);
-    // setupMapillaryPopups(map);
-    setupScenario1Popups(map);
-    setupScenario2Popups(map);
-    setupScenario3Popups(map);
-    setupScenario4Popups(map);
-    setupScenario6Popups(map);
-
-
-
-    document.getElementById("toggle-details").addEventListener("change", function (e) {
-      const visible = e.target.checked ? "visible" : "none";
-      LAYERS.symbols.forEach(layerId => {
-        if (map.getLayer(layerId)) {
-          map.setLayoutProperty(layerId, "visibility", visible);
-        }
-      });
-    });
-
-
-
-
-
-    document.querySelectorAll('.section-arrow').forEach(arrow => {
-      arrow.addEventListener('click', () => {
-        const sectionId = arrow.dataset.arrow;
-        const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
-        if (!section) return;
-
-        const content = section.querySelector('.legend-section-content');
-        const isOpen = arrow.classList.contains('open');
-
-        arrow.classList.toggle('open', !isOpen);
-        section.classList.toggle('collapsed', isOpen);
-      });
-    });
-
-
-
-
-    map.on("moveend", updateVisibleFeatureCount);
-    map.on("zoomend", updateVisibleFeatureCount);
     updateLegendVisibilityByZoom();
-    applyLegendVisibility();
 
-  });
+    setupPermalinkHandling(map); // 6. Permalink-Handling initialisieren
 
-  /// idle MAP
-  map.on("idle", () => {
-    if (!isInitializingRef.value) return;
+    setupEventHandlers(map);                          // 8. moveend / zoomend etc.
 
-    // console.log("🟢 Map ist idle – Permalink wird angewendet");
-    requestAnimationFrame(() => {
-      applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
-      map.on("moveend", () => updatePermalink(map, isInitializingRef));
-      map.on("zoomend", () => updatePermalink(map, isInitializingRef));
-      isInitializingRef.value = false;
-    });
   });
 
 }
@@ -302,7 +221,7 @@ function applyZoomLock() {
 
 
 
-setupBaseLayerControls(map, isInitializingRef);
+// setupBaseLayerControls(map, isInitializingRef);
 //setupLayerToggles(map);
 // setupScenarioControls(map);
 
@@ -612,4 +531,98 @@ function addNavigationControl(map) {
       });
     }
   }, 100);
+}
+
+
+
+function setupPopups(map) {
+  setupAccidentPopups(map);
+  setupAccClusterPopups(map);
+  setupMovebisPopups(map);
+  setupHVSPopups(map);
+  setupMaxspeedPopups(map);
+  setupSchoolsPopups(map);
+  setupHealthPopups(map);
+  setupPlaygroundsPopups(map);
+  // setupMapillaryPopups(map);
+  setupScenario1Popups(map);
+  setupScenario2Popups(map);
+  setupScenario3Popups(map);
+  setupScenario4Popups(map);
+  setupScenario6Popups(map);
+}
+
+function setupLegend(map) {
+  setupLegendClusterCheckboxSync(map);
+  setupLegendToggleHandlers();
+  setupLegendSectionCheckboxes(updateLayerFilter);
+
+  updateColorStyle();
+  updateVisibleFeatureCount();
+}
+
+
+function setupUI(map) {
+  setupBaseLayerControls(map, isInitializingRef);
+  setupLayerToggles(map, applyZoomLock, applyLegendVisibility);
+
+  document.querySelectorAll('input[name="color-style"]').forEach(rb => {
+    rb.addEventListener("change", updateColorStyle);
+  });
+
+  document.getElementById("toggle-details").addEventListener("change", e => {
+    const visible = e.target.checked ? "visible" : "none";
+    LAYERS.symbols.forEach(id => {
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(id, "visibility", visible);
+      }
+    });
+  });
+
+  document.querySelectorAll('.section-arrow').forEach(arrow => {
+    arrow.addEventListener('click', () => {
+      const section = document.querySelector(`.legend-section[data-section="${arrow.dataset.arrow}"]`);
+      if (!section) return;
+      const content = section.querySelector('.legend-section-content');
+      const isOpen = arrow.classList.contains('open');
+      arrow.classList.toggle('open', !isOpen);
+      section.classList.toggle('collapsed', isOpen);
+    });
+  });
+}
+
+
+function setupEventHandlers(map) {
+  map.on("zoomend", () => updateLegendVisibilityByZoom(map));
+  map.on("moveend", () => updateLegendVisibilityByZoom(map));
+  map.on("zoom", updateScenarioLegendVisibility);
+  map.on("load", updateScenarioLegendVisibility);
+
+  map.on("moveend", updateVisibleFeatureCount);
+  map.on("zoomend", updateVisibleFeatureCount);
+
+  applyLegendVisibility();
+}
+
+
+function setupPermalinkHandling(map) {
+  map.on("idle", () => {
+    if (!isInitializingRef.value) return;
+
+    requestAnimationFrame(() => {
+      applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
+      map.on("moveend", () => updatePermalink(map, isInitializingRef));
+      map.on("zoomend", () => updatePermalink(map, isInitializingRef));
+      isInitializingRef.value = false;
+    });
+  });
+}
+
+ function initializeMapModules(map) {
+  setupPhotonGeocoder(map);
+  setupPieChartImageGeneration(map);
+  addNavigationControl(map);
+  addSources(map, { MAPILLARY_TOKEN, MAPTILER_API_KEY });
+  // await loadAllIcons(map); // falls wieder benötigt
+  addLayers(map);
 }

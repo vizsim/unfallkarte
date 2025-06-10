@@ -1,3 +1,5 @@
+import { updatePermalink } from '../permalink.js';
+
 export function setupBaseLayerControls(map, isInitializingRef) {
   document.querySelectorAll('input[name="color-style"]').forEach(rb => {
     rb.addEventListener("change", () => {
