@@ -120,6 +120,13 @@ body {
 }
 
 
+.legend.collapsed > .legend-section,
+.legend.collapsed > .scenario-legend-section,
+.legend.collapsed > .legend-subsection-divider {
+  display: none;
+}
+
+
 /* ───── this needed?? ───── */
 .color-box {
     width: 14px;
