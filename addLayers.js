@@ -230,18 +230,18 @@ export function addLayers(map) {
 
 
     function getZoomBasedOffset(direction) {
-  const factor = direction === "forward" ? 1 : -1;
+      const factor = direction === "forward" ? 1 : -1;
 
-  return [
-    "interpolate",
-    ["linear"],
-    ["zoom"],
-    10, factor * 1,    // bei Zoom 10: kleiner Abstand
-    14, factor * 2,    // mittlerer Zoom: mehr Abstand
-    18, factor * 5,    // starker Zoom: mehr Abstand
-    20, factor * 8     // maximaler Zoom: großer Abstand
-  ];
-}
+      return [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        10, factor * 1,    // bei Zoom 10: kleiner Abstand
+        14, factor * 2,    // mittlerer Zoom: mehr Abstand
+        18, factor * 5,    // starker Zoom: mehr Abstand
+        20, factor * 8     // maximaler Zoom: großer Abstand
+      ];
+    }
 
 
     // Create dynamic color expression based on the given property
@@ -266,25 +266,25 @@ export function addLayers(map) {
     }
 
     // Create paint object with optional dash and offset
-function makePaint(property, isDashed, direction = null) {
-  const paint = {
-    "line-width": [
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-      10, 2.5,
-      17, 3,
-      18, 6,
-      20, 10
-    ],
-    "line-color": makeLineColorExpression(property)
-  };
+    function makePaint(property, isDashed, direction = null) {
+      const paint = {
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, 2.5,
+          17, 3,
+          18, 6,
+          20, 10
+        ],
+        "line-color": makeLineColorExpression(property)
+      };
 
-  if (isDashed) paint["line-dasharray"] = [2, 2];
-  if (direction) paint["line-offset"] = getZoomBasedOffset(direction);
+      if (isDashed) paint["line-dasharray"] = [2, 2];
+      if (direction) paint["line-offset"] = getZoomBasedOffset(direction);
 
-  return paint;
-}
+      return paint;
+    }
 
 
     // --- Conditional lines (directional)
@@ -500,37 +500,35 @@ function makePaint(property, isDashed, direction = null) {
     // Schulen POINTS
 
     map.addLayer({
-      id: "schools-points",
-      type: "symbol",
-      source: "schools",
-      "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
-      filter: ["==", ["geometry-type"], "Point"],
-      layout: {
-        visibility: "none",
-        "icon-image": "home",  // Maki-Icon
-        "icon-size": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          10, 0.6,
-          14, 1,
-          16, 1.7
-        ],
-        "icon-allow-overlap": true //,
-        // "icon-ignore-placement": true,
-        // "icon-optional": true
-      },
-      paint: {
-        "icon-color": [
-          "match",
-          ["get", "amenity"],
-          "school", "#0074D9",       // blue
-          "kindergarten", "#2ECC40", // green
-          "#aaaaaa"                  // default/fallback
-        ],
-        "icon-opacity": 0.5
-      }
-    });
+  id: "schools-points",
+  type: "symbol",
+  source: "schools",
+  "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
+  filter: ["==", ["geometry-type"], "Point"],
+  layout: {
+    visibility: "none",
+    "icon-image": [
+      "match",
+      ["get", "amenity"],
+      "school", "rect-#0074D9-20x16",
+      "kindergarten", "rect-#2ECC40-20x16",
+      "rect-gray-32x16"
+    ],
+    "icon-size": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      10, 0.5,
+      14, 1,
+      16, 1.8
+    ],
+    "icon-allow-overlap": true
+  },
+  paint: {
+    "icon-opacity": 0.5
+  }
+});
+
 
     // Schulen POLYGONS
     map.addLayer({
@@ -643,7 +641,7 @@ function makePaint(property, isDashed, direction = null) {
 
 
 
-    // add playgrounds layer
+  // add playgrounds layer
   function addPlaygroundsLayer(map) {
     // playgrounds POINTS
 
@@ -904,7 +902,7 @@ function makePaint(property, isDashed, direction = null) {
   }
 
 
-    // add Scenario6 layers (missing tempo30)
+  // add Scenario6 layers (missing tempo30)
   function addScenario6Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({
@@ -951,7 +949,7 @@ function makePaint(property, isDashed, direction = null) {
     });
 
 
-        // Polygon Layer LINKS: zoom 14+
+    // Polygon Layer LINKS: zoom 14+
     map.addLayer({
       id: "scenario6-polys2",
       type: "line",
@@ -960,13 +958,13 @@ function makePaint(property, isDashed, direction = null) {
       filter: ["all"],
       minzoom: 14,
       layout: {
-      visibility: "none"
+        visibility: "none"
       },
       paint: {
-      "line-color": "red",
-      "line-width": 2
+        "line-color": "red",
+        "line-width": 2
       }
-   // }, "maxspeed"); // put below the maxspeed layer
+      // }, "maxspeed"); // put below the maxspeed layer
     });
 
   }
@@ -993,7 +991,7 @@ function makePaint(property, isDashed, direction = null) {
   // addScenario3Layers(map);
   // addScenario4Layers(map);
   // addScenario6Layers(map);
-  
+
 
   // change the map order
 
@@ -1017,7 +1015,7 @@ function makePaint(property, isDashed, direction = null) {
   // addMovebisLayer(map);
   // addHvsLayer(map);
 
-  
+
 
 
 

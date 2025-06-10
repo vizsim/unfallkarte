@@ -56,6 +56,7 @@ import {
 import { setupPieChartImageGeneration } from './generatePieIcon.js';
 import { setupMapillary } from "./useMapillary.js";
 
+import { setupRectangleIconGeneration } from "./generateRectangleIcon.js";
 
 
 
@@ -132,6 +133,22 @@ async function initMap() {
 
   /// load MAP
   map.on("load", () => {
+
+// map.on('styleimagemissing', function (e) {
+//   if (e.id === 'rect-icon') {
+//     map.loadImage('icons/png/home.png', (error, image) => {
+//       if (error) {
+//         console.error('Error loading image:', error);
+//         return;
+//       }
+//       if (!map.hasImage('rect-icon')) {
+//         map.addImage('rect-icon', image);
+//       }
+//     });
+//   }
+// });
+
+setupRectangleIconGeneration(map); // add this line
 
     initializeMapModules(map) ;               // 2. Module initialisieren
 
@@ -624,5 +641,6 @@ function setupPermalinkHandling(map) {
   addNavigationControl(map);
   addSources(map, { MAPILLARY_TOKEN, MAPTILER_API_KEY });
   // await loadAllIcons(map); // falls wieder benötigt
+
   addLayers(map);
 }
