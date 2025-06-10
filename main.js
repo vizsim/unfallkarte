@@ -27,7 +27,7 @@ import { addSources } from "./addSources.js";
 import { loadAllIcons } from "./loadAllIcons.js";
 import { addLayers } from "./addLayers.js";
 
-import { setupMapillary } from "../useMapillary.js";
+import { setupMapillary } from "./useMapillary.js";
 
 import {
   updateLegendVisibilityByZoom,
@@ -39,7 +39,8 @@ import {
   setupLegendSectionCheckboxes
 } from './legendHandlers.js';
 
-
+// /// Permalink-stuff
+import { Permalink, applyPermalink, updatePermalink } from './permalink.js';
 
 
 
@@ -308,8 +309,6 @@ function setupPieChartImageGeneration(map) {
 
 
 async function initMap() {
-
-
   /// somehow this is needed to load the pmtiles protocol
   const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
   const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
@@ -325,8 +324,6 @@ async function initMap() {
     minZoom: 6,
     maxZoom: 20
   });
-
-
 
   originalMinZoom = map.getMinZoom();
   originalMaxZoom = map.getMaxZoom();
@@ -361,6 +358,7 @@ async function initMap() {
     setupLegendClusterCheckboxSync(map);
     setupLegendToggleHandlers();
     setupLegendSectionCheckboxes(updateLayerFilter);
+
 
 
     updateColorStyle();
@@ -415,12 +413,12 @@ async function initMap() {
 
 
 
-/// soll das noch hier bleiben? aus dem legend clean up übrig geblieben
-    document.querySelectorAll(".legend input[type=checkbox]").forEach(cb => {
-      cb.addEventListener("change", () => {
-        updateLayerFilter();
-      });
-    });
+// /// soll das noch hier bleiben? aus dem legend clean up übrig geblieben
+//     document.querySelectorAll(".legend input[type=checkbox]").forEach(cb => {
+//       cb.addEventListener("change", () => {
+//         updateLayerFilter();
+//       });
+//     });
 
 
 
@@ -465,8 +463,7 @@ async function initMap() {
 
 }
 
-// /// Permalink-stuff
-import { Permalink, applyPermalink, updatePermalink } from './permalink.js';
+
 
 
 
