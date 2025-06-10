@@ -902,6 +902,54 @@ export function addLayers(map) {
   }
 
 
+    // add Scenario5 layers (missing crossing)
+  function addScenario5Layers(map) {
+    // Polygon Layer: zoom 14+
+    map.addLayer({
+      id: "scenario5-polys",
+      type: "fill",
+      source: "scenario5",
+      "source-layer": "scenario5-polys",
+      // filter: ["==", ["geometry-type"], "Polygon"],
+      filter: ["all"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "orange",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // Points Layer: zoom 6–14
+    map.addLayer({
+      id: "scenario5-points",
+      type: "circle",
+      source: "scenario5",
+      "source-layer": "scenario5-points",
+      filter: ["all"],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "orange",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
+  }
+
+
   // add Scenario6 layers (missing tempo30)
   function addScenario6Layers(map) {
     // Polygon Layer: zoom 14+
@@ -1124,6 +1172,7 @@ export function addLayers(map) {
   addScenario2Layers(map);
   addScenario3Layers(map);
   addScenario4Layers(map);
+  addScenario5Layers(map);
   addScenario6Layers(map);
 
   addMaxspeedLayers(map);

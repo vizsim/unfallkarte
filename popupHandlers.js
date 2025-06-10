@@ -510,8 +510,8 @@ export function setupScenario4Popups(map) {
         <div style="font-size: 12px;">
           <strong>Szenario 4</strong><br/>
           <table style="border-collapse: collapse;">
-            <tr><td><strong>ID</strong></td><td>${props.id ?? "-"}</td></tr>
-            <tr><td><strong>ID</strong></td><td>${props.image_id ?? "-"}</td></tr>
+            <tr><td><strong>Feature_ID</strong></td><td>${props.id ?? "-"}</td></tr>
+            <tr><td><strong>Image_ID</strong></td><td>${props.image_id ?? "-"}</td></tr>
             <tr><td><strong>First Seen At</strong></td><td>${props.first_seen_at ?? "-"}</td></tr>
             <tr><td><strong>Last Seen At</strong></td><td>${props.last_seen_at ?? "-"}</td></tr>
             <tr><td><strong>Value</strong></td><td>${props.value ?? "-"}</td></tr>
@@ -535,6 +535,43 @@ export function setupScenario4Popups(map) {
         map.on("click", layerId, (e) => {
             const image_id = e.features[0].properties.image_id;
             if (image_id) window.open(`https://www.mapillary.com/app/?pKey=${image_id}&trafficSign[]=regulatory--maximum-speed-limit-30--g1`, "_blank");
+        });
+    });
+}
+
+
+// Scenario 5 popups
+export function setupScenario5Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const renderScenario5Tooltip = (props) => `
+        <div style="font-size: 12px;">
+          <strong>Szenario 4</strong><br/>
+          <table style="border-collapse: collapse;">
+            <tr><td><strong>Feature_ID</strong></td><td>${props.id ?? "-"}</td></tr>
+            <tr><td><strong>Image_ID</strong></td><td>${props.image_id ?? "-"}</td></tr>
+            <tr><td><strong>First Seen At</strong></td><td>${props.first_seen_at ?? "-"}</td></tr>
+            <tr><td><strong>Last Seen At</strong></td><td>${props.last_seen_at ?? "-"}</td></tr>
+            <tr><td><strong>Value</strong></td><td>${props.value ?? "-"}</td></tr>
+          </table>
+        </div>
+      `;
+
+    ["scenario5-polys", "scenario5-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario5Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+
+        map.on("click", layerId, (e) => {
+            const image_id = e.features[0].properties.image_id;
+            if (image_id) window.open(`https://www.mapillary.com/app/?pKey=${image_id}&trafficSign[]=information--pedestrians-crossing--g1`, "_blank");
         });
     });
 }

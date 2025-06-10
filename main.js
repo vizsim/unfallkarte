@@ -30,6 +30,7 @@ import {
   setupScenario2Popups,
   setupScenario3Popups,
   setupScenario4Popups,
+  setupScenario5Popups,
   setupScenario6Popups
 } from './popupHandlers.js';
 
@@ -367,6 +368,14 @@ document.getElementById("toggle-scenario4").addEventListener("change", function 
   map.setLayoutProperty("scenario4-polys", "visibility", checked ? "visible" : "none");
 });
 
+// Checkbox shows/hides the layers AND the slider
+document.getElementById("toggle-scenario5").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+
+  map.setLayoutProperty("scenario5-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario5-polys", "visibility", checked ? "visible" : "none");
+});
+
 
 // Checkbox shows/hides the layers AND the slider
 document.getElementById("toggle-scenario6").addEventListener("change", function (e) {
@@ -566,6 +575,7 @@ function setupPopups(map) {
   setupScenario2Popups(map);
   setupScenario3Popups(map);
   setupScenario4Popups(map);
+  setupScenario5Popups(map);
   setupScenario6Popups(map);
 }
 
