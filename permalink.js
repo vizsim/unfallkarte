@@ -204,3 +204,19 @@ export function updatePermalink(map, isInitializingRef) {
         kontext
     });
 }
+
+
+export function cleanupLegacyPermalink() {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+
+  const legacyParams = ["lat", "lng", "zoom", "style", "filters", "scenarios"];
+  const hasLegacy = legacyParams.some(param => params.has(param));
+  const hasCompact = params.has("p");
+
+  if (!hasCompact && hasLegacy) {
+    legacyParams.forEach(param => params.delete(param));
+    url.search = params.toString();
+    history.replaceState(null, "", url.toString());
+  }
+}

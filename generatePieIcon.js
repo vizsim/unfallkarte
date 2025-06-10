@@ -1,4 +1,5 @@
 // generatePieIcon.js
+
 const pixelRatio = 2;
 
 /**
@@ -57,4 +58,26 @@ export function generatePieIcon({ k1, k2, k3 }) {
     size,
     data: ctx.getImageData(0, 0, size * pixelRatio, size * pixelRatio),
   };
+}
+
+
+
+export function setupPieChartImageGeneration(map) {
+  // load piecharts
+  map.on("styleimagemissing", (e) => {
+    const id = e.id;
+    if (!id.startsWith("pie-")) return;
+
+    const parts = id.split("-");
+    if (parts.length !== 4) return;
+
+    const k1 = parseInt(parts[1], 10);
+    const k2 = parseInt(parts[2], 10);
+    const k3 = parseInt(parts[3], 10);
+
+    const image = generatePieIcon({ k1, k2, k3 });
+    if (image) {
+      map.addImage(id, image.data, { pixelRatio: 2 });
+    }
+  });
 }

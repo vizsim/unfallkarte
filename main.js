@@ -2,7 +2,7 @@ import { setupPhotonGeocoder } from './geocoder.js';
 
 import { paintStyles, getCircleColorPaint } from './styleConfig.js';
 
-import { generatePieIcon } from './generatePieIcon.js';
+import { setupPieChartImageGeneration } from './generatePieIcon.js';
 
 import {
   setupAccidentPopups,
@@ -19,10 +19,8 @@ import {
   setupScenario3Popups,
   setupScenario4Popups,
   setupScenario6Popups
-
 } from './popupHandlers.js';
 
-//import { addSourcesAndLayers } from "./addSourcesAndLayers.js";
 import { addSources } from "./addSources.js";
 import { loadAllIcons } from "./loadAllIcons.js";
 import { addLayers } from "./addLayers.js";
@@ -39,8 +37,15 @@ import {
   setupLegendSectionCheckboxes
 } from './legendHandlers.js';
 
-// /// Permalink-stuff
-import { Permalink, applyPermalink, updatePermalink } from './permalink.js';
+import { Permalink, applyPermalink, updatePermalink, cleanupLegacyPermalink } from './permalink.js';
+
+import { setupBaseLayerControls } from './ui/setupBaseLayerControls.js';
+import { setupLayerToggles } from './ui/setupLayerToggles.js';
+// import { setupScenarioControls } from './ui/setupScenarioControls.js';
+
+
+// someday we need this
+//import { updateVisibleFeatureCount } from './ui/featureCounter.js';
 
 
 
@@ -56,38 +61,12 @@ const isInitializingRef = { value: true }; // für Permalink-Module etc.
 
 const isLocalhost = location.hostname === "localhost";
 
-(async () => {
-  try {
-    // handle the config import based on the environment  for the api keys
-    const config = await import(isLocalhost ? './config.js' : './config.public.js');
-    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
-    console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
+export const LAYERS = {
+  accidents: ["accident-points"],
+  symbols: ["beteiligung-symbols"],
+  clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
+};
 
-
-    (function redirectToCompactPermalink() {
-      const url = new URL(window.location.href);
-      const searchParams = url.searchParams;
-
-      // If there's no compact `p` param, and any old ones exist, wipe them
-      const legacyParams = ["lat", "lng", "zoom", "style", "filters", "scenarios"];
-      const hasLegacy = legacyParams.some(param => searchParams.has(param));
-
-      if (!searchParams.has("p") && hasLegacy) {
-        // Remove all legacy params
-        legacyParams.forEach(param => searchParams.delete(param));
-        url.search = searchParams.toString(); // Apply cleaned query
-        history.replaceState(null, "", url.toString());
-      }
-    })();
-
-
-
-    initMap();
-
-  } catch (err) {
-    console.error("❌ Konfig konnte nicht geladen werden:", err);
-  }
-})();
 
 
 document.querySelector('[data-map="standard"]').style.backgroundImage =
@@ -100,211 +79,29 @@ document.querySelector('[data-map="satellite"]').style.backgroundImage =
   "url('./thumbs/thumb-satellite.png')";
 
 
-
-
-const LAYERS = {
-  // accidents: ["accident-points-11-12", "accident-points-12-13"],
-  // symbols: ["beteiligung-symbols-11-12", "beteiligung-symbols-12-13"],
-  accidents: ["accident-points"],
-  symbols: ["beteiligung-symbols"],
-  clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
-};
-
-
-// 4. Farbwechsel anwenden
-function updateColorStyle() {
-  const selected = document.querySelector('input[name="color-style"]:checked').value;
-
-  const colorExpr = getCircleColorPaint(selected);
-
-  LAYERS.accidents.forEach(layerId => {
-    if (map.getLayer(layerId)) {
-      map.setPaintProperty(layerId, "circle-color", colorExpr);
-      map.setPaintProperty(layerId, "circle-opacity", 0.6);
-      map.setLayoutProperty(layerId, "visibility", "visible");
-    }
-  });
-
-  // Beteiligungsbuchstaben-Layer bleibt unabhängig
-  const detailsChecked = document.getElementById("toggle-details").checked;
-  // map.setLayoutProperty("beteiligung-symbols", "visibility", detailsChecked ? "visible" : "none");
-
-  LAYERS.symbols.forEach(layerId => {
-    if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, "visibility", detailsChecked ? "visible" : "none");
-    }
-  });
-
-  updateLegendColors(selected, paintStyles); /// hier angepasst!!!
-}
-
-
-// 5. Event-Listener für Radiobuttons
+//Event-Listener für Radiobuttons
 document.querySelectorAll('input[name="color-style"]').forEach(rb => {
   rb.addEventListener("change", updateColorStyle);
 });
 
 
-function getSelectedCheckboxValues(group) {
-  return Array.from(document.querySelectorAll(`input[data-group="${group}"]:checked`))
-    .map(cb => parseInt(cb.value));
-}
-
-function getSelectedBeteiligungen() {
-  return Array.from(document.querySelectorAll('input[data-field]:checked'))
-    .map(cb => cb.dataset.field);
-}
-
-function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
-  if (isInitializingRef.value && !force) return;
-
-  const uk_vals = getSelectedCheckboxValues("UKATEGORIE");
-  const uart_vals = getSelectedCheckboxValues("UART");
-  const utyp_vals = getSelectedCheckboxValues("UTYP1");
-  const ujahr_vals = getSelectedCheckboxValues("UJAHR");
-  const beteiligungen = getSelectedBeteiligungen();
-
-  // Hauptfilterlogik
-  let filter = ["all"];
-
-  filter.push(["in", "UKATEGORIE", ...(uk_vals.length > 0 ? uk_vals : [-1])]);
-  filter.push(["in", "UART", ...(uart_vals.length > 0 ? uart_vals : [-1])]);
-  filter.push(["in", "UTYP1", ...(utyp_vals.length > 0 ? utyp_vals : [-1])]);
-  filter.push(["in", "UJAHR", ...(ujahr_vals.length > 0 ? ujahr_vals : [-1])]);
-
-  const beteiligungExpr = beteiligungen.length > 0
-    ? ["any", ...beteiligungen.map(f => ["==", f, 1])]
-    : ["==", "UKATEGORIE", -1]; // "unschädlicher" Filter
-  filter.push(beteiligungExpr);
 
 
+(async () => {
+  try {
+    // handle the config import based on the environment  for the api keys
+    const config = await import(isLocalhost ? './config.js' : './config.public.js');
+    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
+    console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
 
-  // Filter anwenden
-  [...LAYERS.accidents, ...LAYERS.symbols].forEach(layerId => {
-    if (map.getLayer(layerId)) map.setFilter(layerId, filter);
-  });
+    cleanupLegacyPermalink();
 
-  map.once("idle", updateVisibleFeatureCount);
+    initMap();
 
-  if (shouldUpdatePermalink && !isInitializingRef.value) {
-    updatePermalink(map, isInitializingRef);
+  } catch (err) {
+    console.error("❌ Konfig konnte nicht geladen werden:", err);
   }
-}
-
-
-
-function updateVisibleFeatureCount() {
-  const zoom = map.getZoom();
-  let features = [];
-
-  const zoomLockText = currentZoomLock
-    ? `<span class="zoom-lock">🔒 ${currentZoomLock}</span>`
-    : "";
-
-  const zoomText = `Zoomlevel: ${zoom.toFixed(2)}${zoomLockText ? ` [${zoomLockText}]` : ""}`;
-
-  if (zoom < 11) {
-    features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
-    const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
-
-    // document.getElementById("feature-count").innerHTML =
-    //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
-
-    document.getElementById("feature-count").innerHTML =
-      `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
-   <div>${zoomText}</div>`;
-    return;
-  }
-
-  features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
-
-  // Zähle nach beliebigem Property
-  function updateBadges(features, property, selectorFn = v => v) {
-    const counts = features.reduce((acc, f) => {
-      const val = selectorFn(f.properties[property]);
-      if (val !== undefined) acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {});
-    document.querySelectorAll(`.legend-item[data-group="${property}"]`).forEach(item => {
-      const val = item.getAttribute("data-value") ?? item.dataset.field;
-      const count = counts[val] || 0;
-      const badge = item.querySelector(".count-badge");
-      if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    });
-  }
-
-  updateBadges(features, "UKATEGORIE", v => parseInt(v));
-  updateBadges(features, "UJAHR", v => parseInt(v));
-  updateBadges(features, "UTYP1", v => parseInt(v));
-  updateBadges(features, "UART", v => parseInt(v));
-
-  // Beteiligung ist ein Sonderfall
-  const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
-  const beteiligungCounts = {};
-  for (const field of beteiligungFields) {
-    beteiligungCounts[field] = features.filter(f => f.properties?.[field] === 1).length;
-  }
-  document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
-    const field = item.dataset.field;
-    const count = beteiligungCounts[field] || 0;
-    const badge = item.querySelector(".count-badge");
-    if (badge) badge.textContent = count > 0 ? `${count}` : "";
-  });
-
-  // document.getElementById("feature-count").innerHTML =
-  //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
-
-  document.getElementById("feature-count").innerHTML =
-    `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
-   <div>${zoomText}</div>`;
-
-}
-
-
-function addNavigationControl(map) {
-  const nav = new maplibregl.NavigationControl();
-
-  // ⚠️ Nicht über addControl platzieren:
-  const customNavContainer = document.getElementById("custom-nav-control");
-  customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
-
-  // Kompass-Reset aktivieren:
-  setTimeout(() => {
-    const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
-    if (compass) {
-      compass.addEventListener('click', () => {
-        map.setPitch(0);
-        map.easeTo({ bearing: 0 });
-      });
-    }
-  }, 100);
-}
-
-function setupPieChartImageGeneration(map) {
-  // load piecharts
-  map.on("styleimagemissing", (e) => {
-    const id = e.id;
-    if (!id.startsWith("pie-")) return;
-
-    const parts = id.split("-");
-    if (parts.length !== 4) return;
-
-    const k1 = parseInt(parts[1], 10);
-    const k2 = parseInt(parts[2], 10);
-    const k3 = parseInt(parts[3], 10);
-
-    const image = generatePieIcon({ k1, k2, k3 });
-    if (image) {
-      map.addImage(id, image.data, { pixelRatio: 2 });
-    }
-  });
-}
-
-
-
-
-
-
+})();
 
 
 
@@ -337,37 +134,22 @@ async function initMap() {
     addNavigationControl(map);
     setupPieChartImageGeneration(map); // für styleimagemissing
 
-
-
-    //// this does not really work as i give the full url later, however, it is needed for the protocol to work
-    const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-    const protocol = new pmtiles.Protocol(name => {
-      const fullUrl = `${pmtilesBaseURL}${name}`;
-      console.log("📡 Protocol resolved:", name, "→", fullUrl);
-      return fullUrl;
-    });
-    maplibregl.addProtocol("pmtiles", protocol.tile);
-
-
+    // maplibregl.addProtocol("pmtiles", protocol.tile);
 
     addSources(map, { MAPILLARY_TOKEN, MAPTILER_API_KEY });
     // await loadAllIcons(map);
     addLayers(map);
+
+    setupLayerToggles(map, applyZoomLock, applyLegendVisibility);
 
 
     setupLegendClusterCheckboxSync(map);
     setupLegendToggleHandlers();
     setupLegendSectionCheckboxes(updateLayerFilter);
 
-
-
     updateColorStyle();
     updateVisibleFeatureCount();
 
-    //addMapillaryInteractivity(map);
-    //setupMapillaryCheckboxHandlers();
-
-    // setupMapillary(map);
 
     setupMapillary(map, {
       applyZoomLock,
@@ -375,7 +157,7 @@ async function initMap() {
     });
 
     map.once("load", updateLegendVisibilityByZoom);
-   // map.on("zoomend", updateLegendVisibilityByZoom);
+    // map.on("zoomend", updateLegendVisibilityByZoom);
     map.on("zoomend", () => updateLegendVisibilityByZoom(map));
     map.on("moveend", () => updateLegendVisibilityByZoom(map));
 
@@ -409,16 +191,6 @@ async function initMap() {
         }
       });
     });
-
-
-
-
-// /// soll das noch hier bleiben? aus dem legend clean up übrig geblieben
-//     document.querySelectorAll(".legend input[type=checkbox]").forEach(cb => {
-//       cb.addEventListener("change", () => {
-//         updateLayerFilter();
-//       });
-//     });
 
 
 
@@ -464,6 +236,10 @@ async function initMap() {
 }
 
 
+
+
+
+//////////////////////// some funcions ////////////////
 
 
 
@@ -525,110 +301,10 @@ function applyZoomLock() {
 
 
 
-document.querySelectorAll('input[name="color-style"]').forEach(rb => {
-  rb.addEventListener("change", () => {
-    updatePermalink(map, isInitializingRef);
-  });
-});
 
-
-
-// Event-Listeners
-
-document.querySelectorAll(".basemap-thumb").forEach(thumb => {
-  thumb.addEventListener("click", () => {
-    const selectedMap = thumb.dataset.map;
-
-    // Sichtbarkeit ändern
-    const isSatellite = selectedMap === "satellite";
-    map.setLayoutProperty("satellite-layer", "visibility", isSatellite ? "visible" : "none");
-
-    // Visuelles Feedback
-    document.querySelectorAll(".basemap-thumb").forEach(t => t.classList.remove("selected"));
-    thumb.classList.add("selected");
-  });
-});
-
-
-
-
-
-document.getElementById("toggle-movebis").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  map.setLayoutProperty("movebis", "visibility", checked ? "visible" : "none");
-
-  applyZoomLock();
-  applyLegendVisibility();
-});
-
-document.getElementById("toggle-hvs").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  map.setLayoutProperty("hvs", "visibility", checked ? "visible" : "none");
-
-  applyZoomLock();
-  applyLegendVisibility();
-});
-
-
-
-document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  const visibility = checked ? "visible" : "none";
-
-  const layerIds = [
-    "maxspeed",
-    "maxspeed-conditional",
-    "maxspeed-forward",
-    "maxspeed-backward",
-    "maxspeed-conditional-forward",
-    "maxspeed-conditional-backward",
-    "maxspeed_minor",
-    "maxspeed_minor-conditional",
-    "maxspeed_minor-forward",
-    "maxspeed_minor-backward",
-    "maxspeed_minor-conditional-forward",
-    "maxspeed_minor-conditional-backward"
-  ];
-
-  layerIds.forEach(id => {
-    if (map.getLayer(id)) {
-      map.setLayoutProperty(id, "visibility", visibility);
-    }
-  });
-
-  applyZoomLock();
-  applyLegendVisibility();
-});
-
-
-
-document.getElementById("toggle-schools").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  map.setLayoutProperty("schools-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("schools-polygons", "visibility", checked ? "visible" : "none");
-
-  applyZoomLock();
-  applyLegendVisibility();
-});
-
-document.getElementById("toggle-health").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  map.setLayoutProperty("health-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("health-polygons", "visibility", checked ? "visible" : "none");
-
-  applyZoomLock();
-  applyLegendVisibility();
-});
-
-document.getElementById("toggle-playgrounds").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-  map.setLayoutProperty("playgrounds-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("playgrounds-polygons", "visibility", checked ? "visible" : "none");
-
-  applyZoomLock();
-  applyLegendVisibility();
-});
-
+setupBaseLayerControls(map, isInitializingRef);
+//setupLayerToggles(map);
+// setupScenarioControls(map);
 
 
 
@@ -764,3 +440,176 @@ document.getElementById("toggle-scenario6").addEventListener("change", function 
   map.setLayoutProperty("scenario6-polys", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario6-polys2", "visibility", checked ? "visible" : "none");
 });
+
+
+
+
+function updateVisibleFeatureCount() {
+  const zoom = map.getZoom();
+  let features = [];
+
+  const zoomLockText = currentZoomLock
+    ? `<span class="zoom-lock">🔒 ${currentZoomLock}</span>`
+    : "";
+
+  const zoomText = `Zoomlevel: ${zoom.toFixed(2)}${zoomLockText ? ` [${zoomLockText}]` : ""}`;
+
+  if (zoom < 11) {
+    features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
+    const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
+
+    // document.getElementById("feature-count").innerHTML =
+    //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
+
+    document.getElementById("feature-count").innerHTML =
+      `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
+   <div>${zoomText}</div>`;
+    return;
+  }
+
+  features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
+
+  // Zähle nach beliebigem Property
+  function updateBadges(features, property, selectorFn = v => v) {
+    const counts = features.reduce((acc, f) => {
+      const val = selectorFn(f.properties[property]);
+      if (val !== undefined) acc[val] = (acc[val] || 0) + 1;
+      return acc;
+    }, {});
+    document.querySelectorAll(`.legend-item[data-group="${property}"]`).forEach(item => {
+      const val = item.getAttribute("data-value") ?? item.dataset.field;
+      const count = counts[val] || 0;
+      const badge = item.querySelector(".count-badge");
+      if (badge) badge.textContent = count > 0 ? `${count}` : "";
+    });
+  }
+
+  updateBadges(features, "UKATEGORIE", v => parseInt(v));
+  updateBadges(features, "UJAHR", v => parseInt(v));
+  updateBadges(features, "UTYP1", v => parseInt(v));
+  updateBadges(features, "UART", v => parseInt(v));
+
+  // Beteiligung ist ein Sonderfall
+  const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
+  const beteiligungCounts = {};
+  for (const field of beteiligungFields) {
+    beteiligungCounts[field] = features.filter(f => f.properties?.[field] === 1).length;
+  }
+  document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
+    const field = item.dataset.field;
+    const count = beteiligungCounts[field] || 0;
+    const badge = item.querySelector(".count-badge");
+    if (badge) badge.textContent = count > 0 ? `${count}` : "";
+  });
+
+  // document.getElementById("feature-count").innerHTML =
+  //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
+
+  document.getElementById("feature-count").innerHTML =
+    `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
+   <div>${zoomText}</div>`;
+
+}
+
+
+
+function getSelectedCheckboxValues(group) {
+  return Array.from(document.querySelectorAll(`input[data-group="${group}"]:checked`))
+    .map(cb => parseInt(cb.value));
+}
+
+function getSelectedBeteiligungen() {
+  return Array.from(document.querySelectorAll('input[data-field]:checked'))
+    .map(cb => cb.dataset.field);
+}
+
+function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
+  if (isInitializingRef.value && !force) return;
+
+  const uk_vals = getSelectedCheckboxValues("UKATEGORIE");
+  const uart_vals = getSelectedCheckboxValues("UART");
+  const utyp_vals = getSelectedCheckboxValues("UTYP1");
+  const ujahr_vals = getSelectedCheckboxValues("UJAHR");
+  const beteiligungen = getSelectedBeteiligungen();
+
+  // Hauptfilterlogik
+  let filter = ["all"];
+
+  filter.push(["in", "UKATEGORIE", ...(uk_vals.length > 0 ? uk_vals : [-1])]);
+  filter.push(["in", "UART", ...(uart_vals.length > 0 ? uart_vals : [-1])]);
+  filter.push(["in", "UTYP1", ...(utyp_vals.length > 0 ? utyp_vals : [-1])]);
+  filter.push(["in", "UJAHR", ...(ujahr_vals.length > 0 ? ujahr_vals : [-1])]);
+
+  const beteiligungExpr = beteiligungen.length > 0
+    ? ["any", ...beteiligungen.map(f => ["==", f, 1])]
+    : ["==", "UKATEGORIE", -1]; // "unschädlicher" Filter
+  filter.push(beteiligungExpr);
+
+
+
+  // Filter anwenden
+  [...LAYERS.accidents, ...LAYERS.symbols].forEach(layerId => {
+    if (map.getLayer(layerId)) map.setFilter(layerId, filter);
+  });
+
+  map.once("idle", updateVisibleFeatureCount);
+
+  if (shouldUpdatePermalink && !isInitializingRef.value) {
+    updatePermalink(map, isInitializingRef);
+  }
+}
+
+
+
+
+
+// 4. Farbwechsel anwenden
+function updateColorStyle() {
+  const selected = document.querySelector('input[name="color-style"]:checked').value;
+
+  const colorExpr = getCircleColorPaint(selected);
+
+  LAYERS.accidents.forEach(layerId => {
+    if (map.getLayer(layerId)) {
+      map.setPaintProperty(layerId, "circle-color", colorExpr);
+      map.setPaintProperty(layerId, "circle-opacity", 0.6);
+      map.setLayoutProperty(layerId, "visibility", "visible");
+    }
+  });
+
+  // Beteiligungsbuchstaben-Layer bleibt unabhängig
+  const detailsChecked = document.getElementById("toggle-details").checked;
+  // map.setLayoutProperty("beteiligung-symbols", "visibility", detailsChecked ? "visible" : "none");
+
+  LAYERS.symbols.forEach(layerId => {
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, "visibility", detailsChecked ? "visible" : "none");
+    }
+  });
+
+  updateLegendColors(selected, paintStyles); /// hier angepasst!!!
+}
+
+
+
+
+
+
+function addNavigationControl(map) {
+  const nav = new maplibregl.NavigationControl();
+
+  // ⚠️ Nicht über addControl platzieren:
+  const customNavContainer = document.getElementById("custom-nav-control");
+  customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
+
+  // Kompass-Reset aktivieren:
+  setTimeout(() => {
+    const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
+    if (compass) {
+      compass.addEventListener('click', () => {
+        map.setPitch(0);
+        map.easeTo({ bearing: 0 });
+      });
+    }
+  }, 100);
+}
