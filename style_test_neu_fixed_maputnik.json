@@ -27,7 +27,7 @@
       "attribution": "© OpenStreetMap contributors | Tiles © OpenMapTiles"
     }
   },
-  "sprite": "https://openmaptiles.github.io/positron-gl-style/sprite",
+  "sprite": "https://demotiles.maplibre.org/styles/osm-bright-gl-style/sprite",
   "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
   "layers": [
     {

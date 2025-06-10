@@ -22,7 +22,14 @@ import {
 
 } from './popupHandlers.js';
 
-import { addSourcesAndLayers } from "./addSourcesAndLayers.js";
+//import { addSourcesAndLayers } from "./addSourcesAndLayers.js";
+import { addSources } from "./addSources.js";
+import { loadAllIcons } from "./loadAllIcons.js";
+import { addLayers } from "./addLayers.js";
+
+import { setupMapillary } from "../useMapillary.js";
+
+
 
 
 
@@ -80,36 +87,6 @@ document.querySelector('[data-map="standard"]').style.backgroundImage =
 
 document.querySelector('[data-map="satellite"]').style.backgroundImage =
   "url('./thumbs/thumb-satellite.png')";
-
-
-
-
-function updateLegendColors(activeKey) {
-  document.querySelectorAll(".legend-item").forEach(item => {
-    const group = item.getAttribute("data-group");
-    const value = item.getAttribute("data-value");
-    const span = item.querySelector("span");
-    if (!span) return;
-
-    // Für Beteiligung: nutze `data-field`
-    if (activeKey === "BETEILIGUNG" && group === "BETEILIGUNG") {
-      const field = item.dataset.field;
-      const color = paintStyles.BETEILIGUNG.colors[field] || "#aaaaaa";
-      span.style.backgroundColor = color;
-    }
-
-    // Für andere Gruppen
-    else if (group === activeKey) {
-      const color = paintStyles[group]?.colors?.[value] || "#aaaaaa";
-      span.style.backgroundColor = color;
-    }
-
-    // Ausgrauen alle nicht aktiven Gruppen
-    else {
-      span.style.backgroundColor = "#ffffff";
-    }
-  });
-}
 
 
 
@@ -273,21 +250,65 @@ function updateVisibleFeatureCount() {
 }
 
 
+function addNavigationControl(map) {
+  const nav = new maplibregl.NavigationControl();
+
+  // ⚠️ Nicht über addControl platzieren:
+  const customNavContainer = document.getElementById("custom-nav-control");
+  customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
+
+  // Kompass-Reset aktivieren:
+  setTimeout(() => {
+    const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
+    if (compass) {
+      compass.addEventListener('click', () => {
+        map.setPitch(0);
+        map.easeTo({ bearing: 0 });
+      });
+    }
+  }, 100);
+}
+
+function setupPieChartImageGeneration(map) {
+  // load piecharts
+  map.on("styleimagemissing", (e) => {
+    const id = e.id;
+    if (!id.startsWith("pie-")) return;
+
+    const parts = id.split("-");
+    if (parts.length !== 4) return;
+
+    const k1 = parseInt(parts[1], 10);
+    const k2 = parseInt(parts[2], 10);
+    const k3 = parseInt(parts[3], 10);
+
+    const image = generatePieIcon({ k1, k2, k3 });
+    if (image) {
+      map.addImage(id, image.data, { pixelRatio: 2 });
+    }
+  });
+}
+
+
+
+
+
+
+
 
 
 async function initMap() {
 
 
   /// somehow this is needed to load the pmtiles protocol
-const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
-const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
-maplibregl.addProtocol("pmtiles", protocol.tile);
+  const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+  const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
+  maplibregl.addProtocol("pmtiles", protocol.tile);
 
 
   window.map = new maplibregl.Map({
     container: "map",
     // style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
-    //style: "./style_test_neu_fixed.json", // <-- your local Positron style 
     style: "./style_test_neu_fixed_maputnik.json", // <-- your local Positron style
     center: [13.634, 52.315],
     zoom: 12,
@@ -305,50 +326,12 @@ maplibregl.addProtocol("pmtiles", protocol.tile);
   /// load MAP
   map.on("load", () => {
 
-    // load geocoder
     setupPhotonGeocoder(map);
-
-    // add NavigationControl
-    const nav = new maplibregl.NavigationControl();
-
-    // ⚠️ Nicht über addControl platzieren:
-    const customNavContainer = document.getElementById("custom-nav-control");
-    customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
-
-    // Kompass-Reset aktivieren:
-    setTimeout(() => {
-      const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
-      if (compass) {
-        compass.addEventListener('click', () => {
-          map.setPitch(0);
-          map.easeTo({ bearing: 0 });
-        });
-      }
-    }, 100);
+    addNavigationControl(map);
+    setupPieChartImageGeneration(map); // für styleimagemissing
 
 
-    // load piecharts
-    map.on("styleimagemissing", (e) => {
-      const id = e.id;
-      if (!id.startsWith("pie-")) return;
 
-      const parts = id.split("-");
-      if (parts.length !== 4) return;
-
-      const k1 = parseInt(parts[1], 10);
-      const k2 = parseInt(parts[2], 10);
-      const k3 = parseInt(parts[3], 10);
-
-      const image = generatePieIcon({ k1, k2, k3 });
-      if (image) {
-        map.addImage(id, image.data, { pixelRatio: 2 });
-      }
-    });
-
-    // // local / github setup
-    //  const protocol = new pmtiles.Protocol();  
-
-    // //  setup backblaze
     //// this does not really work as i give the full url later, however, it is needed for the protocol to work
     const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
     const protocol = new pmtiles.Protocol(name => {
@@ -359,104 +342,33 @@ maplibregl.addProtocol("pmtiles", protocol.tile);
     maplibregl.addProtocol("pmtiles", protocol.tile);
 
 
-    // load sources and layers
-    addSourcesAndLayers(map, {
-      MAPILLARY_TOKEN,
-      MAPTILER_API_KEY
-    });
+
+    addSources(map, { MAPILLARY_TOKEN, MAPTILER_API_KEY });
+    // await loadAllIcons(map);
+    addLayers(map);
 
 
-    // Cluster-Checkbox auf korrekten Zustand setzen
-    const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
-    if (clusterCheckbox) {
-      const layerId = "pie-clusters-fine-layer";
-      map.once("idle", () => {
-        if (map.getLayer(layerId)) {
-          const isVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
-          clusterCheckbox.checked = isVisible;
-        }
-      });
-    }
+    setupLegendClusterCheckboxSync(map)
 
 
     updateColorStyle();
     updateVisibleFeatureCount();
 
-    addMapillaryInteractivity(map);
+    //addMapillaryInteractivity(map);
+    //setupMapillaryCheckboxHandlers();
+
+    // setupMapillary(map);
+
+    setupMapillary(map, {
+      applyZoomLock,
+      applyLegendVisibility
+    });
 
     map.once("load", updateLegendVisibilityByZoom);
     map.on("zoomend", updateLegendVisibilityByZoom); // Danach bei jedem Zoom
 
-
-    function updateScenarioLegendVisibility() {
-      const legendBox = document.querySelector(".legend");
-      const isCollapsed = legendBox.classList.contains("collapsed");
-
-      document.querySelectorAll(".scenario-legend-section").forEach(section => {
-        section.style.display = isCollapsed ? "none" : "block";
-      });
-    }
-
-
     map.on("zoom", updateScenarioLegendVisibility);
     map.on("load", updateScenarioLegendVisibility);
-
-    // map.on('click', function(e) {
-    //   const features = map.queryRenderedFeatures(e.point, {
-    //     layers: ["scenario2-points"]
-    //   });
-    //   console.log("Clicked features:", features);
-    // });
-
-
-    function addMapillaryInteractivity(map) {
-      map.on("click", "mapillary-images-layer", (e) => {
-        const feature = e.features?.[0];
-        const imageId = feature?.properties?.id;
-        if (imageId) {
-          window.open(`https://www.mapillary.com/app/?pKey=${imageId}&focus=photo`, "_blank");
-        }
-      });
-
-      map.on("mouseenter", "mapillary-images-layer", () => {
-        map.getCanvas().style.cursor = "pointer";
-      });
-      map.on("mouseleave", "mapillary-images-layer", () => {
-        map.getCanvas().style.cursor = "";
-      });
-    }
-
-
-    /// // Mapillary Filter-Checkboxen
-    const toggleMapillary = document.getElementById("toggle-mapillary");
-    const mapillaryFilterOptions = document.getElementById("mapillary-filter-options");
-    const cbPano = document.getElementById("mapillary-pano");
-    const cbNonPano = document.getElementById("mapillary-nonpano");
-
-    toggleMapillary.addEventListener("change", () => {
-      const checked = toggleMapillary.checked;
-      mapillaryFilterOptions.style.display = checked ? "block" : "none";
-      cbPano.checked = checked;
-      cbNonPano.checked = checked;
-      toggleMapillary.indeterminate = false;
-      updateMapillaryFilter();
-    });
-
-
-
-    [cbPano, cbNonPano].forEach(cb => {
-      cb.addEventListener("change", () => {
-        const both = cbPano.checked && cbNonPano.checked;
-        const none = !cbPano.checked && !cbNonPano.checked;
-
-        toggleMapillary.checked = both;
-        toggleMapillary.indeterminate = !both && !none;
-
-        updateMapillaryFilter();
-      });
-    });
-
-
 
 
     // popups / tooltips
@@ -487,84 +399,6 @@ maplibregl.addProtocol("pmtiles", protocol.tile);
     });
 
 
-    // // Direkt beim Laden
-    // map.on("load", updateLegendVisibilityByZoom);
-
-    // // Und bei jedem Zoomwechsel
-    // map.on("zoomend", updateLegendVisibilityByZoom);
-
-
-
-
-    // Funktion zur Aktualisierung der Sichtbarkeit der Legende
-    function updateLegendVisibilityByZoom() {
-      const zoom = map.getZoom();
-      const legend = document.querySelector(".legend");
-      if (!legend || legend.classList.contains("collapsed")) return;
-
-      //const clusterLegendEl = document.getElementById("cluster-legend");
-      const clusterLegendEl = document.getElementById("cluster-legend-section");
-      const movebisLegend = document.getElementById("movebis-legend");
-      const hvsLegend = document.getElementById("hvs-legend");
-      const mapillaryLegend = document.getElementById("mapillary-legend");
-      const maxspeedLegend = document.getElementById("maxspeed-legend");
-      // const scenarioLegendEl = document.getElementById("scenario-legend-section");
-
-      // Check visibility of layers
-      const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
-      const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
-      // const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
-      const mapillaryVisible =
-        map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible" ||
-        map.getLayoutProperty("mapillary-images-halo", "visibility") === "visible";
-
-      //const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
-      const maxspeedVisible =
-        map.getLayoutProperty("maxspeed", "visibility") === "visible" ||
-        map.getLayoutProperty("maxspeed_minor", "visibility") === "visible";
-
-      // Update visibility for special legends
-      // if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
-      if (clusterLegendEl) { clusterLegendEl.style.display = zoom < 11 ? "block" : "none"; }
-      if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 11) ? "block" : "none";
-      if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
-      if (maxspeedLegend) maxspeedLegend.style.display = (maxspeedVisible && zoom >= 11) ? "block" : "none";
-      if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
-      // if (scenarioLegendEl) {
-      //   scenarioLegendEl.style.display = "block"; // ← explizit sichtbar machen
-      // }
-
-      // 🔧 Synchronisiere Cluster-Checkbox basierend auf Layer-Sichtbarkeit
-      const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
-      if (clusterCheckbox) {
-        const layerId = "pie-clusters-fine-layer";
-        const isLayerVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
-        clusterCheckbox.checked = isLayerVisible;
-      }
-
-      // // Hide/show regular groups depending on zoom
-      Array.from(legend.children).forEach(el => {
-        const isTitle = el.classList.contains("legend-title");
-        const isFeatureCount = el.id === "feature-count-wrapper";
-        const scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
-        const isSpecial = [
-          clusterLegendEl,
-          movebisLegend,
-          hvsLegend,
-          mapillaryLegend,
-          maxspeedLegend,
-          ...scenarioSections
-        ].includes(el);
-
-        if (zoom < 11) {
-          el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
-        } else {
-          if (!isSpecial) el.style.display = "";
-        }
-      });
-
-
-    }
 
 
     // // Einklappbare Legende mit Pfeil
@@ -794,53 +628,8 @@ function applyZoomLock() {
   // }
 }
 
-function applyLegendVisibility() {
-  ["schools", "health", "playgrounds", "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "scenario1", "scenario2", "scenario3", "scenario4", "scenario6"].forEach(key => {
-    const toggle = document.getElementById(`toggle-${key}`);
-    const legend = document.getElementById(`${key}-legend`);
-    if (toggle && legend) {
-      legend.style.display = toggle.checked ? "block" : "none";
-    }
-  });
-}
 
 
-
-
-function updateMapillaryFilter() {
-  const cbPano = document.getElementById("mapillary-pano");
-  const cbNonPano = document.getElementById("mapillary-nonpano");
-  const filterOptions = document.getElementById("mapillary-filter-options");
-
-  const showPano = cbPano.checked;
-  const showNonPano = cbNonPano.checked;
-
-  let baseFilter = ["any"];
-  if (showPano) baseFilter.push(["==", ["to-string", ["get", "is_pano"]], "true"]);
-  if (showNonPano) baseFilter.push(["==", ["to-string", ["get", "is_pano"]], "false"]);
-
-  if (baseFilter.length === 1) baseFilter = ["==", "id", "__never__"];
-
-  if (map.getLayer("mapillary-images-layer")) {
-    map.setFilter("mapillary-images-layer", baseFilter);
-  }
-
-  if (map.getLayer("mapillary-images-halo")) {
-    const haloFilter = showPano
-      ? ["==", ["to-string", ["get", "is_pano"]], "true"]
-      : ["==", "id", "__never__"];
-    map.setFilter("mapillary-images-halo", haloFilter);
-    map.setLayoutProperty("mapillary-images-halo", "visibility", showPano ? "visible" : "none");
-  }
-
-  const anyChecked = showPano || showNonPano;
-  map.setLayoutProperty("mapillary-images-layer", "visibility", anyChecked ? "visible" : "none");
-
-  filterOptions.style.display = anyChecked ? "block" : "none";
-
-  applyZoomLock();
-  applyLegendVisibility();
-}
 
 
 
@@ -1063,14 +852,6 @@ document.getElementById("toggle-scenario3").addEventListener("change", function 
 
   map.setLayoutProperty("scenario3-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario3-polys", "visibility", checked ? "visible" : "none");
-
-  // Show or hide the slider
-  //sliderContainer3.style.display = checked ? "block" : "none";
-
-  // // Apply filter initially
-  // if (checked) {
-  //   applyScenario3ClusterSizeFilter(0);
-  // }
 });
 
 
@@ -1080,14 +861,6 @@ document.getElementById("toggle-scenario4").addEventListener("change", function 
 
   map.setLayoutProperty("scenario4-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario4-polys", "visibility", checked ? "visible" : "none");
-
-  // Show or hide the slider
-  //sliderContainer3.style.display = checked ? "block" : "none";
-
-  // // Apply filter initially
-  // if (checked) {
-  //   applyScenario3ClusterSizeFilter(0);
-  // }
 });
 
 
@@ -1098,15 +871,159 @@ document.getElementById("toggle-scenario6").addEventListener("change", function 
   map.setLayoutProperty("scenario6-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario6-polys", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario6-polys2", "visibility", checked ? "visible" : "none");
-
-  // Show or hide the slider
-  //sliderContainer3.style.display = checked ? "block" : "none";
-
-  // // Apply filter initially
-  // if (checked) {
-  //   applyScenario3ClusterSizeFilter(0);
-  // }
 });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/////// FUNKTIONEN fuer LEGENDE
+
+
+// Funktion zur Aktualisierung der Sichtbarkeit der Legende
+function updateLegendVisibilityByZoom() {
+  const zoom = map.getZoom();
+  const legend = document.querySelector(".legend");
+  if (!legend || legend.classList.contains("collapsed")) return;
+
+  //const clusterLegendEl = document.getElementById("cluster-legend");
+  const clusterLegendEl = document.getElementById("cluster-legend-section");
+  const movebisLegend = document.getElementById("movebis-legend");
+  const hvsLegend = document.getElementById("hvs-legend");
+  const mapillaryLegend = document.getElementById("mapillary-legend");
+  const maxspeedLegend = document.getElementById("maxspeed-legend");
+  // const scenarioLegendEl = document.getElementById("scenario-legend-section");
+
+  // Check visibility of layers
+  const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
+  const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
+  // const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
+  const mapillaryVisible =
+    map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible" ||
+    map.getLayoutProperty("mapillary-images-halo", "visibility") === "visible";
+
+  //const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
+  const maxspeedVisible =
+    map.getLayoutProperty("maxspeed", "visibility") === "visible" ||
+    map.getLayoutProperty("maxspeed_minor", "visibility") === "visible";
+
+  // Update visibility for special legends
+  // if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "" : "none";
+  if (clusterLegendEl) { clusterLegendEl.style.display = zoom < 11 ? "block" : "none"; }
+  if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 11) ? "block" : "none";
+  if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
+  if (maxspeedLegend) maxspeedLegend.style.display = (maxspeedVisible && zoom >= 11) ? "block" : "none";
+  if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
+  // if (scenarioLegendEl) {
+  //   scenarioLegendEl.style.display = "block"; // ← explizit sichtbar machen
+  // }
+
+  // 🔧 Synchronisiere Cluster-Checkbox basierend auf Layer-Sichtbarkeit
+  const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
+  if (clusterCheckbox) {
+    const layerId = "pie-clusters-fine-layer";
+    const isLayerVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
+    clusterCheckbox.checked = isLayerVisible;
+  }
+
+  // // Hide/show regular groups depending on zoom
+  Array.from(legend.children).forEach(el => {
+    const isTitle = el.classList.contains("legend-title");
+    const isFeatureCount = el.id === "feature-count-wrapper";
+    const scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
+    const isSpecial = [
+      clusterLegendEl,
+      movebisLegend,
+      hvsLegend,
+      mapillaryLegend,
+      maxspeedLegend,
+      ...scenarioSections
+    ].includes(el);
+
+    if (zoom < 11) {
+      el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
+    } else {
+      if (!isSpecial) el.style.display = "";
+    }
+  });
+}
+
+
+
+function updateLegendColors(activeKey) {
+  document.querySelectorAll(".legend-item").forEach(item => {
+    const group = item.getAttribute("data-group");
+    const value = item.getAttribute("data-value");
+    const span = item.querySelector("span");
+    if (!span) return;
+
+    // Für Beteiligung: nutze `data-field`
+    if (activeKey === "BETEILIGUNG" && group === "BETEILIGUNG") {
+      const field = item.dataset.field;
+      const color = paintStyles.BETEILIGUNG.colors[field] || "#aaaaaa";
+      span.style.backgroundColor = color;
+    }
+
+    // Für andere Gruppen
+    else if (group === activeKey) {
+      const color = paintStyles[group]?.colors?.[value] || "#aaaaaa";
+      span.style.backgroundColor = color;
+    }
+
+    // Ausgrauen alle nicht aktiven Gruppen
+    else {
+      span.style.backgroundColor = "#ffffff";
+    }
+  });
+}
+
+
+function updateScenarioLegendVisibility() {
+  const legendBox = document.querySelector(".legend");
+  const isCollapsed = legendBox.classList.contains("collapsed");
+
+  document.querySelectorAll(".scenario-legend-section").forEach(section => {
+    section.style.display = isCollapsed ? "none" : "block";
+  });
+}
+
+function applyLegendVisibility() {
+  ["schools", "health", "playgrounds", "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "scenario1", "scenario2", "scenario3", "scenario4", "scenario6"].forEach(key => {
+    const toggle = document.getElementById(`toggle-${key}`);
+    const legend = document.getElementById(`${key}-legend`);
+    if (toggle && legend) {
+      legend.style.display = toggle.checked ? "block" : "none";
+    }
+  });
+}
+
+
+
+function setupLegendClusterCheckboxSync(map) {
+  // Cluster-Checkbox auf korrekten Zustand setzen
+  const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
+  if (clusterCheckbox) {
+    const layerId = "pie-clusters-fine-layer";
+    map.once("idle", () => {
+      if (map.getLayer(layerId)) {
+        const isVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
+        clusterCheckbox.checked = isVisible;
+      }
+    });
+  }
+}
+
+
+
+
+
+/// MAP
