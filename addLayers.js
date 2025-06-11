@@ -197,6 +197,59 @@ export function addLayers(map) {
     });
   }
 
+
+// add OBS layer
+function addOBSLayer(map) {
+  map.addLayer({
+    id: "obs",
+    type: "circle",
+    source: "obs",
+    "source-layer": "obs_data-points",
+    layout: { visibility: "none" },
+    filter: [">=", ["to-number", ["get", "distance_overtaker"]], 0.2],
+    paint: {
+      "circle-color": [
+        "case",
+
+        // --- Urban color ramp ---
+        ["==", ["get", "zone"], "urban"],
+        [
+          "interpolate",
+          ["linear"],
+          ["to-number", ["get", "distance_overtaker"]],
+          1.1, "#67000d",   // very dark red
+          1.3, "#ef3b2c",   // red
+          1.5, "#fdbf6f",   // yellow
+          1.7, "#a1d99b",   // light green
+          1.9, "#31a354"    // green
+        ],
+
+        // --- Rural color ramp ---
+        ["==", ["get", "zone"], "rural"],
+        [
+          "interpolate",
+          ["linear"],
+          ["to-number", ["get", "distance_overtaker"]],
+          1.6, "#67000d",   // very dark red
+          1.8, "#ef3b2c",   // red
+          2.0, "#fdbf6f",   // yellow
+          2.2, "#a1d99b",   // light green
+          2.4, "#31a354"    // green
+        ],
+
+        // --- Fallback color ---
+        "#cccccc"
+      ],
+      "circle-radius": 4
+    }
+  });
+}
+
+
+
+
+
+
   // and Verkehrsmengen layer
   function addHvsLayer(map) {
     map.addLayer({
@@ -1019,6 +1072,55 @@ export function addLayers(map) {
 
 
 
+      // add Scenario7 layers (missing cycleway)
+  function addScenario7Layers(map) {
+    // Polygon Layer: zoom 14+
+    map.addLayer({
+      id: "scenario7-polys",
+      type: "fill",
+      source: "scenario7",
+      "source-layer": "scenario7-polys",
+      // filter: ["==", ["geometry-type"], "Polygon"],
+      filter: ["all"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "orange",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // Points Layer: zoom 6–14
+    map.addLayer({
+      id: "scenario7-points",
+      type: "circle",
+      source: "scenario7",
+      "source-layer": "scenario7-points",
+      filter: ["all"],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "orange",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
+  }
+
+
+
 
 
   // addAccidentLayersToMap(map);
@@ -1174,10 +1276,12 @@ export function addLayers(map) {
   addScenario4Layers(map);
   addScenario5Layers(map);
   addScenario6Layers(map);
+  addScenario7Layers(map);
 
   addMaxspeedLayers(map);
   addMaxspeedMinorLayers(map);
   addMovebisLayer(map);
+  addOBSLayer(map);
   addHvsLayer(map);
 
 

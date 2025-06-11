@@ -183,6 +183,38 @@ export function setupMovebisPopups(map) {
 }
 
 
+export function setupOBSPopups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    map.on("mousemove", "obs", (e) => {
+        map.getCanvas().style.cursor = "pointer";
+        const props = e.features[0].properties;
+
+        const overtaker = props.distance_overtaker != null ? props.distance_overtaker.toFixed(2) + " m" : "-";
+        const speed = props.speed != null ? (props.speed * 3.6).toFixed(1) + " km/h" : "-"; const zone = props.zone ?? "-";
+
+        const content = `
+    <div style="font-size: 12px;">
+        <strong>Beobachtung</strong><br/>
+        <table style="border-collapse: collapse;">
+            <tr><td><strong>Überholabstand: </strong></td><td>${overtaker}</td></tr>
+            <tr><td><strong>Geschwindigkeit: </strong></td><td>${speed}</td></tr>
+            <tr><td><strong>Zone: </strong></td><td>${zone}</td></tr>
+ 
+        </table>
+    </div>`;
+
+        popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+    });
+
+    map.on("mouseleave", "obs", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
+    });
+}
+
+
+
 
 export function setupHVSPopups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
@@ -605,5 +637,43 @@ export function setupScenario6Popups(map) {
             map.getCanvas().style.cursor = "";
         });
 
+    });
+}
+
+
+
+// Scenario 7 popups
+export function setupScenario7Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const renderScenario7Tooltip = (props) => `
+        <div style="font-size: 12px;">
+          <strong>Szenario 4</strong><br/>
+          <table style="border-collapse: collapse;">
+            <tr><td><strong>Feature_ID</strong></td><td>${props.id ?? "-"}</td></tr>
+            <tr><td><strong>Image_ID</strong></td><td>${props.image_id ?? "-"}</td></tr>
+            <tr><td><strong>First Seen At</strong></td><td>${props.first_seen_at ?? "-"}</td></tr>
+            <tr><td><strong>Last Seen At</strong></td><td>${props.last_seen_at ?? "-"}</td></tr>
+            <tr><td><strong>Value</strong></td><td>${props.value ?? "-"}</td></tr>
+          </table>
+        </div>
+      `;
+
+    ["scenario7-polys", "scenario7-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario7Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+
+        map.on("click", layerId, (e) => {
+            const image_id = e.features[0].properties.image_id;
+            if (image_id) window.open(`https://www.mapillary.com/app/?pKey=${image_id}&mapFeature[]=marking--discrete--symbol--bicycle`, "_blank");
+        });
     });
 }

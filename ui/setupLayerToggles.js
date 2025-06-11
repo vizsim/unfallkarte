@@ -25,6 +25,14 @@ document.getElementById("toggle-hvs").addEventListener("change", function (e) {
   applyLegendVisibility();
 });
 
+document.getElementById("toggle-obs").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  map.setLayoutProperty("obs", "visibility", checked ? "visible" : "none");
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
 
 
 document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {

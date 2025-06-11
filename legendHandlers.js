@@ -11,6 +11,7 @@ export function updateLegendVisibilityByZoom(map) {
   const hvsLegend = document.getElementById("hvs-legend");
   const mapillaryLegend = document.getElementById("mapillary-legend");
   const maxspeedLegend = document.getElementById("maxspeed-legend");
+  const obsLegend = document.getElementById("obs-legend");
 
   const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
   const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
@@ -20,12 +21,16 @@ export function updateLegendVisibilityByZoom(map) {
   const maxspeedVisible =
     map.getLayoutProperty("maxspeed", "visibility") === "visible" ||
     map.getLayoutProperty("maxspeed_minor", "visibility") === "visible";
+  const obsVisible = map.getLayoutProperty("obs", "visibility") === "visible";
+
 
   if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "block" : "none";
   if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 11) ? "block" : "none";
   if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
   if (maxspeedLegend) maxspeedLegend.style.display = (maxspeedVisible && zoom >= 11) ? "block" : "none";
   if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
+  if (obsLegend) obsLegend.style.display = (obsVisible && zoom >= 11) ? "block" : "none";
+
 
   const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
   if (clusterCheckbox) {
@@ -43,6 +48,7 @@ export function updateLegendVisibilityByZoom(map) {
       hvsLegend,
       mapillaryLegend,
       maxspeedLegend,
+      obsLegend,
       ...scenarioSections
     ].includes(el);
 
@@ -57,7 +63,7 @@ export function updateLegendVisibilityByZoom(map) {
 export function applyLegendVisibility() {
   const keys = [
     "schools", "health", "playgrounds",
-    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor",
+    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor","obs",
     "scenario1", "scenario2", "scenario3", "scenario4", "scenario6"
   ];
 
@@ -153,7 +159,8 @@ export function setupLegendToggleHandlers() {
             movebisLegend,
             hvsLegend,
             mapillaryLegend,
-            maxspeedLegend
+            maxspeedLegend,
+            obsLegend
           ].includes(el);
 
           if (collapsed) {

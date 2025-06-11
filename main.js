@@ -22,6 +22,7 @@ import {
   setupMovebisPopups,
   setupHVSPopups,
   setupMaxspeedPopups,
+  setupOBSPopups,
   setupSchoolsPopups,
   setupHealthPopups,
   setupPlaygroundsPopups,
@@ -31,7 +32,8 @@ import {
   setupScenario3Popups,
   setupScenario4Popups,
   setupScenario5Popups,
-  setupScenario6Popups
+  setupScenario6Popups,
+  setupScenario7Popups
 } from './popupHandlers.js';
 
 // 📦 Legende
@@ -197,6 +199,8 @@ function applyZoomLock() {
   const playgroundsPolygonsVisible = map.getLayoutProperty("health-polygons", "visibility") === "visible";
 
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
+  const obsVisible = map.getLayoutProperty("obs", "visibility") === "visible";
+
   //const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
 
 
@@ -214,6 +218,7 @@ function applyZoomLock() {
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
   if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
+  if (obsVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
   // if (scenario1Visible) minZooms.push(11); // ✅ NEW ZOOM LOCK
 
   // const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
@@ -384,6 +389,14 @@ document.getElementById("toggle-scenario6").addEventListener("change", function 
   map.setLayoutProperty("scenario6-points", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario6-polys", "visibility", checked ? "visible" : "none");
   map.setLayoutProperty("scenario6-polys2", "visibility", checked ? "visible" : "none");
+});
+
+
+document.getElementById("toggle-scenario7").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+
+  map.setLayoutProperty("scenario7-points", "visibility", checked ? "visible" : "none");
+  map.setLayoutProperty("scenario7-polys", "visibility", checked ? "visible" : "none");
 });
 
 
@@ -567,6 +580,8 @@ function setupPopups(map) {
   setupMovebisPopups(map);
   setupHVSPopups(map);
   setupMaxspeedPopups(map);
+  setupOBSPopups(map);
+
   setupSchoolsPopups(map);
   setupHealthPopups(map);
   setupPlaygroundsPopups(map);
@@ -577,6 +592,7 @@ function setupPopups(map) {
   setupScenario4Popups(map);
   setupScenario5Popups(map);
   setupScenario6Popups(map);
+  setupScenario7Popups(map);
 }
 
 function setupLegend(map) {

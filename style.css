@@ -249,6 +249,7 @@ body {
 #movebis-legend,
 #hvs-legend,
 #maxspeed-legend,
+#obs-legend,
 #schools-legend {
     display: none;
 }

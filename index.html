@@ -569,7 +569,8 @@
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario4" name="scenario" value="sc4" />
-            Sc4: Kein OSM-Tempo30-Segment trotz Mapillary trafficsign anzeigen <span class="info-icon"
+            Sc4: Tempo30: Missing OSM-Tempo30-Segment<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;in Mapillary vorhanden? [klappt relativ gut] <span class="info-icon"
               title="Quelle: Mapillary – Lizenz: Terms of Use (mapillary.com/legal/terms) & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
           <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
@@ -583,7 +584,8 @@
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario5" name="scenario" value="sc5" />
-            Sc5: Kein OSM-Crossing trotz Mapillary trafficsign Fussgängerüberweg anzeigen <span class="info-icon"
+            Sc5: Fussgängerüberweg: Missing OSM-Crossing<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;in Mapillary vorhanden? [klappt relativ gut] <span class="info-icon"
               title="Quelle: Mapillary – Lizenz: Terms of Use (mapillary.com/legal/terms) & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
           <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
@@ -592,6 +594,21 @@
           <input type="range" id="scenario3-slider" min="3" max="20" step="1" value="3" />
         </div> -->
         </div>
+
+        <div style="margin-top: 6px;">
+          <label style="margin-left: 10px;">
+            <input type="checkbox" id="toggle-scenario7" name="scenario" value="sc7" />
+            Sc7: Cycleway: Missing OSM-Radinfra (nur in BB)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;in Mapillary vorhanden? [klappt relativ schlecht] <span class="info-icon"
+              title="Quelle: Mapillary – Lizenz: Terms of Use (mapillary.com/legal/terms) & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
+          </label>
+          <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <label for="scenario3-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
+              id="scenario3-slider-value">3</span></label><br>
+          <input type="range" id="scenario3-slider" min="3" max="20" step="1" value="3" />
+        </div> -->
+        </div>
+
       </div>
 
 
@@ -726,6 +743,48 @@
               viele (≥ 1000)</div>
           </div>
         </div>
+
+
+        <div style="margin-top: 6px;">
+          <label style="margin-left: 10px;">
+            <input type="checkbox" id="toggle-obs" />
+            OBS Daten anzeigen
+            <span class="info-icon" title="Quelle: OBS community – Lizenz: ???">ⓘ</span>
+          </label>
+        </div>
+
+        <div id="obs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div><strong>Überholabstand nach Zone</strong></div>
+
+          <!-- Innerorts -->
+          <div style="margin-top: 8px;"><strong>Innerorts (1.5 m)</strong></div>
+          <div style="display: flex; align-items: center; gap: 2px; margin-top: 4px;">
+            <div style="background:#67000d; width:24px; height:12px;"></div>
+            <div style="background:#ef3b2c; width:24px; height:12px;"></div>
+            <div style="background:#fdbf6f; width:24px; height:12px;"></div>
+            <div style="background:#a1d99b; width:24px; height:12px;"></div>
+            <div style="background:#31a354; width:24px; height:12px;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; width:120px;">
+            <span>1.10</span><span>1.30</span><span>1.50</span><span>1.70</span><span>1.90</span>
+          </div>
+
+          <!-- Außerorts -->
+          <div style="margin-top: 12px;"><strong>Außerorts (2 m)</strong></div>
+          <div style="display: flex; align-items: center; gap: 2px; margin-top: 4px;">
+            <div style="background:#67000d; width:24px; height:12px;"></div>
+            <div style="background:#ef3b2c; width:24px; height:12px;"></div>
+            <div style="background:#fdbf6f; width:24px; height:12px;"></div>
+            <div style="background:#a1d99b; width:24px; height:12px;"></div>
+            <div style="background:#31a354; width:24px; height:12px;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; width:120px;">
+            <span>1.60</span><span>1.80</span><span>2.00</span><span>2.20</span><span>2.40</span>
+          </div>
+        </div>
+
+
+
 
         <div class="legend-section-subtitle" style="margin-top: 12px;">Orte & Einrichtungen</div>
         <div style="margin-top: 6px;">

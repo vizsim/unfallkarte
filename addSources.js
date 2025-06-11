@@ -18,6 +18,8 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
   addPMTilesSource("maxspeed", "processed_major_highways_germany_250528.pmtiles");
   addPMTilesSource("maxspeed_minor", "processed_minor_highways_germany_250528.pmtiles");
 
+  addPMTilesSource("obs", "OBS_data_2025-06-11.pmtiles");
+
 
 
   addPMTilesSource("schools", "processed_schools_germany_250528.pmtiles"); 
@@ -37,6 +39,8 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
   addPMTilesSource("scenario4", "scenario4_tempo30missing_ger.pmtiles");
   addPMTilesSource("scenario5", "scenario5_crossing-missing.pmtiles");
   addPMTilesSource("scenario6", "scenario6_tempo50_30mbuffer_schulen.pmtiles");
+
+  addPMTilesSource("scenario7", "scenario7_missing-cw_bbb.pmtiles");
 
 
 
