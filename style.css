@@ -30,7 +30,7 @@ body {
     right: 10px;
     width: 320px;
     max-width: 100%;
-    max-height: calc(100vh - 160px);
+    max-height: calc(100dvh  - 160px);
     /* 60 top + 80 bottom */
     background: white;
     padding: 10px;
