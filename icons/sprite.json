@@ -1,0 +1,26 @@
+{
+  "bicycle": {
+    "height": 36,
+    "pixelRatio": 2,
+    "width": 36,
+    "x": 0,
+    "y": 0,
+    "sdf": true
+  },
+  "home": {
+    "height": 36,
+    "pixelRatio": 2,
+    "width": 36,
+    "x": 36,
+    "y": 0,
+    "sdf": true
+  },
+  "playground": {
+    "height": 36,
+    "pixelRatio": 2,
+    "width": 36,
+    "x": 72,
+    "y": 0,
+    "sdf": true
+  }
+}
