@@ -18,6 +18,9 @@ config.js
 # But keep JSON files in the project root (main) folder
 !/*.json
 
+#also exclude JSON files in the icons folder
+!/icons/*.json
+
 # Ignore virtual environment
 unfallkarte_env/
 accident_data/
