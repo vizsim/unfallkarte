@@ -1,70 +1,34 @@
 // legendHandlers.js
 
-export function updateLegendVisibilityByZoom(map) {
-  if (!map || typeof map.getZoom !== "function") return;
-  const zoom = map.getZoom();
-  const legend = document.querySelector(".legend");
-  if (!legend || legend.classList.contains("collapsed")) return;
-
-  const clusterLegendEl = document.getElementById("cluster-legend-section");
-  const movebisLegend = document.getElementById("movebis-legend");
-  const hvsLegend = document.getElementById("hvs-legend");
-  const mapillaryLegend = document.getElementById("mapillary-legend");
-  const maxspeedLegend = document.getElementById("maxspeed-legend");
-  const obsLegend = document.getElementById("obs-legend");
-
-  const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
-  const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
-  const mapillaryVisible =
-    map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible" ||
-    map.getLayoutProperty("mapillary-images-halo", "visibility") === "visible";
-  const maxspeedVisible =
-    map.getLayoutProperty("maxspeed", "visibility") === "visible" ||
-    map.getLayoutProperty("maxspeed_minor", "visibility") === "visible";
-  const obsVisible = map.getLayoutProperty("obs", "visibility") === "visible";
 
 
-  if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "block" : "none";
-  if (movebisLegend) movebisLegend.style.display = (movebisVisible && zoom >= 11) ? "block" : "none";
-  if (hvsLegend) hvsLegend.style.display = (hvsVisible && zoom >= 11) ? "block" : "none";
-  if (maxspeedLegend) maxspeedLegend.style.display = (maxspeedVisible && zoom >= 11) ? "block" : "none";
-  if (mapillaryLegend) mapillaryLegend.style.display = (mapillaryVisible && zoom >= 14) ? "block" : "none";
-  if (obsLegend) obsLegend.style.display = (obsVisible && zoom >= 11) ? "block" : "none";
+const LEGEND_KEYS = [
+  "cluster-legend-section",
+  "movebis-legend",
+  "hvs-legend",
+  "mapillary-legend",
+  "maxspeed-legend",
+  "obs-legend"
+];
 
+function getLegendElements() {
+  const elements = Object.fromEntries(
+    LEGEND_KEYS.map(id => [id, document.getElementById(id)])
+  );
+  elements.scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
+  return elements;
+}
 
-  const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
-  if (clusterCheckbox) {
-    const isVisible = map.getLayoutProperty("pie-clusters-fine-layer", "visibility") !== "none";
-    clusterCheckbox.checked = isVisible;
-  }
-
-  Array.from(legend.children).forEach(el => {
-    const isTitle = el.classList.contains("legend-title");
-    const isFeatureCount = el.id === "feature-count-wrapper";
-    const scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
-    const isSpecial = [
-      clusterLegendEl,
-      movebisLegend,
-      hvsLegend,
-      mapillaryLegend,
-      maxspeedLegend,
-      obsLegend,
-      ...scenarioSections
-    ].includes(el);
-
-    if (zoom < 11) {
-      el.style.display = (isTitle || isFeatureCount || isSpecial) ? "" : "none";
-    } else {
-      if (!isSpecial) el.style.display = "";
-    }
-  });
+function isSpecialLegendElement(el, legends) {
+  const legendElements = LEGEND_KEYS.map(id => legends[id]);
+  return [...legendElements, ...legends.scenarioSections].includes(el);
 }
 
 export function applyLegendVisibility() {
   const keys = [
     "schools", "health", "playgrounds",
-    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor","obs",
-    "scenario1", "scenario2", "scenario3", "scenario4", "scenario6"
+    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs",
+    "scenario1", "scenario2", "scenario3", "scenario4", "scenario6", "scenario7"
   ];
 
   keys.forEach(key => {
@@ -76,6 +40,57 @@ export function applyLegendVisibility() {
   });
 }
 
+export function updateLegendVisibilityByZoom(map) {
+  if (!map || typeof map.getZoom !== "function") return;
+
+  const zoom = map.getZoom();
+  const legend = document.querySelector(".legend");
+  if (!legend || legend.classList.contains("collapsed")) return;
+
+  const legends = getLegendElements();
+  const {
+    ["cluster-legend-section"]: clusterLegendEl,
+    ["movebis-legend"]: movebisLegend,
+    ["hvs-legend"]: hvsLegend,
+    ["mapillary-legend"]: mapillaryLegend,
+    ["maxspeed-legend"]: maxspeedLegend,
+    ["obs-legend"]: obsLegend
+  } = legends;
+
+  const visibilityCheck = (layerId) => map.getLayoutProperty(layerId, "visibility") === "visible";
+
+  if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "block" : "none";
+  if (movebisLegend) movebisLegend.style.display = (visibilityCheck("movebis") && zoom >= 11) ? "block" : "none";
+  if (hvsLegend) hvsLegend.style.display = (visibilityCheck("hvs") && zoom >= 11) ? "block" : "none";
+  if (maxspeedLegend) {
+    const visible = visibilityCheck("maxspeed") || visibilityCheck("maxspeed_minor");
+    maxspeedLegend.style.display = (visible && zoom >= 11) ? "block" : "none";
+  }
+  if (mapillaryLegend) {
+    const visible = visibilityCheck("mapillary-images-layer") || visibilityCheck("mapillary-images-halo");
+    mapillaryLegend.style.display = (visible && zoom >= 14) ? "block" : "none";
+  }
+  if (obsLegend) obsLegend.style.display = (visibilityCheck("obs") && zoom >= 11) ? "block" : "none";
+
+  const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
+  if (clusterCheckbox) {
+    const isVisible = visibilityCheck("pie-clusters-fine-layer");
+    clusterCheckbox.checked = isVisible;
+  }
+
+  Array.from(legend.children).forEach(el => {
+    const isTitle = el.classList.contains("legend-title");
+    const isFeatureCount = el.id === "feature-count-wrapper";
+    const isSpecial = isSpecialLegendElement(el, legends);
+
+    el.style.display = zoom < 11
+      ? (isTitle || isFeatureCount || isSpecial) ? "" : "none"
+      : (!isSpecial ? "" : el.style.display);
+  });
+}
+
+
+
 export function updateScenarioLegendVisibility() {
   const legendBox = document.querySelector(".legend");
   const isCollapsed = legendBox.classList.contains("collapsed");
@@ -84,6 +99,8 @@ export function updateScenarioLegendVisibility() {
     section.style.display = isCollapsed ? "none" : "block";
   });
 }
+
+
 
 export function updateLegendColors(activeKey, paintStyles) {
   document.querySelectorAll(".legend-item").forEach(item => {
@@ -119,6 +136,8 @@ export function setupLegendClusterCheckboxSync(map) {
 }
 
 export function setupLegendToggleHandlers() {
+  const legends = getLegendElements();
+
   document.querySelectorAll(".legend-header").forEach(header => {
     header.addEventListener("click", (e) => {
       if (e.target.tagName === "INPUT" || e.target.classList.contains("info-icon")) return;
@@ -129,61 +148,25 @@ export function setupLegendToggleHandlers() {
       if (key === "legend-root") {
         const legend = document.querySelector(".legend");
         const collapsed = legend.classList.toggle("collapsed");
-
-        //console.log("Legend root toggled:", collapsed); // <-- Add this
-
+        const zoom = window.map.getZoom();
 
         Array.from(legend.children).forEach(el => {
-
-          const zoom = map.getZoom();
-
-          const clusterLegendEl = document.querySelector("#cluster-legend-section");
-          const scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
-          const headers = document.querySelectorAll(".legend-header");
-
-          const movebisLegend = document.getElementById("movebis-legend");
-          const hvsLegend = document.getElementById("hvs-legend");
-          const mapillaryLegend = document.getElementById("mapillary-legend");
-          const maxspeedLegend = document.getElementById("maxspeed-legend");
-          const obsLegend = document.getElementById("obs-legend");
-
           const isTitle = el.classList.contains("legend-title");
           const isFeatureCount = el.id === "feature-count-wrapper";
-
-          // const scenarioSections = document.querySelectorAll(".scenario-legend-section");
-          // const scenarioSections = Array.from(document.querySelectorAll(".scenario-legend-section"));
-          const isScenario = scenarioSections.includes(el);
-
-          // const clusterLegendEl = document.querySelector("#cluster-legend-section");
-          const isClusterLegend = el === clusterLegendEl;
-          const isOtherSpecial = [
-            movebisLegend,
-            hvsLegend,
-            mapillaryLegend,
-            maxspeedLegend,
-            obsLegend
-          ].includes(el);
+          const isScenario = legends.scenarioSections.includes(el);
+          const isClusterLegend = el === legends.clusterLegendEl;
+          const isOtherSpecial = isSpecialLegendElement(el, legends);
 
           if (collapsed) {
-            el.style.display =
-              isTitle || isFeatureCount ? "" : "none";
+            el.style.display = isTitle || isFeatureCount ? "" : "none";
           } else {
             if (zoom < 11) {
-              el.style.display =
-                isTitle || isFeatureCount || isClusterLegend || isScenario
-                  ? ""
-                  : "none";
+              el.style.display = isTitle || isFeatureCount || isClusterLegend || isScenario ? "" : "none";
             } else {
-              if (isClusterLegend) {
-                el.style.display = "none";
-              } else if (!isOtherSpecial) {
-                el.style.display = "";
-              }
+              el.style.display = !isOtherSpecial ? "" : el.style.display;
             }
           }
-
         });
-
 
         if (!collapsed) {
           updateLegendVisibilityByZoom(window.map);
@@ -265,3 +248,4 @@ export function setupLegendSectionCheckboxes(updateLayerFilter) {
     }
   });
 }
+
