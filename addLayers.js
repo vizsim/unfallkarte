@@ -198,52 +198,52 @@ export function addLayers(map) {
   }
 
 
-// add OBS layer
-function addOBSLayer(map) {
-  map.addLayer({
-    id: "obs",
-    type: "circle",
-    source: "obs",
-    "source-layer": "obs_data-points",
-    layout: { visibility: "none" },
-    filter: [">=", ["to-number", ["get", "distance_overtaker"]], 0.2],
-    paint: {
-      "circle-color": [
-        "case",
+  // add OBS layer
+  function addOBSLayer(map) {
+    map.addLayer({
+      id: "obs",
+      type: "circle",
+      source: "obs",
+      "source-layer": "obs_data-points",
+      layout: { visibility: "none" },
+      filter: [">=", ["to-number", ["get", "distance_overtaker"]], 0.2],
+      paint: {
+        "circle-color": [
+          "case",
 
-        // --- Urban color ramp ---
-        ["==", ["get", "zone"], "urban"],
-        [
-          "interpolate",
-          ["linear"],
-          ["to-number", ["get", "distance_overtaker"]],
-          1.1, "#67000d",   // very dark red
-          1.3, "#ef3b2c",   // red
-          1.5, "#fdbf6f",   // yellow
-          1.7, "#a1d99b",   // light green
-          1.9, "#31a354"    // green
+          // --- Urban color ramp ---
+          ["==", ["get", "zone"], "urban"],
+          [
+            "interpolate",
+            ["linear"],
+            ["to-number", ["get", "distance_overtaker"]],
+            1.1, "#67000d",   // very dark red
+            1.3, "#ef3b2c",   // red
+            1.5, "#fdbf6f",   // yellow
+            1.7, "#a1d99b",   // light green
+            1.9, "#31a354"    // green
+          ],
+
+          // --- Rural color ramp ---
+          ["==", ["get", "zone"], "rural"],
+          [
+            "interpolate",
+            ["linear"],
+            ["to-number", ["get", "distance_overtaker"]],
+            1.6, "#67000d",   // very dark red
+            1.8, "#ef3b2c",   // red
+            2.0, "#fdbf6f",   // yellow
+            2.2, "#a1d99b",   // light green
+            2.4, "#31a354"    // green
+          ],
+
+          // --- Fallback color ---
+          "#cccccc"
         ],
-
-        // --- Rural color ramp ---
-        ["==", ["get", "zone"], "rural"],
-        [
-          "interpolate",
-          ["linear"],
-          ["to-number", ["get", "distance_overtaker"]],
-          1.6, "#67000d",   // very dark red
-          1.8, "#ef3b2c",   // red
-          2.0, "#fdbf6f",   // yellow
-          2.2, "#a1d99b",   // light green
-          2.4, "#31a354"    // green
-        ],
-
-        // --- Fallback color ---
-        "#cccccc"
-      ],
-      "circle-radius": 4
-    }
-  });
-}
+        "circle-radius": 4
+      }
+    });
+  }
 
 
 
@@ -553,34 +553,43 @@ function addOBSLayer(map) {
     // Schulen POINTS
 
     map.addLayer({
-  id: "schools-points",
-  type: "symbol",
-  source: "schools",
-  "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
-  filter: ["==", ["geometry-type"], "Point"],
-  layout: {
-    visibility: "none",
-    "icon-image": [
-      "match",
-      ["get", "amenity"],
-      "school", "rect-#0074D9-20x16",
-      "kindergarten", "rect-#2ECC40-20x16",
-      "rect-gray-32x16"
-    ],
-    "icon-size": [
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-      10, 0.5,
-      14, 1,
-      16, 1.8
-    ],
-    "icon-allow-overlap": true
-  },
-  paint: {
-    "icon-opacity": 0.5
-  }
-});
+      id: "schools-points",
+      type: "symbol",
+      source: "schools",
+      "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
+      filter: ["==", ["geometry-type"], "Point"],
+      layout: {
+        visibility: "none",
+        // "icon-image": [
+        //   "match",
+        //   ["get", "amenity"],
+        //   "school", "rect-#0074D9-20x16",
+        //   "kindergarten", "rect-#2ECC40-20x16",
+        //   "rect-gray-32x16"
+        // ],
+        "icon-image": "home",  // Maki-Icon
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, 0.5,
+          14, 1,
+          16, 1.8
+        ],
+        "icon-allow-overlap": true,
+
+      },
+      paint: {
+        "icon-opacity": 0.5,
+                "icon-color": [
+          "match",
+          ["get", "amenity"],
+          "school", "#0074D9",
+          "kindergarten", "#2ECC40",
+          "#aaaaaa"
+        ],
+      }
+    });
 
 
     // Schulen POLYGONS
@@ -730,6 +739,60 @@ function addOBSLayer(map) {
         "icon-opacity": 0.5
       }
     });
+
+    // // 1. Add a colored circle background layer
+    // map.addLayer({
+    //   id: "playgrounds-background",
+    //   type: "circle",
+    //   source: "playgrounds",
+    //   "source-layer": "germany_osm_playgrounds",
+    //   filter: ["==", ["geometry-type"], "Point"],
+    //   paint: {
+    //     "circle-radius": [
+    //       "interpolate",
+    //       ["linear"],
+    //       ["zoom"],
+    //       10, 4,
+    //       14, 7,
+    //       16, 10
+    //     ],
+    //     "circle-color": [
+    //       "case",
+    //       ["==", ["get", "amenity"], "playground"], "green",
+    //       ["==", ["get", "leisure"], "playground"], "green",
+    //       "#aaaaaa"
+    //     ],
+    //     "circle-opacity": 0.5
+    //   }
+    // }, "playgrounds-points"); // Add it just below the icon layer if needed
+
+    // // 2. Then add the icon layer (already defined)
+    // map.addLayer({
+    //   id: "playgrounds-points",
+    //   type: "symbol",
+    //   source: "playgrounds",
+    //   "source-layer": "germany_osm_playgrounds",
+    //   filter: ["==", ["geometry-type"], "Point"],
+    //   layout: {
+    //     visibility: "visible",
+    //     "icon-image": "playground_11",
+    //     "icon-size": [
+    //       "interpolate",
+    //       ["linear"],
+    //       ["zoom"],
+    //       10, 0.6,
+    //       14, 1,
+    //       16, 1.7
+    //     ],
+    //     "icon-allow-overlap": true
+    //   },
+    //   paint: {
+    //     "icon-opacity": 1
+    //     // (icon-color won't apply, it's a raster)
+    //   }
+    // });
+
+
 
     // playgrounds POLYGONS
     map.addLayer({
@@ -955,7 +1018,7 @@ function addOBSLayer(map) {
   }
 
 
-    // add Scenario5 layers (missing crossing)
+  // add Scenario5 layers (missing crossing)
   function addScenario5Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({
@@ -1072,7 +1135,7 @@ function addOBSLayer(map) {
 
 
 
-      // add Scenario7 layers (missing cycleway)
+  // add Scenario7 layers (missing cycleway)
   function addScenario7Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({
