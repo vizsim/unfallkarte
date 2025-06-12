@@ -145,6 +145,7 @@ export function setupLegendToggleHandlers() {
           const hvsLegend = document.getElementById("hvs-legend");
           const mapillaryLegend = document.getElementById("mapillary-legend");
           const maxspeedLegend = document.getElementById("maxspeed-legend");
+          const obsLegend = document.getElementById("obs-legend");
 
           const isTitle = el.classList.contains("legend-title");
           const isFeatureCount = el.id === "feature-count-wrapper";
