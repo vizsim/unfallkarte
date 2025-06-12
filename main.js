@@ -6,13 +6,13 @@ import { paintStyles, getCircleColorPaint } from './styleConfig.js';
 
 // 📦 Kartenfunktionen
 import { addSources } from "./addSources.js";
-import { loadAllIcons } from "./loadAllIcons.js";
+// import { loadAllIcons } from "./loadAllIcons.js";
 import { addLayers } from "./addLayers.js";
 
 // 📦 UI & Interaktion
 import { setupBaseLayerControls } from './ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './ui/setupLayerToggles.js';
-// import { setupScenarioControls } from './ui/setupScenarioControls.js';
+import { setupScenarioControls } from './ui/setupScenarioControls.js';
 // import { updateVisibleFeatureCount } from './ui/featureCounter.js';
 
 // 📦 Popups
@@ -59,7 +59,7 @@ import {
 import { setupPieChartImageGeneration } from './generatePieIcon.js';
 import { setupMapillary } from "./useMapillary.js";
 
-import { setupRectangleIconGeneration } from "./generateRectangleIcon.js";
+// import { setupRectangleIconGeneration } from "./generateRectangleIcon.js";
 
 
 
@@ -137,29 +137,17 @@ async function initMap() {
   /// load MAP
   map.on("load", () => {
 
-// map.on('styleimagemissing', function (e) {
-//   if (e.id === 'rect-icon') {
-//     map.loadImage('icons/png/home.png', (error, image) => {
-//       if (error) {
-//         console.error('Error loading image:', error);
-//         return;
-//       }
-//       if (!map.hasImage('rect-icon')) {
-//         map.addImage('rect-icon', image);
-//       }
-//     });
-//   }
-// });
 
-setupRectangleIconGeneration(map); // add this line
+    // setupRectangleIconGeneration(map); // add this line
 
-    initializeMapModules(map) ;               // 2. Module initialisieren
+    initializeMapModules(map);               // 2. Module initialisieren
 
     setupUI(map);                                     // 3. UI & Layer-Toggles
-    
+    setupScenarioControls(map);
+
     setupLegend(map);                          // 4. Legende initialisieren 
 
-    setupMapillary(map, {applyZoomLock,applyLegendVisibility});
+    setupMapillary(map, { applyZoomLock, applyLegendVisibility });
 
     setupPopups(map);                          // 5. Popups initialisieren
 
@@ -266,138 +254,138 @@ document.getElementById('toggleTerrain').addEventListener('change', (e) => {
 
 
 
-/// SLIDER !! SCENARIO 1
+// /// SLIDER !! SCENARIO 1
 
-const slider = document.getElementById("scenario1-slider");
-const sliderValue = document.getElementById("scenario1-slider-value");
-const sliderContainer = document.getElementById("scenario1-slider-container");
+// const slider = document.getElementById("scenario1-slider");
+// const sliderValue = document.getElementById("scenario1-slider-value");
+// const sliderContainer = document.getElementById("scenario1-slider-container");
 
-function applyClusterSizeFilter(minSize) {
-  const value = parseInt(minSize, 10); // <<< Umwandlung nötig!
-  const filter = [">=", ["to-number", ["get", "cluster_size"]], value];
+// function applyClusterSizeFilter(minSize) {
+//   const value = parseInt(minSize, 10); // <<< Umwandlung nötig!
+//   const filter = [">=", ["to-number", ["get", "cluster_size"]], value];
 
-  if (map.getLayer("scenario1-points")) {
-    map.setFilter("scenario1-points", filter);
-  }
-  if (map.getLayer("scenario1-polys")) {
-    map.setFilter("scenario1-polys", filter);
-  }
-}
-
-
-slider.addEventListener("input", () => {
-  const value = parseInt(slider.value, 10);
-  sliderValue.textContent = value;
-  applyClusterSizeFilter(value);
-
-  const percent = ((value - slider.min) / (slider.max - slider.min)) * 100;
-  slider.style.setProperty("--progress", `${percent}%`);
-});
-
-// Checkbox zeigt/verbirgt die Layer UND den Slider
-document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-
-  map.setLayoutProperty("scenario1-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario1-polys", "visibility", checked ? "visible" : "none");
-
-  // Zeige oder verstecke den Slider
-  sliderContainer.style.display = checked ? "block" : "none";
-
-  // Filter initial anwenden
-  if (checked) {
-    //applyClusterSizeFilter(parseInt(slider.value, 10));
-    applyClusterSizeFilter(0);
-  }
-});
+//   if (map.getLayer("scenario1-points")) {
+//     map.setFilter("scenario1-points", filter);
+//   }
+//   if (map.getLayer("scenario1-polys")) {
+//     map.setFilter("scenario1-polys", filter);
+//   }
+// }
 
 
-// Scenario 2 slider logic
+// slider.addEventListener("input", () => {
+//   const value = parseInt(slider.value, 10);
+//   sliderValue.textContent = value;
+//   applyClusterSizeFilter(value);
 
-const slider2 = document.getElementById("scenario2-slider");
-const sliderValue2 = document.getElementById("scenario2-slider-value");
-const sliderContainer2 = document.getElementById("scenario2-slider-container");
+//   const percent = ((value - slider.min) / (slider.max - slider.min)) * 100;
+//   slider.style.setProperty("--progress", `${percent}%`);
+// });
 
-function applyScenario2ClusterSizeFilter(minSize) {
-  const value = parseInt(minSize, 10);
-  const filter = [">=", ["to-number", ["get", "biped_counts"]], value];
+// // Checkbox zeigt/verbirgt die Layer UND den Slider
+// document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
 
-  if (map.getLayer("scenario2-points")) {
-    map.setFilter("scenario2-points", filter);
-  }
-  if (map.getLayer("scenario2-polys")) {
-    map.setFilter("scenario2-polys", filter);
-  }
-}
+//   map.setLayoutProperty("scenario1-points", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario1-polys", "visibility", checked ? "visible" : "none");
 
-slider2.addEventListener("input", () => {
-  const value = parseInt(slider2.value, 10);
-  sliderValue2.textContent = value;
-  applyScenario2ClusterSizeFilter(value);
+//   // Zeige oder verstecke den Slider
+//   sliderContainer.style.display = checked ? "block" : "none";
 
-  const percent = ((value - slider2.min) / (slider2.max - slider2.min)) * 100;
-  slider2.style.setProperty("--progress", `${percent}%`);
-});
-
-// Checkbox shows/hides the layers AND the slider
-document.getElementById("toggle-scenario2").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-
-  map.setLayoutProperty("scenario2-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario2-polys", "visibility", checked ? "visible" : "none");
-
-  // Show or hide the slider
-  sliderContainer2.style.display = checked ? "block" : "none";
-
-  // Apply filter initially
-  if (checked) {
-    applyScenario2ClusterSizeFilter(0);
-  }
-});
+//   // Filter initial anwenden
+//   if (checked) {
+//     //applyClusterSizeFilter(parseInt(slider.value, 10));
+//     applyClusterSizeFilter(0);
+//   }
+// });
 
 
-// Checkbox shows/hides the layers AND the slider
-document.getElementById("toggle-scenario3").addEventListener("change", function (e) {
-  const checked = e.target.checked;
+// // Scenario 2 slider logic
 
-  map.setLayoutProperty("scenario3-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario3-polys", "visibility", checked ? "visible" : "none");
-});
+// const slider2 = document.getElementById("scenario2-slider");
+// const sliderValue2 = document.getElementById("scenario2-slider-value");
+// const sliderContainer2 = document.getElementById("scenario2-slider-container");
+
+// function applyScenario2ClusterSizeFilter(minSize) {
+//   const value = parseInt(minSize, 10);
+//   const filter = [">=", ["to-number", ["get", "biped_counts"]], value];
+
+//   if (map.getLayer("scenario2-points")) {
+//     map.setFilter("scenario2-points", filter);
+//   }
+//   if (map.getLayer("scenario2-polys")) {
+//     map.setFilter("scenario2-polys", filter);
+//   }
+// }
+
+// slider2.addEventListener("input", () => {
+//   const value = parseInt(slider2.value, 10);
+//   sliderValue2.textContent = value;
+//   applyScenario2ClusterSizeFilter(value);
+
+//   const percent = ((value - slider2.min) / (slider2.max - slider2.min)) * 100;
+//   slider2.style.setProperty("--progress", `${percent}%`);
+// });
+
+// // Checkbox shows/hides the layers AND the slider
+// document.getElementById("toggle-scenario2").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
+
+//   map.setLayoutProperty("scenario2-points", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario2-polys", "visibility", checked ? "visible" : "none");
+
+//   // Show or hide the slider
+//   sliderContainer2.style.display = checked ? "block" : "none";
+
+//   // Apply filter initially
+//   if (checked) {
+//     applyScenario2ClusterSizeFilter(0);
+//   }
+// });
 
 
-// Checkbox shows/hides the layers AND the slider
-document.getElementById("toggle-scenario4").addEventListener("change", function (e) {
-  const checked = e.target.checked;
+// // Checkbox shows/hides the layers AND the slider
+// document.getElementById("toggle-scenario3").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
 
-  map.setLayoutProperty("scenario4-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario4-polys", "visibility", checked ? "visible" : "none");
-});
-
-// Checkbox shows/hides the layers AND the slider
-document.getElementById("toggle-scenario5").addEventListener("change", function (e) {
-  const checked = e.target.checked;
-
-  map.setLayoutProperty("scenario5-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario5-polys", "visibility", checked ? "visible" : "none");
-});
+//   map.setLayoutProperty("scenario3-points", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario3-polys", "visibility", checked ? "visible" : "none");
+// });
 
 
-// Checkbox shows/hides the layers AND the slider
-document.getElementById("toggle-scenario6").addEventListener("change", function (e) {
-  const checked = e.target.checked;
+// // Checkbox shows/hides the layers AND the slider
+// document.getElementById("toggle-scenario4").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
 
-  map.setLayoutProperty("scenario6-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario6-polys", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario6-polys2", "visibility", checked ? "visible" : "none");
-});
+//   map.setLayoutProperty("scenario4-points", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario4-polys", "visibility", checked ? "visible" : "none");
+// });
+
+// // Checkbox shows/hides the layers AND the slider
+// document.getElementById("toggle-scenario5").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
+
+//   map.setLayoutProperty("scenario5-points", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario5-polys", "visibility", checked ? "visible" : "none");
+// });
 
 
-document.getElementById("toggle-scenario7").addEventListener("change", function (e) {
-  const checked = e.target.checked;
+// // Checkbox shows/hides the layers AND the slider
+// document.getElementById("toggle-scenario6").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
 
-  map.setLayoutProperty("scenario7-points", "visibility", checked ? "visible" : "none");
-  map.setLayoutProperty("scenario7-polys", "visibility", checked ? "visible" : "none");
-});
+//   map.setLayoutProperty("scenario6-points", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario6-polys", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario6-polys2", "visibility", checked ? "visible" : "none");
+// });
+
+
+// document.getElementById("toggle-scenario7").addEventListener("change", function (e) {
+//   const checked = e.target.checked;
+
+//   map.setLayoutProperty("scenario7-points", "visibility", checked ? "visible" : "none");
+//   map.setLayoutProperty("scenario7-polys", "visibility", checked ? "visible" : "none");
+// });
 
 
 
@@ -661,7 +649,7 @@ function setupPermalinkHandling(map) {
   });
 }
 
- function initializeMapModules(map) {
+function initializeMapModules(map) {
   setupPhotonGeocoder(map);
   setupPieChartImageGeneration(map);
   addNavigationControl(map);
