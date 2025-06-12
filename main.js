@@ -121,7 +121,7 @@ async function initMap() {
   window.map = new maplibregl.Map({
     container: "map",
     // style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
-    style: "./style_test_neu_fixed_maputnik.json", // <-- your local Positron style
+    style: "./style.json", // <-- your local Positron style
     center: [13.634, 52.315],
     zoom: 12,
     minZoom: 6,
