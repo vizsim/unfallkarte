@@ -29,7 +29,9 @@ const kontextKeys = {
     playgrounds: "p",
     terrain: "t",
     hillshade: "i",
-    obs: "o" //  NEU: OBS
+    obs: "o",
+    laerm1: "l",
+    laerm2: "r",
 };
 
 const reverse = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]));

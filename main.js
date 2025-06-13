@@ -191,6 +191,9 @@ function applyZoomLock() {
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
   const obsVisible = map.getLayoutProperty("obs", "visibility") === "visible";
 
+  const laerm1Visible = map.getLayoutProperty("laerm1", "visibility") === "visible";
+  const laerm2Visible = map.getLayoutProperty("laerm2", "visibility") === "visible";
+
   //const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
 
 
@@ -207,8 +210,10 @@ function applyZoomLock() {
   if (playgroundsVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
-  if (maxspeedVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
-  if (obsVisible) minZooms.push(11); // ✅ NEW ZOOM LOCK
+  if (maxspeedVisible) minZooms.push(11); 
+  if (obsVisible) minZooms.push(11); 
+  if (laerm1Visible) minZooms.push(11);
+  if (laerm2Visible) minZooms.push(11);
   // if (scenario1Visible) minZooms.push(11); // ✅ NEW ZOOM LOCK
 
   // const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
@@ -255,139 +260,6 @@ document.getElementById('toggleTerrain').addEventListener('change', (e) => {
 });
 
 
-
-// /// SLIDER !! SCENARIO 1
-
-// const slider = document.getElementById("scenario1-slider");
-// const sliderValue = document.getElementById("scenario1-slider-value");
-// const sliderContainer = document.getElementById("scenario1-slider-container");
-
-// function applyClusterSizeFilter(minSize) {
-//   const value = parseInt(minSize, 10); // <<< Umwandlung nötig!
-//   const filter = [">=", ["to-number", ["get", "cluster_size"]], value];
-
-//   if (map.getLayer("scenario1-points")) {
-//     map.setFilter("scenario1-points", filter);
-//   }
-//   if (map.getLayer("scenario1-polys")) {
-//     map.setFilter("scenario1-polys", filter);
-//   }
-// }
-
-
-// slider.addEventListener("input", () => {
-//   const value = parseInt(slider.value, 10);
-//   sliderValue.textContent = value;
-//   applyClusterSizeFilter(value);
-
-//   const percent = ((value - slider.min) / (slider.max - slider.min)) * 100;
-//   slider.style.setProperty("--progress", `${percent}%`);
-// });
-
-// // Checkbox zeigt/verbirgt die Layer UND den Slider
-// document.getElementById("toggle-scenario1").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("scenario1-points", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario1-polys", "visibility", checked ? "visible" : "none");
-
-//   // Zeige oder verstecke den Slider
-//   sliderContainer.style.display = checked ? "block" : "none";
-
-//   // Filter initial anwenden
-//   if (checked) {
-//     //applyClusterSizeFilter(parseInt(slider.value, 10));
-//     applyClusterSizeFilter(0);
-//   }
-// });
-
-
-// // Scenario 2 slider logic
-
-// const slider2 = document.getElementById("scenario2-slider");
-// const sliderValue2 = document.getElementById("scenario2-slider-value");
-// const sliderContainer2 = document.getElementById("scenario2-slider-container");
-
-// function applyScenario2ClusterSizeFilter(minSize) {
-//   const value = parseInt(minSize, 10);
-//   const filter = [">=", ["to-number", ["get", "biped_counts"]], value];
-
-//   if (map.getLayer("scenario2-points")) {
-//     map.setFilter("scenario2-points", filter);
-//   }
-//   if (map.getLayer("scenario2-polys")) {
-//     map.setFilter("scenario2-polys", filter);
-//   }
-// }
-
-// slider2.addEventListener("input", () => {
-//   const value = parseInt(slider2.value, 10);
-//   sliderValue2.textContent = value;
-//   applyScenario2ClusterSizeFilter(value);
-
-//   const percent = ((value - slider2.min) / (slider2.max - slider2.min)) * 100;
-//   slider2.style.setProperty("--progress", `${percent}%`);
-// });
-
-// // Checkbox shows/hides the layers AND the slider
-// document.getElementById("toggle-scenario2").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("scenario2-points", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario2-polys", "visibility", checked ? "visible" : "none");
-
-//   // Show or hide the slider
-//   sliderContainer2.style.display = checked ? "block" : "none";
-
-//   // Apply filter initially
-//   if (checked) {
-//     applyScenario2ClusterSizeFilter(0);
-//   }
-// });
-
-
-// // Checkbox shows/hides the layers AND the slider
-// document.getElementById("toggle-scenario3").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("scenario3-points", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario3-polys", "visibility", checked ? "visible" : "none");
-// });
-
-
-// // Checkbox shows/hides the layers AND the slider
-// document.getElementById("toggle-scenario4").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("scenario4-points", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario4-polys", "visibility", checked ? "visible" : "none");
-// });
-
-// // Checkbox shows/hides the layers AND the slider
-// document.getElementById("toggle-scenario5").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("scenario5-points", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario5-polys", "visibility", checked ? "visible" : "none");
-// });
-
-
-// // Checkbox shows/hides the layers AND the slider
-// document.getElementById("toggle-scenario6").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("scenario6-points", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario6-polys", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario6-polys2", "visibility", checked ? "visible" : "none");
-// });
-
-
-// document.getElementById("toggle-scenario7").addEventListener("change", function (e) {
-//   const checked = e.target.checked;
-
-//   map.setLayoutProperty("scenario7-points", "visibility", checked ? "visible" : "none");
-//   map.setLayoutProperty("scenario7-polys", "visibility", checked ? "visible" : "none");
-// });
 
 
 
