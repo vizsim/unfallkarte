@@ -33,6 +33,22 @@ document.getElementById("toggle-obs").addEventListener("change", function (e) {
   applyLegendVisibility();
 });
 
+document.getElementById("toggle-laerm1").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  map.setLayoutProperty("laerm1", "visibility", checked ? "visible" : "none");
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
+document.getElementById("toggle-laerm2").addEventListener("change", function (e) {
+  const checked = e.target.checked;
+  map.setLayoutProperty("laerm2", "visibility", checked ? "visible" : "none");
+
+  applyZoomLock();
+  applyLegendVisibility();
+});
+
 
 
 document.getElementById("toggle-maxspeed").addEventListener("change", function (e) {

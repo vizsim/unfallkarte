@@ -8,7 +8,9 @@ const LEGEND_KEYS = [
   "hvs-legend",
   "mapillary-legend",
   "maxspeed-legend",
-  "obs-legend"
+  "obs-legend",
+  "laerm1-legend",
+  "laerm2-legend"
 ];
 
 function getLegendElements() {
@@ -27,7 +29,7 @@ function isSpecialLegendElement(el, legends) {
 export function applyLegendVisibility() {
   const keys = [
     "schools", "health", "playgrounds",
-    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs",
+    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2",
     "scenario1", "scenario2", "scenario3", "scenario4", "scenario6", "scenario7"
   ];
 
@@ -54,7 +56,9 @@ export function updateLegendVisibilityByZoom(map) {
     ["hvs-legend"]: hvsLegend,
     ["mapillary-legend"]: mapillaryLegend,
     ["maxspeed-legend"]: maxspeedLegend,
-    ["obs-legend"]: obsLegend
+    ["obs-legend"]: obsLegend,
+    ["laerm1-legend"]: laerm1Legend,
+    ["laerm2-legend"]: laerm2Legend
   } = legends;
 
   const visibilityCheck = (layerId) => map.getLayoutProperty(layerId, "visibility") === "visible";
@@ -71,6 +75,10 @@ export function updateLegendVisibilityByZoom(map) {
     mapillaryLegend.style.display = (visible && zoom >= 14) ? "block" : "none";
   }
   if (obsLegend) obsLegend.style.display = (visibilityCheck("obs") && zoom >= 11) ? "block" : "none";
+  if (laerm1Legend) laerm1Legend.style.display = (visibilityCheck("laerm1") && zoom >= 11) ? "block" : "none";
+  if (laerm2Legend) laerm2Legend.style.display = (visibilityCheck("laerm2") && zoom >= 11) ? "block" : "none";
+
+
 
   const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
   if (clusterCheckbox) {

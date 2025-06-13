@@ -260,12 +260,12 @@ export function setupMaxspeedPopups(map) {
         "maxspeed-backward",
         "maxspeed-conditional-forward",
         "maxspeed-conditional-backward",
-            "maxspeed_minor",
-    "maxspeed_minor-conditional",
-    "maxspeed_minor-forward",
-    "maxspeed_minor-backward",
-    "maxspeed_minor-conditional-forward",
-    "maxspeed_minor-conditional-backward"
+        "maxspeed_minor",
+        "maxspeed_minor-conditional",
+        "maxspeed_minor-forward",
+        "maxspeed_minor-backward",
+        "maxspeed_minor-conditional-forward",
+        "maxspeed_minor-conditional-backward"
     ].forEach((layerId) => {
         map.on("mousemove", layerId, (e) => {
             map.getCanvas().style.cursor = "pointer";
@@ -337,14 +337,14 @@ export function setupSchoolsPopups(map) {
 }
 
 export function setupHealthPopups(map) {
-  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
-  const handleLayer = (layerId) => {
-    map.on("mouseenter", layerId, (e) => {
-      map.getCanvas().style.cursor = "pointer";
-      const props = e.features[0].properties;
+    const handleLayer = (layerId) => {
+        map.on("mouseenter", layerId, (e) => {
+            map.getCanvas().style.cursor = "pointer";
+            const props = e.features[0].properties;
 
-      const content = `
+            const content = `
         <table style="font-size:12px; border-collapse:collapse;">
           ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
           ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
@@ -358,17 +358,17 @@ export function setupHealthPopups(map) {
         </table>
       `;
 
-      popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-    });
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+        });
 
-    map.on("mouseleave", layerId, () => {
-      map.getCanvas().style.cursor = "";
-      popup.remove();
-    });
-  };
+        map.on("mouseleave", layerId, () => {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+        });
+    };
 
-  handleLayer("health-points");
-  handleLayer("health-polygons");
+    handleLayer("health-points");
+    handleLayer("health-polygons");
 }
 
 
@@ -404,6 +404,99 @@ export function setupPlaygroundsPopups(map) {
     handleLayer("playgrounds-points");
     handleLayer("playgrounds-polygons");
 }
+
+
+export function setupLaerm1Popups(map) {
+    const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    const laermpegelklasseLabels = {
+        Lden5559: "55 – 59 dB(A)",
+        Lden6064: "60 – 64 dB(A)",
+        Lden6569: "65 – 69 dB(A)",
+        Lden7074: "70 – 74 dB(A)",
+        LdenGreaterThan75: "> 75 dB(A)"
+    };
+
+    const handleLayer = (layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            map.getCanvas().style.cursor = "pointer";
+            const props = e.features[0].properties;
+            const readableClass = laermpegelklasseLabels[props.Lärmpegelklasse] || props.Lärmpegelklasse;
+
+            const content = `
+                <div style="font-size:12px;">
+                    <strong>Lärmbelastung (Tag, HLQ)</strong><br/>
+                    <table style="font-size:12px; border-collapse:collapse;">
+                        ${props.Lärmpegelklasse ? `<tr><td><strong>Lärmpegelklasse</strong></td><td>${readableClass}</td></tr>` : ""}
+                    </table>
+                </div>
+            `;
+            // const content = `
+            //     <table style="font-size:12px; border-collapse:collapse;">
+            //         ${props.OBJECTID ? `<tr><td><strong>OBJECTID</strong></td><td>${props.OBJECTID}</td></tr>` : ""}
+            //         ${props.id ? `<tr><td><strong>ID</strong></td><td>${props.id}</td></tr>` : ""}
+            //         ${props.Lärmpegelklasse ? `<tr><td><strong>Lärmpegelklasse</strong></td><td>${readableClass}</td></tr>` : ""}
+            //         ${props.source ? `<tr><td><strong>Quelle</strong></td><td>${props.source}</td></tr>` : ""}
+            //     </table>
+            // `;
+
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+        });
+
+        map.on("mouseleave", layerId, () => {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+        });
+    };
+
+    handleLayer("laerm1");
+}
+
+export function setupLaerm2Popups(map) {
+    const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    const laermpegelklasseLabels = {
+        Lnight5054: "50 – 54 dB(A)",
+        Lnight5559: "55 – 59 dB(A)",
+        Lnight6064: "60 – 64 dB(A)",
+        Lnight6569: "65 – 69 dB(A)",
+        LnightGreaterThan70: "> 70 dB(A)"
+    };
+
+    const handleLayer = (layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            map.getCanvas().style.cursor = "pointer";
+            const props = e.features[0].properties;
+            const readableClass = laermpegelklasseLabels[props.Lärmpegelklasse] || props.Lärmpegelklasse;
+
+            const content = `
+                <div style="font-size:12px;">
+                    <strong>Lärmbelastung (Nacht, HLQ)</strong><br/>
+                    <table style="font-size:12px; border-collapse:collapse;">
+                        ${props.Lärmpegelklasse ? `<tr><td><strong>Lärmpegelklasse</strong></td><td>${readableClass}</td></tr>` : ""}
+                    </table>
+                </div>
+            `;
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+        });
+
+        map.on("mouseleave", layerId, () => {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+        });
+    };
+
+    handleLayer("laerm2");
+}
+
+
+
 
 
 // export function setupMapillaryPopups(map) {

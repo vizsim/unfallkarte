@@ -20,6 +20,8 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
 
   addPMTilesSource("obs", "OBS_data_2025-06-11.pmtiles");
 
+  addPMTilesSource("laerm1", "laerm/laerm_hlq_den.pmtiles");
+  addPMTilesSource("laerm2", "laerm/laerm_4120_hlq_night.pmtiles");
 
 
   addPMTilesSource("schools", "processed_schools_germany_250528.pmtiles"); 

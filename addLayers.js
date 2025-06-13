@@ -581,7 +581,7 @@ export function addLayers(map) {
       },
       paint: {
         "icon-opacity": 0.5,
-                "icon-color": [
+        "icon-color": [
           "match",
           ["get", "amenity"],
           "school", "#0074D9",
@@ -817,6 +817,67 @@ export function addLayers(map) {
       }
     });
   }
+
+
+  /// LAERM
+
+  // add playgrounds layer
+  function addLaermLayer(map) {
+
+    // laerm1 POLYGONS
+    map.addLayer({
+      id: "laerm1",
+      type: "fill",
+      source: "laerm1",
+      "source-layer": "laerm_hlq_den-polys",
+      filter: ["==", ["geometry-type"], "Polygon"],
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": [
+          "match",
+          ["get", "Lärmpegelklasse"],
+          "Lden5559", "#A6AD88",
+          "Lden6064", "#B89C63",
+          "Lden6569", "#994848",
+          "Lden7074", "#4B244A",
+          "LdenGreaterThan75", "#2F0037",
+        /* default */ "#999999"
+        ],
+        "fill-opacity": 0.6,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // laerm2 POLYGONS
+    map.addLayer({
+      id: "laerm2",
+      type: "fill",
+      source: "laerm2",
+      "source-layer": "laerm_4120_hlq_night-polys",
+      filter: ["==", ["geometry-type"], "Polygon"],
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": [
+          "match",
+          ["get", "Lärmpegelklasse"],
+          "Lnight5054", "#A6AD88",
+          "Lnight5559", "#B89C63",
+          "Lnight6064", "#994848",
+          "Lnight6569", "#4B244A",
+          "LnightGreaterThan70", "#2F0037",
+        /* default */ "#999999"
+        ],
+        "fill-opacity": 0.6,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+  }
+
+
 
 
 
@@ -1346,6 +1407,7 @@ export function addLayers(map) {
   addMovebisLayer(map);
   addOBSLayer(map);
   addHvsLayer(map);
+  addLaermLayer(map);
 
 
 

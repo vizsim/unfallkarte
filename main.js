@@ -23,6 +23,8 @@ import {
   setupHVSPopups,
   setupMaxspeedPopups,
   setupOBSPopups,
+  setupLaerm1Popups,
+  setupLaerm2Popups,
   setupSchoolsPopups,
   setupHealthPopups,
   setupPlaygroundsPopups,
@@ -569,6 +571,8 @@ function setupPopups(map) {
   setupHVSPopups(map);
   setupMaxspeedPopups(map);
   setupOBSPopups(map);
+  setupLaerm1Popups(map);
+  setupLaerm2Popups(map);
 
   setupSchoolsPopups(map);
   setupHealthPopups(map);
