@@ -498,6 +498,15 @@ function setupUI(map) {
       section.classList.toggle('collapsed', isOpen);
     });
   });
+
+// Hide both pie cluster layers initially
+  const layersToHide = ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"];
+
+  layersToHide.forEach((layerId) => {
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, "visibility", "none");
+    }
+  });
 }
 
 

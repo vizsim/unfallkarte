@@ -6,7 +6,6 @@ export function setupLayerToggles(map, applyZoomLock, applyLegendVisibility) {
 
 
 
-
 // just a copy of the old code
 
 document.getElementById("toggle-movebis").addEventListener("change", function (e) {
