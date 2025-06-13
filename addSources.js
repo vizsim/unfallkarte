@@ -43,6 +43,7 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
   addPMTilesSource("scenario6", "scenario6_tempo50_30mbuffer_schulen.pmtiles");
 
   addPMTilesSource("scenario7", "scenario7_missing-cw_bbb.pmtiles");
+  addPMTilesSource("scenario8", "scenario8_laerm_schulen.pmtiles");
 
 
 

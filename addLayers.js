@@ -1244,6 +1244,54 @@ export function addLayers(map) {
   }
 
 
+    // add Scenario8 layers (laerm und schulen)
+  function addScenario8Layers(map) {
+    // Polygon Layer: zoom 14+
+    map.addLayer({
+      id: "scenario8-polys",
+      type: "fill",
+      source: "scenario8",
+      "source-layer": "scenario8-polys",
+      // filter: ["==", ["geometry-type"], "Polygon"],
+      filter: ["all"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "orange",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // Points Layer: zoom 6–14
+    map.addLayer({
+      id: "scenario8-points",
+      type: "circle",
+      source: "scenario8",
+      "source-layer": "scenario8-points",
+      filter: ["all"],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "orange",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
+  }
+
+
 
 
 
@@ -1401,6 +1449,7 @@ export function addLayers(map) {
   addScenario5Layers(map);
   addScenario6Layers(map);
   addScenario7Layers(map);
+  addScenario8Layers(map);
 
   addMaxspeedLayers(map);
   addMaxspeedMinorLayers(map);

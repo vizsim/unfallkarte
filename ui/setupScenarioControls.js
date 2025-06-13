@@ -57,8 +57,46 @@ export function setupScenarioControls(map) {
     if (checked) applyScenario2ClusterSizeFilter(0);
   });
 
-  // Other scenario toggles (3-7)
-  for (let i = 3; i <= 7; i++) {
+
+
+  function applyScenario8ClusterSizeFilter(minSize) {
+    const value = parseInt(minSize, 10);
+    const filter = [">=", ["to-number", ["get", "max_laerm_num"]], value];
+
+    if (map.getLayer("scenario8-points")) map.setFilter("scenario8-points", filter);
+    if (map.getLayer("scenario8-polys")) map.setFilter("scenario8-polys", filter);
+  }
+
+  const slider8 = document.getElementById("scenario8-slider");
+  const sliderVal8 = document.getElementById("scenario8-slider-value");
+  const sliderContainer8 = document.getElementById("scenario8-slider-container");
+
+  slider8.addEventListener("input", () => {
+    const val = parseInt(slider8.value, 10);
+    sliderVal8.textContent = val;
+    applyScenario8ClusterSizeFilter(val);
+    const percent = ((val - slider8.min) / (slider8.max - slider8.min)) * 100;
+    slider8.style.setProperty("--progress", `${percent}%`);
+  });
+
+  document.getElementById("toggle-scenario8").addEventListener("change", function (e) {
+    const checked = e.target.checked;
+    map.setLayoutProperty("scenario8-points", "visibility", checked ? "visible" : "none");
+    map.setLayoutProperty("scenario8-polys", "visibility", checked ? "visible" : "none");
+    sliderContainer8.style.display = checked ? "block" : "none";
+    if (checked) applyScenario8ClusterSizeFilter(0);
+  });
+
+
+
+
+
+
+
+
+
+  // Other scenario toggles (3-8)
+  for (let i = 3; i <= 8; i++) {
     const toggle = document.getElementById(`toggle-scenario${i}`);
     if (toggle) {
       toggle.addEventListener("change", function (e) {

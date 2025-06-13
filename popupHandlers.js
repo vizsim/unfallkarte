@@ -770,3 +770,45 @@ export function setupScenario7Popups(map) {
         });
     });
 }
+
+
+
+// Scenario 8 popups
+export function setupScenario8Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const renderScenario8Tooltip = (props) => {
+        const laermValue = props.max_laerm_num;
+        let laermText = "-";
+
+        if (laermValue === 55) laermText = "55–59 dB(A)";
+        else if (laermValue === 60) laermText = "60–64 dB(A)";
+        else if (laermValue === 65) laermText = "65–69 dB(A)";
+        else if (laermValue === 70) laermText = "70–74 dB(A)";
+        else if (laermValue === 75) laermText = "> 75 dB(A)";
+
+        return `
+        <div style="font-size: 12px;">
+          <strong>${props.name ?? "Unbenannte Schule"}</strong><br/>
+          <table style="border-collapse: collapse;">
+            <tr><td><strong>Typ</strong></td><td>${props.amenity ?? "-"}</td></tr>
+            <tr><td><strong>Lärm</strong></td><td>bis zu ${laermText}</td></tr>
+          </table>
+        </div>
+    `;
+    };
+
+    ["scenario8-polys", "scenario8-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario8Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+    });
+}
+
