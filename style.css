@@ -32,6 +32,7 @@ body {
     max-width: 100%;
     max-height: calc(100dvh  - 160px);
     /* 60 top + 80 bottom */
+    /* background: rgb(254, 253, 255); */
     background: white;
     padding: 10px;
     font-size: 12px;
