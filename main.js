@@ -186,8 +186,8 @@ function applyZoomLock() {
   const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
   const healthPointsVisible = map.getLayoutProperty("health-points", "visibility") === "visible";
   const healthPolygonsVisible = map.getLayoutProperty("health-polygons", "visibility") === "visible";
-  const playgroundsPointsVisible = map.getLayoutProperty("health-points", "visibility") === "visible";
-  const playgroundsPolygonsVisible = map.getLayoutProperty("health-polygons", "visibility") === "visible";
+  const playgroundsPointsVisible = map.getLayoutProperty("playgrounds-points", "visibility") === "visible";
+  const playgroundsPolygonsVisible = map.getLayoutProperty("playgrounds-polygons", "visibility") === "visible";
 
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
   const obsVisible = map.getLayoutProperty("obs", "visibility") === "visible";
@@ -206,9 +206,9 @@ function applyZoomLock() {
   // Determine the strictest minZoom
   const minZooms = [];
   if (movebisVisible) minZooms.push(13);
-  if (schoolsVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
-  if (healthVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
-  if (playgroundsVisible) minZooms.push(12); // TODO: should be 11 but need to fix pmtiles
+  if (schoolsVisible) minZooms.push(11); 
+  if (healthVisible) minZooms.push(11); 
+  if (playgroundsVisible) minZooms.push(11);
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
   if (maxspeedVisible) minZooms.push(11); 
