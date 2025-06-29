@@ -34,11 +34,13 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
 
 
   addPMTilesSource("accidents-cluster", "combined_may25_group.pmtiles");
+
+  // Scenarios: new scenarios with dates are added into the folder "scenarios"
   addPMTilesSource("scenario1", "scenario1_cluster_accidents_ms100.pmtiles");
 
   addPMTilesSource("scenario2", "scenario2_accidents_close2schools.pmtiles");
   addPMTilesSource("scenario3", "scenario3_tempo30_conti.pmtiles");
-  addPMTilesSource("scenario4", "scenario4_tempo30missing_ger.pmtiles");
+  addPMTilesSource("scenario4", "scenarios/scenario4_tempo30missing_ger_osm250628_ml250607.pmtiles");
   addPMTilesSource("scenario5", "scenario5_crossing-missing.pmtiles");
   addPMTilesSource("scenario6", "scenario6_tempo50_30mbuffer_schulen.pmtiles");
 
