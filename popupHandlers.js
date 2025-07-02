@@ -306,53 +306,20 @@ export function setupMaxspeedPopups(map) {
 }
 
 
-// export function setupUspeedPopups(map) {
-//     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-
-//     map.on("mousemove", "uspeed", (e) => {
-//         map.getCanvas().style.cursor = "pointer";
-//         const p = e.features[0].properties;
-
-//         const content = `
-//         <div style="font-size: 12px;">
-//             <strong>Segment Details</strong><br/>
-//             <table style="border-collapse: collapse;">
-//                 <tr><td><strong>OSM Way ID:</strong></td><td>${p.osm_way_id}</td></tr>
-//                 <tr><td><strong>Start Node:</strong></td><td>${p.osm_start_node_id}</td></tr>
-//                 <tr><td><strong>End Node:</strong></td><td>${p.osm_end_node_id}</td></tr>
-//                 <tr><td><strong>Hour:</strong></td><td>${p.hour_of_day}</td></tr>
-//                 <tr><td><strong>Avg. Speed:</strong></td><td>${Number(p.speed_kph_mean).toFixed(1)} km/h</td></tr>
-//                 <tr><td><strong>Direction:</strong></td><td>${p.reconstruction_direction}</td></tr>               
-//             </table>
-//         </div>
-//         `;
-
-//                  // <tr><td><strong>Segment ID:</strong></td><td>${p.segment_id}</td></tr>
-//                 // <tr><td><strong>Start Junction:</strong></td><td>${p.start_junction_id}</td></tr>
-//                 // <tr><td><strong>End Junction:</strong></td><td>${p.end_junction_id}</td></tr>
-
-//         popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-//     });
-
-//     map.on("mouseleave", "uspeed", () => {
-//         map.getCanvas().style.cursor = "";
-//         popup.remove();
-//     });
-// }
 
 export function setupUspeedPopups(map) {
-  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
-  const uspeedLayers = ["uspeed-forward", "uspeed-reverse"];
+    const uspeedLayers = ["uspeed-forward", "uspeed-reverse"];
     //const uspeedLayers = ["uspeed"];
 
 
-  for (const layer of uspeedLayers) {
-    map.on("mousemove", layer, (e) => {
-      map.getCanvas().style.cursor = "pointer";
-      const p = e.features[0].properties;
+    for (const layer of uspeedLayers) {
+        map.on("mousemove", layer, (e) => {
+            map.getCanvas().style.cursor = "pointer";
+            const p = e.features[0].properties;
 
-      const content = `
+            const content = `
         <div style="font-size: 12px;">
             <strong>Segment Details</strong><br/>
             <table style="border-collapse: collapse;">
@@ -366,15 +333,173 @@ export function setupUspeedPopups(map) {
         </div>
       `;
 
-      popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
-    });
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+        });
 
-    map.on("mouseleave", layer, () => {
-      map.getCanvas().style.cursor = "";
-      popup.remove();
-    });
-  }
+        map.on("mouseleave", layer, () => {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+        });
+    }
+    map.on("click", "uspeed-forward", (e) => showUspeedChartPopup(e));
+    map.on("click", "uspeed-reverse", (e) => showUspeedChartPopup(e));
 }
+
+function showUspeedChartPopup(e) {
+    const feature = e.features[0];
+    // const osmId = feature.properties.osm_way_id;
+
+    // // Hier musst du ALLE Stunden für diesen Weg suchen:
+    // const allFeatures = map.querySourceFeatures("uspeed", {
+    //     sourceLayer: "uber_movement_osm"
+    // }).filter(f => f.properties.osm_way_id === osmId);
+
+    const osmId = feature.properties.osm_way_id;
+    const startNode = feature.properties.osm_start_node_id;
+    const endNode = feature.properties.osm_end_node_id;
+
+    const allFeatures = map.querySourceFeatures("uspeed", {
+        sourceLayer: "uber_movement_osm"
+    }).filter(f =>
+        f.properties.osm_way_id === osmId &&
+        f.properties.osm_start_node_id === startNode &&
+        f.properties.osm_end_node_id === endNode
+    );
+
+    const hourlySpeeds = Array(24).fill(null);
+    for (const f of allFeatures) {
+        const hour = parseInt(f.properties.hour_of_day);
+        hourlySpeeds[hour] = Number(f.properties.speed_kph_mean);
+    }
+
+    const container = document.createElement("div");
+    container.innerHTML = `<canvas id="speed-chart" width="320" height="180"></canvas>`;
+
+    const popup = new maplibregl.Popup()
+        .setLngLat(e.lngLat)
+        .setDOMContent(container)
+        .addTo(map);
+
+    setTimeout(() => {
+        new Chart(document.getElementById("speed-chart"), {
+            type: "line",
+            data: {
+                labels: [...Array(24).keys()],
+                datasets: [{
+                    label: "Ø Geschwindigkeit (km/h) je h",
+                    data: hourlySpeeds,
+                    borderColor: "#0074D9",
+                    backgroundColor: "rgba(0, 116, 217, 0.1)",
+                    borderWidth: 1.5,
+                    pointRadius: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                layout: {
+                    padding: 4
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: false // ← Optional: ganz weglassen
+                        },
+                        ticks: {
+                            font: { size: 9 },
+                            padding: 2,
+                            maxRotation: 0,
+                            autoSkipPadding: 2
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: false // ← Optional: ganz weglassen
+                        },
+                        ticks: {
+                            font: { size: 9 },
+                            padding: 2,
+                            precision: 0
+                        },
+                        suggestedMin: 0
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            boxWidth: 0,
+                            font: { size: 11, weight: "bold" },
+                            padding: 4
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: ctx => `${ctx[0].label} Uhr`,
+                            label: ctx => `${ctx.parsed.y.toFixed(1)} km/h`
+                        }
+                    }
+                }
+            }
+        });
+    }, 50);
+
+
+    // const container = document.createElement("div");
+    // container.innerHTML = `<canvas id="speed-chart" width="380" height="250"></canvas>`;
+
+    // const popup = new maplibregl.Popup()
+    //     .setLngLat(e.lngLat)
+    //     .setDOMContent(container)
+    //     .addTo(map);
+
+    // setTimeout(() => {
+    //     new Chart(document.getElementById("speed-chart"), {
+    //         type: "line",
+    //         data: {
+    //             labels: [...Array(24).keys()], // [0,1,...23]
+    //             datasets: [{
+    //                 label: "Ø Geschwindigkeit (km/h)",
+    //                 data: hourlySpeeds,
+    //                 borderWidth: 2,
+    //                 borderColor: "#0074D9",
+    //                 backgroundColor: "rgba(0, 116, 217, 0.1)",
+    //                 pointRadius: 3
+    //             }]
+    //         },
+    //         options: {
+
+    //             scales: {
+    //                 x: { title: { display: true, text: "Tagesstunde" } },
+    //                 y: { title: { display: true, text: "km/h" } }
+    //             },
+    //             plugins: {
+    //                 legend: {
+    //                     labels: {
+    //                         generateLabels: function (chart) {
+    //                             // Nur Text, ohne farbiges Kästchen
+    //                             return chart.data.datasets.map((dataset, i) => ({
+    //                                 text: dataset.label,
+    //                                 fillStyle: "transparent", // unsichtbar
+    //                                 strokeStyle: "transparent",
+    //                                 lineWidth: 0,
+    //                                 hidden: !chart.isDatasetVisible(i),
+    //                                 datasetIndex: i
+    //                             }));
+    //                         }
+    //                     }
+    //                 },
+    //                 tooltip: {
+    //                     callbacks: {
+    //                         label: ctx => `${ctx.parsed.y} km/h`
+    //                     }
+    //                 }
+    //             }
+
+    //         }
+    //     });
+    // }, 50);
+}
+
 
 
 
