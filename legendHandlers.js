@@ -10,7 +10,8 @@ const LEGEND_KEYS = [
   "maxspeed-legend",
   "obs-legend",
   "laerm1-legend",
-  "laerm2-legend"
+  "laerm2-legend",
+  "uspeed-legend"
 ];
 
 function getLegendElements() {
@@ -29,7 +30,7 @@ function isSpecialLegendElement(el, legends) {
 export function applyLegendVisibility() {
   const keys = [
     "schools", "health", "playgrounds",
-    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2",
+    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2", "uspeed",
     "scenario1", "scenario2", "scenario3", "scenario4", "scenario6", "scenario7"
   ];
 
@@ -58,7 +59,8 @@ export function updateLegendVisibilityByZoom(map) {
     ["maxspeed-legend"]: maxspeedLegend,
     ["obs-legend"]: obsLegend,
     ["laerm1-legend"]: laerm1Legend,
-    ["laerm2-legend"]: laerm2Legend
+    ["laerm2-legend"]: laerm2Legend,
+    ["uspeed-legend"]: uspeedLegend
   } = legends;
 
   const visibilityCheck = (layerId) => map.getLayoutProperty(layerId, "visibility") === "visible";
@@ -77,6 +79,13 @@ export function updateLegendVisibilityByZoom(map) {
   if (obsLegend) obsLegend.style.display = (visibilityCheck("obs") && zoom >= 11) ? "block" : "none";
   if (laerm1Legend) laerm1Legend.style.display = (visibilityCheck("laerm1") && zoom >= 11) ? "block" : "none";
   if (laerm2Legend) laerm2Legend.style.display = (visibilityCheck("laerm2") && zoom >= 11) ? "block" : "none";
+
+  // if (uspeedLegend) uspeedLegend.style.display = (visibilityCheck("uspeed") && zoom >= 11) ? "block" : "none";
+if (uspeedLegend) {
+  const isVisible =
+    visibilityCheck("uspeed-forward") || visibilityCheck("uspeed-reverse");
+  uspeedLegend.style.display = (isVisible && zoom >= 11) ? "block" : "none";
+}
 
 
 

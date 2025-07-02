@@ -275,6 +275,84 @@ export function addLayers(map) {
 
 
 
+  function addUspeedLayer(map) {
+    //     if (map.getLayer("uspeed")) {
+    //   map.removeLayer("uspeed");
+    // }
+
+    // === Offset-Funktion (wie bei maxspeed)
+    function getZoomBasedOffset_uspeed() {
+      return [
+        "interpolate", ["linear"], ["zoom"],
+        10, 0.5,
+        14, 4,
+        18, 8,
+        20, 12
+      ];
+    }
+
+    const commonPaint = {
+      "line-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "speed_kph_mean"]],
+        10, "#006400",
+        30, "#31a354",
+        50, "#fdcc8a",
+        100, "#e31a1c"
+      ],
+      "line-width": [
+        "interpolate", ["linear"], ["zoom"],
+        10, 0.5,
+        12, 1.5,
+        13, 2.5,
+        16, 3.5,
+        20, 5
+      ]
+    };
+
+    // === Layer: forward (kein Offset)
+    map.addLayer({
+      id: "uspeed-forward",
+      type: "line",
+      source: "uspeed",
+      "source-layer": "uber_movement_osm",
+      layout: { visibility: "none" },
+      filter: [
+        "all",
+        ["==", ["to-number", ["get", "hour_of_day"]], 14],
+        ["==", ["get", "reconstruction_direction"], "forward2"]
+      ],
+      paint: {
+        ...commonPaint,
+        "line-offset": 0
+      }
+    });
+
+    // === Layer: reverse (mit Zoom-Offset)
+    map.addLayer({
+      id: "uspeed-reverse",
+      type: "line",
+      source: "uspeed",
+      "source-layer": "uber_movement_osm",
+      layout: { visibility: "none" },
+      filter: [
+        "all",
+        ["==", ["to-number", ["get", "hour_of_day"]], 14],
+        ["==", ["get", "reconstruction_direction"], "reverse"]
+      ],
+      paint: {
+        ...commonPaint,
+        "line-offset": getZoomBasedOffset_uspeed()
+      }
+    });
+  }
+
+
+
+
+
+
+
   // // Maxspeed layers
 
   function addMaxspeedLayers(map) {
@@ -1244,7 +1322,7 @@ export function addLayers(map) {
   }
 
 
-    // add Scenario8 layers (laerm und schulen)
+  // add Scenario8 layers (laerm und schulen)
   function addScenario8Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({
@@ -1457,6 +1535,7 @@ export function addLayers(map) {
   addOBSLayer(map);
   addHvsLayer(map);
   addLaermLayer(map);
+  addUspeedLayer(map);
 
 
 

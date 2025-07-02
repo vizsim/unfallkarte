@@ -89,7 +89,110 @@ export function setupScenarioControls(map) {
 
 
 
+//   // Obacht: hier jetzt ein Kontext slider und kein Scenario slider, aber slider ist slider....
+// document.getElementById("uspeed-slider").addEventListener("input", (e) => {
+//   const hour = parseInt(e.target.value);
+//   document.getElementById("uspeed-slider-value").textContent = hour;
 
+//   // console.log("🎚️ Uspeed slider hour:", hour);
+
+//   if (map.getLayer("uspeed")) {
+//         map.setLayoutProperty("uspeed", "visibility", "visible"); // 👈 HIER EINBAUEN
+//     const filter = ["==", ["to-number", ["get", "hour_of_day"]], hour]
+//     // console.log("📦 Applying filter to uspeed:", filter);
+//     map.setFilter("uspeed", filter);
+//   } else {
+//     console.warn("⚠️ 'uspeed' layer not found in map.");
+//   }
+// });
+
+// let uspeedDebounceTimer = null;
+
+// document.getElementById("uspeed-slider").addEventListener("input", (e) => {
+//   const hour = parseInt(e.target.value, 10);
+//   document.getElementById("uspeed-slider-value").textContent = hour;
+
+//   // Clear previous timer if still running
+//   if (uspeedDebounceTimer) {
+//     clearTimeout(uspeedDebounceTimer);
+//   }
+
+//   // Set a new timer (e.g. 200 ms)
+//   uspeedDebounceTimer = setTimeout(() => {
+//     if (!map.getLayer("uspeed")) {
+//       console.warn("⚠️ 'uspeed' layer not found in map.");
+//       return;
+//     }
+
+//     // Ensure layer is visible
+//     map.setLayoutProperty("uspeed", "visibility", "visible");
+
+//     // Apply filtered hour
+//     const filter = ["==", ["to-number", ["get", "hour_of_day"]], hour];
+//     map.setFilter("uspeed", filter);
+//   }, 200); // ← You can adjust this delay
+// });
+
+
+
+// let uspeedDebounceTimer = null;
+
+// document.getElementById("uspeed-slider").addEventListener("input", (e) => {
+//   const hour = parseInt(e.target.value, 10);
+//   document.getElementById("uspeed-slider-value").textContent = hour;
+
+//   if (uspeedDebounceTimer) {
+//     clearTimeout(uspeedDebounceTimer);
+//   }
+
+//   uspeedDebounceTimer = setTimeout(() => {
+//     const filter = ["==", ["to-number", ["get", "hour_of_day"]], hour];
+
+//     for (const layer of ["uspeed-forward", "uspeed-reverse"]) {
+//       if (map.getLayer(layer)) {
+//         map.setLayoutProperty(layer, "visibility", "visible");
+//         map.setFilter(layer, filter);
+//       } else {
+//         console.warn(`⚠️ Layer '${layer}' not found.`);
+//       }
+//     }
+//   }, 200); // Debounce delay in ms
+// });
+
+let uspeedDebounceTimer = null;
+
+document.getElementById("uspeed-slider").addEventListener("input", (e) => {
+  const hour = parseInt(e.target.value, 10);
+  document.getElementById("uspeed-slider-value").textContent = hour;
+
+  if (uspeedDebounceTimer) {
+    clearTimeout(uspeedDebounceTimer);
+  }
+
+  uspeedDebounceTimer = setTimeout(() => {
+    const filters = {
+      "uspeed-forward": [
+        "all",
+        ["==", ["to-number", ["get", "hour_of_day"]], hour],
+        ["==", ["get", "reconstruction_direction"], "forward"]
+      ],
+      "uspeed-reverse": [
+        "all",
+        ["==", ["to-number", ["get", "hour_of_day"]], hour],
+        ["==", ["get", "reconstruction_direction"], "reverse"]
+      ]
+    };
+
+    for (const layer of ["uspeed-forward", "uspeed-reverse"]) {
+      if (map.getLayer(layer)) {
+        map.setLayoutProperty(layer, "visibility", "visible");
+        map.setFilter(layer, filters[layer]);
+      } else {
+        console.warn(`⚠️ Layer '${layer}' not found.`);
+      }
+    }
+  }, 200);
+});
 
 
 
@@ -109,4 +212,10 @@ export function setupScenarioControls(map) {
       });
     }
   }
+
+
+
+
+
+
 }

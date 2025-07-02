@@ -32,6 +32,7 @@ const kontextKeys = {
     obs: "o",
     laerm1: "l",
     laerm2: "r",
+    uspeed: "u",
 };
 
 const reverse = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]));

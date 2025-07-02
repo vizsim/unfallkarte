@@ -18,6 +18,11 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
   addPMTilesSource("maxspeed", "processed_major_highways_germany_250528.pmtiles");
   addPMTilesSource("maxspeed_minor", "processed_minor_highways_germany_250528.pmtiles");
 
+  // addPMTilesSource("uspeed", "uber_movement_osm_q2_2019_18Uhr_osm200101.pmtiles");
+  addPMTilesSource("uspeed", "uber_movement_osm_q2_2019_allHoures_osm200101.pmtiles");
+
+
+
   addPMTilesSource("obs", "OBS_data_2025-06-11.pmtiles");
 
   addPMTilesSource("laerm1", "laerm/laerm_hlq_den.pmtiles");

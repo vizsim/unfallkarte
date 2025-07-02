@@ -22,6 +22,7 @@ import {
   setupMovebisPopups,
   setupHVSPopups,
   setupMaxspeedPopups,
+  setupUspeedPopups,
   setupOBSPopups,
   setupLaerm1Popups,
   setupLaerm2Popups,
@@ -190,6 +191,12 @@ function applyZoomLock() {
   const playgroundsPolygonsVisible = map.getLayoutProperty("playgrounds-polygons", "visibility") === "visible";
 
   const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
+  // const uspeedVisible = map.getLayoutProperty("uspeed", "visibility") === "visible";
+
+  const uspeedRevVisible = map.getLayoutProperty("uspeed-reverse", "visibility") === "visible";
+  const uspeedForVisible = map.getLayoutProperty("uspeed-forward", "visibility") === "visible";
+
+
   const obsVisible = map.getLayoutProperty("obs", "visibility") === "visible";
 
   const laerm1Visible = map.getLayoutProperty("laerm1", "visibility") === "visible";
@@ -202,6 +209,8 @@ function applyZoomLock() {
   const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
   const healthVisible = healthPointsVisible || healthPolygonsVisible;
   const playgroundsVisible = playgroundsPointsVisible || playgroundsPolygonsVisible;
+  const uspeedVisible = uspeedRevVisible || uspeedForVisible;
+
 
   // Determine the strictest minZoom
   const minZooms = [];
@@ -211,7 +220,8 @@ function applyZoomLock() {
   if (playgroundsVisible) minZooms.push(11);
   if (hvsVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
-  if (maxspeedVisible) minZooms.push(11); 
+  if (maxspeedVisible) minZooms.push(11);
+  if (uspeedVisible) minZooms.push(11); 
   if (obsVisible) minZooms.push(11); 
   if (laerm1Visible) minZooms.push(11);
   if (laerm2Visible) minZooms.push(11);
@@ -443,6 +453,7 @@ function setupPopups(map) {
   setupMovebisPopups(map);
   setupHVSPopups(map);
   setupMaxspeedPopups(map);
+  setupUspeedPopups(map);
   setupOBSPopups(map);
   setupLaerm1Popups(map);
   setupLaerm2Popups(map);

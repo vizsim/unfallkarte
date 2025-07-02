@@ -305,6 +305,79 @@ export function setupMaxspeedPopups(map) {
     });
 }
 
+
+// export function setupUspeedPopups(map) {
+//     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+//     map.on("mousemove", "uspeed", (e) => {
+//         map.getCanvas().style.cursor = "pointer";
+//         const p = e.features[0].properties;
+
+//         const content = `
+//         <div style="font-size: 12px;">
+//             <strong>Segment Details</strong><br/>
+//             <table style="border-collapse: collapse;">
+//                 <tr><td><strong>OSM Way ID:</strong></td><td>${p.osm_way_id}</td></tr>
+//                 <tr><td><strong>Start Node:</strong></td><td>${p.osm_start_node_id}</td></tr>
+//                 <tr><td><strong>End Node:</strong></td><td>${p.osm_end_node_id}</td></tr>
+//                 <tr><td><strong>Hour:</strong></td><td>${p.hour_of_day}</td></tr>
+//                 <tr><td><strong>Avg. Speed:</strong></td><td>${Number(p.speed_kph_mean).toFixed(1)} km/h</td></tr>
+//                 <tr><td><strong>Direction:</strong></td><td>${p.reconstruction_direction}</td></tr>               
+//             </table>
+//         </div>
+//         `;
+
+//                  // <tr><td><strong>Segment ID:</strong></td><td>${p.segment_id}</td></tr>
+//                 // <tr><td><strong>Start Junction:</strong></td><td>${p.start_junction_id}</td></tr>
+//                 // <tr><td><strong>End Junction:</strong></td><td>${p.end_junction_id}</td></tr>
+
+//         popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+//     });
+
+//     map.on("mouseleave", "uspeed", () => {
+//         map.getCanvas().style.cursor = "";
+//         popup.remove();
+//     });
+// }
+
+export function setupUspeedPopups(map) {
+  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+  const uspeedLayers = ["uspeed-forward", "uspeed-reverse"];
+    //const uspeedLayers = ["uspeed"];
+
+
+  for (const layer of uspeedLayers) {
+    map.on("mousemove", layer, (e) => {
+      map.getCanvas().style.cursor = "pointer";
+      const p = e.features[0].properties;
+
+      const content = `
+        <div style="font-size: 12px;">
+            <strong>Segment Details</strong><br/>
+            <table style="border-collapse: collapse;">
+                <tr><td><strong>OSM Way ID:</strong></td><td>${p.osm_way_id}</td></tr>
+                <tr><td><strong>Start Node:</strong></td><td>${p.osm_start_node_id}</td></tr>
+                <tr><td><strong>End Node:</strong></td><td>${p.osm_end_node_id}</td></tr>
+                <tr><td><strong>Hour:</strong></td><td>${p.hour_of_day}</td></tr>
+                <tr><td><strong>Avg. Speed:</strong></td><td>${Number(p.speed_kph_mean).toFixed(1)} km/h</td></tr>
+                <tr><td><strong>Direction:</strong></td><td>${p.reconstruction_direction}</td></tr>               
+            </table>
+        </div>
+      `;
+
+      popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+    });
+
+    map.on("mouseleave", layer, () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+  }
+}
+
+
+
 export function setupSchoolsPopups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
