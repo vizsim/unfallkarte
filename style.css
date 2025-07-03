@@ -1,89 +1,89 @@
 /* ───── General Layout ───── */
 html,
 body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: sans-serif;
 }
 
 #map {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 /* ────────────── Legend Style ────────────── */
 
 .legend-heading {
-    font-size: 24px;
-    font-weight: bold;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .legend-subtext {
-    font-size: 12px;
-    color: #555;
+  font-size: 12px;
+  color: #555;
 }
 
 .legend {
-    position: absolute;
-    top: 60px;
-    right: 10px;
-    width: 320px;
-    max-width: 100%;
-    max-height: calc(100dvh  - 160px);
-    /* 60 top + 80 bottom */
-    /* background: rgb(254, 253, 255); */
-    background: white;
-    padding: 10px;
-    font-size: 12px;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    /* overflow-y: auto; */
-    overflow-y: scroll; 
-    scrollbar-gutter: stable;
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  width: 320px;
+  max-width: 100%;
+  max-height: calc(100dvh - 160px);
+  /* 60 top + 80 bottom */
+  /* background: rgb(254, 253, 255); */
+  background: white;
+  padding: 10px;
+  font-size: 12px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  /* overflow-y: auto; */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 
 .legend .legend-title .info-icon {
-    font-size: 14px;
-    cursor: help;
-    color: #555;
+  font-size: 14px;
+  cursor: help;
+  color: #555;
 }
 
 .legend-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 0 6px;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 6px;
+  cursor: pointer;
 }
 
 .legend-header label {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 
 .legend-section-divider {
-    border-top: 1px solid #ccc;
-    margin: 12px 0 6px;
+  border-top: 1px solid #ccc;
+  margin: 12px 0 6px;
 }
 
 .legend-subsection-divider {
-    border-top: 1px solid #ddd;
-    margin: 2px 0;
-    margin-left: 16px;
-    /* Einrückung nach rechts */
-    width: calc(100% - 16px);
-    /* Optional: macht's proportional */
+  border-top: 1px solid #ddd;
+  margin: 2px 0;
+  margin-left: 16px;
+  /* Einrückung nach rechts */
+  width: calc(100% - 16px);
+  /* Optional: macht's proportional */
 }
 
 /* Items and layout */
 .legend-items {
-    margin-left: 8px;
+  margin-left: 8px;
 }
 
 .legend-items.collapsed {
-    display: none;
+  display: none;
 }
 
 /* .legend-items.collapsed + .legend-subsection-divider {
@@ -91,21 +91,21 @@ body {
 } */
 
 .legend-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
 }
 
 .label-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
-    /* ← This is the key part */
-    min-width: 0;
-    /* prevents overflow on long labels */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  /* ← This is the key part */
+  min-width: 0;
+  /* prevents overflow on long labels */
 }
 
 
@@ -114,26 +114,26 @@ body {
 } */
 
 .legend-section-title {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 6px;
-    color: #333;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #333;
 }
 
 
-.legend.collapsed > .legend-section,
-.legend.collapsed > .scenario-legend-section,
-.legend.collapsed > .legend-subsection-divider {
+.legend.collapsed>.legend-section,
+.legend.collapsed>.scenario-legend-section,
+.legend.collapsed>.legend-subsection-divider {
   display: none;
 }
 
 
 /* ───── this needed?? ───── */
 .color-box {
-    width: 14px;
-    height: 14px;
-    display: inline-block;
-    border-radius: 2px;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  border-radius: 2px;
 }
 
 
@@ -149,7 +149,7 @@ body {
     white-space: nowrap;
     color: #333;
 } */
- .count-badge {
+.count-badge {
   font-size: 10px;
   padding: 0 4px;
   background: #eee;
@@ -158,8 +158,10 @@ body {
   text-align: center;
   white-space: nowrap;
   color: #333;
-  display: inline-block; /* ← Stelle sicher, dass es sichtbar bleibt */
-  flex-shrink: 0;         /* ← verhindert „Zerdrücken“ im Flexlayout */
+  display: inline-block;
+  /* ← Stelle sicher, dass es sichtbar bleibt */
+  flex-shrink: 0;
+  /* ← verhindert „Zerdrücken“ im Flexlayout */
 }
 
 /* ───── Toggle Arrows ───── */
@@ -252,14 +254,15 @@ body {
 #maxspeed-legend,
 #obs-legend,
 #schools-legend {
-    display: none;
+  display: none;
 }
+
 /* 
 #cluster-legend-section {
   display: none;
 } */
 
- /* #scenario-legend-section {
+/* #scenario-legend-section {
       display: none;
     }  */
 
@@ -292,43 +295,43 @@ body {
 
 /* ────────────── Photon Geocoder ────────────── */
 .geocoder {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1;
-    background: white;
-    padding: 6px;
-    border-radius: 4px;
-    width: 300px;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  background: white;
+  padding: 6px;
+  border-radius: 4px;
+  width: 300px;
 }
 
 #search {
-    width: 100%;
-    padding: 6px;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    border-radius: 4px;
-    box-sizing: border-box;
+  width: 100%;
+  padding: 6px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
 #results {
-    margin-top: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    display: none;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: none;
 }
 
 .result-item {
-    padding: 6px;
-    cursor: pointer;
+  padding: 6px;
+  cursor: pointer;
 }
 
 .result-item:hover {
-    background: #f0f0f0;
+  background: #f0f0f0;
 }
 
 /* ───── Container Bottom Left ───── */
@@ -340,7 +343,8 @@ body {
   gap: 12px;
   z-index: 2;
   font-family: sans-serif;
-  align-items: flex-end; /* 👈 keeps thumbs and box aligned at bottom */
+  align-items: flex-end;
+  /* 👈 keeps thumbs and box aligned at bottom */
 }
 
 /* ───── Basemap Thumbnails ───── */
@@ -353,7 +357,7 @@ body {
 
 #basemap-thumbnails {
   display: flex;
-  gap: 8px; 
+  gap: 8px;
   align-items: flex-end;
 }
 
@@ -379,7 +383,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 63px; /* Match thumbs */
+  height: 63px;
+  /* Match thumbs */
   padding: 4px 6px;
   font-size: 12px;
   border: 2px solid #ccc;
@@ -399,50 +404,84 @@ body {
 }
 
 
+/* ─── Cluster Legend Layout ─── */
 
-
-/* ───── Cluster Legend ───── */
-
-
-#cluster-legend {
-    display: grid;
-    row-gap: 4px;
-    /* erhöht vertikalen Abstand */
+.legend-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* .cluster-legend-entry {
-    display: grid;
-    grid-template-columns: 35px 1fr auto;
-    align-items: center;
-    column-gap: 6px;
-} */
+.legend-section-title label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-section-allcontent {
+  display: flex;
+  gap: 20px;
+}
+
+
+/* ─── Linke Spalte: Cluster Entries ─── */
 
 .cluster-legend-entry {
-    display: grid;
-    grid-template-columns: 35px 1fr;
-    align-items: center;
-    column-gap: 6px;
-    margin-bottom: 6px;
+  display: grid;
+  grid-template-columns: 35px 1fr;
+  align-items: center;
+  column-gap: 6px;
+  margin-bottom: 6px;
+  padding-left: 8px;
 }
 
 .cluster-dot {
-    justify-self: center;
-    background-color: #999;
-    border-radius: 50%;
-    border: 0.5px solid #e6e6e6;
-    box-sizing: border-box;
+  justify-self: center;
+  background-color: #999;
+  border-radius: 50%;
+  border: 0.5px solid #e6e6e6;
+  box-sizing: border-box;
 }
-
 
 .cluster-label {
-    text-align: center;
-    white-space: nowrap;
+  text-align: center;
+  white-space: nowrap;
 }
 
+
+/* ─── Rechte Spalte: Verletztenanteile ─── */
+
+#cluster-legend-color {
+  margin-left: 10px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cluster-color-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cluster-color-item svg {
+  width: 30px;
+  height: 30px;
+  display: block;
+  /* wichtig! */
+  min-width: 30px;
+  /* stellt konsistente Breite sicher */
+}
+
+
+
+/* ─── ─── */
+
 .spacer {
-    /* width: 160px; */
-    display: none;
-    /* Erzwingt Breite für rechte Spalte */
+  /* width: 160px; */
+  display: none;
+  /* Erzwingt Breite für rechte Spalte */
 }
 
 
@@ -484,9 +523,9 @@ body {
 }
 
 #scenario-legend-section {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 

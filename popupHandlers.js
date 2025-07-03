@@ -347,13 +347,6 @@ export function setupUspeedPopups(map) {
 
 function showUspeedChartPopup(e) {
     const feature = e.features[0];
-    // const osmId = feature.properties.osm_way_id;
-
-    // // Hier musst du ALLE Stunden für diesen Weg suchen:
-    // const allFeatures = map.querySourceFeatures("uspeed", {
-    //     sourceLayer: "uber_movement_osm"
-    // }).filter(f => f.properties.osm_way_id === osmId);
-
     const osmId = feature.properties.osm_way_id;
     const startNode = feature.properties.osm_start_node_id;
     const endNode = feature.properties.osm_end_node_id;
@@ -442,62 +435,6 @@ function showUspeedChartPopup(e) {
             }
         });
     }, 50);
-
-
-    // const container = document.createElement("div");
-    // container.innerHTML = `<canvas id="speed-chart" width="380" height="250"></canvas>`;
-
-    // const popup = new maplibregl.Popup()
-    //     .setLngLat(e.lngLat)
-    //     .setDOMContent(container)
-    //     .addTo(map);
-
-    // setTimeout(() => {
-    //     new Chart(document.getElementById("speed-chart"), {
-    //         type: "line",
-    //         data: {
-    //             labels: [...Array(24).keys()], // [0,1,...23]
-    //             datasets: [{
-    //                 label: "Ø Geschwindigkeit (km/h)",
-    //                 data: hourlySpeeds,
-    //                 borderWidth: 2,
-    //                 borderColor: "#0074D9",
-    //                 backgroundColor: "rgba(0, 116, 217, 0.1)",
-    //                 pointRadius: 3
-    //             }]
-    //         },
-    //         options: {
-
-    //             scales: {
-    //                 x: { title: { display: true, text: "Tagesstunde" } },
-    //                 y: { title: { display: true, text: "km/h" } }
-    //             },
-    //             plugins: {
-    //                 legend: {
-    //                     labels: {
-    //                         generateLabels: function (chart) {
-    //                             // Nur Text, ohne farbiges Kästchen
-    //                             return chart.data.datasets.map((dataset, i) => ({
-    //                                 text: dataset.label,
-    //                                 fillStyle: "transparent", // unsichtbar
-    //                                 strokeStyle: "transparent",
-    //                                 lineWidth: 0,
-    //                                 hidden: !chart.isDatasetVisible(i),
-    //                                 datasetIndex: i
-    //                             }));
-    //                         }
-    //                     }
-    //                 },
-    //                 tooltip: {
-    //                     callbacks: {
-    //                         label: ctx => `${ctx.parsed.y} km/h`
-    //                     }
-    //                 }
-    //             }
-
-    //         }
-    //     });
-    // }, 50);
 }
 
 

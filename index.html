@@ -403,13 +403,12 @@
 
     <!-- Sektion X: Bei Zoom < 11 -->
 
-    <div class="legend-section" data-section="cluster" id="cluster-legend-section">
+    <!-- <div class="legend-section" data-section="cluster" id="cluster-legend-section">
       <div class="legend-section-divider"></div>
       <div class="legend-section-title" data-section-id="cluster"
         style="display: flex; align-items: center; justify-content: space-between;">
         <label style="display: flex; align-items: center; gap: 6px;">
 
-          <!-- <input type="checkbox" class="section-checkbox" data-section="cluster" checked /> -->
           <input type="checkbox" class="section-checkbox" data-section="cluster" />
           Unfälle-Cluster nach Schwere (ungefiltert)
         </label>
@@ -447,13 +446,290 @@
           <div class="cluster-label">10001+ Unfälle</div>
           <div class="spacer"></div>
         </div>
+
+
+        <div id="cluster-legend-color" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div style="margin-top: 4px;">
+            <div>
+              <span
+                style="display:inline-block;width:12px;height:12px;background:#d90000;border-radius:50%;margin-right:6px;"></span>
+              Getötete
+            </div>
+            <div>
+              <span
+                style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
+              Schwerverletzte
+            </div>
+            <div>
+              <span
+                style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
+              Leichtverletzte
+            </div>
+          </div>
+        </div>
+
       </div>
+
+
+      <div class="legend-section-divider"></div>
+    </div> -->
+
+
+    <!-- Sektion X: Bei Zoom < 11 -->
+
+    <!-- <div class="legend-section" data-section="cluster" id="cluster-legend-section">
+      <div class="legend-section-divider"></div>
+
+      <div class="legend-section-title" data-section-id="cluster"
+        style="display: flex; align-items: center; justify-content: space-between;">
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" class="section-checkbox" data-section="cluster" />
+          Unfälle-Cluster nach Schwere (ungefiltert)
+        </label>
+        <span class="toggle-arrow section-arrow open" data-arrow="cluster"></span>
+      </div>
+
+      <div class="legend-section-content">
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:4.8px; height:4.8px;"></div>
+          <div class="cluster-label">1 Unfall</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:9.6px; height:9.6px;"></div>
+          <div class="cluster-label">2–10 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:19.2px; height:19.2px;"></div>
+          <div class="cluster-label">11–100 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:28.8px; height:28.8px;"></div>
+          <div class="cluster-label">101–1000 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:36px; height:36px;"></div>
+          <div class="cluster-label">1001–10000 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:48px; height:48px;"></div>
+          <div class="cluster-label">10001+ Unfälle</div>
+        </div>
+
+
+
+        <div id="cluster-legend-color" style="margin-left: 20px; margin-top: 6px; font-size: 11px;">
+          <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 6px;">
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="30" height="30" viewBox="0 0 32 32">
+                <path d="M16,16 
+         L32,16 
+         A16,16 0 0,1 27.3,27.3 
+         Z" fill="#d90000" />
+              </svg>
+              <span>Getötete</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="30" height="30" viewBox="0 0 32 32">
+                <path d="M16,16 
+         L27.3,27.3 
+         A16,16 0 0,1 4.7,27.3 
+         Z" fill="#0074D9" />
+              </svg>
+              <span>Schwerverletzte</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="30" height="30" viewBox="0 0 32 32">
+                <path d="M16,16 
+         L4.7,27.3 
+         A16,16 0 0,1 16,0
+         A16,16 0 0,1 27.3,4.7
+         A16,16 0 0,1 32,16
+         Z" fill="#2ECC40" />
+              </svg>
+              <span>Leichtverletzte</span>
+            </div>
+
+          </div>
+        </div>
+
+
+
+      </div>
+
+      <div class="legend-section-divider"></div>
+    </div> -->
+
+
+    <!-- <div class="legend-section" data-section="cluster" id="cluster-legend-section">
+      <div class="legend-section-divider"></div>
+
+      <div class="legend-section-title" data-section-id="cluster"
+        style="display: flex; align-items: center; justify-content: space-between;">
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" class="section-checkbox" data-section="cluster" />
+          Unfälle-Cluster nach Schwere (ungefiltert)
+        </label>
+        <span class="toggle-arrow section-arrow open" data-arrow="cluster"></span>
+      </div>
+
+<div class="legend-section-allcontent" style="display: flex; gap: 20px;">
+
+      <div class="legend-section-content">
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:4.8px; height:4.8px;"></div>
+          <div class="cluster-label">1 Unfall</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:9.6px; height:9.6px;"></div>
+          <div class="cluster-label">2–10 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:19.2px; height:19.2px;"></div>
+          <div class="cluster-label">11–100 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:28.8px; height:28.8px;"></div>
+          <div class="cluster-label">101–1000 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:36px; height:36px;"></div>
+          <div class="cluster-label">1001–10000 Unfälle</div>
+        </div>
+
+        <div class="cluster-legend-entry">
+          <div class="cluster-dot" style="width:48px; height:48px;"></div>
+          <div class="cluster-label">10001+ Unfälle</div>
+        </div>
+
+</div>
+
+        <div id="cluster-legend-color" style="margin-left: 20px; margin-top: 6px;">
+          <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 6px;">
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="30" height="30" viewBox="0 0 32 32">
+                <path d="M16,16 
+         L32,16 
+         A16,16 0 0,1 27.3,27.3 
+         Z" fill="#d90000" />
+              </svg>
+              <span>Anteil Getötete</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="30" height="30" viewBox="0 0 32 32">
+                <path d="M16,16 
+         L27.3,27.3 
+         A16,16 0 0,1 4.7,27.3 
+         Z" fill="#0074D9" />
+              </svg>
+              <span>Anteil Schwerverletzte</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="30" height="30" viewBox="0 0 32 32">
+                <path d="M16,16 
+         L4.7,27.3 
+         A16,16 0 0,1 16,0
+         A16,16 0 0,1 27.3,4.7
+         A16,16 0 0,1 32,16
+         Z" fill="#2ECC40" />
+              </svg>
+              <span>Anteil Leichtverletzte</span>
+            </div>
+
+          </div>
+        </div>
+</div>
+
+
+      
+
+      <div class="legend-section-divider"></div>
+    </div> -->
+
+
+
+
+    <div class="legend-section" data-section="cluster" id="cluster-legend-section">
+      <div class="legend-section-divider"></div>
+
+      <div class="legend-section-title" data-section-id="cluster">
+        <label>
+          <input type="checkbox" class="section-checkbox" data-section="cluster" />
+          Unfälle-Cluster nach Schwere (ungefiltert)
+        </label>
+        <span class="toggle-arrow section-arrow open" data-arrow="cluster"></span>
+      </div>
+
+      <div class="legend-section-allcontent">
+        <!-- Unfallanzahl -->
+        <div class="legend-section-content">
+          <div class="cluster-legend-entry">
+            <div class="cluster-dot" style="width:4.8px; height:4.8px;"></div>
+            <div class="cluster-label">1 Unfall</div>
+          </div>
+          <div class="cluster-legend-entry">
+            <div class="cluster-dot" style="width:9.6px; height:9.6px;"></div>
+            <div class="cluster-label">2–10 Unfälle</div>
+          </div>
+          <div class="cluster-legend-entry">
+            <div class="cluster-dot" style="width:19.2px; height:19.2px;"></div>
+            <div class="cluster-label">11–100 Unfälle</div>
+          </div>
+          <div class="cluster-legend-entry">
+            <div class="cluster-dot" style="width:28.8px; height:28.8px;"></div>
+            <div class="cluster-label">101–1000 Unfälle</div>
+          </div>
+          <div class="cluster-legend-entry">
+            <div class="cluster-dot" style="width:36px; height:36px;"></div>
+            <div class="cluster-label">1001–10000 Unfälle</div>
+          </div>
+          <div class="cluster-legend-entry">
+            <div class="cluster-dot" style="width:48px; height:48px;"></div>
+            <div class="cluster-label">10001+ Unfälle</div>
+          </div>
+        </div>
+
+        <!-- Verletzten-Farben -->
+        <div id="cluster-legend-color">
+          <div class="cluster-color-item">
+            <svg viewBox="0 0 32 32">
+              <path d="M16,16 L32,16 A16,16 0 0,1 27.3,27.3 Z" fill="rgba(228,26,28,1)" />
+            </svg>
+            <span>Anteil<br>Getötete</span>
+          </div>
+          <div class="cluster-color-item">
+            <svg viewBox="0 0 32 32">
+              <path d="M16,16 L27.3,27.3 A16,16 0 0,1 4.7,27.3 Z" fill="rgba(55,126,184,0.9)" />
+            </svg>
+            <span>Anteil Schwerverletzte</span>
+          </div>
+          <div class="cluster-color-item">
+            <svg viewBox="0 0 32 32">
+              <path d="M16,16 L4.7,27.3 A16,16 0 0,1 16,0 A16,16 0 0,1 27.3,4.7 A16,16 0 0,1 32,16 Z" fill="rgba(77,175,74,0.6)" />
+            </svg>
+            <span>Anteil Leichtverletzte</span>
+          </div>
+        </div>
+      </div>
+
       <div class="legend-section-divider"></div>
     </div>
-
-
-
-
 
 
 
@@ -699,11 +975,13 @@
         <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
           <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
           <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤
+            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span>
+              ≤
               30 km/h</div>
             <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
               50 km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥
+            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span>
+              ≥
               100 km/h</div>
             <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span>
               kein Tempolimit</div>
@@ -721,16 +999,19 @@
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-uspeed" />
             Gemessene Pkw-Geschwindigkeit (nur Berlin) anzeigen
-            <span class="info-icon" title="Quelle: Data from Q2 2019 originally provided by Uber Movement, accessed in [01/2020] – Lizenz: CC BY-NC 4.0">ⓘ</span>
+            <span class="info-icon"
+              title="Quelle: Data from Q2 2019 originally provided by Uber Movement, accessed in [01/2020] – Lizenz: CC BY-NC 4.0">ⓘ</span>
           </label>
         </div>
         <div id="uspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
           <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span> ≤
+            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span>
+              ≤
               30 km/h</div>
             <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
               50 km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span> ≥
+            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span>
+              ≥
               100 km/h</div>
           </div>
 
@@ -750,11 +1031,14 @@
         <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
           <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
           <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤ 3
+            <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤
+              3
               Mio Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈ 6
+            <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈
+              6
               Mio Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥ 10
+            <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥
+              10
               Mio Fahrzeuge/Jahr</div>
           </div>
         </div>
@@ -1031,14 +1315,10 @@
   </div>
 
 
-<script src="https://unpkg.com/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/chart.js@4.5.0/dist/chart.umd.min.js"></script>
 
   <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js"></script>
-  <!-- <script src="https://unpkg.com/@mapbox-controls/compass@3.0.0/src/index.js"></script>  -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@mapbox-controls/compass@3.0.0/src/index.min.js"></script>  -->
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@mapbox-controls/compass@3.0.0/dist/compass.umd.min.js"></script> -->
-
   <script type="module" src="./main.js"></script>
 </body>
 
