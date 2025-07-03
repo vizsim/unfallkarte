@@ -1,7 +1,7 @@
 //featureCounter.js
 
-import { LAYERS } from "../main.js";
-import { paintStyles } from "../styleConfig.js";
+import { LAYERS } from "../../main.js";
+import { paintStyles } from "../../styleConfig.js";
 
 export function updateVisibleFeatureCount(map, currentZoomLock) {
   const zoom = map.getZoom();

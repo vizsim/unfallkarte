@@ -1,18 +1,18 @@
 
 
 // 📦 Geocoder & Styles
-import { setupPhotonGeocoder } from './geocoder.js';
-import { paintStyles, getCircleColorPaint } from './styleConfig.js';
+import { setupPhotonGeocoder } from './js/utils/geocoder.js';
+import { paintStyles, getCircleColorPaint } from './js/styleConfig.js';
 
 // 📦 Kartenfunktionen
-import { addSources } from "./addSources.js";
+import { addSources } from "./js/mapdata/addSources.js";
 // import { loadAllIcons } from "./loadAllIcons.js";
-import { addLayers } from "./addLayers.js";
+import { addLayers } from "./js/mapdata/addLayers.js";
 
 // 📦 UI & Interaktion
-import { setupBaseLayerControls } from './ui/setupBaseLayerControls.js';
-import { setupLayerToggles } from './ui/setupLayerToggles.js';
-import { setupScenarioControls } from './ui/setupScenarioControls.js';
+import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
+import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
+import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 // import { updateVisibleFeatureCount } from './ui/featureCounter.js';
 
 // 📦 Popups
@@ -38,7 +38,7 @@ import {
   setupScenario6Popups,
   setupScenario7Popups,
   setupScenario8Popups
-} from './popupHandlers.js';
+} from './js/ui/popupHandlers.js';
 
 // 📦 Legende
 import {
@@ -49,7 +49,7 @@ import {
   setupLegendClusterCheckboxSync,
   setupLegendToggleHandlers,
   setupLegendSectionCheckboxes
-} from './legendHandlers.js';
+} from './js/ui/legendHandlers.js';
 
 // 📦 Permalink
 import {
@@ -57,11 +57,12 @@ import {
   applyPermalink,
   updatePermalink,
   cleanupLegacyPermalink
-} from './permalink.js';
+} from './js/utils/permalink.js';
+
 
 // 📦 Sonstiges
-import { setupPieChartImageGeneration } from './generatePieIcon.js';
-import { setupMapillary } from "./useMapillary.js";
+import { setupPieChartImageGeneration } from './js/utils/generatePieIcon.js';
+import { setupMapillary } from "./js/utils/useMapillary.js";
 
 // import { setupRectangleIconGeneration } from "./generateRectangleIcon.js";
 
@@ -100,7 +101,7 @@ document.querySelector('[data-map="satellite"]').style.backgroundImage =
 (async () => {
   try {
     // handle the config import based on the environment  for the api keys
-    const config = await import(isLocalhost ? './config.js' : './config.public.js');
+    const config = await import(isLocalhost ? './js/config/config.js' : './js/config/config.public.js');
     ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
 
