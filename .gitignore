@@ -13,6 +13,7 @@ config.js
 
 *.parquet 
 
+*.csv.zip
 
 
 # But keep JSON files in the project root (main) folder
