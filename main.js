@@ -56,7 +56,8 @@ import {
   Permalink,
   applyPermalink,
   updatePermalink,
-  cleanupLegacyPermalink
+  cleanupLegacyPermalink,
+  encodeList, beteiligungMap, yearMap
 } from './js/utils/permalink.js';
 
 
@@ -123,12 +124,20 @@ async function initMap() {
   maplibregl.addProtocol("pmtiles", protocol.tile);
 
 
+
+  const { lat, lng, zoom } = Permalink.parse();
+
+const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
+
+
+
+
   window.map = new maplibregl.Map({
     container: "map",
     // style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
     style: "./style.json", // <-- your local Positron style
-    center: [13.634, 52.315],
-    zoom: 12,
+  center: hasPermalink ? [lng, lat] : [13.634, 52.315],
+  zoom: hasPermalink ? zoom : 12,
     minZoom: 6,
     maxZoom: 20
   });
@@ -535,7 +544,45 @@ function setupEventHandlers(map) {
 }
 
 
+// function setupPermalinkHandling(map) {
+//   map.on("idle", () => {
+//     if (!isInitializingRef.value) return;
+
+//     requestAnimationFrame(() => {
+//       applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
+//       map.on("moveend", () => updatePermalink(map, isInitializingRef));
+//       map.on("zoomend", () => updatePermalink(map, isInitializingRef));
+//       isInitializingRef.value = false;
+//     });
+//   });
+// }
+
 function setupPermalinkHandling(map) {
+  const hasPermalink = new URLSearchParams(window.location.search).has("p");
+
+  if (!hasPermalink) {
+    // Permalink fehlt → Standardwerte einmal setzen
+    Permalink.stringify({
+      lat: 52.315,
+      lng: 13.634,
+      zoom: 12.00,
+      style: "UKATEGORIE",
+      filters: [
+        encodeList(Object.keys(paintStyles.UKATEGORIE.colors), {}),
+        encodeList(Object.keys(paintStyles.BETEILIGUNG.colors), beteiligungMap),
+        encodeList(Object.keys(paintStyles.UJAHR.colors), yearMap),
+        encodeList(Object.keys(paintStyles.UTYP1.colors), {}),
+        encodeList(Object.keys(paintStyles.UART.colors), {})
+      ],
+      scenarios: [],
+      kontext: []
+    });
+
+        // 2. applyPermalink verzögert ausführen → URL ist nun gültig
+    requestAnimationFrame(() => setupPermalinkHandling(map));
+    return;
+  }
+
   map.on("idle", () => {
     if (!isInitializingRef.value) return;
 
@@ -547,6 +594,7 @@ function setupPermalinkHandling(map) {
     });
   });
 }
+
 
 function initializeMapModules(map) {
   setupPhotonGeocoder(map);

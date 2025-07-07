@@ -1,6 +1,6 @@
 // Cleaned permalink.js
 
-const beteiligungMap = {
+export const beteiligungMap = {
     IstRad: "1",
     IstPKW: "2",
     IstFuss: "3",
@@ -9,7 +9,7 @@ const beteiligungMap = {
     IstSonstig: "6"
 };
 
-const yearMap = {
+export const yearMap = {
     2017: "17",
     2018: "18",
     2019: "19",
@@ -19,7 +19,7 @@ const yearMap = {
     2023: "23"
 };
 
-const kontextKeys = {
+export const kontextKeys = {
     mapillary: "m",
     maxspeed: "s",
     hvs: "h",
@@ -49,7 +49,7 @@ const styleShortMap = {
 };
 const reverseStyleMap = reverse(styleShortMap);
 
-const encodeList = (list, map) => list.map(item => map[item] || item).join("_");
+export const encodeList = (list, map) => list.map(item => map[item] || item).join("_");
 const decodeList = (str, reverseMap) => (str || "").split("_").map(code => reverseMap[code]).filter(Boolean).join("_");
 
 export const Permalink = {
@@ -111,29 +111,6 @@ export const Permalink = {
 
 export function applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef) {
     const { lat, lng, zoom, style, filters, scenarios, kontext } = Permalink.parse();
-
-    if (!new URLSearchParams(window.location.search).has("p")) {
-        const defaultFilters = [
-            encodeList(Object.keys(paintStyles.UKATEGORIE.colors), {}),
-            encodeList(Object.keys(paintStyles.BETEILIGUNG.colors), beteiligungMap),
-            encodeList(Object.keys(paintStyles.UJAHR.colors), yearMap),
-            encodeList(Object.keys(paintStyles.UTYP1.colors), {}),
-            encodeList(Object.keys(paintStyles.UART.colors), {})
-        ];
-
-        Permalink.stringify({
-            lat: 52.315,
-            lng: 13.634,
-            zoom: 12.00,
-            style: "UKATEGORIE",
-            filters: defaultFilters,
-            scenarios: [],
-            kontext: []
-        });
-
-        setTimeout(() => applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef), 0);
-        return;
-    }
 
     isInitializingRef.value = true;
     const [ukat, beteiligung, ujahr, utyp, uart] = filters;
