@@ -9,7 +9,6 @@
   <link rel="icon" href="stationary-bike-gym-svgrepo-com.svg" type="image/svg+xml">
   <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css' />
   <link rel="stylesheet" href="style.css" />
-
 </head>
 
 <body>
@@ -17,6 +16,10 @@
 
   <div class="legend">
 
+
+    <!-- ====================
+MAIN HEADER
+======================= -->
     <div class="legend-header legend-title" data-toggle="legend-root">
       <div style="flex-grow: 1;">
         <div class="legend-heading">Unfallkarte</div>
@@ -31,7 +34,9 @@
 
     <div class="legend-section-divider"></div>
 
-    <!-- Sektion 1: Unfälle einzeln -->
+    <!-- ====================
+     Sektion 1: Unfälle einzeln
+======================= -->
     <div class="legend-section" data-section="einzeln">
       <div class="legend-section-title" data-section-id="einzeln"
         style="display: flex; align-items: center; justify-content: space-between;">
@@ -399,7 +404,10 @@
 
 
 
-    <!-- Sektion X: Bei Zoom < 11 -->
+
+    <!-- ====================
+     Sektion 1b: Unfälle-Cluster nach Schwere (Bei Zoom < 11)
+======================= -->
 
     <div class="legend-section" data-section="cluster" id="cluster-legend-section">
       <div class="legend-section-divider"></div>
@@ -445,8 +453,8 @@
 
         <!-- Verletzten-Farben -->
         <div id="cluster-legend-color">
-            <div style="text-align: center; font-weight: bold;">Anteil Unfallschwere</div>
-            
+          <div style="text-align: center; font-weight: bold;">Anteil Unfallschwere</div>
+
           <div class="cluster-color-item">
             <svg viewBox="0 0 32 32">
               <path d="M16,16 L32,16 A16,16 0 0,1 27.3,27.3 Z" fill="rgba(228,26,28,1)" />
@@ -461,7 +469,8 @@
           </div>
           <div class="cluster-color-item">
             <svg viewBox="0 0 32 32">
-              <path d="M16,16 L4.7,27.3 A16,16 0 0,1 16,0 A16,16 0 0,1 27.3,4.7 A16,16 0 0,1 32,16 Z" fill="rgba(77,175,74,0.6)" />
+              <path d="M16,16 L4.7,27.3 A16,16 0 0,1 16,0 A16,16 0 0,1 27.3,4.7 A16,16 0 0,1 32,16 Z"
+                fill="rgba(77,175,74,0.6)" />
             </svg>
             <span>Anteil<br>Leichtverletzte</span>
           </div>
@@ -473,31 +482,10 @@
 
 
 
-    <!-- Sektion 2: Cluster / Szenarien -->
 
-    <!-- Szenario 1 -->
-    <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-1">
-      <div class="legend-section-title">Unfall-Szenarien (Cluster)</div>
-
-
-      <div style="margin-top: 6px;">
-        <label style="margin-left: 10px;">
-          <input type="checkbox" id="toggle-scenario1" />
-
-          Sc1: Unfall-Häufungen bei Tempo100 anzeigen
-
-          <span class="info-icon"
-            title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
-        </label>
-        <div id="scenario1-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
-          <label for="scenario1-slider">Min. Cluster-Größe: <span id="scenario1-slider-value">0</span></label><br>
-          <input type="range" id="scenario1-slider" min="3" max="20" step="1" value="3" />
-        </div>
-
-      </div>
-      <div class="legend-section-divider"></div>
-    </div> -->
-
+    <!-- ====================
+     Sektion 2: Szenarien
+======================= -->
 
     <div class="legend-section scenario-legend-section" data-section="scenario">
       <div class="legend-section-title" data-section-id="scenario"
@@ -513,6 +501,8 @@
       <div class="legend-section-content">
         <div class="legend-section-subtitle">Unfall-Szenarien</div>
 
+
+        <!-- Szenario 1 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <!-- <input type="checkbox" id="toggle-scenario1" /> -->
@@ -528,6 +518,7 @@
           </div>
         </div>
 
+        <!-- Szenario 2 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <!-- <input type="checkbox" id="toggle-scenario2" /> -->
@@ -551,6 +542,7 @@
       <div class="legend-section-content">
         <div class="legend-section-subtitle">Straßennetz-Szenarien</div>
 
+        <!-- Szenario 3 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario3" name="scenario" value="sc3" />
@@ -565,6 +557,7 @@
         </div>
         <!-- </div> -->
 
+        <!-- Szenario 6 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario6" name="scenario" value="sc6" />
@@ -582,7 +575,7 @@
       <div class="legend-section-content">
         <div class="legend-section-subtitle">Lärm-Szenarien</div>
 
-
+        <!-- Szenario 8 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario8" name="scenario" value="sc8" />
@@ -604,7 +597,7 @@
       <div class="legend-section-content">
         <div class="legend-section-subtitle">Mapping-Szenarien</div>
 
-
+        <!-- Szenario 4 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario4" name="scenario" value="sc4" />
@@ -620,7 +613,7 @@
         </div>
 
 
-
+        <!-- Szenario 5 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario5" name="scenario" value="sc5" />
@@ -635,6 +628,7 @@
         </div> -->
         </div>
 
+        <!-- Szenario 7 -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-scenario7" name="scenario" value="sc7" />
@@ -657,19 +651,12 @@
 
 
 
-    <!-- Szenario 2 -->
-    <!-- <div class="legend-section scenario-legend-section" id="scenario-legend-section-2">
-    ...
-  </div> -->
 
 
 
-
-
-    <!-- <div class="legend-section-divider"></div> -->
-    <!-- <div class="legend-section-divider"></div> -->
-
-    <!-- Sektion 3: Kontext -->
+    <!-- ====================
+     Sektion 3: Kontext
+======================= -->
     <div class="legend-section" data-section="kontext">
       <div class="legend-section-title section-toggle" data-section-id="kontext"
         style="display: flex; align-items: center; justify-content: space-between;">
