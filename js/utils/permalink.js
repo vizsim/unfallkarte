@@ -144,6 +144,13 @@ export function applyPermalink(map, paintStyles, updateLayerFilter, updateVisibl
         }
     });
 
+
+
+    // Force immediate layer visibility update (fixes delay)
+    if (typeof applyLegendVisibility === 'function') {
+        applyLegendVisibility();
+    }
+
     updateLayerFilter(false, true);
     updateVisibleFeatureCount();
     setTimeout(() => isInitializingRef.value = false, 0);
@@ -188,16 +195,72 @@ export function updatePermalink(map, isInitializingRef) {
 
 
 export function cleanupLegacyPermalink() {
-  const url = new URL(window.location.href);
-  const params = url.searchParams;
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
 
-  const legacyParams = ["lat", "lng", "zoom", "style", "filters", "scenarios"];
-  const hasLegacy = legacyParams.some(param => params.has(param));
-  const hasCompact = params.has("p");
+    const legacyParams = ["lat", "lng", "zoom", "style", "filters", "scenarios"];
+    const hasLegacy = legacyParams.some(param => params.has(param));
+    const hasCompact = params.has("p");
 
-  if (!hasCompact && hasLegacy) {
-    legacyParams.forEach(param => params.delete(param));
-    url.search = params.toString();
-    history.replaceState(null, "", url.toString());
-  }
+    if (!hasCompact && hasLegacy) {
+        legacyParams.forEach(param => params.delete(param));
+        url.search = params.toString();
+        history.replaceState(null, "", url.toString());
+    }
+}
+
+
+
+export function setupPermalinkHandling(map, {
+    paintStyles,
+    updateLayerFilter,
+    updateVisibleFeatureCount,
+    isInitializingRef
+}) {
+    const hasPermalink = new URLSearchParams(window.location.search).has("p");
+
+    if (!hasPermalink) {
+        // Default permalink generation
+        Permalink.stringify({
+            lat: 52.315,
+            lng: 13.634,
+            zoom: 12.00,
+            style: "UKATEGORIE",
+            filters: [
+                encodeList(Object.keys(paintStyles.UKATEGORIE.colors), {}),
+                encodeList(Object.keys(paintStyles.BETEILIGUNG.colors), beteiligungMap),
+                encodeList(Object.keys(paintStyles.UJAHR.colors), yearMap),
+                encodeList(Object.keys(paintStyles.UTYP1.colors), {}),
+                encodeList(Object.keys(paintStyles.UART.colors), {})
+            ],
+            scenarios: [],
+            kontext: []
+        });
+
+        // Wait for URL change to apply
+        requestAnimationFrame(() => setupPermalinkHandling(map, {
+            paintStyles,
+            updateLayerFilter,
+            updateVisibleFeatureCount,
+            isInitializingRef
+        }));
+        return;
+    }
+
+    map.on("idle", () => {
+        if (!isInitializingRef.value) return;
+
+        requestAnimationFrame(() => {
+            applyPermalink(
+                map,
+                paintStyles,
+                updateLayerFilter,
+                updateVisibleFeatureCount,
+                isInitializingRef
+            );
+            map.on("moveend", () => updatePermalink(map, isInitializingRef));
+            map.on("zoomend", () => updatePermalink(map, isInitializingRef));
+            isInitializingRef.value = false;
+        });
+    });
 }

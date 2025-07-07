@@ -15,7 +15,7 @@ import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 
-import { applyZoomLock } from './js/utils/zoomLock.js';
+// import { applyZoomLock } from './js/utils/zoomLock.js';
 
 // 📦 Popups
 import {
@@ -56,11 +56,14 @@ import {
 // 📦 Permalink
 import {
   Permalink,
-  applyPermalink,
+  // applyPermalink,
   updatePermalink,
   cleanupLegacyPermalink,
-  encodeList, beteiligungMap, yearMap
+  // encodeList, beteiligungMap, yearMap,
+  setupPermalinkHandling
 } from './js/utils/permalink.js';
+
+// import { setupPermalinkHandling } from './js/utils/permalink.js';
 
 
 // 📦 Sonstiges
@@ -153,31 +156,24 @@ async function initMap() {
   /// load MAP
   map.on("load", () => {
 
-
-    // setupRectangleIconGeneration(map); // add this line
-
     initializeMapModules(map);               // 2. Module initialisieren
-
     setupUI(map);                                     // 3. UI & Layer-Toggles
     setupScenarioControls(map);
-
     setupLegend(map);                          // 4. Legende initialisieren 
-
-    // setupMapillary(map, { applyZoomLock, applyLegendVisibility });
-    setupMapillary(map, {
-      originalMinZoom,
-      setCurrentZoomLock: z => currentZoomLock = z,
-      applyLegendVisibility
-    });
-
-
-
+    setupMapillary(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
     setupPopups(map);                          // 5. Popups initialisieren
 
     map.once("load", updateLegendVisibilityByZoom);
     updateLegendVisibilityByZoom();
 
-    setupPermalinkHandling(map); // 6. Permalink-Handling initialisieren
+    // setupPermalinkHandling(map); // 6. Permalink-Handling initialisieren
+    setupPermalinkHandling(map, {
+      paintStyles,
+      updateLayerFilter,
+      updateVisibleFeatureCount: () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles),
+      isInitializingRef
+    });
+
 
     setupEventHandlers(map);                          // 8. moveend / zoomend etc.
 
@@ -207,77 +203,6 @@ document.getElementById('toggleTerrain').addEventListener('change', (e) => {
   }
 });
 
-
-
-
-
-
-// function updateVisibleFeatureCount() {
-//   const zoom = map.getZoom();
-//   let features = [];
-
-//   const zoomLockText = currentZoomLock
-//     ? `<span class="zoom-lock">🔒 ${currentZoomLock}</span>`
-//     : "";
-
-//   const zoomText = `Zoomlevel: ${zoom.toFixed(2)}${zoomLockText ? ` [${zoomLockText}]` : ""}`;
-
-//   if (zoom < 11) {
-//     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
-//     const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
-
-//     // document.getElementById("feature-count").innerHTML =
-//     //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
-
-//     document.getElementById("feature-count").innerHTML =
-//       `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
-//    <div>${zoomText}</div>`;
-//     return;
-//   }
-
-//   features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
-
-//   // Zähle nach beliebigem Property
-//   function updateBadges(features, property, selectorFn = v => v) {
-//     const counts = features.reduce((acc, f) => {
-//       const val = selectorFn(f.properties[property]);
-//       if (val !== undefined) acc[val] = (acc[val] || 0) + 1;
-//       return acc;
-//     }, {});
-//     document.querySelectorAll(`.legend-item[data-group="${property}"]`).forEach(item => {
-//       const val = item.getAttribute("data-value") ?? item.dataset.field;
-//       const count = counts[val] || 0;
-//       const badge = item.querySelector(".count-badge");
-//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
-//     });
-//   }
-
-//   updateBadges(features, "UKATEGORIE", v => parseInt(v));
-//   updateBadges(features, "UJAHR", v => parseInt(v));
-//   updateBadges(features, "UTYP1", v => parseInt(v));
-//   updateBadges(features, "UART", v => parseInt(v));
-
-//   // Beteiligung ist ein Sonderfall
-//   const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
-//   const beteiligungCounts = {};
-//   for (const field of beteiligungFields) {
-//     beteiligungCounts[field] = features.filter(f => f.properties?.[field] === 1).length;
-//   }
-//   document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
-//     const field = item.dataset.field;
-//     const count = beteiligungCounts[field] || 0;
-//     const badge = item.querySelector(".count-badge");
-//     if (badge) badge.textContent = count > 0 ? `${count}` : "";
-//   });
-
-//   // document.getElementById("feature-count").innerHTML =
-//   //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
-
-//   document.getElementById("feature-count").innerHTML =
-//     `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
-//    <div>${zoomText}</div>`;
-
-// }
 
 
 
@@ -321,7 +246,7 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
   });
 
   // map.once("idle", updateVisibleFeatureCount);
-   map.once("idle", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
+  map.once("idle", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
 
   if (shouldUpdatePermalink && !isInitializingRef.value) {
     updatePermalink(map, isInitializingRef);
@@ -480,64 +405,6 @@ function setupEventHandlers(map) {
   applyLegendVisibility();
 }
 
-
-// function setupPermalinkHandling(map) {
-//   map.on("idle", () => {
-//     if (!isInitializingRef.value) return;
-
-//     requestAnimationFrame(() => {
-//       applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
-//       map.on("moveend", () => updatePermalink(map, isInitializingRef));
-//       map.on("zoomend", () => updatePermalink(map, isInitializingRef));
-//       isInitializingRef.value = false;
-//     });
-//   });
-// }
-
-function setupPermalinkHandling(map) {
-  const hasPermalink = new URLSearchParams(window.location.search).has("p");
-
-  if (!hasPermalink) {
-    // Permalink fehlt → Standardwerte einmal setzen
-    Permalink.stringify({
-      lat: 52.315,
-      lng: 13.634,
-      zoom: 12.00,
-      style: "UKATEGORIE",
-      filters: [
-        encodeList(Object.keys(paintStyles.UKATEGORIE.colors), {}),
-        encodeList(Object.keys(paintStyles.BETEILIGUNG.colors), beteiligungMap),
-        encodeList(Object.keys(paintStyles.UJAHR.colors), yearMap),
-        encodeList(Object.keys(paintStyles.UTYP1.colors), {}),
-        encodeList(Object.keys(paintStyles.UART.colors), {})
-      ],
-      scenarios: [],
-      kontext: []
-    });
-
-    // 2. applyPermalink verzögert ausführen → URL ist nun gültig
-    requestAnimationFrame(() => setupPermalinkHandling(map));
-    return;
-  }
-
-  map.on("idle", () => {
-    if (!isInitializingRef.value) return;
-
-    requestAnimationFrame(() => {
-      // applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
-      applyPermalink(
-        map,
-        paintStyles,
-        updateLayerFilter,
-        () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles),
-        isInitializingRef
-      );
-      map.on("moveend", () => updatePermalink(map, isInitializingRef));
-      map.on("zoomend", () => updatePermalink(map, isInitializingRef));
-      isInitializingRef.value = false;
-    });
-  });
-}
 
 
 function initializeMapModules(map) {
