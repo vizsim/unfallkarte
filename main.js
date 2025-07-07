@@ -14,6 +14,7 @@ import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 // import { updateVisibleFeatureCount } from './ui/featureCounter.js';
+import { applyZoomLock } from './js/utils/zoomLock.js';
 
 // 📦 Popups
 import {
@@ -127,7 +128,7 @@ async function initMap() {
 
   const { lat, lng, zoom } = Permalink.parse();
 
-const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
+  const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
 
 
 
@@ -136,8 +137,8 @@ const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
     container: "map",
     // style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
     style: "./style.json", // <-- your local Positron style
-  center: hasPermalink ? [lng, lat] : [13.634, 52.315],
-  zoom: hasPermalink ? zoom : 12,
+    center: hasPermalink ? [lng, lat] : [13.634, 52.315],
+    zoom: hasPermalink ? zoom : 12,
     minZoom: 6,
     maxZoom: 20
   });
@@ -161,7 +162,14 @@ const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
 
     setupLegend(map);                          // 4. Legende initialisieren 
 
-    setupMapillary(map, { applyZoomLock, applyLegendVisibility });
+    // setupMapillary(map, { applyZoomLock, applyLegendVisibility });
+    setupMapillary(map, {
+      originalMinZoom,
+      setCurrentZoomLock: z => currentZoomLock = z,
+      applyLegendVisibility
+    });
+
+
 
     setupPopups(map);                          // 5. Popups initialisieren
 
@@ -181,88 +189,6 @@ const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
 
 
 //////////////////////// some funcions ////////////////
-
-
-
-/// Zoom Lock stuff
-
-function applyZoomLock() {
-
-  // currentZoomLock = strictestMinZoom;
-
-  const movebisVisible = map.getLayoutProperty("movebis", "visibility") === "visible";
-  const hvsVisible = map.getLayoutProperty("hvs", "visibility") === "visible";
-  const mapillaryVisible = map.getLayoutProperty("mapillary-images-layer", "visibility") === "visible";
-  const schoolsPointsVisible = map.getLayoutProperty("schools-points", "visibility") === "visible";
-  const schoolsPolygonsVisible = map.getLayoutProperty("schools-polygons", "visibility") === "visible";
-  const healthPointsVisible = map.getLayoutProperty("health-points", "visibility") === "visible";
-  const healthPolygonsVisible = map.getLayoutProperty("health-polygons", "visibility") === "visible";
-  const playgroundsPointsVisible = map.getLayoutProperty("playgrounds-points", "visibility") === "visible";
-  const playgroundsPolygonsVisible = map.getLayoutProperty("playgrounds-polygons", "visibility") === "visible";
-
-  const maxspeedVisible = map.getLayoutProperty("maxspeed", "visibility") === "visible";
-  // const uspeedVisible = map.getLayoutProperty("uspeed", "visibility") === "visible";
-
-  const uspeedRevVisible = map.getLayoutProperty("uspeed-reverse", "visibility") === "visible";
-  const uspeedForVisible = map.getLayoutProperty("uspeed-forward", "visibility") === "visible";
-
-
-  const obsVisible = map.getLayoutProperty("obs", "visibility") === "visible";
-
-  const laerm1Visible = map.getLayoutProperty("laerm1", "visibility") === "visible";
-  const laerm2Visible = map.getLayoutProperty("laerm2", "visibility") === "visible";
-
-  //const scenario1Visible = map.getLayoutProperty("scenario1-polys", "visibility") === "visible";
-
-
-
-  const schoolsVisible = schoolsPointsVisible || schoolsPolygonsVisible;
-  const healthVisible = healthPointsVisible || healthPolygonsVisible;
-  const playgroundsVisible = playgroundsPointsVisible || playgroundsPolygonsVisible;
-  const uspeedVisible = uspeedRevVisible || uspeedForVisible;
-
-
-  // Determine the strictest minZoom
-  const minZooms = [];
-  if (movebisVisible) minZooms.push(13);
-  if (schoolsVisible) minZooms.push(11); 
-  if (healthVisible) minZooms.push(11); 
-  if (playgroundsVisible) minZooms.push(11);
-  if (hvsVisible) minZooms.push(11);
-  if (mapillaryVisible) minZooms.push(14);
-  if (maxspeedVisible) minZooms.push(11);
-  if (uspeedVisible) minZooms.push(11); 
-  if (obsVisible) minZooms.push(11); 
-  if (laerm1Visible) minZooms.push(11);
-  if (laerm2Visible) minZooms.push(11);
-  // if (scenario1Visible) minZooms.push(11); // ✅ NEW ZOOM LOCK
-
-  // const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
-  const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;
-  currentZoomLock = minZooms.length > 0 ? strictestMinZoom : null;
-
-
-  map.setMinZoom(strictestMinZoom);
-  // map.setMaxZoom(mapillaryVisible ? 14.99 : originalMaxZoom);
-
-  // Adjust current zoom if it's below the required minimum
-  const z = map.getZoom();
-  if (z < strictestMinZoom) {
-    map.setZoom(strictestMinZoom);
-  } //else if (mapillaryVisible && z > 14.99) {
-  //   map.setZoom(14.99);
-  // }
-}
-
-
-
-
-
-
-
-// setupBaseLayerControls(map, isInitializingRef);
-//setupLayerToggles(map);
-// setupScenarioControls(map);
 
 
 
@@ -494,7 +420,13 @@ function setupLegend(map) {
 
 function setupUI(map) {
   setupBaseLayerControls(map, isInitializingRef);
-  setupLayerToggles(map, applyZoomLock, applyLegendVisibility);
+  // setupLayerToggles(map, applyZoomLock, applyLegendVisibility);
+  setupLayerToggles(
+    map,
+    originalMinZoom,
+    z => currentZoomLock = z,
+    applyLegendVisibility
+  );
 
   document.querySelectorAll('input[name="color-style"]').forEach(rb => {
     rb.addEventListener("change", updateColorStyle);
@@ -520,7 +452,7 @@ function setupUI(map) {
     });
   });
 
-// Hide both pie cluster layers initially
+  // Hide both pie cluster layers initially
   const layersToHide = ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"];
 
   layersToHide.forEach((layerId) => {
@@ -578,7 +510,7 @@ function setupPermalinkHandling(map) {
       kontext: []
     });
 
-        // 2. applyPermalink verzögert ausführen → URL ist nun gültig
+    // 2. applyPermalink verzögert ausführen → URL ist nun gültig
     requestAnimationFrame(() => setupPermalinkHandling(map));
     return;
   }

@@ -1,8 +1,16 @@
-export function setupMapillary(map, { applyZoomLock, applyLegendVisibility }) {
+import { applyZoomLock} from './zoomLock.js';
+
+
+export function setupMapillary(map, {
+  originalMinZoom,
+  setCurrentZoomLock,
+  applyLegendVisibility
+}) {
   setupInteractivity(map);
-  setupCheckboxHandlers(map, applyZoomLock, applyLegendVisibility);
-  updateMapillaryFilter(map, applyZoomLock, applyLegendVisibility);
+  setupCheckboxHandlers(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility);
+  updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility);
 }
+
 
 function setupInteractivity(map) {
   map.on("click", "mapillary-images-layer", (e) => {
@@ -21,7 +29,7 @@ function setupInteractivity(map) {
   });
 }
 
-function setupCheckboxHandlers(map, applyZoomLock, applyLegendVisibility) {
+function setupCheckboxHandlers(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility) {
   const toggleMapillary = document.getElementById("toggle-mapillary");
   const mapillaryFilterOptions = document.getElementById("mapillary-filter-options");
   const cbPano = document.getElementById("mapillary-pano");
@@ -33,7 +41,8 @@ function setupCheckboxHandlers(map, applyZoomLock, applyLegendVisibility) {
     cbPano.checked = checked;
     cbNonPano.checked = checked;
     toggleMapillary.indeterminate = false;
-        updateMapillaryFilter(map, applyZoomLock, applyLegendVisibility);
+
+    updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility);
   });
 
   [cbPano, cbNonPano].forEach(cb => {
@@ -44,12 +53,13 @@ function setupCheckboxHandlers(map, applyZoomLock, applyLegendVisibility) {
       toggleMapillary.checked = both;
       toggleMapillary.indeterminate = !both && !none;
 
-          updateMapillaryFilter(map, applyZoomLock, applyLegendVisibility);
+      updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility);
     });
   });
 }
 
-function updateMapillaryFilter(map, applyZoomLock, applyLegendVisibility) {
+
+function updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility) {
   const cbPano = document.getElementById("mapillary-pano");
   const cbNonPano = document.getElementById("mapillary-nonpano");
   const filterOptions = document.getElementById("mapillary-filter-options");
@@ -77,9 +87,9 @@ function updateMapillaryFilter(map, applyZoomLock, applyLegendVisibility) {
 
   const anyChecked = showPano || showNonPano;
   map.setLayoutProperty("mapillary-images-layer", "visibility", anyChecked ? "visible" : "none");
-
   filterOptions.style.display = anyChecked ? "block" : "none";
 
-  applyZoomLock();
+  applyZoomLock(map, originalMinZoom, setCurrentZoomLock);
   applyLegendVisibility();
 }
+
