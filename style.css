@@ -86,9 +86,6 @@ body {
   display: none;
 }
 
-/* .legend-items.collapsed + .legend-subsection-divider {
-  margin: 2px 0;
-} */
 
 .legend-item {
   display: flex;
@@ -113,12 +110,26 @@ body {
     margin-top: 10px;
 } */
 
+
+
 .legend-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-weight: bold;
   font-size: 14px;
   margin-bottom: 6px;
   color: #333;
+  cursor: pointer;
+  gap: 6px;
 }
+
+.legend-section-title label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 
 
 .legend.collapsed>.legend-section,
@@ -128,7 +139,70 @@ body {
 }
 
 
-/* ───── this needed?? ───── */
+/* ─── Cluster Legend Layout ─── */
+
+
+
+.legend-section-allcontent {
+  display: flex;
+  gap: 20px;
+  margin-top: 14px; 
+
+}
+
+
+/* ─── Linke Spalte: Cluster Entries ─── */
+
+.cluster-legend-entry {
+  display: grid;
+  grid-template-columns: 35px 1fr;
+  align-items: center;
+  column-gap: 6px;
+  margin-bottom: 6px;
+  padding-left: 8px;
+}
+
+.cluster-dot {
+  justify-self: center;
+  background-color: #999;
+  border-radius: 50%;
+  border: 0.5px solid #e6e6e6;
+  box-sizing: border-box;
+}
+
+.cluster-label {
+  text-align: center;
+  white-space: nowrap;
+}
+
+
+/* ─── Rechte Spalte: Verletztenanteile ─── */
+
+#cluster-legend-color {
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cluster-color-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cluster-color-item svg {
+  width: 30px;
+  height: 30px;
+  display: block;
+  /* wichtig! */
+  min-width: 30px;
+  /* stellt konsistente Breite sicher */
+}
+
+
+
+/* ─────  ───── */
 .color-box {
   width: 14px;
   height: 14px;
@@ -139,16 +213,7 @@ body {
 
 
 /* ───── Count Badges ───── */
-/* .count-badge {
-    font-size: 10px;
-    padding: 0px 4px;
-    background: #eee;
-    border-radius: 10px;
-    min-width: 24px;
-    text-align: center;
-    white-space: nowrap;
-    color: #333;
-} */
+
 .count-badge {
   font-size: 10px;
   padding: 0 4px;
@@ -159,33 +224,10 @@ body {
   white-space: nowrap;
   color: #333;
   display: inline-block;
-  /* ← Stelle sicher, dass es sichtbar bleibt */
   flex-shrink: 0;
-  /* ← verhindert „Zerdrücken“ im Flexlayout */
 }
 
 /* ───── Toggle Arrows ───── */
-/* .toggle-arrow {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-right: 4px solid #000;
-    border-bottom: 4px solid #000;
-    transform: rotate(135deg);
-    transition: transform 0.2s ease;
-    margin-right: 5px;
-}
-
-.toggle-arrow.open {
-    transform: rotate(45deg) !important;
-}
-
-[data-arrow="legend-root"] {
-    width: 14px;
-    height: 14px;
-    border-width: 5px;
-    margin-left: auto;
-} */
 
 /* Basis-Pfeil-Logik */
 .toggle-arrow {
@@ -199,7 +241,6 @@ body {
   transform: rotate(45deg);
 }
 
-
 /* Großer Root-Pfeil (nur bei legend-root) */
 [data-arrow="legend-root"] {
   width: 14px !important;
@@ -209,7 +250,6 @@ body {
   margin-left: auto;
 }
 
-
 /* Mittlere Section-Pfeile */
 .section-arrow {
   width: 10px;
@@ -218,7 +258,6 @@ body {
   border-bottom: 4px solid #000;
   margin-left: 8px;
 }
-
 
 /* Kleine Pfeile bei legend-header */
 .legend-header .toggle-arrow {
@@ -231,20 +270,16 @@ body {
 
 
 
-
-
 /* Einklappbare Sektionen */
 .legend-section.collapsed .legend-section-content {
   display: none;
 }
 
-/* Optional: Abstand für .legend-section-title selbst */
-.legend-section-title {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 6px;
+.legend-section.collapsed .legend-section-allcontent {
+  display: none;
 }
+
+
 
 
 /* ───── Hidden Section Defaults ───── */
@@ -257,14 +292,6 @@ body {
   display: none;
 }
 
-/* 
-#cluster-legend-section {
-  display: none;
-} */
-
-/* #scenario-legend-section {
-      display: none;
-    }  */
 
 
 
@@ -348,12 +375,6 @@ body {
 }
 
 /* ───── Basemap Thumbnails ───── */
-/* #custom-nav-control, 
-.maplibregl-ctrl {
-  height: 60px; 
-  display: flex;
-  align-items: flex-end;
-} */
 
 #basemap-thumbnails {
   display: flex;
@@ -401,77 +422,6 @@ body {
   display: flex;
   align-items: center;
   height: 50%;
-}
-
-
-/* ─── Cluster Legend Layout ─── */
-
-.legend-section-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.legend-section-title label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.legend-section-allcontent {
-  display: flex;
-  gap: 20px;
-}
-
-
-/* ─── Linke Spalte: Cluster Entries ─── */
-
-.cluster-legend-entry {
-  display: grid;
-  grid-template-columns: 35px 1fr;
-  align-items: center;
-  column-gap: 6px;
-  margin-bottom: 6px;
-  padding-left: 8px;
-}
-
-.cluster-dot {
-  justify-self: center;
-  background-color: #999;
-  border-radius: 50%;
-  border: 0.5px solid #e6e6e6;
-  box-sizing: border-box;
-}
-
-.cluster-label {
-  text-align: center;
-  white-space: nowrap;
-}
-
-
-/* ─── Rechte Spalte: Verletztenanteile ─── */
-
-#cluster-legend-color {
-  margin-left: 10px;
-  margin-top: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cluster-color-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cluster-color-item svg {
-  width: 30px;
-  height: 30px;
-  display: block;
-  /* wichtig! */
-  min-width: 30px;
-  /* stellt konsistente Breite sicher */
 }
 
 

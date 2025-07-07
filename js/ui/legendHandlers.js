@@ -81,11 +81,11 @@ export function updateLegendVisibilityByZoom(map) {
   if (laerm2Legend) laerm2Legend.style.display = (visibilityCheck("laerm2") && zoom >= 11) ? "block" : "none";
 
   // if (uspeedLegend) uspeedLegend.style.display = (visibilityCheck("uspeed") && zoom >= 11) ? "block" : "none";
-if (uspeedLegend) {
-  const isVisible =
-    visibilityCheck("uspeed-forward") || visibilityCheck("uspeed-reverse");
-  uspeedLegend.style.display = (isVisible && zoom >= 11) ? "block" : "none";
-}
+  if (uspeedLegend) {
+    const isVisible =
+      visibilityCheck("uspeed-forward") || visibilityCheck("uspeed-reverse");
+    uspeedLegend.style.display = (isVisible && zoom >= 11) ? "block" : "none";
+  }
 
 
 
@@ -155,7 +155,7 @@ export function setupLegendClusterCheckboxSync(map) {
 export function setupLegendToggleHandlers() {
   const legends = getLegendElements();
 
-  document.querySelectorAll(".legend-header").forEach(header => {
+  document.querySelectorAll(".legend-header, .legend-section-allcontent").forEach(header => {
     header.addEventListener("click", (e) => {
       if (e.target.tagName === "INPUT" || e.target.classList.contains("info-icon")) return;
 
@@ -190,7 +190,10 @@ export function setupLegendToggleHandlers() {
           updateScenarioLegendVisibility();
         }
       } else {
-        const section = document.querySelector(`.legend-items[data-section="${key}"]`);
+        // const section = document.querySelector(`.legend-items[data-section="${key}"]`);
+        const section =
+          document.querySelector(`.legend-section-allcontent[data-section="${key}"]`) ||
+          document.querySelector(`.legend-items[data-section="${key}"]`);
         if (section) section.classList.toggle("collapsed");
       }
 
