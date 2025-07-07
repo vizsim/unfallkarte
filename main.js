@@ -13,7 +13,8 @@ import { addLayers } from "./js/mapdata/addLayers.js";
 import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
-// import { updateVisibleFeatureCount } from './ui/featureCounter.js';
+import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
+
 import { applyZoomLock } from './js/utils/zoomLock.js';
 
 // 📦 Popups
@@ -211,72 +212,72 @@ document.getElementById('toggleTerrain').addEventListener('change', (e) => {
 
 
 
-function updateVisibleFeatureCount() {
-  const zoom = map.getZoom();
-  let features = [];
+// function updateVisibleFeatureCount() {
+//   const zoom = map.getZoom();
+//   let features = [];
 
-  const zoomLockText = currentZoomLock
-    ? `<span class="zoom-lock">🔒 ${currentZoomLock}</span>`
-    : "";
+//   const zoomLockText = currentZoomLock
+//     ? `<span class="zoom-lock">🔒 ${currentZoomLock}</span>`
+//     : "";
 
-  const zoomText = `Zoomlevel: ${zoom.toFixed(2)}${zoomLockText ? ` [${zoomLockText}]` : ""}`;
+//   const zoomText = `Zoomlevel: ${zoom.toFixed(2)}${zoomLockText ? ` [${zoomLockText}]` : ""}`;
 
-  if (zoom < 11) {
-    features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
-    const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
+//   if (zoom < 11) {
+//     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
+//     const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
 
-    // document.getElementById("feature-count").innerHTML =
-    //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
+//     // document.getElementById("feature-count").innerHTML =
+//     //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
 
-    document.getElementById("feature-count").innerHTML =
-      `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
-   <div>${zoomText}</div>`;
-    return;
-  }
+//     document.getElementById("feature-count").innerHTML =
+//       `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
+//    <div>${zoomText}</div>`;
+//     return;
+//   }
 
-  features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
+//   features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
 
-  // Zähle nach beliebigem Property
-  function updateBadges(features, property, selectorFn = v => v) {
-    const counts = features.reduce((acc, f) => {
-      const val = selectorFn(f.properties[property]);
-      if (val !== undefined) acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {});
-    document.querySelectorAll(`.legend-item[data-group="${property}"]`).forEach(item => {
-      const val = item.getAttribute("data-value") ?? item.dataset.field;
-      const count = counts[val] || 0;
-      const badge = item.querySelector(".count-badge");
-      if (badge) badge.textContent = count > 0 ? `${count}` : "";
-    });
-  }
+//   // Zähle nach beliebigem Property
+//   function updateBadges(features, property, selectorFn = v => v) {
+//     const counts = features.reduce((acc, f) => {
+//       const val = selectorFn(f.properties[property]);
+//       if (val !== undefined) acc[val] = (acc[val] || 0) + 1;
+//       return acc;
+//     }, {});
+//     document.querySelectorAll(`.legend-item[data-group="${property}"]`).forEach(item => {
+//       const val = item.getAttribute("data-value") ?? item.dataset.field;
+//       const count = counts[val] || 0;
+//       const badge = item.querySelector(".count-badge");
+//       if (badge) badge.textContent = count > 0 ? `${count}` : "";
+//     });
+//   }
 
-  updateBadges(features, "UKATEGORIE", v => parseInt(v));
-  updateBadges(features, "UJAHR", v => parseInt(v));
-  updateBadges(features, "UTYP1", v => parseInt(v));
-  updateBadges(features, "UART", v => parseInt(v));
+//   updateBadges(features, "UKATEGORIE", v => parseInt(v));
+//   updateBadges(features, "UJAHR", v => parseInt(v));
+//   updateBadges(features, "UTYP1", v => parseInt(v));
+//   updateBadges(features, "UART", v => parseInt(v));
 
-  // Beteiligung ist ein Sonderfall
-  const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
-  const beteiligungCounts = {};
-  for (const field of beteiligungFields) {
-    beteiligungCounts[field] = features.filter(f => f.properties?.[field] === 1).length;
-  }
-  document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
-    const field = item.dataset.field;
-    const count = beteiligungCounts[field] || 0;
-    const badge = item.querySelector(".count-badge");
-    if (badge) badge.textContent = count > 0 ? `${count}` : "";
-  });
+//   // Beteiligung ist ein Sonderfall
+//   const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
+//   const beteiligungCounts = {};
+//   for (const field of beteiligungFields) {
+//     beteiligungCounts[field] = features.filter(f => f.properties?.[field] === 1).length;
+//   }
+//   document.querySelectorAll('.legend-item[data-group="BETEILIGUNG"]').forEach(item => {
+//     const field = item.dataset.field;
+//     const count = beteiligungCounts[field] || 0;
+//     const badge = item.querySelector(".count-badge");
+//     if (badge) badge.textContent = count > 0 ? `${count}` : "";
+//   });
 
-  // document.getElementById("feature-count").innerHTML =
-  //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
+//   // document.getElementById("feature-count").innerHTML =
+//   //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
 
-  document.getElementById("feature-count").innerHTML =
-    `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
-   <div>${zoomText}</div>`;
+//   document.getElementById("feature-count").innerHTML =
+//     `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
+//    <div>${zoomText}</div>`;
 
-}
+// }
 
 
 
@@ -319,7 +320,8 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
     if (map.getLayer(layerId)) map.setFilter(layerId, filter);
   });
 
-  map.once("idle", updateVisibleFeatureCount);
+  // map.once("idle", updateVisibleFeatureCount);
+   map.once("idle", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
 
   if (shouldUpdatePermalink && !isInitializingRef.value) {
     updatePermalink(map, isInitializingRef);
@@ -414,7 +416,8 @@ function setupLegend(map) {
   setupLegendSectionCheckboxes(updateLayerFilter);
 
   updateColorStyle();
-  updateVisibleFeatureCount();
+  // updateVisibleFeatureCount();
+  updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles);
 }
 
 
@@ -469,8 +472,10 @@ function setupEventHandlers(map) {
   map.on("zoom", updateScenarioLegendVisibility);
   map.on("load", updateScenarioLegendVisibility);
 
-  map.on("moveend", updateVisibleFeatureCount);
-  map.on("zoomend", updateVisibleFeatureCount);
+  // map.on("moveend", updateVisibleFeatureCount);
+  // map.on("zoomend", updateVisibleFeatureCount);
+  map.on("moveend", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
+  map.on("zoomend", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
 
   applyLegendVisibility();
 }
@@ -519,7 +524,14 @@ function setupPermalinkHandling(map) {
     if (!isInitializingRef.value) return;
 
     requestAnimationFrame(() => {
-      applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
+      // applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef);
+      applyPermalink(
+        map,
+        paintStyles,
+        updateLayerFilter,
+        () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles),
+        isInitializingRef
+      );
       map.on("moveend", () => updatePermalink(map, isInitializingRef));
       map.on("zoomend", () => updatePermalink(map, isInitializingRef));
       isInitializingRef.value = false;

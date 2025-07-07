@@ -1,9 +1,6 @@
 //featureCounter.js
 
-import { LAYERS } from "../../main.js";
-import { paintStyles } from "../../styleConfig.js";
-
-export function updateVisibleFeatureCount(map, currentZoomLock) {
+export function updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles) {
   const zoom = map.getZoom();
   let features = [];
 
@@ -17,18 +14,14 @@ export function updateVisibleFeatureCount(map, currentZoomLock) {
     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
     const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
 
-    // document.getElementById("feature-count").innerHTML =
-    //   `Sichtbare Punkte (Cluster): ${total.toLocaleString()}<br/>${zoomText}`;
-
     document.getElementById("feature-count").innerHTML =
       `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
-   <div>${zoomText}</div>`;
+       <div>${zoomText}</div>`;
     return;
   }
 
   features = map.queryRenderedFeatures({ layers: LAYERS.accidents });
 
-  // Zähle nach beliebigem Property
   function updateBadges(features, property, selectorFn = v => v) {
     const counts = features.reduce((acc, f) => {
       const val = selectorFn(f.properties[property]);
@@ -48,7 +41,6 @@ export function updateVisibleFeatureCount(map, currentZoomLock) {
   updateBadges(features, "UTYP1", v => parseInt(v));
   updateBadges(features, "UART", v => parseInt(v));
 
-  // Beteiligung ist ein Sonderfall
   const beteiligungFields = Object.keys(paintStyles.BETEILIGUNG.colors);
   const beteiligungCounts = {};
   for (const field of beteiligungFields) {
@@ -61,11 +53,7 @@ export function updateVisibleFeatureCount(map, currentZoomLock) {
     if (badge) badge.textContent = count > 0 ? `${count}` : "";
   });
 
-  // document.getElementById("feature-count").innerHTML =
-  //   `Sichtbare Punkte: ${features.length.toLocaleString()}<br/>${zoomText}`;
-
   document.getElementById("feature-count").innerHTML =
     `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
-   <div>${zoomText}</div>`;
-
+     <div>${zoomText}</div>`;
 }
