@@ -901,7 +901,8 @@ export function setupScenario7Popups(map) {
 
         map.on("click", layerId, (e) => {
             const image_id = e.features[0].properties.image_id;
-            if (image_id) window.open(`https://www.mapillary.com/app/?pKey=${image_id}&mapFeature[]=marking--discrete--symbol--bicycle`, "_blank");
+            // if (image_id) window.open(`https://www.mapillary.com/app/?pKey=${image_id}&mapFeature[]=marking--discrete--symbol--bicycle`, "_blank");
+            if (image_id) window.open(`https://www.mapillary.com/app/?pKey=${image_id}&trafficSign[]=regulatory--bicycles-only--g1&trafficSign[]=regulatory--shared-path-pedestrians-and-bicycles--g1&trafficSign[]=regulatory--dual-path-bicycles-and-pedestrians--g1&trafficSign[]=regulatory--dual-path-pedestrians-and-bicycles--g1`, "_blank");
         });
     });
 }
