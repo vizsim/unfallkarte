@@ -51,7 +51,9 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
 
   // addPMTilesSource("scenario7", "scenario7_missing-cw_bbb.pmtiles");
   //addPMTilesSource("scenario7", "scenarios/scenario7_trafficsigns_missing-cw_osm250528_ml250607.pmtiles");
-  addPMTilesSource("scenario7", "scenarios/scenario7_trafficsigns_missing-cw_osm250721_ml250607.pmtiles");
+  //addPMTilesSource("scenario7", "scenarios/scenario7_trafficsigns_missing-cw_osm250721_ml250607.pmtiles");
+  addPMTilesSource("scenario7", "scenarios/scenario7_trafficsigns_missing-cw_osm250721_ml250607_ml1y25_.pmtiles");
+
 
 
   addPMTilesSource("scenario8", "scenario8_laerm_schulen.pmtiles");
