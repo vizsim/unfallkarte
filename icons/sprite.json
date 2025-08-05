@@ -3,36 +3,64 @@
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
+    "x": 0,
+    "y": 48
+  },
+  "home": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
+    "x": 15,
+    "y": 48
+  },
+  "home_blue": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
+    "x": 30,
+    "y": 48
+  },
+  "home_green": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
+    "x": 45,
+    "y": 48
+  },
+  "home_red": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
     "x": 48,
     "y": 0
   },
-  "home": {
+  "home_turkis": {
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
     "x": 48,
     "y": 15
   },
-  "home_blue": {
+  "home_yellow": {
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
     "x": 48,
     "y": 30
   },
-  "home_green": {
-    "height": 15,
-    "pixelRatio": 1,
-    "width": 15,
-    "x": 48,
-    "y": 45
-  },
   "playground": {
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
-    "x": 0,
-    "y": 48
+    "x": 60,
+    "y": 45
+  },
+  "playground_darkgreen": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
+    "x": 63,
+    "y": 0
   },
   "regulatory--bicycles-only--g1": {
     "height": 24,
@@ -45,15 +73,15 @@
     "height": 24,
     "pixelRatio": 1,
     "width": 24,
-    "x": 24,
-    "y": 0
+    "x": 0,
+    "y": 24
   },
   "regulatory--dual-path-pedestrians-and-bicycles--g1": {
     "height": 24,
     "pixelRatio": 1,
     "width": 24,
-    "x": 0,
-    "y": 24
+    "x": 24,
+    "y": 0
   },
   "regulatory--shared-path-pedestrians-and-bicycles--g1": {
     "height": 24,
