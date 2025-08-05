@@ -638,7 +638,7 @@ export function addLayers(map) {
       "source-layer": "germany_osm_schools",
       filter: ["==", ["geometry-type"], "Point"],
       layout: {
-        visibility: "visible",
+        visibility: "none",
 
         // 👇 switch icon based on amenity value
         "icon-image": [
