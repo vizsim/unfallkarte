@@ -1,4 +1,4 @@
-import { applyZoomLock} from './zoomLock.js';
+import { applyZoomLock } from './zoomLock.js';
 
 
 export function setupMapillary(map, {
@@ -90,6 +90,87 @@ function updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLe
   filterOptions.style.display = anyChecked ? "block" : "none";
 
   applyZoomLock(map, originalMinZoom, setCurrentZoomLock);
+  applyLegendVisibility();
+}
+
+
+
+
+//////////  Mapillary Traffic signs  //////////
+
+
+export function setupMapillaryTS(map, {
+  applyLegendVisibility
+}) {
+  setupMapillaryTSCheckboxHandlers(map, applyLegendVisibility);
+  updateMapillaryTSFilter(map, applyLegendVisibility);
+}
+
+
+
+function setupMapillaryTSCheckboxHandlers(map, applyLegendVisibility) {
+  const toggle = document.getElementById("toggle-mapillary_ts");
+  const filterOptions = document.getElementById("mapillary-ts-filter-options");
+  const cbVZ1 = document.getElementById("mapillary-vz1");
+  const cbVZ2 = document.getElementById("mapillary-vz2");
+  const cbVZ3 = document.getElementById("mapillary-vz3");
+  const cbVZ4 = document.getElementById("mapillary-vz4");
+
+  toggle.addEventListener("change", () => {
+    const checked = toggle.checked;
+    filterOptions.style.display = checked ? "block" : "none";
+    cbVZ1.checked = checked;
+    cbVZ2.checked = checked;
+    cbVZ3.checked = checked;
+    cbVZ4.checked = checked;
+    toggle.indeterminate = false;
+
+    updateMapillaryTSFilter(map, applyLegendVisibility);
+  });
+
+[cbVZ1, cbVZ2, cbVZ3, cbVZ4].forEach(cb => {
+  cb.addEventListener("change", () => {
+    const all = cbVZ1.checked && cbVZ2.checked && cbVZ3.checked && cbVZ4.checked;
+    const none = !cbVZ1.checked && !cbVZ2.checked && !cbVZ3.checked && !cbVZ4.checked;
+
+    toggle.checked = all;
+    toggle.indeterminate = !all && !none;
+
+    updateMapillaryTSFilter(map, applyLegendVisibility);
+  });
+});
+
+}
+
+
+function updateMapillaryTSFilter(map, applyLegendVisibility) {
+  const cbVZ1 = document.getElementById("mapillary-vz1");
+  const cbVZ2 = document.getElementById("mapillary-vz2");
+  const cbVZ3 = document.getElementById("mapillary-vz3");
+  const cbVZ4 = document.getElementById("mapillary-vz4");
+  const filterOptions = document.getElementById("mapillary-ts-filter-options");
+
+  const selectedValues = [];
+  if (cbVZ1.checked) selectedValues.push("regulatory--bicycles-only--g1");  // 237
+  if (cbVZ2.checked) selectedValues.push("regulatory--shared-path-pedestrians-and-bicycles--g1"); // 240
+  if (cbVZ3.checked) selectedValues.push("regulatory--dual-path-pedestrians-and-bicycles--g1"); // 241
+  if (cbVZ4.checked) selectedValues.push("regulatory--dual-path-bicycles-and-pedestrians--g1"); // 241
+
+  let baseFilter;
+
+  if (selectedValues.length > 0) {
+    baseFilter = ["in", ["get", "value"], ["literal", selectedValues]];
+  } else {
+    baseFilter = ["==", "value", "__never__"];
+  }
+
+  if (map.getLayer("mapillary-ts")) {
+    map.setFilter("mapillary-ts", baseFilter);
+    map.setLayoutProperty("mapillary-ts", "visibility", selectedValues.length > 0 ? "visible" : "none");
+  }
+
+  filterOptions.style.display = selectedValues.length > 0 ? "block" : "none";
+
   applyLegendVisibility();
 }
 

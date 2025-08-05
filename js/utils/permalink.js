@@ -21,6 +21,7 @@ export const yearMap = {
 
 export const kontextKeys = {
     mapillary: "m",
+    mapillary_ts: "y",
     maxspeed: "s",
     hvs: "h",
     movebis: "b",

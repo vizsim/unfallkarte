@@ -1,0 +1,31 @@
+
+
+## SDF SROTS ERSTELLEN
+
+spreet icons sprite
+spreet --retina icons sprite@2x
+
+
+
+## PNGS ERSTELLEN
+mkdir -p pngs
+for f in *.svg; do
+  inkscape "$f" \
+    --export-type=png \
+    --export-filename="pngs/${f%.svg}.png" \
+    --export-width=64 \
+    --export-height=64
+done
+
+
+
+
+
+
+
+
+
+## SDF SROTS ERSTELLEN (ALT!!!)
+
+spreet --sdf icons sprite
+spreet --retina --sdf icons sprite@2x

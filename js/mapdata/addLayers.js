@@ -630,22 +630,25 @@ export function addLayers(map) {
   function addSchoolsLayer(map) {
     // Schulen POINTS
 
+
     map.addLayer({
       id: "schools-points",
       type: "symbol",
       source: "schools",
-      "source-layer": "germany_osm_schools", // must match tippecanoe `-l` name
+      "source-layer": "germany_osm_schools",
       filter: ["==", ["geometry-type"], "Point"],
       layout: {
-        visibility: "none",
-        // "icon-image": [
-        //   "match",
-        //   ["get", "amenity"],
-        //   "school", "rect-#0074D9-20x16",
-        //   "kindergarten", "rect-#2ECC40-20x16",
-        //   "rect-gray-32x16"
-        // ],
-        "icon-image": "home",  // Maki-Icon
+        visibility: "visible",
+
+        // 👇 switch icon based on amenity value
+        "icon-image": [
+          "match",
+          ["get", "amenity"],
+          "school", "home_blue",         // matches to `home_blue.png`
+          "kindergarten", "home_green",  // matches to `home_green.png`
+          "home"                    // default fallback icon
+        ],
+
         "icon-size": [
           "interpolate",
           ["linear"],
@@ -654,20 +657,14 @@ export function addLayers(map) {
           14, 1,
           16, 1.8
         ],
-        "icon-allow-overlap": true,
-
+        "icon-allow-overlap": true
       },
       paint: {
         "icon-opacity": 0.5,
-        "icon-color": [
-          "match",
-          ["get", "amenity"],
-          "school", "#0074D9",
-          "kindergarten", "#2ECC40",
-          "#aaaaaa"
-        ],
       }
     });
+
+
 
 
     // Schulen POLYGONS
@@ -707,7 +704,31 @@ export function addLayers(map) {
       filter: ["==", ["geometry-type"], "Point"],
       layout: {
         visibility: "none",
-        "icon-image": "home",  // Maki-Icon
+        "icon-image": [
+          "case",
+
+          // Gruppe 1: Medizinisch → 🔴 red
+          ["any",
+            ["==", ["get", "amenity"], "hospital"],
+            ["==", ["get", "amenity"], "clinic"],
+            ["==", ["get", "healthcare"], "rehabilitation"],
+            ["==", ["get", "healthcare:speciality"], "psychiatry"]
+          ], "home_red",
+
+          // Gruppe 3: Pflege / Senioren → 🟦 türkis
+          ["any",
+            ["==", ["get", "social_facility"], "nursing_home"],
+            ["==", ["get", "social_facility"], "assisted_living"],
+            ["==", ["get", "social_facility_for"], "senior"]
+          ], "home_turkis",
+
+          // Gruppe 4: Behindertenhilfe → 🟨 yellow
+          ["==", ["get", "social_facility_for"], "disabled"], "home_yellow",
+
+          // Fallback
+          // "home"
+          "__none__" // default fallback icon
+        ],
         "icon-size": [
           "interpolate",
           ["linear"],
@@ -721,27 +742,10 @@ export function addLayers(map) {
         // "icon-optional": true
       },
       paint: {
-        "icon-color": [
-          "case",
-          // Gruppe 1: Medizinisch
-          ["==", ["get", "amenity"], "hospital"], "#D62728",
-          ["==", ["get", "amenity"], "clinic"], "#D62728",
-          ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
-          ["==", ["get", "healthcare:speciality"], "psychiatry"], "#D62728",
-
-          // Gruppe 3: Pflege / Senioren
-          ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
-          ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
-          ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
-
-          // Gruppe 4: Behindertenhilfe
-          ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
-
-          "#aaaaaa"
-        ],
         "icon-opacity": 0.5
       }
     });
+
 
     // health POLYGONS
     map.addLayer({
@@ -760,9 +764,8 @@ export function addLayers(map) {
           ["==", ["get", "amenity"], "hospital"], "#D62728",
           ["==", ["get", "amenity"], "clinic"], "#D62728",
           ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
+          ["==", ["get", "healthcare:speciality"], "psychiatry"], "#D62728",
 
-          // Gruppe 2: Psychisch
-          ["==", ["get", "healthcare:speciality"], "psychiatry"], "#9467BD",
           // Gruppe 3: Pflege / Senioren
           ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
           ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
@@ -793,7 +796,22 @@ export function addLayers(map) {
       filter: ["==", ["geometry-type"], "Point"],
       layout: {
         visibility: "none",
-        "icon-image": "playground",  // Maki-Icon
+        // "icon-image": "playground_darkgreen",  // Maki-Icon
+
+        "icon-image": [
+          "case",
+
+          ["any",
+            ["==", ["get", "amenity"], "playground"], 
+            ["==", ["get", "leisure"], "playground"], 
+
+          ], "playground_darkgreen",
+
+          // Fallback
+          "__none__" // default fallback icon
+        ],
+
+
         "icon-size": [
           "interpolate",
           ["linear"],
@@ -807,13 +825,6 @@ export function addLayers(map) {
         // "icon-optional": true
       },
       paint: {
-        "icon-color": [
-          "case",
-          // playgrounds
-          ["==", ["get", "amenity"], "playground"], "green",
-          ["==", ["get", "leisure"], "playground"], "green",
-          "#aaaaaa"
-        ],
         "icon-opacity": 0.5
       }
     });
@@ -886,8 +897,8 @@ export function addLayers(map) {
         "fill-color": [
           "case",
           // playgrounds
-          ["==", ["get", "amenity"], "playground"], "green",
-          ["==", ["get", "leisure"], "playground"], "green",
+          ["==", ["get", "amenity"], "playground"], "#008000",
+          ["==", ["get", "leisure"], "playground"], "#008000",
           "#aaaaaa"
         ],
         "fill-opacity": 0.5,
@@ -1373,47 +1384,45 @@ export function addLayers(map) {
 
 
 
-  // addAccidentLayersToMap(map);
-  // addAccidentClusterLayers(map);
+  function addMapillaryTSLayer(map) {
+    map.addLayer({
+      id: "mapillary-ts",
+      type: "symbol",
+      source: "mapillary-traffic_signs",
+      "source-layer": "traffic_sign",
+      minzoom: 14,
+      maxzoom: 21,
+      layout: {
+        //visibility: "none",
+        visibility: "visible",
 
-  // addMovebisLayer(map);
-  // addHvsLayer(map);
+        // 👇 switch icon based on amenity value
+        "icon-image": [
+          "match",
+          ["get", "value"],
+          "regulatory--bicycles-only--g1", "regulatory--bicycles-only--g1", // 237
+          "regulatory--shared-path-pedestrians-and-bicycles--g1", "regulatory--shared-path-pedestrians-and-bicycles--g1",   // 240
+          "regulatory--dual-path-pedestrians-and-bicycles--g1", "regulatory--dual-path-pedestrians-and-bicycles--g1",   // 241
+          "regulatory--dual-path-bicycles-and-pedestrians--g1", "regulatory--dual-path-bicycles-and-pedestrians--g1",   // 241
+          "home"                    // default fallback icon
+        ],
 
-  // addMaxspeedLayers(map);
-  // addMaxspeedMinorLayers(map);
-
-  // addSchoolsLayer(map);
-  // addHealthLayer(map);
-  // addPlaygroundsLayer(map);
-
-  // addScenario1Layers(map);
-  // addScenario2Layers(map);
-  // addScenario3Layers(map);
-  // addScenario4Layers(map);
-  // addScenario6Layers(map);
-
-
-  // change the map order
-
-
-  // addSchoolsLayer(map);
-  // addHealthLayer(map);
-  // addPlaygroundsLayer(map);
-
-
-  // addAccidentLayersToMap(map);
-  // addAccidentClusterLayers(map);
-
-  // addScenario1Layers(map);
-  // addScenario2Layers(map);
-  // addScenario3Layers(map);
-  // addScenario4Layers(map);
-  // addScenario6Layers(map);
-
-  // addMaxspeedLayers(map);
-  // addMaxspeedMinorLayers(map);
-  // addMovebisLayer(map);
-  // addHvsLayer(map);
+        //"icon-image": ["get", "value"],  // 👈 Dynamisch
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10, 0.6,
+          14, 1,
+          16, 1.5
+        ],
+        "icon-allow-overlap": true //,
+        // "icon-ignore-placement": true,
+        // "icon-optional": true
+      },
+      filter: ["==", ["geometry-type"], "Point"],
+    });
+  }
 
 
 
@@ -1538,9 +1547,10 @@ export function addLayers(map) {
   addUspeedLayer(map);
 
 
-
-
   addMapillaryLayer(map);
+  addMapillaryTSLayer(map);
+
+
 
   addRasterLayers(map);
 

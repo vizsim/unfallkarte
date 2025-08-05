@@ -73,6 +73,21 @@ export function addSources(map, { MAPTILER_API_KEY, MAPILLARY_TOKEN }) {
     // maxzoom: 14.99
     maxzoom: 14,
   });
+
+
+  // Mapillary traffic signs
+  map.addSource("mapillary-traffic_signs", {
+    type: "vector",
+    tiles: [
+      `https://tiles.mapillary.com/maps/vtp/mly_map_feature_traffic_sign/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`
+    ],
+    minzoom: 14,
+    // maxzoom: 14.99
+    maxzoom: 14,
+  });
+
+
+
   // // Raster: Satellite
   // map.addSource("satellite", {
   //   type: "raster",

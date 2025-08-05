@@ -32,6 +32,7 @@ import {
   setupHealthPopups,
   setupPlaygroundsPopups,
   // setupMapillaryPopups,
+  setupMapillaryTrafficsignPopups,
   setupScenario1Popups,
   setupScenario2Popups,
   setupScenario3Popups,
@@ -68,7 +69,7 @@ import {
 
 // 📦 Sonstiges
 import { setupPieChartImageGeneration } from './js/utils/generatePieIcon.js';
-import { setupMapillary } from "./js/utils/useMapillary.js";
+import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 
 // import { setupRectangleIconGeneration } from "./generateRectangleIcon.js";
 
@@ -156,11 +157,17 @@ async function initMap() {
   /// load MAP
   map.on("load", () => {
 
+
+
     initializeMapModules(map);               // 2. Module initialisieren
     setupUI(map);                                     // 3. UI & Layer-Toggles
     setupScenarioControls(map);
     setupLegend(map);                          // 4. Legende initialisieren 
     setupMapillary(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
+
+
+    setupMapillaryTS(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
+
     setupPopups(map);                          // 5. Popups initialisieren
 
     map.once("load", updateLegendVisibilityByZoom);
@@ -325,6 +332,7 @@ function setupPopups(map) {
   setupHealthPopups(map);
   setupPlaygroundsPopups(map);
   // setupMapillaryPopups(map);
+  setupMapillaryTrafficsignPopups(map);
   setupScenario1Popups(map);
   setupScenario2Popups(map);
   setupScenario3Popups(map);
@@ -416,3 +424,43 @@ function initializeMapModules(map) {
 
   addLayers(map);
 }
+
+
+
+//////////////////
+
+
+// function loadTrafficSignIcons(map) {
+
+//   console.log("🚧 loadTrafficSignIcons() aufgerufen");
+
+
+//   const iconNames = [
+//     "regulatory--bicycles-only--g1",
+//     "regulatory--dual-path-pedestrians-and-bicycles--g1"
+//     // ... weitere nach Bedarf
+//   ];
+
+//   let loaded = 0;
+
+//   iconNames.forEach((name) => {
+//     map.loadImage(`/icons/${name}.png`, (err, image) => {
+//       if (err) {
+//         console.warn(`❌ Icon konnte nicht geladen werden: ${name}`, err);
+//       } else if (!map.hasImage(name)) {
+//         map.addImage(name, image, { sdf: false });
+//       }
+
+//       loaded++;
+
+//       if (loaded === iconNames.length) {
+//         console.log("✅ Alle Icons geladen → setupMapillaryTS()");
+//         setupMapillaryTS(map, {
+//           originalMinZoom,
+//           setCurrentZoomLock: z => currentZoomLock = z,
+//           applyLegendVisibility
+//         });
+//       }
+//     });
+//   });
+// }
