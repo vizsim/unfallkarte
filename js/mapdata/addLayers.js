@@ -802,8 +802,8 @@ export function addLayers(map) {
           "case",
 
           ["any",
-            ["==", ["get", "amenity"], "playground"], 
-            ["==", ["get", "leisure"], "playground"], 
+            ["==", ["get", "amenity"], "playground"],
+            ["==", ["get", "leisure"], "playground"],
 
           ], "playground_darkgreen",
 
@@ -829,57 +829,6 @@ export function addLayers(map) {
       }
     });
 
-    // // 1. Add a colored circle background layer
-    // map.addLayer({
-    //   id: "playgrounds-background",
-    //   type: "circle",
-    //   source: "playgrounds",
-    //   "source-layer": "germany_osm_playgrounds",
-    //   filter: ["==", ["geometry-type"], "Point"],
-    //   paint: {
-    //     "circle-radius": [
-    //       "interpolate",
-    //       ["linear"],
-    //       ["zoom"],
-    //       10, 4,
-    //       14, 7,
-    //       16, 10
-    //     ],
-    //     "circle-color": [
-    //       "case",
-    //       ["==", ["get", "amenity"], "playground"], "green",
-    //       ["==", ["get", "leisure"], "playground"], "green",
-    //       "#aaaaaa"
-    //     ],
-    //     "circle-opacity": 0.5
-    //   }
-    // }, "playgrounds-points"); // Add it just below the icon layer if needed
-
-    // // 2. Then add the icon layer (already defined)
-    // map.addLayer({
-    //   id: "playgrounds-points",
-    //   type: "symbol",
-    //   source: "playgrounds",
-    //   "source-layer": "germany_osm_playgrounds",
-    //   filter: ["==", ["geometry-type"], "Point"],
-    //   layout: {
-    //     visibility: "visible",
-    //     "icon-image": "playground_11",
-    //     "icon-size": [
-    //       "interpolate",
-    //       ["linear"],
-    //       ["zoom"],
-    //       10, 0.6,
-    //       14, 1,
-    //       16, 1.7
-    //     ],
-    //     "icon-allow-overlap": true
-    //   },
-    //   paint: {
-    //     "icon-opacity": 1
-    //     // (icon-color won't apply, it's a raster)
-    //   }
-    // });
 
 
 
@@ -1400,10 +1349,20 @@ export function addLayers(map) {
         "icon-image": [
           "match",
           ["get", "value"],
+
+          // radverkehr
           "regulatory--bicycles-only--g1", "regulatory--bicycles-only--g1", // 237
           "regulatory--shared-path-pedestrians-and-bicycles--g1", "regulatory--shared-path-pedestrians-and-bicycles--g1",   // 240
           "regulatory--dual-path-pedestrians-and-bicycles--g1", "regulatory--dual-path-pedestrians-and-bicycles--g1",   // 241
           "regulatory--dual-path-bicycles-and-pedestrians--g1", "regulatory--dual-path-bicycles-and-pedestrians--g1",   // 241
+
+          // speed limits
+          "regulatory--maximum-speed-limit-30--g1", "regulatory--maximum-speed-limit-30--g1", // 274-30
+          "regulatory--maximum-speed-limit-50--g1", "regulatory--maximum-speed-limit-50--g1", // 274-50
+          "regulatory--maximum-speed-limit-70--g1", "regulatory--maximum-speed-limit-70--g1", // 274-70
+          "regulatory--maximum-speed-limit-80--g1", "regulatory--maximum-speed-limit-80--g1", // 274-80
+          "regulatory--maximum-speed-limit-100--g1", "regulatory--maximum-speed-limit-100--g1", // 274-100
+
           "home"                    // default fallback icon
         ],
 

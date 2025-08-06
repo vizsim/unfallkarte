@@ -699,10 +699,17 @@ MAIN HEADER
 
         <div id="mapillary-ts-filter-options" style="display: none; margin-left: 32px; margin-top: 6px;">
 
+          <!-- Title above first 4 labels -->
+          <!-- <div style="font-weight: bold; margin-bottom: 6px; margin-top: 8px;">Radverkehr</div> -->
+          <div
+            style="font-weight: bold; margin-bottom: 5px; margin-top: 8px;margin-left: -10px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="ml-group-radverkehr" />
+            Radverkehr
+          </div>
+
           <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
             <input type="checkbox" id="mapillary-vz1" />
-            <img src="icons/regulatory--bicycles-only--g1.svg"
-              style="width: 20px; height: 20px;" />
+            <img src="icons/regulatory--bicycles-only--g1.svg" style="width: 20px; height: 20px;" />
             VZ 237
           </label>
           <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
@@ -722,6 +729,40 @@ MAIN HEADER
             <img src="icons/regulatory--dual-path-bicycles-and-pedestrians--g1.svg"
               style="width: 20px; height: 20px;" />
             VZ 241
+          </label>
+
+
+          <!-- <div style="font-weight: bold; margin-bottom: 6px; margin-top: 8px;">Geschwindigkeit</div> -->
+          <div
+            style="font-weight: bold; margin-bottom: 5px; margin-top: 8px;margin-left: -10px; display: flex; align-items: center; gap: 6px;">
+            <input type="checkbox" id="ml-group-geschwindigkeit" />
+            Geschwindigkeit
+          </div>
+          <!-- Add 5 more labels here -->
+          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <input type="checkbox" id="mapillary-vz5" />
+            <img src="icons/regulatory--maximum-speed-limit-30--g1.svg" style="width: 20px; height: 20px;" />
+            VZ 274-30
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <input type="checkbox" id="mapillary-vz6" />
+            <img src="icons/regulatory--maximum-speed-limit-50--g1.svg" style="width: 20px; height: 20px;" />
+            VZ 274-50
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <input type="checkbox" id="mapillary-vz7" />
+            <img src="icons/regulatory--maximum-speed-limit-70--g1.svg" style="width: 20px; height: 20px;" />
+            VZ 274-70
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <input type="checkbox" id="mapillary-vz8" />
+            <img src="icons/regulatory--maximum-speed-limit-80--g1.svg" style="width: 20px; height: 20px;" />
+            VZ 274-80
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <input type="checkbox" id="mapillary-vz9" />
+            <img src="icons/regulatory--maximum-speed-limit-100--g1.svg" style="width: 20px; height: 20px;" />
+            VZ 274-100
           </label>
         </div>
 
@@ -846,7 +887,7 @@ MAIN HEADER
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-obs" />
             OBS Daten anzeigen
-            <span class="info-icon" title="Quelle: OBS community – Lizenz: ???">ⓘ</span>
+            <span class="info-icon" title="Quelle: OpenBikeSensor community – Lizenz: ???">ⓘ</span>
           </label>
         </div>
 
