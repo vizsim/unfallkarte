@@ -3,64 +3,64 @@
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
+    "x": 96,
+    "y": 24
+  },
+  "home": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
+    "x": 111,
+    "y": 24
+  },
+  "home_blue": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
+    "x": 96,
+    "y": 39
+  },
+  "home_green": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
+    "x": 111,
+    "y": 39
+  },
+  "home_red": {
+    "height": 15,
+    "pixelRatio": 1,
+    "width": 15,
     "x": 0,
     "y": 48
   },
-  "home": {
+  "home_turkis": {
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
     "x": 15,
     "y": 48
   },
-  "home_blue": {
+  "home_yellow": {
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
     "x": 30,
     "y": 48
   },
-  "home_green": {
+  "playground": {
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
     "x": 45,
     "y": 48
   },
-  "home_red": {
-    "height": 15,
-    "pixelRatio": 1,
-    "width": 15,
-    "x": 48,
-    "y": 0
-  },
-  "home_turkis": {
-    "height": 15,
-    "pixelRatio": 1,
-    "width": 15,
-    "x": 48,
-    "y": 15
-  },
-  "home_yellow": {
-    "height": 15,
-    "pixelRatio": 1,
-    "width": 15,
-    "x": 48,
-    "y": 30
-  },
-  "playground": {
-    "height": 15,
-    "pixelRatio": 1,
-    "width": 15,
-    "x": 60,
-    "y": 45
-  },
   "playground_darkgreen": {
     "height": 15,
     "pixelRatio": 1,
     "width": 15,
-    "x": 63,
-    "y": 0
+    "x": 60,
+    "y": 48
   },
   "regulatory--bicycles-only--g1": {
     "height": 24,
@@ -83,11 +83,46 @@
     "x": 24,
     "y": 0
   },
-  "regulatory--shared-path-pedestrians-and-bicycles--g1": {
+  "regulatory--maximum-speed-limit-100--g1": {
     "height": 24,
     "pixelRatio": 1,
     "width": 24,
     "x": 24,
+    "y": 24
+  },
+  "regulatory--maximum-speed-limit-30--g1": {
+    "height": 24,
+    "pixelRatio": 1,
+    "width": 24,
+    "x": 48,
+    "y": 0
+  },
+  "regulatory--maximum-speed-limit-50--g1": {
+    "height": 24,
+    "pixelRatio": 1,
+    "width": 24,
+    "x": 48,
+    "y": 24
+  },
+  "regulatory--maximum-speed-limit-70--g1": {
+    "height": 24,
+    "pixelRatio": 1,
+    "width": 24,
+    "x": 72,
+    "y": 0
+  },
+  "regulatory--maximum-speed-limit-80--g1": {
+    "height": 24,
+    "pixelRatio": 1,
+    "width": 24,
+    "x": 96,
+    "y": 0
+  },
+  "regulatory--shared-path-pedestrians-and-bicycles--g1": {
+    "height": 24,
+    "pixelRatio": 1,
+    "width": 24,
+    "x": 72,
     "y": 24
   }
 }
