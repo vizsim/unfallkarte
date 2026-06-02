@@ -18,15 +18,11 @@ REGISTRY: dict[str, Callable[[ScenarioContext], Path]] = {
 }
 
 # Noch zu portieren (Phase 3). Kurzbeschreibung je Szenario.
-# Hinweis: scenario4/5/7 basieren auf Mapillary-Daten aus dem externen Repo
-# vizsim/mapillary_trafficsigns (als `external`-PMTiles konsumieren, NICHT fetchen).
+# scenario4/5/7 (Mapillary-Mapping-Szenarien) werden bewusst NICHT übernommen.
 PLANNED: dict[str, str] = {
     "scenario1": "Cluster der Unfälle (marker-size 100)",
     "scenario3": "Tempo-30 durchgängig",
-    "scenario4": "Tempo-30 fehlend — extern (mapillary_trafficsigns)",
-    "scenario5": "Zebrastreifen fehlend — extern (mapillary markings)",
     "scenario6": "Tempo-50 vor Schulen (Highway-Länge, 30 m Buffer)",
-    "scenario7": "fehlende Radwege — extern (mapillary_trafficsigns)",
     "scenario8": "Lärm vor Schulen",
 }
 

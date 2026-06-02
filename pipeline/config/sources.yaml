@@ -43,17 +43,5 @@ datasets:
     label: "Radinfrastruktur"
     attribution: "radverkehrsatlas / TILDA"
 
-  # Mapillary-Ableitungen kommen aus dem externen Repo vizsim/mapillary_trafficsigns
-  # (eigene Pipeline, regelmäßig aktualisiert) — NICHT in unfallkarte fetchen.
-  # `external` = fertige PMTiles per URL (raw.githubusercontent oder B2-Spiegel).
-  mapillary_trafficsigns:
-    external: "https://raw.githubusercontent.com/vizsim/mapillary_trafficsigns/BRANCH/use_cases/cycleway_complete_campaign/ts_output/mapillary_trafficsigns_bicycle_latest.pmtiles"
-    label: "Fehlende Radweg-Beschilderung (Mapillary)"
-    attribution: "© Mapillary (CC BY-SA 4.0)"
-    verify: true   # Branch/Pfad bestätigen (Repo entwickelt auf feature/docker-notebook)
-
-  mapillary_markings:
-    external: ""   # Markings nicht öffentlich → Skript im Repo läuft; selbst hosten (B2) und URL eintragen
-    label: "Fehlende Zebrastreifen-Markierung (Mapillary)"
-    attribution: "© Mapillary (CC BY-SA 4.0)"
-    verify: true
+  # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
+  # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.
