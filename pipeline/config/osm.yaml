@@ -17,7 +17,7 @@ layers:
     kind: poi
     osmium_filter: ["nwr/amenity=school,kindergarten"]
     osmconf: "osmconf_schools.ini"
-    gpkg_layers: ["points", "multipolygons"]
+    osm_layers: ["points", "multipolygons"]
     tag_filters:
       amenity: ["school", "kindergarten"]
     tippecanoe_layer: "germany_osm_schools"
@@ -31,7 +31,7 @@ layers:
       - "nwr/healthcare"
       - "nwr/social_facility"
     osmconf: "osmconf_health.ini"
-    gpkg_layers: ["points", "multipolygons"]
+    osm_layers: ["points", "multipolygons"]
     tag_filters:
       amenity: ["hospital", "clinic"]
       healthcare: ["rehabilitation", "centre"]
@@ -46,7 +46,7 @@ layers:
     kind: poi
     osmium_filter: ["nwr/leisure=playground"]
     osmconf: "osmconf_playgrounds.ini"
-    gpkg_layers: ["points", "multipolygons"]
+    osm_layers: ["points", "multipolygons"]
     tag_filters:
       leisure: ["playground"]
     tippecanoe_layer: "germany_osm_playgrounds"

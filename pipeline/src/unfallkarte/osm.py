@@ -87,21 +87,14 @@ def _ogr2ogr(args: list[str], osmconf: str | None, *, dry_run: bool) -> None:
     _run(["ogr2ogr", *args], dry_run=dry_run, env=env)
 
 
-def filter_gpkg_to_fgb(
-    gpkg: Path, fgb: Path, layers: list[str], tag_filters: dict[str, list[str]]
-) -> Path:
-    """Liest die gewünschten GPKG-Layer, filtert per tag_filters (OR über Tags),
-    schreibt nach FlatGeobuf. (Reiner geopandas-Schritt — gut testbar.)"""
+def _filter_and_merge(frames: list, tag_filters: dict[str, list[str]]):
+    """Filtert je GeoDataFrame per tag_filters (OR über Tags) und merged zu einem.
+    Reiner pandas/geopandas-Schritt ohne IO — gut testbar."""
     import geopandas as gpd
     import pandas as pd
-    from pyogrio import list_layers
 
-    available = {row[0] for row in list_layers(gpkg)}
-    frames: list[gpd.GeoDataFrame] = []
-    for layer in layers:
-        if layer not in available:
-            continue
-        gdf = gpd.read_file(gpkg, layer=layer)
+    kept: list = []
+    for gdf in frames:
         if tag_filters:
             mask = pd.Series(False, index=gdf.index)
             for tag, allowed in tag_filters.items():
@@ -109,10 +102,43 @@ def filter_gpkg_to_fgb(
                     mask |= gdf[tag].isin(allowed)
             gdf = gdf[mask]
         if len(gdf):
-            frames.append(gdf)
-    if not frames:
-        raise ValueError(f"Keine Features nach Filter in {gpkg}")
-    merged = gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=frames[0].crs)
+            kept.append(gdf)
+    if not kept:
+        raise ValueError("Keine Features nach Filter")
+    return gpd.GeoDataFrame(pd.concat(kept, ignore_index=True), crs=kept[0].crs)
+
+
+def pbf_layers_to_fgb(
+    pbf: Path,
+    fgb: Path,
+    layers: list[str],
+    tag_filters: dict[str, list[str]],
+    osmconf: str | None = None,
+) -> Path:
+    """Liest OSM-Layer (z.B. points + multipolygons) DIREKT aus der gefilterten PBF
+    (GDAL-OSM-Treiber via pyogrio), filtert per tag_filters und schreibt FlatGeobuf.
+
+    Kein ogr2ogr/GPKG-Zwischenschritt: der OSM-Treiber liefert die Layer direkt.
+    Wichtig: OGR_INTERLEAVED_READING NICHT auf YES zwingen (Default liefert die
+    Features, YES → 0). `osmconf` wird via OSM_CONFIG_FILE beim Lesen angewandt.
+    """
+    from pyogrio import list_layers, read_dataframe
+
+    env_key = "OSM_CONFIG_FILE"
+    prev = os.environ.get(env_key)
+    if osmconf:
+        os.environ[env_key] = str(_osmconf_path(osmconf))
+    try:
+        available = {row[0] for row in list_layers(pbf)}
+        frames = [read_dataframe(pbf, layer=lyr) for lyr in layers if lyr in available]
+    finally:
+        if osmconf:
+            if prev is None:
+                os.environ.pop(env_key, None)
+            else:
+                os.environ[env_key] = prev
+
+    merged = _filter_and_merge(frames, tag_filters)
     fgb.parent.mkdir(parents=True, exist_ok=True)
     merged.to_file(fgb, driver="FlatGeobuf")
     return fgb
@@ -121,16 +147,13 @@ def filter_gpkg_to_fgb(
 def _build_poi(name: str, spec: dict[str, Any], pbf: Path, *, dry_run: bool) -> Path:
     raw = _raw()
     cat_pbf = tags_filter(pbf, spec["osmium_filter"], raw / f"{name}.osm.pbf", dry_run=dry_run)
-    gpkg = raw / f"{name}.gpkg"
-    _ogr2ogr(
-        ["-overwrite", "-f", "GPKG", str(gpkg), str(cat_pbf)],
-        spec.get("osmconf"), dry_run=dry_run,
-    )
     fgb = raw / f"{name}.fgb"
-    if dry_run or not gpkg.exists():
-        print(f"  [skip] filter_gpkg_to_fgb {gpkg.name} -> {fgb.name} (kein GPKG / dry-run)")
+    if dry_run or not cat_pbf.exists():
+        print(f"  [skip] PBF-Layer {spec['osm_layers']} -> {fgb.name} direkt (kein PBF / dry-run)")
     else:
-        filter_gpkg_to_fgb(gpkg, fgb, spec["gpkg_layers"], spec.get("tag_filters", {}))
+        pbf_layers_to_fgb(
+            cat_pbf, fgb, spec["osm_layers"], spec.get("tag_filters", {}), spec.get("osmconf")
+        )
     out = get_paths().data / spec["output"]
     return tiles.tippecanoe(
         spec["tile_profile"], fgb, out, layer_override=spec["tippecanoe_layer"], dry_run=dry_run
