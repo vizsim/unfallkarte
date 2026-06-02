@@ -56,24 +56,8 @@ profiles:
     no_tile_size_limit: true
     maximum_tile_bytes: 1000000
 
-  # Querungen (Punkte)
-  osm_crossings:
-    layer: crossings
-    minzoom: 6
-    maxzoom: 14
-    drop_rate: 0
-    drop_densest_as_needed: true
-    no_feature_limit: true
-    no_tile_size_limit: true
-
-  # Radwege (Linien)
-  osm_cycleways:
-    layer: cycleways
-    minzoom: 13
-    maxzoom: 14
-    drop_densest_as_needed: true
-    no_feature_limit: true
-    no_tile_size_limit: true
+  # (osm_crossings / osm_cycleways entfernt — die Line-Layer wurden mit den
+  #  Mapillary-Szenarien sc5/sc7 fallengelassen.)
 
   # --- Szenarien (Phase 3): Dual-Layer (Punkte niedrig-zoom, Polygone hoch-zoom) ---
   # Layer-Name je Szenario via layer_override (z.B. scenario2-points/-polys).

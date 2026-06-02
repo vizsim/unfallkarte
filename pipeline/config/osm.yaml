@@ -53,43 +53,7 @@ layers:
     tile_profile: "osm_features"
     output: "osm/playgrounds.pmtiles"
 
-  crossings:
-    kind: line
-    # 2026-06-02 gegen prepare_osm-crossings.ipynb bestätigt: nur Knoten mit
-    # highway=crossing (nicht w/highway), layer points, osmconf.ini, Z6-14.
-    osmium_filter: ["n/highway=crossing"]
-    osmconf: "osmconf.ini"
-    ogr_layer: "points"
-    tippecanoe_layer: "crossings"
-    tile_profile: "osm_crossings"
-    output: "osm/crossings.pmtiles"
-
-  cycleways:
-    kind: line
-    # 2026-06-02 gegen prepare_network_pbf_get_cycleways.ipynb korrigiert: NICHT
-    # "w/highway" (alle Straßen), sondern die kuratierte Radinfrastruktur-Tagliste
-    # (highway-Subset + bicycle/cycleway:*/sidewalk:*:bicycle). Layer lines, Z13-14.
-    osmium_filter:
-      - "w/highway=cycleway,path,footway,residential,unclassified,living_street,road,pedestrian"
-      - "w/bicycle=yes"
-      - "w/bicycle=designated"
-      - "w/cycleway"
-      - "w/cycleway:left"
-      - "w/cycleway:right"
-      - "w/cycleway:both"
-      - "w/cycleway:lane"
-      - "w/cycleway:track"
-      - "w/cycleway:opposite"
-      - "w/cycleway:opposite_lane"
-      - "w/cycleway:opposite_track"
-      - "w/cycleway:shared_lane"
-      - "w/sidewalk:left:bicycle"
-      - "w/sidewalk:right:bicycle"
-      - "w/sidewalk:both:bicycle"
-      - "w/bicycle:forward"
-      - "w/bicycle:backward"
-    osmconf: "osmconf_cycleways.ini"
-    ogr_layer: "lines"
-    tippecanoe_layer: "cycleways"
-    tile_profile: "osm_cycleways"
-    output: "osm/cycleways.pmtiles"
+# Hinweis: Die Line-Layer crossings/cycleways wurden entfernt — sie waren nur
+# Inputs der (nicht übernommenen) Mapillary-Szenarien sc5/sc7, kein eigenständiger
+# Frontend-Kontextlayer. _build_line/_ogr2ogr bleiben für künftige Linien-Layer
+# (z.B. maxspeed major/minor). osmconf.ini / osmconf_cycleways.ini bleiben als Template.

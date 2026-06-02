@@ -40,7 +40,7 @@ def test_filter_and_merge() -> None:
 
 def test_osm_build_dry_run_constructs_commands(capsys) -> None:
     # dry_run: keine Binaries nötig, prüft nur, dass die Pipeline die richtigen
-    # Schritte für einen POI- und einen Line-Layer plant.
+    # Schritte für den POI-Pfad plant (osmium -> direktes PBF-Lesen -> tippecanoe).
     osm.build("schools", dry_run=True)
     out = capsys.readouterr().out
     assert "osmium tags-filter" in out
@@ -49,8 +49,3 @@ def test_osm_build_dry_run_constructs_commands(capsys) -> None:
     assert "ogr2ogr" not in out and "GPKG" not in out
     assert "PBF-Layer" in out
     assert "tippecanoe" in out and "germany_osm_schools" in out
-
-    osm.build("cycleways", dry_run=True)
-    out = capsys.readouterr().out
-    assert "GeoJSON" in out
-    assert "-l cycleways" in out
