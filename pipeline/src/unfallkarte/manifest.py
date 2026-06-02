@@ -40,7 +40,7 @@ def _resolve_date(dataset_id: str, date_spec: Any) -> str | None:
         # Szenarien sind unfallgetrieben -> Datenstand = max. Unfalljahr
         if dataset_id.startswith("accidents") or dataset_id.startswith("scenario"):
             return _accidents_vintage()
-        if dataset_id.startswith("osm"):
+        if dataset_id.startswith(("osm", "maxspeed")):  # OSM-abgeleitete Layer
             return _osm_vintage()
     return None
 

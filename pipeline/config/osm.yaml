@@ -1,12 +1,13 @@
-# OSM-Build-Config: Geofabrik-Download + osmium-Vorfilter + ogr2ogr -> Tiles.
+# OSM-Build-Config: Geofabrik-Download + osmium-Vorfilter -> FGB -> Tiles.
 #
-# Zwei Muster:
-#   kind: poi  -> osmium tags-filter -> ogr2ogr GPKG (osmconf) -> gpkg-Layer nach
-#                 tag_filters filtern -> fgb -> tippecanoe
-#   kind: line -> osmium tags-filter -> ogr2ogr GeoJSON (ogr_layer) -> tippecanoe
+# Einheitlicher Flow je Layer:
+#   osmium tags-filter -> Kategorie-PBF -> die `osm_layers` DIREKT mit pyogrio
+#   lesen (osmconf via OSM_CONFIG_FILE) -> optional per `tag_filters` filtern (OR
+#   über Tags) -> FlatGeobuf -> tippecanoe. Kein ogr2ogr/GPKG/GeoJSON.
 #
-# `osmium_filter` = Liste von tags-filter-Ausdrücken (osmium-Syntax).
-# osmconf-Dateien liegen unter config/osmconf/.
+# POI:   osm_layers ["points","multipolygons"] + tag_filters (osmium-Filter grob).
+# Linie: osm_layers ["lines"], kein tag_filter (osmium-Filter selektiert die Ways).
+# `osmium_filter` = Liste von tags-filter-Ausdrücken; osmconf unter config/osmconf/.
 
 geofabrik:
   url: "https://download.geofabrik.de/europe/germany-latest.osm.pbf"
@@ -14,7 +15,6 @@ geofabrik:
 
 layers:
   schools:
-    kind: poi
     osmium_filter: ["nwr/amenity=school,kindergarten"]
     osmconf: "osmconf_schools.ini"
     osm_layers: ["points", "multipolygons"]
@@ -25,7 +25,6 @@ layers:
     output: "osm/schools.pmtiles"
 
   health:
-    kind: poi
     osmium_filter:
       - "nwr/amenity=hospital,clinic,doctors"
       - "nwr/healthcare"
@@ -43,7 +42,6 @@ layers:
     output: "osm/health.pmtiles"
 
   playgrounds:
-    kind: poi
     osmium_filter: ["nwr/leisure=playground"]
     osmconf: "osmconf_playgrounds.ini"
     osm_layers: ["points", "multipolygons"]
@@ -53,7 +51,26 @@ layers:
     tile_profile: "osm_features"
     output: "osm/playgrounds.pmtiles"
 
-# Hinweis: Die Line-Layer crossings/cycleways wurden entfernt — sie waren nur
-# Inputs der (nicht übernommenen) Mapillary-Szenarien sc5/sc7, kein eigenständiger
-# Frontend-Kontextlayer. _build_line/_ogr2ogr bleiben für künftige Linien-Layer
-# (z.B. maxspeed major/minor). osmconf.ini / osmconf_cycleways.ini bleiben als Template.
+  # Hauptverkehrsstraßen-Netz mit maxspeed (osmconf.ini exponiert highway/maxspeed/
+  # maxspeed:type/...). Frontend-Kontextlayer (maxspeed/maxspeed_minor) UND joinbare
+  # Daten-Basis für Szenarien (sc1/3/6 lesen das fgb-Zwischenprodukt in data/raw/osm/).
+  # Portiert aus prepare_network_pbf_to_filtered_geojson_to_pmtiles / _get_minor.
+  maxspeed_major:
+    osmium_filter:
+      - "w/highway=motorway,trunk,primary,secondary,tertiary,motorway_link,trunk_link,primary_link,secondary_link,tertiary_link"
+    osmconf: "osmconf.ini"
+    osm_layers: ["lines"]
+    tippecanoe_layer: "highways"
+    tile_profile: "highways_major"
+    output: "osm/maxspeed_major.pmtiles"
+
+  maxspeed_minor:
+    osmium_filter: ["w/highway=unclassified,residential,living_street,road"]
+    osmconf: "osmconf.ini"
+    osm_layers: ["lines"]
+    tippecanoe_layer: "highways_minor"
+    tile_profile: "highways_minor"
+    output: "osm/maxspeed_minor.pmtiles"
+
+  # crossings/cycleways wurden entfernt (nur Inputs der gedroppten Mapillary-
+  # Szenarien sc5/sc7). osmconf_cycleways.ini bleibt als Template.

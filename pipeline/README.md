@@ -30,8 +30,8 @@ unfallkarte deploy                        # b2 sync (PMTiles + manifest)
 
 ## System-Binaries (nicht via pip)
 
-`tippecanoe` + `tile-join`, `osmium-tool`, `gdal-bin` (für `ogr2ogr`).
-b2-CLI via `uv tool install b2`.
+`tippecanoe` + `tile-join`, `osmium-tool`. b2-CLI via `uv tool install b2`.
+(`ogr2ogr`/gdal-bin nicht nötig — OSM-PBF wird direkt via pyogrio gelesen.)
 
 ## Layout
 

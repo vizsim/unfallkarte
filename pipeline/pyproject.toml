@@ -40,5 +40,6 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
-# System-Binaries (NICHT via pip): tippecanoe + tile-join, osmium-tool, gdal-bin (ogr2ogr).
+# System-Binaries (NICHT via pip): tippecanoe + tile-join, osmium-tool.
+# (ogr2ogr/gdal-bin nicht nötig — OSM-PBF wird direkt via pyogrio gelesen.)
 # b2-CLI via:  uv tool install b2

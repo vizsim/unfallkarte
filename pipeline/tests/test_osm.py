@@ -45,7 +45,15 @@ def test_osm_build_dry_run_constructs_commands(capsys) -> None:
     out = capsys.readouterr().out
     assert "osmium tags-filter" in out
     assert "nwr/amenity=school,kindergarten" in out
-    # POI-Pfad liest die PBF-Layer direkt (kein ogr2ogr/GPKG mehr)
-    assert "ogr2ogr" not in out and "GPKG" not in out
+    # POI-Pfad liest die PBF-Layer direkt (kein ogr2ogr/GPKG/GeoJSON mehr)
+    assert "ogr2ogr" not in out and "GPKG" not in out and "GeoJSON" not in out
     assert "PBF-Layer" in out
     assert "tippecanoe" in out and "germany_osm_schools" in out
+
+    # Line-Layer laufen über denselben Direkt-PBF-Pfad (osm_layers ["lines"]).
+    osm.build("maxspeed_major", dry_run=True)
+    out = capsys.readouterr().out
+    assert "osmium tags-filter" in out and "w/highway=motorway" in out
+    assert "ogr2ogr" not in out and "GeoJSON" not in out
+    assert "PBF-Layer" in out and "lines" in out
+    assert "-l highways" in out

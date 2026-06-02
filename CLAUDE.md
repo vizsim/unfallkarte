@@ -24,8 +24,9 @@ siehe `REFACTORING_PLAN.md`. Diese Datei = die Regeln, die in JEDER Session gelt
 - Config-getrieben: Jahres-Quirks/Filter/Tile-Profile in `config/*.yaml`, nicht im Code.
 
 ## System-Binaries (nicht via pip)
-`tippecanoe` + `tile-join`, `osmium-tool`, `gdal-bin` (für `ogr2ogr`). b2-CLI via
-`uv tool install b2`. Versionen siehe README.
+`tippecanoe` + `tile-join`, `osmium-tool`. b2-CLI via `uv tool install b2`.
+Versionen siehe README. (`ogr2ogr`/gdal-bin wird **nicht** mehr gebraucht — OSM-PBF
+wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
 
 ## Referenz-Repos (lesen, Muster übernehmen — nicht neu erfinden)
 - `vizsim/gradients2osm` → Karten-Panel unten links, OpenFreeMap+Mapterhorn-Setup

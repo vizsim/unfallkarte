@@ -1,9 +1,10 @@
-"""OSM-Kontextlayer: Geofabrik laden, mit osmium vorfiltern, via ogr2ogr nach
-fgb/GeoJSON, dann Tippecanoe.
+"""OSM-Kontextlayer: Geofabrik laden, mit osmium vorfiltern, dann Tippecanoe.
 
 Der osmium-Vorfilter schneidet die ~4 GB Deutschland-PBF streaming auf kleine
-Kategorie-PBFs runter, bevor der schwere ogr2ogr-Schritt läuft. Profile/Filter
-stehen in config/osm.yaml. Binär-Schritte (osmium/ogr2ogr/tippecanoe) werden bei
+Kategorie-PBFs runter. Daraus werden die gewünschten OSM-Layer (points/
+multipolygons/lines) DIREKT mit pyogrio gelesen (GDAL-OSM-Treiber, KEIN ogr2ogr/
+GPKG/GeoJSON-Zwischenschritt), gefiltert und nach FlatGeobuf geschrieben, dann
+getilet. Profile/Filter stehen in config/osm.yaml. osmium/tippecanoe werden bei
 dry_run oder fehlendem Binary nur ausgegeben.
 """
 
@@ -80,13 +81,6 @@ def tags_filter(pbf: Path, expressions: list[str], out_pbf: Path, *, dry_run: bo
     return out_pbf
 
 
-def _ogr2ogr(args: list[str], osmconf: str | None, *, dry_run: bool) -> None:
-    env = os.environ.copy()
-    if osmconf:
-        env["OSM_CONFIG_FILE"] = str(_osmconf_path(osmconf))
-    _run(["ogr2ogr", *args], dry_run=dry_run, env=env)
-
-
 def _filter_and_merge(frames: list, tag_filters: dict[str, list[str]]):
     """Filtert je GeoDataFrame per tag_filters (OR über Tags) und merged zu einem.
     Reiner pandas/geopandas-Schritt ohne IO — gut testbar."""
@@ -144,7 +138,13 @@ def pbf_layers_to_fgb(
     return fgb
 
 
-def _build_poi(name: str, spec: dict[str, Any], pbf: Path, *, dry_run: bool) -> Path:
+def _build_layer(name: str, spec: dict[str, Any], pbf: Path, *, dry_run: bool) -> Path:
+    """Ein OSM-Layer: osmium-Vorfilter -> PBF-Layer direkt nach FGB -> Tippecanoe.
+
+    Einheitlich für POI (osm_layers points+multipolygons, mit tag_filters) und
+    Linien (osm_layers lines, ohne tag_filters) — der osmium-Filter selektiert dort
+    schon die Ways, daher kein zusätzlicher tag_filter nötig.
+    """
     raw = _raw()
     cat_pbf = tags_filter(pbf, spec["osmium_filter"], raw / f"{name}.osm.pbf", dry_run=dry_run)
     fgb = raw / f"{name}.fgb"
@@ -160,20 +160,6 @@ def _build_poi(name: str, spec: dict[str, Any], pbf: Path, *, dry_run: bool) -> 
     )
 
 
-def _build_line(name: str, spec: dict[str, Any], pbf: Path, *, dry_run: bool) -> Path:
-    raw = _raw()
-    cat_pbf = tags_filter(pbf, spec["osmium_filter"], raw / f"{name}.osm.pbf", dry_run=dry_run)
-    geojson = raw / f"{name}.geojson.gz"
-    _ogr2ogr(
-        ["-f", "GeoJSON", str(geojson), str(cat_pbf), spec["ogr_layer"]],
-        spec.get("osmconf"), dry_run=dry_run,
-    )
-    out = get_paths().data / spec["output"]
-    return tiles.tippecanoe(
-        spec["tile_profile"], geojson, out, layer_override=spec["tippecanoe_layer"], dry_run=dry_run
-    )
-
-
 def build(layer: str | None = None, *, dry_run: bool = False) -> dict[str, Path]:
     """Baut einen oder alle OSM-Layer. Setzt eine vorhandene Geofabrik-PBF voraus
     (sonst erst `osm fetch`)."""
@@ -185,12 +171,6 @@ def build(layer: str | None = None, *, dry_run: bool = False) -> dict[str, Path]
     names = list(cfg["layers"]) if layer in (None, "all") else [layer]
     results: dict[str, Path] = {}
     for name in names:
-        spec = cfg["layers"][name]
-        print(f"OSM-Layer: {name} ({spec['kind']})")
-        if spec["kind"] == "poi":
-            results[name] = _build_poi(name, spec, pbf, dry_run=dry_run)
-        elif spec["kind"] == "line":
-            results[name] = _build_line(name, spec, pbf, dry_run=dry_run)
-        else:
-            raise ValueError(f"{name}: unbekanntes kind '{spec['kind']}'")
+        print(f"OSM-Layer: {name}")
+        results[name] = _build_layer(name, cfg["layers"][name], pbf, dry_run=dry_run)
     return results

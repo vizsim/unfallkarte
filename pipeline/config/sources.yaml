@@ -38,6 +38,18 @@ datasets:
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
     date: auto
 
+  maxspeed_major:
+    file: "osm/maxspeed_major.pmtiles"
+    label: "Tempolimits (Hauptstraßen)"
+    attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
+    date: auto
+
+  maxspeed_minor:
+    file: "osm/maxspeed_minor.pmtiles"
+    label: "Tempolimits (Nebenstraßen)"
+    attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
+    date: auto
+
   laerm_den:
     file: "noise/laerm_den.pmtiles"
     label: "Lärm (Tag-Abend-Nacht)"
