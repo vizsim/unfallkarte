@@ -364,14 +364,33 @@ body {
 /* ───── Container Bottom Left ───── */
 #bottom-left-ui-container {
   position: absolute;
-  bottom: 10px;
+  bottom: 64px;            /* angehoben: Platz für den Karten-Panel-Button darunter */
   left: 10px;
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   z-index: 2;
   font-family: sans-serif;
-  align-items: flex-end;
-  /* 👈 keeps thumbs and box aligned at bottom */
+}
+
+/* Nav (Zoom/Kompass) als 44px-Kacheln, passend zum Karten-Panel-Button (wie hilo_profiler) */
+#custom-nav-control .maplibregl-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 44px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+#custom-nav-control .maplibregl-ctrl-group button {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e3e5e9;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
 }
 
 /* ───── Basemap Thumbnails ───── */
@@ -490,7 +509,7 @@ body {
 /* Karten-Panel unten links — an style.css anhängen. Aus vizsim/gradients2osm. */
 
 .map-settings-toggle {
-  position: absolute; left: 16px; bottom: 16px; z-index: 6;
+  position: absolute; left: 10px; bottom: 10px; z-index: 6;
   width: 44px; height: 44px; border-radius: 12px;
   background: #fff; border: 1px solid #e3e5e9;
   box-shadow: 0 6px 16px rgba(0,0,0,.12);
@@ -500,7 +519,7 @@ body {
 .map-settings-toggle:hover { background: #f3f4f6; }
 
 .map-settings-panel {
-  position: absolute; left: 16px; bottom: 16px; width: 300px;
+  position: absolute; left: 10px; bottom: 64px; width: 300px;
   max-width: calc(100vw - 32px);
   background: #fff; border-radius: 16px; border: 1px solid #e3e5e9;
   box-shadow: 0 14px 40px rgba(0,0,0,.18); z-index: 5; padding: 14px;
