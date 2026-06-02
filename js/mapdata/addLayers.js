@@ -1448,29 +1448,8 @@ export function addLayers(map) {
 
 
 
-  function addRasterLayers(map) {
-    // Satellite layer (optional: insert below a specific layer)
-    map.addLayer({
-      id: "satellite-layer",
-      type: "raster",
-      source: "satellite",
-      layout: { visibility: "none" }
-    }, "accident-points"); // insert below accident points layer
-
-    // Hillshade layer
-    map.addLayer({
-      id: "hillshade-layer",
-      type: "raster",
-      source: "hillshade",
-      layout: { visibility: "none" }, // initial hidden
-      paint: {
-        "raster-opacity": 0.3
-      }
-    });
-
-    // Disable terrain initially (can be enabled dynamically)
-    map.setTerrain(null);
-  }
+  // (Alte Raster-Layer satellite-layer/hillshade-layer entfernt — Basemaps/Terrain
+  //  kommen jetzt keyless aus js/map/basemapTerrain.js.)
 
 
 
@@ -1508,9 +1487,4 @@ export function addLayers(map) {
 
   addMapillaryLayer(map);
   addMapillaryTSLayer(map);
-
-
-
-  addRasterLayers(map);
-
 }

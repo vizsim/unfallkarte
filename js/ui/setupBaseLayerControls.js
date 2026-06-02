@@ -7,15 +7,6 @@ export function setupBaseLayerControls(map, isInitializingRef) {
     });
   });
 
-  document.querySelectorAll(".basemap-thumb").forEach(thumb => {
-    thumb.addEventListener("click", () => {
-      const selectedMap = thumb.dataset.map;
-      const isSatellite = selectedMap === "satellite";
-
-      map.setLayoutProperty("satellite-layer", "visibility", isSatellite ? "visible" : "none");
-
-      document.querySelectorAll(".basemap-thumb").forEach(t => t.classList.remove("selected"));
-      thumb.classList.add("selected");
-    });
-  });
+  // Basemap-Auswahl (Positron/OSM/Esri) läuft jetzt über das Karten-Panel
+  // (js/map/basemapTerrain.js, verdrahtet in main.js) — kein .basemap-thumb mehr.
 }

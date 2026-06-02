@@ -1093,33 +1093,56 @@ MAIN HEADER
   </div>
 
 
-  <!-- <div id="controls">
-  <label><input type="checkbox" id="toggleTerrain" checked> Terrain</label><br/>
-  <label><input type="checkbox" id="toggleHillshade" checked> Hillshade</label>
-</div>
-
-
-  <div id="basemap-thumbnails">
-    <div class="basemap-thumb selected" data-map="standard" title="Standard"></div>
-    <div class="basemap-thumb" data-map="streets" title="Streets"></div> 
-    <div class="basemap-thumb" data-map="satellite" title="Satellit"></div>
-  </div> -->
 
 
   <!-- Gemeinsamer Container -->
   <div id="bottom-left-ui-container">
     <div id="custom-nav-control"></div>
-
-    <div id="basemap-thumbnails">
-      <div class="basemap-thumb selected" data-map="standard" title="Standard"></div>
-      <div class="basemap-thumb" data-map="satellite" title="Satellit"></div>
-    </div>
-
-    <div id="terrain-controls">
-      <label><input type="checkbox" id="toggleTerrain" /> Terrain</label>
-      <label><input type="checkbox" id="toggleHillshade" /> Hillshade</label>
-    </div>
   </div>
+
+  <!-- Karten-Panel unten links (Basemaps + Relief + 3D-Gebäude + Radinfra).
+       Ersetzt den alten Standard/Satellit-Umschalter und die Terrain/Hillshade-Checkboxen. -->
+  <button id="map-settings-toggle" class="map-settings-toggle" type="button"
+          aria-expanded="false" aria-controls="map-settings-panel" title="Kartenauswahl">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polygon points="1 6 8 3 16 6 23 3 23 18 16 21 8 18 1 21 1 6"></polygon>
+      <line x1="8" y1="3" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="21"></line>
+    </svg>
+  </button>
+
+  <section id="map-settings-panel" class="map-settings-panel is-collapsed" aria-label="Kartenauswahl">
+    <div class="map-settings-panel-content">
+      <div class="basemap-grid">
+        <button class="basemap-btn selected" type="button" data-basemap="positron">
+          <span class="basemap-preview basemap-preview-positron"></span>
+          <span class="basemap-label">Positron</span>
+        </button>
+        <button class="basemap-btn" type="button" data-basemap="osm">
+          <span class="basemap-preview basemap-preview-osm"></span>
+          <span class="basemap-label">OSM Carto</span>
+        </button>
+        <button class="basemap-btn" type="button" data-basemap="satellite">
+          <span class="basemap-preview basemap-preview-satellite"></span>
+          <span class="basemap-label">Esri Imagery</span>
+        </button>
+      </div>
+
+      <div class="terrain-row">
+        <div><strong>Geländerelief</strong><p>3D-Oberfläche + Hillshade (Mapterhorn)</p></div>
+        <label class="switch"><input id="toggle-relief" type="checkbox" /><span class="switch-slider"></span></label>
+      </div>
+
+      <div class="terrain-row">
+        <div><strong>3D-Gebäude</strong><p>Ab Zoom 14 sichtbar</p></div>
+        <label class="switch"><input id="toggle-buildings" type="checkbox" /><span class="switch-slider"></span></label>
+      </div>
+
+      <div class="terrain-row">
+        <div><strong>Radinfrastruktur</strong><p>radverkehrsatlas / TILDA</p></div>
+        <label class="switch"><input id="toggle-bikelanes" type="checkbox" /><span class="switch-slider"></span></label>
+      </div>
+    </div>
+  </section>
 
 
   <script src="https://unpkg.com/chart.js@4.5.0/dist/chart.umd.min.js"></script>

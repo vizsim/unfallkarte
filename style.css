@@ -485,3 +485,61 @@ body {
   margin: 12px 10px 4px 10px;
   color: #333;
 }
+
+/* ===== Karten-Panel (unten links) — aus frontend-Makeover ===== */
+/* Karten-Panel unten links — an style.css anhängen. Aus vizsim/gradients2osm. */
+
+.map-settings-toggle {
+  position: absolute; left: 16px; bottom: 16px; z-index: 6;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: #fff; border: 1px solid #e3e5e9;
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #4b5563; padding: 0; cursor: pointer;
+}
+.map-settings-toggle:hover { background: #f3f4f6; }
+
+.map-settings-panel {
+  position: absolute; left: 16px; bottom: 16px; width: 300px;
+  max-width: calc(100vw - 32px);
+  background: #fff; border-radius: 16px; border: 1px solid #e3e5e9;
+  box-shadow: 0 14px 40px rgba(0,0,0,.18); z-index: 5; padding: 14px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.map-settings-panel.is-collapsed { display: none; }
+.map-settings-panel-content { display: flex; flex-direction: column; gap: 10px; }
+
+.basemap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.basemap-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 6px; border: 1px solid transparent; border-radius: 10px;
+  background: #f9fafb; cursor: pointer;
+}
+.basemap-btn:hover { background: #f3f4f6; }
+.basemap-btn.selected { border-color: #1d4ed8; background: #eef2ff; }
+.basemap-preview {
+  width: 100%; aspect-ratio: 1 / 1; border-radius: 8px;
+  background-size: cover; background-position: center; background-color: #e5e7eb;
+}
+/* Thumbnails: vorhandene thumbs/ nutzen oder aus gradients2osm übernehmen. */
+.basemap-preview-positron  { background-image: url('./thumbs/thumb-standard.png'); }
+.basemap-preview-osm       { background-image: url('./thumbs/thumb-osm.png'); }
+.basemap-preview-satellite { background-image: url('./thumbs/thumb-satellite.png'); }
+.basemap-label { font-size: 11px; color: #4b5563; }
+
+.terrain-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.terrain-row strong { font-size: 13px; }
+.terrain-row p { margin: 2px 0 0; font-size: 11px; color: #6b7280; }
+
+.switch { position: relative; display: inline-block; width: 40px; height: 22px; flex: none; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-slider {
+  position: absolute; inset: 0; cursor: pointer; background: #cbd5e1;
+  border-radius: 22px; transition: .2s;
+}
+.switch-slider::before {
+  content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px;
+  background: #fff; border-radius: 50%; transition: .2s;
+}
+.switch input:checked + .switch-slider { background: #1d4ed8; }
+.switch input:checked + .switch-slider::before { transform: translateX(18px); }

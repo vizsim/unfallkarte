@@ -9,6 +9,10 @@ import { addSources } from "./js/mapdata/addSources.js";
 // import { loadAllIcons } from "./loadAllIcons.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
 
+// 📦 Basemap/Terrain (keyless, ersetzt MapTiler) + Radinfrastruktur (TILDA)
+import { addBasemapTerrain, setBasemap, setRelief, setBuildings } from './js/map/basemapTerrain.js';
+import { addBikeLanesSource, addBikeLanesLayers, setBikeLanesVisible } from './js/map/bikeLanesLayers.js';
+
 // 📦 UI & Interaktion
 import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
@@ -75,7 +79,6 @@ import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 
 
 
-let MAPTILER_API_KEY = '';
 let MAPILLARY_TOKEN = '';
 
 let originalMinZoom = 6;
@@ -93,11 +96,8 @@ export const LAYERS = {
   clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
 };
 
-document.querySelector('[data-map="standard"]').style.backgroundImage =
-  "url('./thumbs/thumb-standard.png')";
-
-document.querySelector('[data-map="satellite"]').style.backgroundImage =
-  "url('./thumbs/thumb-satellite.png')";
+// (Alte Basemap-Thumb-Hintergründe entfernt — Vorschau-Thumbnails kommen jetzt
+//  über das Karten-Panel/panel.css.)
 
 
 
@@ -109,7 +109,7 @@ document.querySelector('[data-map="satellite"]').style.backgroundImage =
   try {
     // handle the config import based on the environment  for the api keys
     const config = await import(isLocalhost ? './js/config/config.js' : './js/config/config.public.js');
-    ({ MAPTILER_API_KEY, MAPILLARY_TOKEN } = config);
+    ({ MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
 
     cleanupLegacyPermalink();
@@ -140,8 +140,7 @@ async function initMap() {
 
   window.map = new maplibregl.Map({
     container: "map",
-    // style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_API_KEY}`,
-    style: "./style.json", // <-- your local Positron style
+    style: "./style.json", // lokaler, keyless Positron-Style (eigene planetiler-Tiles)
     center: hasPermalink ? [lng, lat] : [13.634, 52.315],
     zoom: hasPermalink ? zoom : 12,
     minZoom: 6,
@@ -196,19 +195,8 @@ async function initMap() {
 
 
 
-// Toggle logic for Hillshade and Terrain
-document.getElementById('toggleHillshade').addEventListener('change', (e) => {
-  const visibility = e.target.checked ? 'visible' : 'none';
-  map.setLayoutProperty('hillshade-layer', 'visibility', visibility);
-});
-
-document.getElementById('toggleTerrain').addEventListener('change', (e) => {
-  if (e.target.checked) {
-    map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
-  } else {
-    map.setTerrain(null);
-  }
-});
+// (Alte Hillshade/Terrain-Toggles entfernt — Relief/3D-Gelände läuft jetzt über das
+//  Karten-Panel via setRelief() aus js/map/basemapTerrain.js, siehe setupMapPanel.)
 
 
 
@@ -356,6 +344,7 @@ function setupLegend(map) {
 
 function setupUI(map) {
   setupBaseLayerControls(map, isInitializingRef);
+  setupMapPanel(map);
   // setupLayerToggles(map, applyZoomLock, applyLegendVisibility);
   setupLayerToggles(
     map,
@@ -399,6 +388,36 @@ function setupUI(map) {
 }
 
 
+// Karten-Panel unten links: Basemaps (Positron/OSM/Esri), Relief, 3D-Gebäude, Radinfra.
+function setupMapPanel(map) {
+  const panel = document.getElementById('map-settings-panel');
+  const panelToggle = document.getElementById('map-settings-toggle');
+  if (panelToggle && panel) {
+    panelToggle.addEventListener('click', () => {
+      const collapsed = panel.classList.toggle('is-collapsed');
+      panelToggle.setAttribute('aria-expanded', String(!collapsed));
+    });
+  }
+
+  document.querySelectorAll('.basemap-btn[data-basemap]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setBasemap(map, btn.dataset.basemap);
+      document.querySelectorAll('.basemap-btn').forEach((b) => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+
+  const reliefToggle = document.getElementById('toggle-relief');
+  if (reliefToggle) reliefToggle.addEventListener('change', (e) => setRelief(map, e.target.checked));
+
+  const buildingsToggle = document.getElementById('toggle-buildings');
+  if (buildingsToggle) buildingsToggle.addEventListener('change', (e) => setBuildings(map, e.target.checked));
+
+  const bikelanesToggle = document.getElementById('toggle-bikelanes');
+  if (bikelanesToggle) bikelanesToggle.addEventListener('change', (e) => setBikeLanesVisible(map, e.target.checked));
+}
+
+
 function setupEventHandlers(map) {
   map.on("zoomend", () => updateLegendVisibilityByZoom(map));
   map.on("moveend", () => updateLegendVisibilityByZoom(map));
@@ -419,10 +438,16 @@ function initializeMapModules(map) {
   setupPhotonGeocoder(map);
   setupPieChartImageGeneration(map);
   addNavigationControl(map);
-  addSources(map, { MAPILLARY_TOKEN, MAPTILER_API_KEY });
+  addSources(map, { MAPILLARY_TOKEN });
   // await loadAllIcons(map); // falls wieder benötigt
 
   addLayers(map);
+
+  // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude,
+  // nach addSources/addLayers, damit Host-Layer & Symbol-Reihenfolge stehen.
+  addBasemapTerrain(map);
+  addBikeLanesSource(map);
+  addBikeLanesLayers(map);
 }
 
 
