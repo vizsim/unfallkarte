@@ -36,14 +36,13 @@ years:
     zip: "Unfallorte2023_EPSG25832_CSV.zip"
     csv_path: "csv/Unfallorte2023_LinRef.csv"
     sep: ";"
-  # 2024 ist seit Juli 2025 verfügbar (alle Länder).
-  # TODO Phase 1: zip-Name + internen csv_path + evtl. neue Spalten VERIFIZIEREN
-  # (NRW-Mirror-Muster vs. unfallatlas.statistikportal.de).
+  # 2024: am 2026-06-02 gegen den NRW-Mirror verifiziert — URL-Muster greift,
+  # csv_path stimmt, Header identisch zu 2023 (26 Spalten, kein Schema-Drift →
+  # rename/drop_columns greifen 1:1). 268.519 Rohzeilen.
   "2024":
     zip: "Unfallorte2024_EPSG25832_CSV.zip"
     csv_path: "csv/Unfallorte2024_LinRef.csv"
     sep: ";"
-    verify: true   # markiert: vor Nutzung gegenprüfen
 
 # Koordinaten-Spalten: Komma->Punkt, float, dann Point-Geometrie in EPSG:4326.
 lon_col: "XGCSWGS84"
