@@ -1,0 +1,34 @@
+# --- Secrets ---
+.env
+
+# --- Daten (rohe + abgeleitete Artefakte; liegen lokal + auf B2, nicht im Git) ---
+data/
+*.pmtiles
+*.parquet
+*.fgb
+*.gpkg
+*.pbf
+*.osm.pbf
+*.geojson
+*.geojson.gz
+
+# Ausnahme: das generierte Manifest gehört ins Deploy (klein, kein Datenblob)
+!data/manifest.json
+
+# Golden-Referenz gehört ins Git (überschreibt das globale *.json der Repo-Root-.gitignore)
+!tests/golden/accidents.json
+
+# --- Python / uv ---
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# --- OS / Editor ---
+.DS_Store
+.idea/
+.vscode/

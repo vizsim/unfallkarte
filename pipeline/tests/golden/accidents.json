@@ -1,0 +1,43 @@
+{
+  "n_rows": 1677827,
+  "columns": [
+    "IstFuss",
+    "IstGkfz",
+    "IstKrad",
+    "IstPKW",
+    "IstRad",
+    "IstSonstig",
+    "LICHT",
+    "OBJECTID",
+    "PLST",
+    "UART",
+    "UGEMEINDE",
+    "UJAHR",
+    "UKATEGORIE",
+    "UKREIS",
+    "ULAND",
+    "UMONAT",
+    "UREGBEZ",
+    "USTRZUSTAND",
+    "USTUNDE",
+    "UTYP1",
+    "UWOCHENTAG",
+    "geometry"
+  ],
+  "per_year": {
+    "2017": 195229,
+    "2018": 211868,
+    "2019": 268370,
+    "2020": 237994,
+    "2021": 238826,
+    "2022": 256492,
+    "2023": 269048
+  },
+  "bounds": [
+    5.86726,
+    47.31555,
+    15.02868,
+    55.05184
+  ],
+  "crs": "EPSG:4326"
+}
