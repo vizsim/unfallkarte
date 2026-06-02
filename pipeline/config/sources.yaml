@@ -26,6 +26,18 @@ datasets:
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
     date: auto            # aus `osmium fileinfo` der Geofabrik-PBF
 
+  osm_health:
+    file: "osm/health.pmtiles"
+    label: "Gesundheit & Pflege"
+    attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
+    date: auto
+
+  osm_playgrounds:
+    file: "osm/playgrounds.pmtiles"
+    label: "Spielplätze"
+    attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
+    date: auto
+
   laerm_den:
     file: "noise/laerm_den.pmtiles"
     label: "Lärm (Tag-Abend-Nacht)"
@@ -42,6 +54,13 @@ datasets:
     live: true            # externer TILDA-Tile-Server, kein Build-Artefakt
     label: "Radinfrastruktur"
     attribution: "radverkehrsatlas / TILDA"
+
+  # --- Szenarien ---
+  scenario2:
+    file: "scenarios/scenario2_accidents_close2schools.pmtiles"
+    label: "Unfälle nahe Schulen"
+    attribution: "Unfallatlas (dl-de/by-2-0), © OpenStreetMap (ODbL)"
+    date: auto            # unfallgetrieben -> max. Unfalljahr
 
   # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
   # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.

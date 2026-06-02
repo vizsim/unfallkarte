@@ -37,7 +37,8 @@ def _resolve_date(dataset_id: str, date_spec: Any) -> str | None:
     if isinstance(date_spec, dict) and "fixed" in date_spec:
         return str(date_spec["fixed"])
     if date_spec == "auto":
-        if dataset_id.startswith("accidents"):
+        # Szenarien sind unfallgetrieben -> Datenstand = max. Unfalljahr
+        if dataset_id.startswith("accidents") or dataset_id.startswith("scenario"):
             return _accidents_vintage()
         if dataset_id.startswith("osm"):
             return _osm_vintage()
