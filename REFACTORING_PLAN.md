@@ -529,3 +529,64 @@ AGPL-3.0 · MapTiler raus → OpenFreeMap + Mapterhorn (gehosteter Endpoint) ·
 Karten-Panel aus gradients2osm · Radinfrastruktur als Layer (Szenario optional,
 auf OSM-Cycleway-Basis) · kein Docker (System-Binaries dokumentieren) ·
 `data/` gitignoren ab jetzt, History-Cleanup erst nach dem Merge.
+
+---
+
+## 13. Post-Refactor: Verbesserungspotenzial / Backlog (Review 2026-06-03)
+
+Nach abgeschlossenem Refactor + Frontend-Feinschliff (Radinfra ins rechte Panel,
+Basemap auf OpenFreeMap-hosted, Tempolimit-Zoom-Hinweis statt Lock, Perf: Unfall-Layer
+nur bei Auswahl laden, hängender Einzug) ein frischer Review-Durchgang über Frontend,
+Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
+
+### 🟢 Sofort lohnend (klein, risikoarm)
+
+1. **Doku-Staleness nachziehen** — Basemap ist jetzt OFM-**gehostet**, nicht „eigene
+   Planetiler-Tiles": `README.md` (Basemap-Zeile), `main.js:141` (Kommentar). Plus:
+   HTML-Fallback-Datum „25-05-28" → „25-07-31" (`index.html`, 4×; Wahrheit kommt ohnehin
+   aus dem Manifest via `applyDataVintages.js`); `cli.py` osm_build-Docstring sagt noch
+   „ogr2ogr" statt pyogrio; dieser Plan §9 nennt teils altes Bucket `unfallkarte-data`
+   statt `-v2`.
+2. **Toter Code raus** — auskommentierte Dubletten: `useMapillary.js` (~150 Z.
+   TS-Handler), `setupScenarioControls.js` (uspeed-Slider-Varianten), no-op-Importe in
+   `main.js`. Git hält die Historie.
+3. **scenario8-Doppelbindung** — `toggle-scenario8` hat zwei Change-Handler (expliziter
+   Block `:82` + `for i=3..8`-Schleife `:205` in `setupScenarioControls.js`); beide setzen
+   dieselbe Sichtbarkeit → heute harmlos, aber Footgun. Schleife auf `i<=7` begrenzen.
+
+### 🟡 Robustheit
+
+4. **Kein Retry/Backoff im Deploy** (`deploy.py`) — transienter B2-500 bricht `b2 sync`
+   mittendrin ab (Teil-Deploy). Retry-Loop (3× exp. Backoff) für B2 + `requests`-Retry
+   für Geofabrik/Accidents-Fetch.
+5. **Golden-Reference läuft nie im pytest** und deckt nur 2017–2023 ab — `golden.py` wird
+   von keinem Test importiert. pytest ergänzen, der `golden.compare` fährt + Referenz auf
+   2024 neu capturen.
+6. **Manifest-Totalausfall ist stumm** (`resolveSources.js`, `loadManifest` → `{}`) —
+   blanke Karte ohne Hinweis. Sichtbares Banner + `?.`-Guards an den ungeschützten
+   `getElementById(...).addEventListener`-Stellen (main.js, setupScenarioControls.js).
+
+### 🟡 Performance
+
+7. **Alle ~18 Quellen eager beim Start** (`addSources.js`) → pro Quelle ein
+   PMTiles/TileJSON-Metadaten-Fetch + HEAD-Probe, auch für nie genutzte Layer. Quellen
+   lazy beim ersten Einschalten anlegen (`ensureSource(id)`), nur accidents/cluster eager.
+8. **`updateVisibleFeatureCount` + `queryRenderedFeatures` bei jedem moveend/zoomend**
+   (`main.js`) + Cluster-Popup pro mousemove → Ruckeln. Debouncen; redundanten
+   `moveend`-Aufruf von `updateLegendVisibilityByZoom` streichen (zoomend reicht).
+
+### 🟠 Größere Refactors (optional)
+
+9. **`addLayers.js` (~1345 Z.) + die 11 `setup*Popups`** sind Copy-Paste-Fabriken →
+   config-getriebene Erzeugung (Szenarien/Maxspeed/Popups), spart ~600 Z. + verhindert
+   Drift (z. B. sc6 `fill-opacity` 0.4 vs 0.8).
+10. **`updateLegendVisibilityByZoom`** stützt sich auf vier parallele Layer-Listen
+    (`LEGEND_KEYS`, Destructure, `applyLegendVisibility`-Keys, `EARLY_CONTEXT`) → eine
+    deklarative Tabelle `[{key, layerIds, minZoom, dataMinZoom}]` als Single Source of Truth.
+11. **`main.js`** mischt Bootstrap + Filter/Color/Legend + mutable Globals →
+    `accidentFilter.js` extrahieren; doppeltes `willShow`/`accidentsWillShow` zusammenführen.
+
+### ✅ Schon solide
+
+Pipeline-CRS-Disziplin (25832↔4326), config-getriebenes Design, Secret-Masking
+(getestet), Szenario-Korrektheits-Tests, keyless/Local-first/B2 konsistent.
