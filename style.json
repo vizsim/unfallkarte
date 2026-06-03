@@ -23,12 +23,12 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "pmtiles://https://f003.backblazeb2.com/file/unfallkarte-data/planetiler-de.pmtiles",
-      "attribution": "© OpenStreetMap contributors | Tiles © OpenMapTiles"
+      "url": "https://tiles.openfreemap.org/planet",
+      "attribution": "© OpenStreetMap contributors | Tiles © OpenFreeMap (OpenMapTiles)"
     }
   },
   "sprite": "https://vizsim.github.io/unfallkarte/icons/sprite",
-  "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
