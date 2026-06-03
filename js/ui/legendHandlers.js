@@ -105,6 +105,42 @@ export function updateLegendVisibilityByZoom(map) {
       ? (isTitle || isFeatureCount || isSpecial) ? "" : "none"
       : (!isSpecial ? "" : el.style.display);
   });
+
+  // Radinfrastruktur (TILDA) rendert bereits ab Zoom 9 — anders als die übrigen
+  // Kontext-Layer (ab Zoom 11). Daher die Radinfra-Zeile + -Legende auch unter
+  // Zoom 11 sichtbar halten, wenn aktiv (restlicher Kontext-Inhalt bleibt aus),
+  // und den Zoom-Hinweis nur unter Zoom 9 zeigen (Daten ab 9 sichtbar).
+  const bikeToggle = document.getElementById("toggle-bikelanes");
+  const bikeChecked = !!(bikeToggle && bikeToggle.checked);
+  const kontextSection = document.querySelector('.legend-section[data-section="kontext"]');
+  const kontextContent = kontextSection && kontextSection.querySelector(".legend-section-content");
+  const bikeRow = bikeToggle && bikeToggle.closest("div");
+  const bikeLegend = document.getElementById("bikelanes-legend");
+
+  if (kontextSection && kontextContent) {
+    const children = Array.from(kontextContent.children);
+    if (zoom < 11 && bikeChecked) {
+      kontextSection.style.display = "";           // Sektion offen lassen (überschreibt Loop oben)
+      children.forEach(el => {
+        if (el === bikeRow || el === bikeLegend) return;
+        if (el.style.display !== "none") el.dataset.bikehidden = "1";
+        el.style.display = "none";
+      });
+      if (bikeLegend) bikeLegend.style.display = "block";
+    } else {
+      // Bike-Sonderfall aufheben: nur die von uns versteckten Elemente wiederherstellen,
+      // damit eigenständig versteckte Elemente (z. B. mapillary-filter-options) ihren Zustand behalten.
+      children.forEach(el => {
+        if (el.dataset.bikehidden) {
+          el.style.display = "";
+          delete el.dataset.bikehidden;
+        }
+      });
+    }
+  }
+
+  const bikeHint = bikeLegend && bikeLegend.querySelector(".bl-zoom-hint");
+  if (bikeHint) bikeHint.style.display = (bikeChecked && zoom < 9) ? "block" : "none";
 }
 
 

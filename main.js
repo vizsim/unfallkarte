@@ -353,6 +353,7 @@ function setupUI(map) {
     bikelanesToggle.addEventListener('change', (e) => {
       setBikeLanesVisible(map, e.target.checked);
       applyLegendVisibility();
+      updateLegendVisibilityByZoom(map);  // Radinfra-Legende/Hinweis sofort an Zoom anpassen
     });
   }
 
