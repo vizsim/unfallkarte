@@ -832,7 +832,7 @@ export function setupScenario8Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
     const renderScenario8Tooltip = (props) => {
-        const laermValue = props.max_laerm_num;
+        const laermValue = Number(props.max_laerm_num);  // pmtiles liefert ggf. String
         let laermText = "-";
 
         if (laermValue === 55) laermText = "55–59 dB(A)";
