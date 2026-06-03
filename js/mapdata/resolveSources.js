@@ -11,15 +11,19 @@
 const LOCAL_BASE = "./data/";
 const REMOTE_BASE = "https://f003.backblazeb2.com/file/unfallkarte-data-v2/";
 
-export async function loadManifest(path = "./data/manifest.json") {
-  try {
-    const res = await fetch(path, { cache: "no-cache" });
-    if (!res.ok) throw new Error(`manifest ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    console.warn("[resolveSources] manifest nicht ladbar, nutze nur Remote:", err);
-    return {};
+// Manifest local-first laden, sonst von B2. So braucht die deployte Seite (Pages)
+// kein eigenes data/manifest.json — sie nimmt das aus dem Bucket.
+export async function loadManifest(localPath = "./data/manifest.json", remoteBase = REMOTE_BASE) {
+  for (const url of [localPath, `${remoteBase}manifest.json`]) {
+    try {
+      const res = await fetch(url, { cache: "no-cache" });
+      if (res.ok) return await res.json();
+    } catch {
+      /* nächste Quelle versuchen */
+    }
   }
+  console.warn("[resolveSources] manifest weder lokal noch auf B2 ladbar");
+  return {};
 }
 
 async function existsLocally(url) {
@@ -35,7 +39,7 @@ async function existsLocally(url) {
 // Local-first wird pro Datei via HEAD-Probe entschieden; live/external-Einträge
 // werden übersprungen (die binden ihre URL direkt ein).
 export async function resolveSources({ localBase = LOCAL_BASE, remoteBase = REMOTE_BASE } = {}) {
-  const manifest = await loadManifest();
+  const manifest = await loadManifest("./data/manifest.json", remoteBase);
   const resolved = {};
 
   const entries = Object.entries(manifest).filter(([, m]) => m.file && !m.live && !m.external);
