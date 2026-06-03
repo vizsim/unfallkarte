@@ -637,10 +637,10 @@ body {
   width: 100%; aspect-ratio: 1 / 1; border-radius: 8px;
   background-size: cover; background-position: center; background-color: #e5e7eb;
 }
-/* Thumbnails: vorhandene thumbs/ nutzen oder aus gradients2osm übernehmen. */
-.basemap-preview-positron  { background-image: url('./thumbs/thumb-standard.png'); }
-.basemap-preview-osm       { background-image: url('./thumbs/thumb-osm.png'); }
-.basemap-preview-satellite { background-image: url('./thumbs/thumb-satellite.png'); }
+/* Thumbnails 1:1 aus vizsim/gradients2osm (viz/assets/basemaps) übernommen. */
+.basemap-preview-positron  { background-color: #eef3f7; background-image: url('./thumbs/thumb-standard.png'); }
+.basemap-preview-osm       { background-color: #f5f1df; background-image: url('./thumbs/thumb-osm.png'); }
+.basemap-preview-satellite { background-color: #516146; background-image: url('./thumbs/thumb-satellite.png'); }
 .basemap-label { font-size: 11px; color: #4b5563; }
 
 .terrain-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
