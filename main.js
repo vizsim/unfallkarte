@@ -12,6 +12,7 @@ import { addLayers } from "./js/mapdata/addLayers.js";
 // 📦 Basemap/Terrain (keyless, ersetzt MapTiler) + Radinfrastruktur (TILDA)
 import { addBasemapTerrain, setBasemap, setRelief, setBuildings } from './js/map/basemapTerrain.js';
 import { addBikeLanesSource, addBikeLanesLayers, setBikeLanesVisible } from './js/map/bikeLanesLayers.js';
+import { applyDataVintages } from './js/utils/applyDataVintages.js';
 
 // 📦 UI & Interaktion
 import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
@@ -449,6 +450,9 @@ async function initializeMapModules(map) {
   addBasemapTerrain(map);
   addBikeLanesSource(map);
   addBikeLanesLayers(map);
+
+  // OSM-Quellen-Tooltips dynamisch mit dem Datenstand (vintage) aus dem Manifest füllen.
+  applyDataVintages();
 }
 
 
