@@ -13,6 +13,9 @@ export function addLayers(map) {
         "source-layer": "accidents",
         minzoom,
         maxzoom,
+        // Start versteckt: erst updateLayerFilter() schaltet sichtbar, wenn eine Auswahl
+        // existiert -> kein Laden der accidents_single-Tiles bei leerer Auswahl.
+        layout: { visibility: "none" },
         paint: {
           "circle-radius": [
             "interpolate", // interpolate ciclesize based on zoom
@@ -67,7 +70,7 @@ export function addLayers(map) {
           "text-anchor": "top",
           "text-allow-overlap": true,
           "text-ignore-placement": true,
-          "visibility": "visible"
+          "visibility": "none"
         },
         paint: {
           "text-color": "#000"

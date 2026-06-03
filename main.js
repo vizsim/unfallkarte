@@ -166,8 +166,9 @@ async function initMap() {
 
     setupPopups(map);                          // 5. Popups initialisieren
 
-    map.once("load", updateLegendVisibilityByZoom);
-    updateLegendVisibilityByZoom();
+    // WICHTIG: mit `map` aufrufen — ohne Argument returnt die Funktion sofort, dann
+    // wird die Cluster-Legende erst spät (per zoomend/idle) korrigiert -> Flackern.
+    updateLegendVisibilityByZoom(map);
 
     // setupPermalinkHandling(map); // 6. Permalink-Handling initialisieren
     setupPermalinkHandling(map, {
@@ -208,6 +209,17 @@ function getSelectedBeteiligungen() {
     .map(cb => cb.dataset.field);
 }
 
+// Zeigt die aktuelle Auswahl überhaupt Unfälle? Der Filter verknüpft alle Dimensionen
+// mit UND — ist eine Dimension leer, matcht nichts. Dann Layer ausblenden statt nur
+// filtern (spart das Laden der accidents_single-Tiles).
+function accidentsWillShow() {
+  return getSelectedCheckboxValues("UKATEGORIE").length > 0
+    && getSelectedCheckboxValues("UART").length > 0
+    && getSelectedCheckboxValues("UTYP1").length > 0
+    && getSelectedCheckboxValues("UJAHR").length > 0
+    && getSelectedBeteiligungen().length > 0;
+}
+
 function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
   if (isInitializingRef.value && !force) return;
 
@@ -237,6 +249,19 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
     if (map.getLayer(layerId)) map.setFilter(layerId, filter);
   });
 
+  // Perf: bei leerer Auswahl (Filter matcht nichts) die Unfall-Layer ausblenden statt nur
+  // filtern -> MapLibre lädt die accidents_single-Tiles gar nicht erst (kein unnötiger
+  // pmtiles-Download + kein Aufblitzen). Symbole zusätzlich nur, wenn Details-Toggle an.
+  const willShow = uk_vals.length > 0 && uart_vals.length > 0 && utyp_vals.length > 0
+    && ujahr_vals.length > 0 && beteiligungen.length > 0;
+  const detailsChecked = !!document.getElementById("toggle-details")?.checked;
+  LAYERS.accidents.forEach(id => {
+    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", willShow ? "visible" : "none");
+  });
+  LAYERS.symbols.forEach(id => {
+    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", (willShow && detailsChecked) ? "visible" : "none");
+  });
+
   // map.once("idle", updateVisibleFeatureCount);
   map.once("idle", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
 
@@ -259,17 +284,16 @@ function updateColorStyle() {
     if (map.getLayer(layerId)) {
       map.setPaintProperty(layerId, "circle-color", colorExpr);
       map.setPaintProperty(layerId, "circle-opacity", 0.6);
-      map.setLayoutProperty(layerId, "visibility", "visible");
+      // Sichtbarkeit NICHT hier setzen — die bestimmt updateLayerFilter (Auswahl-abhängig),
+      // sonst würden die accidents_single-Tiles schon vor dem Auflösen der Auswahl geladen.
     }
   });
 
-  // Beteiligungsbuchstaben-Layer bleibt unabhängig
+  // Beteiligungsbuchstaben-Layer: nur wenn Details an UND eine Auswahl Unfälle zeigt.
   const detailsChecked = document.getElementById("toggle-details").checked;
-  // map.setLayoutProperty("beteiligung-symbols", "visibility", detailsChecked ? "visible" : "none");
-
   LAYERS.symbols.forEach(layerId => {
     if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, "visibility", detailsChecked ? "visible" : "none");
+      map.setLayoutProperty(layerId, "visibility", (detailsChecked && accidentsWillShow()) ? "visible" : "none");
     }
   });
 
@@ -363,7 +387,7 @@ function setupUI(map) {
   });
 
   document.getElementById("toggle-details").addEventListener("change", e => {
-    const visible = e.target.checked ? "visible" : "none";
+    const visible = (e.target.checked && accidentsWillShow()) ? "visible" : "none";
     LAYERS.symbols.forEach(id => {
       if (map.getLayer(id)) {
         map.setLayoutProperty(id, "visibility", visible);

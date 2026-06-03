@@ -416,7 +416,9 @@ MAIN HEADER
      Sektion 1b: Unfälle-Cluster nach Schwere (Bei Zoom < 11)
 ======================= -->
 
-    <div class="legend-section" data-section="cluster" id="cluster-legend-section">
+    <!-- Default ausgeblendet: updateLegendVisibilityByZoom() zeigt die Cluster-Legende
+         nur bei Zoom < 11. Vermeidet das Block-Flackern beim Start (z12). -->
+    <div class="legend-section" data-section="cluster" id="cluster-legend-section" style="display: none;">
       <div class="legend-section-divider"></div>
 
       <div class="legend-section-title" data-section-id="cluster">
