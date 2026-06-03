@@ -18,6 +18,7 @@ dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",  # .env-Handling
     "tqdm>=4.66",
+    "scikit-learn>=1.9.0",
 ]
 
 [project.scripts]

@@ -68,6 +68,12 @@ datasets:
     attribution: "radverkehrsatlas / TILDA"
 
   # --- Szenarien ---
+  scenario1:
+    file: "scenarios/scenario1_cluster_accidents_ms100.pmtiles"
+    label: "Unfall-Cluster (Tempo-100-Straßen)"
+    attribution: "Unfallatlas (dl-de/by-2-0), © OpenStreetMap (ODbL)"
+    date: auto            # unfallgetrieben -> max. Unfalljahr
+
   scenario2:
     file: "scenarios/scenario2_accidents_close2schools.pmtiles"
     label: "Unfälle nahe Schulen"
