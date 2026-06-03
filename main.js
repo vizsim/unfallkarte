@@ -445,6 +445,19 @@ async function initializeMapModules(map) {
 
   addLayers(map);
 
+  // Tempolimit: kein Zoom-Lock mehr (siehe zoomLock.js) — dafür rendern die Layer
+  // erst ab Zoom 11 (vorher Z6-Daten, die nur der Lock verdeckte). Darunter greift
+  // der Zoom-Hinweis in der Legende (analog Radinfra).
+  const MAXSPEED_LAYERS = [
+    "maxspeed", "maxspeed-conditional", "maxspeed-forward", "maxspeed-backward",
+    "maxspeed-conditional-forward", "maxspeed-conditional-backward",
+    "maxspeed_minor", "maxspeed_minor-conditional", "maxspeed_minor-forward",
+    "maxspeed_minor-backward", "maxspeed_minor-conditional-forward", "maxspeed_minor-conditional-backward",
+  ];
+  for (const id of MAXSPEED_LAYERS) {
+    if (map.getLayer(id)) map.setLayerZoomRange(id, 11, 24);
+  }
+
   // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude,
   // nach addSources/addLayers, damit Host-Layer & Symbol-Reihenfolge stehen.
   addBasemapTerrain(map);

@@ -587,12 +587,14 @@ body {
   background: repeating-linear-gradient(to right,
       var(--line-color, #174ed9) 0 6px, transparent 6px 8px);
 }
-#bikelanes-legend .bl-zoom-hint {
+/* Zoom-Hinweis "Daten ab Zoomstufe X+" (Radinfra + Tempolimit), nur unter dataMinZoom. */
+.zoom-hint {
   padding: 6px 10px;
   margin-bottom: 8px;
   background: rgba(255, 193, 7, 0.1);
   border: 1px solid rgba(255, 193, 7, 0.3);
   border-radius: 4px;
+  font-size: 11px;
 }
 #bikelanes-legend .bl-source {
   margin-top: 6px;

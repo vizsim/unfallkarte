@@ -106,41 +106,57 @@ export function updateLegendVisibilityByZoom(map) {
       : (!isSpecial ? "" : el.style.display);
   });
 
-  // Radinfrastruktur (TILDA) rendert bereits ab Zoom 9 — anders als die übrigen
-  // Kontext-Layer (ab Zoom 11). Daher die Radinfra-Zeile + -Legende auch unter
-  // Zoom 11 sichtbar halten, wenn aktiv (restlicher Kontext-Inhalt bleibt aus),
-  // und den Zoom-Hinweis nur unter Zoom 9 zeigen (Daten ab 9 sichtbar).
-  const bikeToggle = document.getElementById("toggle-bikelanes");
-  const bikeChecked = !!(bikeToggle && bikeToggle.checked);
+  // Kontext-Layer, die schon vor Zoom 11 nutzbar bleiben (Radinfra ab z9, Tempolimit ab z11):
+  // Zeile + Legende auch unter Zoom 11 sichtbar halten, wenn aktiv (restlicher Kontext-Inhalt
+  // bleibt aus), und je einen Zoom-Hinweis nur unter dataMinZoom zeigen (= Daten noch nicht da,
+  // ersetzt den früheren Zoom-Lock).
+  const EARLY_CONTEXT = [
+    { toggleId: "toggle-bikelanes", legendId: "bikelanes-legend", dataMinZoom: 9 },
+    { toggleId: "toggle-maxspeed", legendId: "maxspeed-legend", dataMinZoom: 11 },
+  ];
   const kontextSection = document.querySelector('.legend-section[data-section="kontext"]');
   const kontextContent = kontextSection && kontextSection.querySelector(".legend-section-content");
-  const bikeRow = bikeToggle && bikeToggle.closest("div");
-  const bikeLegend = document.getElementById("bikelanes-legend");
 
   if (kontextSection && kontextContent) {
+    const keep = new Set();
+    let anyActive = false;
+    for (const e of EARLY_CONTEXT) {
+      const toggle = document.getElementById(e.toggleId);
+      const checked = !!(toggle && toggle.checked);
+      const legend = document.getElementById(e.legendId);
+      const row = toggle && toggle.closest("div");
+      const hint = legend && legend.querySelector(".zoom-hint");
+      if (checked) {
+        anyActive = true;
+        if (row) keep.add(row);
+        if (legend) keep.add(legend);
+      }
+      // Hinweis nur unter dataMinZoom (Daten noch nicht sichtbar)
+      if (hint) hint.style.display = (checked && zoom < e.dataMinZoom) ? "block" : "none";
+    }
+
     const children = Array.from(kontextContent.children);
-    if (zoom < 11 && bikeChecked) {
+    if (zoom < 11 && anyActive) {
       kontextSection.style.display = "";           // Sektion offen lassen (überschreibt Loop oben)
       children.forEach(el => {
-        if (el === bikeRow || el === bikeLegend) return;
-        if (el.style.display !== "none") el.dataset.bikehidden = "1";
+        if (keep.has(el)) {
+          el.style.display = (el.id && el.id.endsWith("-legend")) ? "block" : "";
+          return;
+        }
+        if (el.style.display !== "none") el.dataset.ctxhidden = "1";
         el.style.display = "none";
       });
-      if (bikeLegend) bikeLegend.style.display = "block";
     } else {
-      // Bike-Sonderfall aufheben: nur die von uns versteckten Elemente wiederherstellen,
-      // damit eigenständig versteckte Elemente (z. B. mapillary-filter-options) ihren Zustand behalten.
+      // Sonderfall aufheben: nur die von uns versteckten Elemente wiederherstellen, damit
+      // eigenständig versteckte Elemente (z. B. mapillary-filter-options) ihren Zustand behalten.
       children.forEach(el => {
-        if (el.dataset.bikehidden) {
+        if (el.dataset.ctxhidden) {
           el.style.display = "";
-          delete el.dataset.bikehidden;
+          delete el.dataset.ctxhidden;
         }
       });
     }
   }
-
-  const bikeHint = bikeLegend && bikeLegend.querySelector(".bl-zoom-hint");
-  if (bikeHint) bikeHint.style.display = (bikeChecked && zoom < 9) ? "block" : "none";
 }
 
 

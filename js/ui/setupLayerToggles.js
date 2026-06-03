@@ -6,6 +6,7 @@
 
 
 import { applyZoomLock } from "../utils/zoomLock.js";
+import { updateLegendVisibilityByZoom } from "./legendHandlers.js";
 
 
 
@@ -24,6 +25,7 @@ export function setupToggle(map, checkboxId, layerIds, applyZoomLock, applyLegen
 
     applyZoomLock();
     applyLegendVisibility();
+    updateLegendVisibilityByZoom(map);  // Legende/Hinweis sofort an Zoom anpassen (z. B. Tempolimit < z11)
   });
 }
 
