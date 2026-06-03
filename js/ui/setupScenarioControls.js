@@ -87,78 +87,6 @@ export function setupScenarioControls(map) {
     if (checked) applyScenario8ClusterSizeFilter(0);
   });
 
-
-
-//   // Obacht: hier jetzt ein Kontext slider und kein Scenario slider, aber slider ist slider....
-// document.getElementById("uspeed-slider").addEventListener("input", (e) => {
-//   const hour = parseInt(e.target.value);
-//   document.getElementById("uspeed-slider-value").textContent = hour;
-
-//   // console.log("🎚️ Uspeed slider hour:", hour);
-
-//   if (map.getLayer("uspeed")) {
-//         map.setLayoutProperty("uspeed", "visibility", "visible"); // 👈 HIER EINBAUEN
-//     const filter = ["==", ["to-number", ["get", "hour_of_day"]], hour]
-//     // console.log("📦 Applying filter to uspeed:", filter);
-//     map.setFilter("uspeed", filter);
-//   } else {
-//     console.warn("⚠️ 'uspeed' layer not found in map.");
-//   }
-// });
-
-// let uspeedDebounceTimer = null;
-
-// document.getElementById("uspeed-slider").addEventListener("input", (e) => {
-//   const hour = parseInt(e.target.value, 10);
-//   document.getElementById("uspeed-slider-value").textContent = hour;
-
-//   // Clear previous timer if still running
-//   if (uspeedDebounceTimer) {
-//     clearTimeout(uspeedDebounceTimer);
-//   }
-
-//   // Set a new timer (e.g. 200 ms)
-//   uspeedDebounceTimer = setTimeout(() => {
-//     if (!map.getLayer("uspeed")) {
-//       console.warn("⚠️ 'uspeed' layer not found in map.");
-//       return;
-//     }
-
-//     // Ensure layer is visible
-//     map.setLayoutProperty("uspeed", "visibility", "visible");
-
-//     // Apply filtered hour
-//     const filter = ["==", ["to-number", ["get", "hour_of_day"]], hour];
-//     map.setFilter("uspeed", filter);
-//   }, 200); // ← You can adjust this delay
-// });
-
-
-
-// let uspeedDebounceTimer = null;
-
-// document.getElementById("uspeed-slider").addEventListener("input", (e) => {
-//   const hour = parseInt(e.target.value, 10);
-//   document.getElementById("uspeed-slider-value").textContent = hour;
-
-//   if (uspeedDebounceTimer) {
-//     clearTimeout(uspeedDebounceTimer);
-//   }
-
-//   uspeedDebounceTimer = setTimeout(() => {
-//     const filter = ["==", ["to-number", ["get", "hour_of_day"]], hour];
-
-//     for (const layer of ["uspeed-forward", "uspeed-reverse"]) {
-//       if (map.getLayer(layer)) {
-//         map.setLayoutProperty(layer, "visibility", "visible");
-//         map.setFilter(layer, filter);
-//       } else {
-//         console.warn(`⚠️ Layer '${layer}' not found.`);
-//       }
-//     }
-//   }, 200); // Debounce delay in ms
-// });
-
 let uspeedDebounceTimer = null;
 
 document.getElementById("uspeed-slider").addEventListener("input", (e) => {
@@ -198,8 +126,10 @@ document.getElementById("uspeed-slider").addEventListener("input", (e) => {
 
 
 
-  // Other scenario toggles (3-8)
-  for (let i = 3; i <= 8; i++) {
+  // Andere Szenario-Toggles (3-7). scenario8 hat oben einen eigenen Handler (inkl. Slider),
+  // daher NICHT bis 8 laufen lassen -> sonst doppelte change-Bindung. (4/5/7 existieren
+  // nicht -> werden durch das if(toggle) übersprungen.)
+  for (let i = 3; i <= 7; i++) {
     const toggle = document.getElementById(`toggle-scenario${i}`);
     if (toggle) {
       toggle.addEventListener("change", function (e) {

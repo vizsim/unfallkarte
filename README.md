@@ -41,8 +41,8 @@ Zwei Teile in einem Repo:
 
 ## 🔑 Keyless — kein MapTiler
 
-- **Basemap**: [OpenFreeMap](https://openfreemap.org/) Positron (eigene Planetiler-Tiles),
-  dazu OSM Carto und Esri Imagery (im Karten-Panel umschaltbar).
+- **Basemap**: [OpenFreeMap](https://openfreemap.org/) Positron (gehostete OpenFreeMap-Tiles
+  inkl. Fonts), dazu OSM Carto und Esri Imagery (im Karten-Panel umschaltbar).
 - **Relief / 3D-Terrain + Hillshade**: [Mapterhorn](https://mapterhorn.com/) (raster-dem, terrarium).
 - **3D-Gebäude**: OpenFreeMap-Planet. **Adress-Suche**: [Photon](https://photon.komoot.io/) (Komoot).
 - Kein API-Key im Code; Secrets nur in `.env` (gitignored).

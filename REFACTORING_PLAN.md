@@ -541,6 +541,8 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
 
 ### 🟢 Sofort lohnend (klein, risikoarm)
 
+> ✅ **1–3 erledigt 2026-06-03.**
+
 1. **Doku-Staleness nachziehen** — Basemap ist jetzt OFM-**gehostet**, nicht „eigene
    Planetiler-Tiles": `README.md` (Basemap-Zeile), `main.js:141` (Kommentar). Plus:
    HTML-Fallback-Datum „25-05-28" → „25-07-31" (`index.html`, 4×; Wahrheit kommt ohnehin

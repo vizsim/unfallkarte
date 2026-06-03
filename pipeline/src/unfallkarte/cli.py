@@ -99,7 +99,7 @@ def osm_build(
     layer: str = typer.Argument("all", help="Layer-Name aus osm.yaml oder 'all'"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
 ) -> None:
-    """Geofabrik -> osmium tags-filter -> ogr2ogr -> fgb/geojson -> pmtiles."""
+    """Geofabrik -> osmium tags-filter -> pyogrio (direkt PBF->FGB) -> pmtiles."""
     from unfallkarte import osm
 
     out = osm.build(layer, dry_run=dry_run)

@@ -6,7 +6,6 @@ import { paintStyles, getCircleColorPaint } from './js/styleConfig.js';
 
 // 📦 Kartenfunktionen
 import { addSources } from "./js/mapdata/addSources.js";
-// import { loadAllIcons } from "./loadAllIcons.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
 
 // 📦 Basemap/Terrain (keyless, ersetzt MapTiler) + Radinfrastruktur (TILDA)
@@ -20,7 +19,6 @@ import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 
-// import { applyZoomLock } from './js/utils/zoomLock.js';
 
 // 📦 Popups
 import {
@@ -66,14 +64,12 @@ import {
   setupPermalinkHandling
 } from './js/utils/permalink.js';
 
-// import { setupPermalinkHandling } from './js/utils/permalink.js';
 
 
 // 📦 Sonstiges
 import { setupPieChartImageGeneration } from './js/utils/generatePieIcon.js';
 import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 
-// import { setupRectangleIconGeneration } from "./generateRectangleIcon.js";
 
 
 
@@ -138,7 +134,7 @@ async function initMap() {
 
   window.map = new maplibregl.Map({
     container: "map",
-    style: "./style.json", // lokaler, keyless Positron-Style (eigene planetiler-Tiles)
+    style: "./style.json", // lokaler Positron-Style (keyless); Tiles von OpenFreeMap (gehostet)
     center: hasPermalink ? [lng, lat] : [13.634, 52.315],
     zoom: hasPermalink ? zoom : 12,
     minZoom: 6,
@@ -148,7 +144,6 @@ async function initMap() {
   originalMinZoom = map.getMinZoom();
   originalMaxZoom = map.getMaxZoom();
 
-  // const map = await createBaseMap();                // 1. Karte erzeugen
 
 
   /// load MAP
