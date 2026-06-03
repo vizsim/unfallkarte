@@ -21,7 +21,7 @@ NAME = "scenario2"
 DESCRIPTION = "Unfälle nahe Schulen (50 m Buffer, > 2 Rad/Fuß-Unfälle ab 2020)"
 OUTPUT = "scenarios/scenario2_accidents_close2schools.pmtiles"
 
-YEARS = [2020, 2021, 2022, 2023]
+YEARS = [2020, 2021, 2022, 2023, 2024]  # ab 2020 bundesweit vollständig (inkl. 2024)
 BUFFER_M = 50
 BIPED_THRESHOLD = 2
 COUNT_COLS = ["total_count", "biped_count", "bike_count", "ped_count"]
