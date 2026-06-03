@@ -1,5 +1,11 @@
 # Refactoring-Plan: Unfallkarte – Notebooks → stabile Python-Pipeline
 
+> **Status (2026-06): umgesetzt.** Die Pipeline liegt in `pipeline/`, alle Phasen
+> (0–5) sind abgeschlossen — accidents (2017–**2024**), OSM-Layer und Szenarien
+> 1/2/3/6/8 sind portiert, gebaut und nach B2 deployt; Frontend keyless mit
+> Local-first/B2; alte Notebooks ausgemistet. Dieser Plan bleibt als Begründung/
+> Historie erhalten. Aktueller Überblick: `README.md`, Regeln: `CLAUDE.md`.
+>
 > Ziel: Die Jupyter-Notebooks in `preprocessing/` und `scenarios/` durch einen
 > wartbaren, testbaren Python-Code ersetzen, sodass sich die Daten (v. a. die
 > Unfalldaten) flexibel aktualisieren und anschließend **alle Szenarien

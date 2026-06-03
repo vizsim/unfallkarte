@@ -1,105 +1,94 @@
 ![Status: Experimental](https://img.shields.io/badge/Status-Experimental-red)
+![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue)
 
 # 🚧 Unfallkarte (Deutschland)
 
-**Interaktive Webkarte** zur Darstellung und Erkundung von Verkehrsunfällen in Deutschland. Die Daten stammen aus dem [Unfallatlas des Statistischen Bundesamtes (Destatis)](https://unfallatlas.statistikportal.de/).
+**Interaktive Webkarte** für Verkehrsunfälle in Deutschland. Die Unfalldaten stammen
+aus dem [Unfallatlas der Statistischen Ämter](https://unfallatlas.statistikportal.de/)
+(dl-de/by-2-0). Rohe Unfall- und OpenStreetMap-Daten werden zu **PMTiles** verarbeitet
+und **keyless** in einer MapLibre-Karte dargestellt.
 
 ## 🚀 Online ansehen
 
 👉 [Unfallkarte auf GitHub Pages](https://vizsim.github.io/unfallkarte/)
 
-## ✨ Motivation
+## 🏗️ Architektur
 
-Mit diesem Projekt wollte ich...
+Zwei Teile in einem Repo:
 
-- **PMTiles** kennenlernen und ausprobieren – ein modernes Format zur Bereitstellung von Vektor-Tiles über HTTP.
-- **Tippecanoe** einsetzen, um große GeoJSON-Daten in performante Tiles zu verwandeln.
-- Die Möglichkeiten von **Maplibre GL JS** nutzen – insbesondere Layer-Styling, Interaktionen und benutzerdefinierte Filter.
-- **MapTilers Basemaps** verwenden – und für den Detailblick **Mapillary** integrieren.
+- **`pipeline/`** — Python-Pipeline (uv): lädt Unfalldaten (2017–2024) + OSM, baut
+  PMTiles, rechnet die Szenarien und deployt nach Backblaze B2.
+  Details + CLI: [`pipeline/README.md`](pipeline/README.md).
+- **Frontend (Repo-Root)** — statische MapLibre-Karte (`index.html` + `js/`, `style.json`).
+  Lädt die PMTiles **local-first** (`data/`) mit **B2-Fallback** über ein generiertes
+  `manifest.json`.
 
-Im Laufe der Weiterentwicklung wurden viele Komponenten weiterentwickelt und teilweise ersetzt.
+## 🗂️ Daten & Ebenen
 
-## 🔄 Neuere Entwicklungen (Juni/Juli 2025)
+- **Unfälle 2017–2024** (Unfallatlas) — Einzelpunkte (hoher Zoom) + Cluster (niedriger
+  Zoom mit Tortendiagrammen), filterbar nach Schwere, Art, Typ, Jahr und Beteiligung.
+- **OSM-Kontext** (ODbL): Schulen & Kindergärten, Gesundheitseinrichtungen, Spielplätze,
+  Tempolimit-Straßennetz (Haupt- und Nebenstraßen).
+- **Szenarien** (Unfälle/OSM × Kontext):
+  - **sc1** — Unfall-Cluster auf Tempo-100-Straßen (DBSCAN)
+  - **sc2** — Unfälle nahe Schulen (50 m, ab 2020)
+  - **sc3** — Tempo-30 durchgängig: kurze 50er-Lücken zwischen 30er-Zonen
+  - **sc6** — Tempo-50-Straßen vor Schulen (30 m, ≥60 m)
+  - **sc8** — Lärm vor Schulen (UBA-Lärmkartierung, >56 dB)
+- **Live-/Kontextlayer**: Radinfrastruktur ([radverkehrsatlas/TILDA](https://radverkehrsatlas.de/)),
+  Mapillary-Tiles (Street-View-Sprung), sowie statische Layer (Uber-Geschwindigkeiten Berlin,
+  OpenBikeSensor, UBA-Lärm, Hauptverkehrsstraßen).
 
-Das Projekt hat sich in den letzten Monaten deutlich weiterentwickelt. Wichtige Neuerungen:
+## 🔑 Keyless — kein MapTiler
 
-### ✅ Eigenes Hosting der Basemap
+- **Basemap**: [OpenFreeMap](https://openfreemap.org/) Positron (eigene Planetiler-Tiles),
+  dazu OSM Carto und Esri Imagery (im Karten-Panel umschaltbar).
+- **Relief / 3D-Terrain + Hillshade**: [Mapterhorn](https://mapterhorn.com/) (raster-dem, terrarium).
+- **3D-Gebäude**: OpenFreeMap-Planet. **Adress-Suche**: [Photon](https://photon.komoot.io/) (Komoot).
+- Kein API-Key im Code; Secrets nur in `.env` (gitignored).
 
-- **[Planetiler](https://github.com/onthegomap/planetiler)**: Erzeugt PMTiles direkt aus OpenStreetMap-Daten für die Hintergrundkarte.
-- **[OpenMapTiles Style-Vorlage](https://github.com/openmaptiles/positron-gl-style)**: Verwendet als Ausgangspunkt für das Style-Design (inspiriert von *Positron Light*).
-- **[Maputnik](https://github.com/maplibre/maputnik)**: Zum visuellen Editieren und Anpassen des Kartenstils (`style.json`).
-- Die Basemap stammt **nicht mehr von MapTiler**, um API-Limits zu vermeiden.
-- **Hillshade und 3D-Terrain** werden jedoch weiterhin über MapTiler bereitgestellt.
+## 🖥️ Frontend lokal starten
 
-### ✅ Kontext durch zusätzliche Datenebenen
+Statische Seite über HTTP servieren (ES-Module + `fetch` brauchen HTTP, kein `file://`):
 
-#### Straßen & Verkehr
+```bash
+python3 -m http.server 8000          # im Repo-Root
+# -> http://localhost:8000
+```
 
-- **Geschwindigkeitsbegrenzungen** (OpenStreetMap)
-- **Gemessene Pkw-Geschwindigkeiten (nur Berlin)**  
-  → Durchschnittsgeschwindigkeit je Tagesstunde aus *Uber Movement* (Q2 2019)
-- **Verkehrsmengen deutschlandweit**  
-  → Vom Umweltbundesamt (Lärmkartierung); nur Straßen mit >3 Mio. Fahrzeugen/Jahr (~10.000/Tag)
-- **Stadtradeln-Daten 2020**  
-  → Durchschnittsgeschwindigkeiten und Anzahl registrierter Fahrten
-- **OpenBikeSensor (OBS)**  
-  → Messungen zu Überholabständen aus dem OpenBikeSensor-Projekt
+**Local-first**: liegt ein `data/`-Verzeichnis lokal vor (z. B. Symlink auf `pipeline/data/`),
+werden die PMTiles von dort geladen; sonst fällt das Frontend automatisch auf B2 zurück
+(Manifest wird local-first, sonst aus dem Bucket gelesen).
 
-#### Sonstige
+## ⚙️ Daten aufbauen (Pipeline)
 
-- **Lärmkarten (Tag/Nacht)**  des Umweltbundesamts (deutschlandweit!)
-- **Schulen & Kindergärten** (OSM)
-- **Gesundheitseinrichtungen** (OSM)
-- **Spielplätze** (OSM)
+Voll dokumentiert in [`pipeline/README.md`](pipeline/README.md). Kurzform:
 
-### **Unterschiedliche Szenarien**
+```bash
+cd pipeline
+uv sync
+uv run unfallkarte accidents fetch && uv run unfallkarte accidents build
+uv run unfallkarte accidents tiles data/accidents/accidents_germany_2017-2024_oid.parquet
+uv run unfallkarte osm fetch && uv run unfallkarte osm build all
+uv run unfallkarte scenario run-all
+uv run unfallkarte manifest && uv run unfallkarte deploy
+```
 
-Sogenannte **Szenarien** kombinieren Unfalldaten mit ausgewählten Kontextinformationen  
-(z. B. Unfallhäufung vor Schulen oder auf Straßen mit hoher Geschwindigkeit). 
+System-Binaries (nicht via pip): `tippecanoe` + `tile-join`, `osmium-tool`; b2-CLI via
+`uv tool install b2`. (`ogr2ogr`/gdal-bin wird **nicht** gebraucht — OSM-PBF wird direkt
+via pyogrio gelesen.)
 
-Weitere Infos folgen.
+## 🧰 Tech
 
-## 🔍 Funktionen (Stand Mai 2025)
+MapLibre GL JS · PMTiles · tippecanoe · osmium-tool · GeoPandas/pyogrio (Python-Pipeline, **uv**)
+· OpenFreeMap · Mapterhorn · Backblaze B2 · Photon · radverkehrsatlas/TILDA.
 
-- **Filterung** der Unfälle nach:
-  - Unfallschwere (Getötete, Schwerverletzte, Leichtverletzte)
-  - Unfallart / -typ
-  - Jahr (2017–2023, ab 2020 alle Bundesländer)
-  - Beteiligte Verkehrsmittel (z. B. Fahrrad, Pkw, Fußgänger etc.)
-- **Farbkodierung** nach gewähltem Kriterium
-- **Mapillary-Integration**: Direkt zur Straßenansicht springen, wenn verfügbar
-- **Cluster-Darstellung** bei niedrigem Zoom für bessere Übersicht
-- Umschaltbare **Basemaps** (Standard/Satellit)
+## 📄 Lizenz
 
-## 📦 Tools & Technologien
+**AGPL-3.0-or-later** © vizsim. (Früher MIT — bereits unter MIT veröffentlichte Stände
+bleiben MIT; künftige Versionen sind AGPL.) Der Quellcode-Link im UI erfüllt die
+AGPL-§13-Pflicht (Network Use).
 
-- **[Maplibre GL JS](https://maplibre.org/)**  
-  Rendering-Engine für Webkarten mit Vektor-Tiles und Interaktionen.
-
-- **[PMTiles](https://docs.protomaps.com/pmtiles/)**  
-  Kompaktes, serverloses Tile-Format – wird direkt per HTTP gestreamt.
-
-- **[Tippecanoe](https://github.com/mapbox/tippecanoe)**  
-  CLI-Tool zur Konvertierung großer GeoJSON-Dateien in effiziente PMTiles.
-
-- **[MapTiler](https://www.maptiler.com/)**  
-  Ehemals für Basemaps genutzt – jetzt nur noch für Hillshade & 3D-Terrain.
-
-- **[Mapillary](https://www.mapillary.com/)**  
-  API-basierter Zugriff auf crowdsourcierte Straßenfotos (für kontextuelle Einblicke).
-
-- **[Planetiler](https://github.com/onthegomap/planetiler)**  
-  Generiert PMTiles direkt aus OpenStreetMap-Daten – ideal für selbst gehostete Basemaps.
-
-- **[OpenMapTiles Style-Vorlage](https://github.com/openmaptiles/positron-gl-style)**  
-  Style-Grundlage im Positron-Light-Stil für die Hintergrundkarte.
-
-- **[Maputnik](https://github.com/maplibre/maputnik)**  
-  Visueller Editor für das Anpassen von Vektor-Tile-Styles (`style.json`).
-
-- **[pmtiles.io](https://pmtiles.io/)**  
-  Praktisches Online-Tool zum Testen und Visualisieren von PMTiles-Dateien.
-
-- **[Backblaze B2](https://www.backblaze.com/)**  
-  Objekt-Storage für Hosting der PMTiles – wird aktuell genutzt, ggf. durch Alternative ersetzt.
-
+**Daten** behalten ihre eigenen Lizenzen + Attribution: Unfallatlas (dl-de/by-2-0),
+OpenStreetMap (ODbL), Umweltbundesamt (Lärm), OpenFreeMap (ODbL), Mapterhorn, Mapillary,
+radverkehrsatlas/TILDA.
