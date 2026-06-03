@@ -516,6 +516,17 @@ body {
 }
 
 
+/* Toggle-Labels in Szenarien + Kontext: hängender Einzug, damit umgebrochene Zeilen
+   unter dem Text (nicht links unter der Checkbox) weiterlaufen. Ausgenommen:
+   Sektions-Header (liegen außerhalb .legend-section-content), Slider-Labels (for=…)
+   und Flex-Labels (Mapillary-Filter mit Icon). */
+.scenario-legend-section .legend-section-content label:not([for]):not([style*="flex"]),
+.legend-section[data-section="kontext"] .legend-section-content label:not([for]):not([style*="flex"]) {
+  display: block;
+  padding-left: 1.45em;
+  text-indent: -1.45em;
+}
+
 /* slider */
 #scenario1-slider,
 #scenario8-slider,
