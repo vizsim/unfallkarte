@@ -12,6 +12,7 @@ from unfallkarte.scenarios.scenario1_clusters_ms100 import run as run_scenario1
 from unfallkarte.scenarios.scenario2_schools import run as run_scenario2
 from unfallkarte.scenarios.scenario3_tempo30_continuous import run as run_scenario3
 from unfallkarte.scenarios.scenario6_schools_tempo50 import run as run_scenario6
+from unfallkarte.scenarios.scenario8_schools_noise import run as run_scenario8
 
 
 def _write_inputs(tmp_path):
@@ -197,6 +198,44 @@ def test_scenario3_tempo30(tmp_path, capsys):
     assert "scenario3-points" in out and "scenario3-polys" in out and "tile-join" in out
 
 
-def test_registry_has_scenarios():
-    assert {"scenario1", "scenario2", "scenario3", "scenario6"} <= set(registry.REGISTRY)
-    assert "scenario8" in registry.PLANNED
+def test_scenario8_noise(tmp_path, capsys):
+    osm_raw = tmp_path / "raw" / "osm"
+    osm_raw.mkdir(parents=True)
+    laerm_raw = tmp_path / "raw" / "laerm"
+    laerm_raw.mkdir(parents=True)
+    # Schule A in einer Lärmzone (Lden6569 -> 65 > 56), Schule B außerhalb.
+    gpd.GeoDataFrame(
+        {
+            "osm_way_id": [None, None],
+            "osm_id": [11, 22],
+            "geometry": [Point(10.0, 50.0), Point(11.0, 51.0)],
+        },
+        crs="EPSG:4326",
+    ).to_file(osm_raw / "schools.fgb", driver="FlatGeobuf")
+    gpd.GeoDataFrame(
+        {"Lärmpegelklasse": ["Lden6569"], "geometry": [Point(10.0, 50.0).buffer(0.01)]},
+        crs="EPSG:4326",
+    ).to_file(laerm_raw / "laerm_den_road.fgb", driver="FlatGeobuf")
+    acc = tmp_path / "accidents.parquet"
+    gpd.GeoDataFrame(
+        {"UJAHR": [2023], "geometry": [Point(10, 50)]}, crs="EPSG:4326"
+    ).to_parquet(acc)
+    out_dir = tmp_path / "scenarios"
+    ctx = ScenarioContext(
+        accidents_parquet=acc, osm_raw=osm_raw, out_dir=out_dir, laerm_raw=laerm_raw, dry_run=True
+    )
+
+    run_scenario8(ctx)
+
+    polys = gpd.read_file(out_dir / "_tmp" / "scenario8_polys.fgb")
+    assert len(polys) == 1  # nur die laute Schule A
+    assert int(polys.iloc[0]["max_laerm_num"]) == 65
+    assert len(gpd.read_file(out_dir / "_tmp" / "scenario8_points.fgb")) == 1
+    out = capsys.readouterr().out
+    assert "scenario8-points" in out and "scenario8-polys" in out and "tile-join" in out
+
+
+def test_registry_all_scenarios():
+    expected = {"scenario1", "scenario2", "scenario3", "scenario6", "scenario8"}
+    assert expected == set(registry.REGISTRY)
+    assert registry.PLANNED == {}

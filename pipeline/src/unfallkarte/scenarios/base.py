@@ -13,6 +13,7 @@ class ScenarioContext:
     accidents_parquet: Path  # data/accidents/accidents_germany_<min>-<max>_oid.parquet
     osm_raw: Path            # data/raw/osm/ (enthält die *.fgb aus `osm build`)
     out_dir: Path            # data/scenarios/
+    laerm_raw: Path | None = None  # data/raw/laerm/ (UBA-Lärm-fgb, statisch; für sc8)
     dry_run: bool = False
 
 
@@ -27,5 +28,6 @@ def default_context(*, dry_run: bool = False) -> ScenarioContext:
         accidents_parquet=candidates[-1],
         osm_raw=paths.raw / "osm",
         out_dir=paths.out("scenarios"),
+        laerm_raw=paths.raw / "laerm",
         dry_run=dry_run,
     )

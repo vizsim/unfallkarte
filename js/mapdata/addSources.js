@@ -15,6 +15,7 @@ const MIGRATED = {
   scenario2: "scenario2",
   scenario3: "scenario3",
   scenario6: "scenario6",
+  scenario8: "scenario8",
 };
 
 // Noch NICHT in die Pipeline migriert -> altes Bucket + alte Dateinamen.
@@ -27,7 +28,6 @@ const LEGACY = {
   obs: "OBS_data_2025-06-11.pmtiles",
   laerm1: "laerm/laerm_hlq_den.pmtiles",
   laerm2: "laerm/laerm_4120_hlq_night.pmtiles",
-  scenario8: "scenario8_laerm_schulen.pmtiles",
 };
 
 export async function addSources(map, { MAPILLARY_TOKEN }) {
