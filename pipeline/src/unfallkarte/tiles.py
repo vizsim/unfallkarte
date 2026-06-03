@@ -142,7 +142,11 @@ def build_multi_layer(
         part = output.with_name(f"{output.stem}_tmp{i}.pmtiles")
         tippecanoe(profile, fgb, part, layer_override=layer_name, dry_run=dry_run)
         tmp_parts.append(part)
-    return tile_join(output, tmp_parts, dry_run=dry_run)
+    result = tile_join(output, tmp_parts, dry_run=dry_run)
+    if not dry_run:  # Zwischen-PMTiles entfernen (sollen nicht ins Deploy)
+        for part in tmp_parts:
+            part.unlink(missing_ok=True)
+    return result
 
 
 def build_accident_tiles(parquet: Path, *, dry_run: bool = False) -> dict[str, Path]:
@@ -167,5 +171,8 @@ def build_accident_tiles(parquet: Path, *, dry_run: bool = False) -> dict[str, P
         tippecanoe(prof, grouped, part, dry_run=dry_run)
         tmp_parts.append(part)
     combined = tile_join(out_dir / cfg["cluster_output"], tmp_parts, dry_run=dry_run)
+    if not dry_run:  # Zwischen-Cluster-PMTiles entfernen
+        for part in tmp_parts:
+            part.unlink(missing_ok=True)
 
     return {"single": single, "cluster": combined}
