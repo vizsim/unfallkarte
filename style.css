@@ -567,6 +567,41 @@ body {
   color: #333;
 }
 
+/* ===== Radinfrastruktur-Legende (rechtes Kontext-Panel, Stil aus mapillary_coverage_analysis) ===== */
+#bikelanes-legend .bl-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+#bikelanes-legend .bl-line {
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+#bikelanes-legend .bl-line.solid {
+  background: var(--line-color, #174ed9);
+}
+#bikelanes-legend .bl-line.dashed {
+  background: repeating-linear-gradient(to right,
+      var(--line-color, #174ed9) 0 6px, transparent 6px 8px);
+}
+#bikelanes-legend .bl-zoom-hint {
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 4px;
+}
+#bikelanes-legend .bl-source {
+  margin-top: 6px;
+  opacity: 0.8;
+}
+#bikelanes-legend .bl-source a {
+  color: inherit;
+}
+
 /* ===== Karten-Panel (unten links) — aus frontend-Makeover ===== */
 /* Karten-Panel unten links — an style.css anhängen. Aus vizsim/gradients2osm. */
 

@@ -759,6 +759,34 @@ MAIN HEADER
           </div>
         </div>
 
+        <!-- Radinfrastruktur (live: TILDA / radverkehrsatlas, kein Preprocessing) -->
+        <div style="margin-top: 6px;">
+          <label style="margin-left: 10px;">
+            <input type="checkbox" id="toggle-bikelanes" />
+            Radinfrastruktur anzeigen
+            <span class="info-icon"
+              title="Fahrradinfrastruktur & Führungsformen aus OpenStreetMap, klassifiziert nach tilda-geo / radinfra.de. Quelle: tilda-geo.de – Lizenz: ODbL. Daten ab Zoomstufe 9 sichtbar.">ⓘ</span>
+          </label>
+        </div>
+        <div id="bikelanes-legend"
+          style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div class="bl-zoom-hint">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
+          <div class="bl-row"><span class="bl-line solid" style="--line-color:#174ed9;"></span>
+            <span>Führung baul. abgesetzt von Kfz</span></div>
+          <div class="bl-row"><span class="bl-line solid" style="--line-color:#0098f0;"></span>
+            <span>Führung eigenständig auf Fahrbahn</span></div>
+          <div class="bl-row"><span class="bl-line dashed" style="--line-color:#174ed9;"></span>
+            <span>Führung mit Fußverkehr</span></div>
+          <div class="bl-row"><span class="bl-line dashed" style="--line-color:#9fb9f9;"></span>
+            <span>Fußverkehr mit Rad frei</span></div>
+          <div class="bl-row"><span class="bl-line dashed" style="--line-color:#0098f0;"></span>
+            <span>Führung mit Kfz (explizit)</span></div>
+          <div class="bl-row"><span class="bl-line dashed" style="--line-color:#a97bea;"></span>
+            <span>Führungsform unklar</span></div>
+          <div class="bl-source">Quelle: <a href="https://tilda-geo.de/regionen/radinfra"
+              target="_blank" rel="noopener noreferrer">tilda-geo.de</a></div>
+        </div>
+
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
             <input type="checkbox" id="toggle-uspeed" />
@@ -1057,8 +1085,9 @@ MAIN HEADER
     <div id="custom-nav-control"></div>
   </div>
 
-  <!-- Karten-Panel unten links (Basemaps + Relief + 3D-Gebäude + Radinfra).
-       Ersetzt den alten Standard/Satellit-Umschalter und die Terrain/Hillshade-Checkboxen. -->
+  <!-- Karten-Panel unten links (Basemaps + Relief + 3D-Gebäude).
+       Ersetzt den alten Standard/Satellit-Umschalter und die Terrain/Hillshade-Checkboxen.
+       Radinfrastruktur lebt im rechten Kontext-Panel unter "Straßen & Verkehr". -->
   <button id="map-settings-toggle" class="map-settings-toggle" type="button"
           aria-expanded="false" aria-controls="map-settings-panel" title="Kartenauswahl">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1092,11 +1121,6 @@ MAIN HEADER
       <div class="terrain-row">
         <div><strong>3D-Gebäude</strong><p>Ab Zoom 14 sichtbar</p></div>
         <label class="switch"><input id="toggle-buildings" type="checkbox" /><span class="switch-slider"></span></label>
-      </div>
-
-      <div class="terrain-row">
-        <div><strong>Radinfrastruktur</strong><p>radverkehrsatlas / TILDA</p></div>
-        <label class="switch"><input id="toggle-bikelanes" type="checkbox" /><span class="switch-slider"></span></label>
       </div>
     </div>
   </section>

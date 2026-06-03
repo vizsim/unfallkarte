@@ -2,41 +2,96 @@
 //
 // Kontextlayer "Radinfrastruktur" — live aus dem TILDA/radverkehrsatlas-
 // Vektor-Tile-Server (kein Preprocessing, kein B2). Portiert aus
-// vizsim/mapillary_coverage_analysis (viz/map/bikeLanesLayers.js); Styling nach
-// der Property `category`. Paint-Details ggf. am Original verfeinern.
+// vizsim/mapillary_coverage_analysis (viz/map/bikeLanesLayers.js); Styling +
+// Klassifizierung (Property `category`) 1:1 von dort übernommen — die dortigen
+// `category`-Werte entsprechen dem TILDA-Schema (atlas_generalized_bikelanes).
 
 export const BIKE_LANES_SOURCE_ID = "bike-lanes";
 export const BIKE_LANES_LAYER_IDS = [
   "bike-lanes-baulich",
   "bike-lanes-eigenstaendig",
-  "bike-lanes-gehweg",
+  "bike-lanes-fussverkehr",
   "bike-lanes-kfz",
+  "bike-lanes-gehweg",
   "bike-lanes-needsClarification",
 ];
 
-const LINE_WIDTH = ["interpolate", ["linear"], ["zoom"], 8, 1.5, 12, 2, 16, 3];
+const LINE_WIDTH = ["interpolate", ["linear"], ["zoom"], 8, 1.5, 10, 1.5, 14, 2, 16, 3];
+const LINE_OFFSET = ["interpolate", ["linear"], ["zoom"], 12, 0, 15, -1];
 
-// category-Werte -> Paint. Reihenfolge = Zeichenreihenfolge.
+// Reihenfolge = Zeichenreihenfolge (erster Eintrag zuunterst). Farben/Dash/Filter
+// exakt wie im Referenz-Repo, damit Karte und Legende übereinstimmen.
 const CATEGORIES = [
   {
-    id: "bike-lanes-baulich",
-    color: "#1d4ed8",
-    categories: ["cyclewayOnHighwayBothSides", "cyclewayOnHighway", "cycleway", "cyclewayLink"],
+    id: "bike-lanes-needsClarification",
+    color: "#a97bea",
+    dash: [2.5, 0.5],
+    offset: false,
+    categories: ["needsClarification"],
   },
-  { id: "bike-lanes-eigenstaendig", color: "#0098f0", categories: ["cyclewaySeparated", "footAndCyclewaySegregated"] },
   {
     id: "bike-lanes-gehweg",
     color: "#9fb9f9",
     dash: [2, 2],
+    offset: true,
     categories: [
       "footwayBicycleYes_isolated",
+      "pedestrianAreaBicycleYes",
       "footwayBicycleYes_adjoining",
       "footwayBicycleYes_adjoiningOrIsolated",
-      "pedestrianAreaBicycleYes",
     ],
   },
-  { id: "bike-lanes-kfz", color: "#f59e0b", dash: [1.5, 1], categories: ["sharedBusLane", "sharedMotorVehicleLane"] },
-  { id: "bike-lanes-needsClarification", color: "#a97bea", dash: [2.5, 0.5], categories: ["needsClarification"] },
+  {
+    id: "bike-lanes-kfz",
+    color: "#0098f0",
+    dash: [3, 1],
+    offset: true,
+    categories: [
+      "sharedMotorVehicleLane",
+      "bicycleRoad_vehicleDestination",
+      "sharedBusLaneBusWithBike",
+      "sharedBusLaneBikeWithBus",
+    ],
+  },
+  {
+    id: "bike-lanes-fussverkehr",
+    color: "#174ed9",
+    dash: [3, 1],
+    offset: true,
+    categories: [
+      "footAndCyclewayShared_isolated",
+      "footAndCyclewayShared_adjoining",
+      "footAndCyclewayShared_adjoiningOrIsolated",
+    ],
+  },
+  {
+    id: "bike-lanes-eigenstaendig",
+    color: "#0098f0",
+    offset: true,
+    categories: [
+      "cyclewayOnHighway_exclusive",
+      "cyclewayOnHighwayBetweenLanes",
+      "cyclewayLink",
+      "crossing",
+      "cyclewayOnHighway_advisory",
+      "cyclewayOnHighway_advisoryOrExclusive",
+    ],
+  },
+  {
+    id: "bike-lanes-baulich",
+    color: "#174ed9",
+    offset: true,
+    categories: [
+      "footAndCyclewaySegregated_adjoining",
+      "footAndCyclewaySegregated_adjoiningOrIsolated",
+      "cycleway_isolated",
+      "cycleway_adjoining",
+      "bicycleRoad",
+      "footAndCyclewaySegregated_isolated",
+      "cycleway_adjoiningOrIsolated",
+      "cyclewayOnHighwayProtected",
+    ],
+  },
 ];
 
 export function addBikeLanesSource(map) {
@@ -46,7 +101,7 @@ export function addBikeLanesSource(map) {
     tiles: ["https://tiles.tilda-geo.de/atlas_generalized_bikelanes/{z}/{x}/{y}"],
     minzoom: 9,
     maxzoom: 22,
-    attribution: 'Radinfrastruktur: radverkehrsatlas / TILDA',
+    attribution: "Radinfrastruktur: radverkehrsatlas / TILDA",
   });
 }
 
@@ -56,6 +111,7 @@ export function addBikeLanesLayers(map, beforeId) {
     if (map.getLayer(cat.id)) continue;
     const paint = { "line-width": LINE_WIDTH, "line-color": cat.color };
     if (cat.dash) paint["line-dasharray"] = cat.dash;
+    if (cat.offset) paint["line-offset"] = LINE_OFFSET;
     map.addLayer(
       {
         id: cat.id,

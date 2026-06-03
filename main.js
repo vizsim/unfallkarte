@@ -346,6 +346,16 @@ function setupUI(map) {
     applyLegendVisibility
   );
 
+  // Radinfrastruktur (TILDA) — Kontext-Layer im rechten Panel unter "Straßen & Verkehr".
+  // Layer-Sichtbarkeit + Legende (applyLegendVisibility schaltet #bikelanes-legend).
+  const bikelanesToggle = document.getElementById('toggle-bikelanes');
+  if (bikelanesToggle) {
+    bikelanesToggle.addEventListener('change', (e) => {
+      setBikeLanesVisible(map, e.target.checked);
+      applyLegendVisibility();
+    });
+  }
+
   document.querySelectorAll('input[name="color-style"]').forEach(rb => {
     rb.addEventListener("change", updateColorStyle);
   });
@@ -405,9 +415,6 @@ function setupMapPanel(map) {
 
   const buildingsToggle = document.getElementById('toggle-buildings');
   if (buildingsToggle) buildingsToggle.addEventListener('change', (e) => setBuildings(map, e.target.checked));
-
-  const bikelanesToggle = document.getElementById('toggle-bikelanes');
-  if (bikelanesToggle) bikelanesToggle.addEventListener('change', (e) => setBikeLanesVisible(map, e.target.checked));
 }
 
 
