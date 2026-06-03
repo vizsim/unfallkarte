@@ -74,5 +74,11 @@ datasets:
     attribution: "Unfallatlas (dl-de/by-2-0), © OpenStreetMap (ODbL)"
     date: auto            # unfallgetrieben -> max. Unfalljahr
 
+  scenario6:
+    file: "scenarios/scenario6_tempo50_30mbuffer_schulen.pmtiles"
+    label: "Tempo-50-Straßen vor Schulen"
+    attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
+    date: { fixed: "2025-07-31" }   # OSM-getrieben (kein Unfallbezug)
+
   # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
   # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.

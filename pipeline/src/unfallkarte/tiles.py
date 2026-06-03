@@ -120,15 +120,29 @@ def build_dual_layer(
 
     Punkte tragen bei niedrigem Zoom, Polygone bei hohem Zoom (siehe Profile).
     """
-    tmp_points = output.with_name(output.stem + "_tmp_points.pmtiles")
-    tmp_polys = output.with_name(output.stem + "_tmp_polys.pmtiles")
-    tippecanoe(
-        "scenario_points", points_fgb, tmp_points, layer_override=points_layer, dry_run=dry_run
+    return build_multi_layer(
+        [
+            (points_fgb, points_layer, "scenario_points"),
+            (polys_fgb, polys_layer, "scenario_polys"),
+        ],
+        output,
+        dry_run=dry_run,
     )
-    tippecanoe(
-        "scenario_polys", polys_fgb, tmp_polys, layer_override=polys_layer, dry_run=dry_run
-    )
-    return tile_join(output, [tmp_points, tmp_polys], dry_run=dry_run)
+
+
+def build_multi_layer(
+    layers: list[tuple[Path, str, str]], output: Path, *, dry_run: bool = False
+) -> Path:
+    """Mehrere FGB getrennt tilen, dann per tile-join zu einem PMTiles vereinen.
+
+    layers = Liste von (fgb, layer_name, profile_name). Layer-Namen = Frontend-Vertrag.
+    """
+    tmp_parts: list[Path] = []
+    for i, (fgb, layer_name, profile) in enumerate(layers):
+        part = output.with_name(f"{output.stem}_tmp{i}.pmtiles")
+        tippecanoe(profile, fgb, part, layer_override=layer_name, dry_run=dry_run)
+        tmp_parts.append(part)
+    return tile_join(output, tmp_parts, dry_run=dry_run)
 
 
 def build_accident_tiles(parquet: Path, *, dry_run: bool = False) -> dict[str, Path]:
