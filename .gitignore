@@ -33,3 +33,6 @@ schrott/
 # !accidents_12-13.pmtiles
 # !combined.pmtiles
 
+
+# Lokaler Local-first-Symlink auf pipeline/data (nicht committen)
+/data

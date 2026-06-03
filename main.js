@@ -154,11 +154,10 @@ async function initMap() {
 
 
   /// load MAP
-  map.on("load", () => {
+  map.on("load", async () => {
 
-
-
-    initializeMapModules(map);               // 2. Module initialisieren
+    // addSources ist async (Local-first-Auflösung) -> erst Module/Layer, dann UI.
+    await initializeMapModules(map);         // 2. Module initialisieren
     setupUI(map);                                     // 3. UI & Layer-Toggles
     setupScenarioControls(map);
     setupLegend(map);                          // 4. Legende initialisieren 
@@ -434,11 +433,11 @@ function setupEventHandlers(map) {
 
 
 
-function initializeMapModules(map) {
+async function initializeMapModules(map) {
   setupPhotonGeocoder(map);
   setupPieChartImageGeneration(map);
   addNavigationControl(map);
-  addSources(map, { MAPILLARY_TOKEN });
+  await addSources(map, { MAPILLARY_TOKEN });  // async: Local-first-Auflösung (manifest)
   // await loadAllIcons(map); // falls wieder benötigt
 
   addLayers(map);
