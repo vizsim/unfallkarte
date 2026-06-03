@@ -12,20 +12,21 @@ from pathlib import Path
 from .base import ScenarioContext
 from .scenario1_clusters_ms100 import run as run_scenario1
 from .scenario2_schools import run as run_scenario2
+from .scenario3_tempo30_continuous import run as run_scenario3
 from .scenario6_schools_tempo50 import run as run_scenario6
 
 REGISTRY: dict[str, Callable[[ScenarioContext], Path]] = {
     "scenario1": run_scenario1,
     "scenario2": run_scenario2,
+    "scenario3": run_scenario3,
     "scenario6": run_scenario6,
 }
 
-# Noch zu portieren (Phase 3). Kurzbeschreibung je Szenario.
-# scenario4/5/7 (Mapillary-Mapping-Szenarien) werden bewusst NICHT übernommen.
+# Noch zu portieren (Phase 3). scenario4/5/7 (Mapillary-Mapping) bewusst NICHT
+# übernommen; scenario8 (Lärm vor Schulen) braucht noch die Lärm-PMTiles.
 PLANNED: dict[str, str] = {
-    "scenario3": "Tempo-30 durchgängig",
     "scenario8": "Lärm vor Schulen",
 }
 
 # Reihenfolge für run-all (nur implementierte).
-ORDER: list[str] = ["scenario1", "scenario2", "scenario6"]
+ORDER: list[str] = ["scenario1", "scenario2", "scenario3", "scenario6"]

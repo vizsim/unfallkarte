@@ -10,6 +10,7 @@ from unfallkarte.scenarios import registry
 from unfallkarte.scenarios.base import ScenarioContext
 from unfallkarte.scenarios.scenario1_clusters_ms100 import run as run_scenario1
 from unfallkarte.scenarios.scenario2_schools import run as run_scenario2
+from unfallkarte.scenarios.scenario3_tempo30_continuous import run as run_scenario3
 from unfallkarte.scenarios.scenario6_schools_tempo50 import run as run_scenario6
 
 
@@ -160,6 +161,42 @@ def test_scenario1_clusters(tmp_path, capsys):
     assert "scenario1-points" in out and "scenario1-polys" in out and "tile-join" in out
 
 
+def test_scenario3_tempo30(tmp_path, capsys):
+    osm_raw = tmp_path / "raw" / "osm"
+    osm_raw.mkdir(parents=True)
+    # 30er-Zone A — kurze 50er-Lücke C — 30er-Zone B (C berührt A am Start, B am Ende).
+    gpd.GeoDataFrame(
+        {
+            "osm_id": [1, 2, 3],
+            "maxspeed": ["30", "50", "30"],
+            "maxspeed_type": ["DE:urban"] * 3,
+            "maxspeed_conditional": ["", "", ""],
+            "name": ["Zone A", "Luecke C", "Zone B"],
+            "highway": ["tertiary"] * 3,
+            "geometry": [
+                LineString([(9.998, 50.0), (9.999, 50.0)]),
+                LineString([(9.999, 50.0), (10.000, 50.0)]),
+                LineString([(10.000, 50.0), (10.001, 50.0)]),
+            ],
+        },
+        crs="EPSG:4326",
+    ).to_file(osm_raw / "maxspeed_major.fgb", driver="FlatGeobuf")
+    acc = tmp_path / "accidents.parquet"
+    gpd.GeoDataFrame(
+        {"UJAHR": [2023], "geometry": [Point(10, 50)]}, crs="EPSG:4326"
+    ).to_parquet(acc)
+    out_dir = tmp_path / "scenarios"
+    ctx = ScenarioContext(accidents_parquet=acc, osm_raw=osm_raw, out_dir=out_dir, dry_run=True)
+
+    run_scenario3(ctx)
+
+    polys = gpd.read_file(out_dir / "_tmp" / "scenario3_polys.fgb")
+    assert len(polys) == 1  # genau die eine 50er-Lücke C
+    assert len(gpd.read_file(out_dir / "_tmp" / "scenario3_points.fgb")) == 1
+    out = capsys.readouterr().out
+    assert "scenario3-points" in out and "scenario3-polys" in out and "tile-join" in out
+
+
 def test_registry_has_scenarios():
-    assert {"scenario1", "scenario2", "scenario6"} <= set(registry.REGISTRY)
-    assert "scenario3" in registry.PLANNED
+    assert {"scenario1", "scenario2", "scenario3", "scenario6"} <= set(registry.REGISTRY)
+    assert "scenario8" in registry.PLANNED
