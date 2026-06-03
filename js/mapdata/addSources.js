@@ -18,8 +18,7 @@ const MIGRATED = {
 };
 
 // Noch NICHT in die Pipeline migriert -> altes Bucket + alte Dateinamen.
-// (scenario4/5/7 sind Mapillary-Szenarien, in der Pipeline bewusst entfallen,
-//  liegen aber noch im alten Bucket; scenario8 = Lärm noch offen.)
+// (statische Kontextdaten + scenario8/Lärm; scenario4/5/7 = Mapillary wurden entfernt.)
 const OLD_BASE = "https://f003.backblazeb2.com/file/unfallkarte-data/";
 const LEGACY = {
   movebis: "movebis_speed_germany_2020_min10cnt.pmtiles",
@@ -28,9 +27,6 @@ const LEGACY = {
   obs: "OBS_data_2025-06-11.pmtiles",
   laerm1: "laerm/laerm_hlq_den.pmtiles",
   laerm2: "laerm/laerm_4120_hlq_night.pmtiles",
-  scenario4: "scenarios/scenario4_tempo30missing_ger_osm250628_ml250607.pmtiles",
-  scenario5: "scenario5_crossing-missing.pmtiles",
-  scenario7: "scenarios/scenario7_trafficsigns_missing-cw_osm250731_ml250730_ml1y25.pmtiles",
   scenario8: "scenario8_laerm_schulen.pmtiles",
 };
 

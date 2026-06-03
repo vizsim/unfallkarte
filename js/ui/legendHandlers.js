@@ -31,7 +31,7 @@ export function applyLegendVisibility() {
   const keys = [
     "schools", "health", "playgrounds",
     "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2", "uspeed",
-    "scenario1", "scenario2", "scenario3", "scenario4", "scenario6", "scenario7"
+    "scenario1", "scenario2", "scenario3", "scenario6"
   ];
 
   keys.forEach(key => {

@@ -40,10 +40,7 @@ import {
   setupScenario1Popups,
   setupScenario2Popups,
   setupScenario3Popups,
-  setupScenario4Popups,
-  setupScenario5Popups,
   setupScenario6Popups,
-  setupScenario7Popups,
   setupScenario8Popups
 } from './js/ui/popupHandlers.js';
 
@@ -323,10 +320,7 @@ function setupPopups(map) {
   setupScenario1Popups(map);
   setupScenario2Popups(map);
   setupScenario3Popups(map);
-  setupScenario4Popups(map);
-  setupScenario5Popups(map);
   setupScenario6Popups(map);
-  setupScenario7Popups(map);
   setupScenario8Popups(map);
 }
 
