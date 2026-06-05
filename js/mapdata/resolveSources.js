@@ -9,7 +9,7 @@
 //   map.addSource("accidents_single", { type:"vector", url: sources.url("accidents_single") });
 
 const LOCAL_BASE = "./data/";
-const REMOTE_BASE = "https://f003.backblazeb2.com/file/unfallkarte-data-v2/";
+const REMOTE_BASE = "https://tiles.vizsim.de/file/unfallkarte-data-v2/";
 
 // Manifest local-first laden, sonst von B2. So braucht die deployte Seite (Pages)
 // kein eigenes data/manifest.json — sie nimmt das aus dem Bucket.

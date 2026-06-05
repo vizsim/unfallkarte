@@ -119,7 +119,7 @@ export const LAYERS = {
 
 async function initMap() {
   /// somehow this is needed to load the pmtiles protocol
-  const pmtilesBaseURL = "https://f003.backblazeb2.com/file/unfallkarte-data/";
+  const pmtilesBaseURL = "https://tiles.vizsim.de/file/unfallkarte-data/";
   const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
   maplibregl.addProtocol("pmtiles", protocol.tile);
 
