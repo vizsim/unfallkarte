@@ -56,6 +56,15 @@ function setupCheckboxHandlers(map, originalMinZoom, setCurrentZoomLock, applyLe
       updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility);
     });
   });
+
+  // Zeit-Slider: filtert nach captured_at (Aufnahmedatum). max dynamisch aufs aktuelle Jahr.
+  const yearSlider = document.getElementById("mapillary-img-year");
+  if (yearSlider) {
+    yearSlider.max = String(new Date().getFullYear());
+    yearSlider.addEventListener("input", () => {
+      updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLegendVisibility);
+    });
+  }
 }
 
 
@@ -73,15 +82,30 @@ function updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLe
 
   if (baseFilter.length === 1) baseFilter = ["==", "id", "__never__"];
 
+  // Zeitfilter über captured_at (ms-Epoch). Slider am Minimum = "alle" (kein Zeitfilter).
+  const yearSlider = document.getElementById("mapillary-img-year");
+  const yearLabel = document.getElementById("mapillary-img-year-value");
+  let timeClause = null;
+  if (yearSlider) {
+    const year = Number(yearSlider.value);
+    const minYear = Number(yearSlider.min);
+    if (yearLabel) yearLabel.textContent = year <= minYear ? "alle" : year;
+    if (year > minYear) {
+      const cutoffMs = Date.UTC(year, 0, 1);
+      timeClause = [">=", ["to-number", ["get", "captured_at"]], cutoffMs];
+    }
+  }
+  const withTime = (f) => (timeClause ? ["all", f, timeClause] : f);
+
   if (map.getLayer("mapillary-images-layer")) {
-    map.setFilter("mapillary-images-layer", baseFilter);
+    map.setFilter("mapillary-images-layer", withTime(baseFilter));
   }
 
   if (map.getLayer("mapillary-images-halo")) {
     const haloFilter = showPano
       ? ["==", ["to-string", ["get", "is_pano"]], "true"]
       : ["==", "id", "__never__"];
-    map.setFilter("mapillary-images-halo", haloFilter);
+    map.setFilter("mapillary-images-halo", withTime(haloFilter));
     map.setLayoutProperty("mapillary-images-halo", "visibility", showPano ? "visible" : "none");
   }
 

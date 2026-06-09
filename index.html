@@ -645,6 +645,18 @@ MAIN HEADER
             <span style="width: 12px; height: 12px; background: #0077ff; border-radius: 2px;"></span>
             Panorama-Bilder
           </label>
+
+          <!-- Zeitfilter: Aufnahmedatum (captured_at) -->
+          <div style="margin-top: 12px;">
+            <label for="mapillary-img-year" style="display: block; font-weight: bold; margin-bottom: 4px;">
+              Aufgenommen ab: <span id="mapillary-img-year-value">2024</span>
+            </label>
+            <input type="range" id="mapillary-img-year" min="2014" max="2026" step="1" value="2024"
+              style="width: 100%;" />
+            <div style="font-size: 10px; color: #666; margin-top: 2px;">
+              Nur Bilder ab dem gewählten Aufnahmejahr (captured_at).
+            </div>
+          </div>
         </div>
 
 
