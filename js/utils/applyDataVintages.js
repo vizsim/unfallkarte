@@ -22,4 +22,16 @@ export async function applyDataVintages(manifest) {
       el.title = `Quelle: © OpenStreetMap (${shortDate(vintage)}) – Lizenz: ODbL`;
     }
   });
+
+  // Telraam: eigener Quellen-/Lizenztext (CC BY-NC) + Prozessierungsdatum (Manifest-
+  // vintage = mtime des PMTiles). Füllt Info-Icon-Tooltip und den "Stand"-Hinweis
+  // hinter "Ø der letzten 2 Wochen" in der Legende.
+  const tv = mf && mf.telraam_segments && mf.telraam_segments.vintage;
+  if (tv) {
+    document.querySelectorAll("[data-telraam-vintage]").forEach((el) => {
+      el.title = `Quelle: Telraam (© Telraam-Mitwirkende), Stand ${tv} – Lizenz: CC BY-NC 4.0`;
+    });
+    const note = document.getElementById("telraam-vintage-note");
+    if (note) note.textContent = ` (Stand: ${tv})`;
+  }
 }
