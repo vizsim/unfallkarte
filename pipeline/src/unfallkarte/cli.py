@@ -17,9 +17,11 @@ app = typer.Typer(no_args_is_help=True, add_completion=False, help="unfallkarte 
 accidents_app = typer.Typer(no_args_is_help=True, help="Unfalldaten: laden & bauen")
 osm_app = typer.Typer(no_args_is_help=True, help="OSM via Geofabrik + osmium")
 scenario_app = typer.Typer(no_args_is_help=True, help="Szenarien rechnen")
+telraam_app = typer.Typer(no_args_is_help=True, help="Telraam-Verkehrszähl-Segmente")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
+app.add_typer(telraam_app, name="telraam")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -105,6 +107,27 @@ def osm_build(
     out = osm.build(layer, dry_run=dry_run)
     for name, path in out.items():
         typer.secho(f"{name}: {path}", fg=typer.colors.GREEN)
+
+
+# --- telraam (Kontextlayer) ---
+@telraam_app.command("fetch")
+def telraam_fetch(force: bool = typer.Option(False, "--force", help="Erneut laden")) -> None:
+    """Lädt alle Telraam-Segmente (segments/all) nach data/raw/telraam/."""
+    from unfallkarte import telraam
+
+    dest = telraam.fetch(force=force)
+    typer.secho(f"JSON: {dest}", fg=typer.colors.GREEN)
+
+
+@telraam_app.command("build")
+def telraam_build(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """Reprojiziert+filtert (DE) und tilet -> telraam/telraam_segments.pmtiles."""
+    from unfallkarte import telraam
+
+    out = telraam.build(dry_run=dry_run)
+    typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 
 # --- scenarios (Phase 3) ---

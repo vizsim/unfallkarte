@@ -1251,6 +1251,35 @@ export function addLayers(map) {
 
 
 
+  function addTelraamLayer(map) {
+    // Telraam-Zählstellen (kurze Straßensegmente, CC BY-NC). Klick öffnet die
+    // Telraam-Location-Seite (siehe setupTelraamLinks in popupHandlers.js).
+    // source-layer + oidn = Frontend-Vertrag (siehe pipeline telraam.py / tiles.yaml).
+    map.addLayer({
+      id: "telraam",
+      type: "line",
+      source: "telraam_segments",
+      "source-layer": "telraam_segments",
+      minzoom: 9,
+      layout: {
+        visibility: "none",
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      paint: {
+        "line-color": "#6a1b9a",
+        "line-opacity": 0.9,
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          9, 2,
+          13, 4,
+          16, 7
+        ]
+      }
+    });
+  }
+
+
   function addMapillaryLayer(map) {
     // ⬇️ Soft halo for pano
     map.addLayer({
@@ -1342,6 +1371,7 @@ export function addLayers(map) {
   addHvsLayer(map);
   addLaermLayer(map);
   addUspeedLayer(map);
+  addTelraamLayer(map);
 
 
   addMapillaryLayer(map);

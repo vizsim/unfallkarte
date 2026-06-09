@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     b2_application_key: str = ""
     b2_bucket_name: str = "unfallkarte-data-v2"
     mapillary_token: str = ""
+    telraam_api_key: str = ""
 
 
 @lru_cache

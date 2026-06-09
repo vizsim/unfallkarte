@@ -33,11 +33,19 @@ def _osm_vintage() -> str | None:
     return osm.data_date(get_paths().raw / "osm" / cfg["pbf"])
 
 
+def _telraam_vintage() -> str | None:
+    """Datenstand = Build-Zeit des Telraam-PMTiles (Segment-Standorte ändern sich selten)."""
+    f = get_paths().out("telraam") / "telraam_segments.pmtiles"
+    return date.fromtimestamp(f.stat().st_mtime).isoformat() if f.exists() else None
+
+
 def _resolve_date(dataset_id: str, date_spec: Any) -> str | None:
     if isinstance(date_spec, dict) and "fixed" in date_spec:
         return str(date_spec["fixed"])
     if date_spec == "osm":  # explizit OSM-getrieben (z.B. OSM-Szenarien ohne Unfallbezug)
         return _osm_vintage()
+    if date_spec == "telraam":  # Harvest-getrieben (Telraam-API)
+        return _telraam_vintage()
     if date_spec == "auto":
         # Szenarien sind unfallgetrieben -> Datenstand = max. Unfalljahr
         if dataset_id.startswith("accidents") or dataset_id.startswith("scenario"):

@@ -661,6 +661,24 @@ export function setupMapillaryTrafficsignPopups(map) {
 }
 
 
+// Telraam-Zählstellen: Klick öffnet die zugehörige Telraam-Location-Seite.
+// Keine Popup-Tabelle — `oidn` (Segment-ID) ist die einzige Property.
+export function setupTelraamLinks(map) {
+    map.on("click", "telraam", (e) => {
+        const oidn = e.features?.[0]?.properties?.oidn;
+        if (oidn != null) {
+            window.open(`https://telraam.net/en/location/${oidn}`, "_blank", "noopener");
+        }
+    });
+    map.on("mouseenter", "telraam", () => {
+        map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "telraam", () => {
+        map.getCanvas().style.cursor = "";
+    });
+}
+
+
 
 
 

@@ -41,6 +41,7 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
   setupToggle(map, "toggle-obs", ["obs"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-laerm1", ["laerm1"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-laerm2", ["laerm2"], zoomLock, applyLegendVisibility);
+  setupToggle(map, "toggle-telraam", ["telraam"], zoomLock, applyLegendVisibility);
 
   // Für "maxspeed" Layer mit mehreren Layern
   setupToggle(map, "toggle-maxspeed", [

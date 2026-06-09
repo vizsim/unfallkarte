@@ -98,5 +98,12 @@ datasets:
     attribution: "Umweltbundesamt (UBA-Lärmkartierung), © OpenStreetMap (ODbL)"
     date: { fixed: "2017" }   # UBA-Lärmkartierung (lärmgetrieben, statisch)
 
+  # --- Kontextlayer Telraam ---
+  telraam_segments:
+    file: "telraam/telraam_segments.pmtiles"
+    label: "Telraam-Zählstellen"
+    attribution: "© Telraam-Mitwirkende (CC BY-NC 4.0)"
+    date: telraam         # Build-/Harvest-Datum (Segment-Standorte ändern sich selten)
+
   # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
   # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.

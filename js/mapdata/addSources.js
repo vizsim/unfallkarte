@@ -16,6 +16,7 @@ const MIGRATED = {
   scenario3: "scenario3",
   scenario6: "scenario6",
   scenario8: "scenario8",
+  telraam_segments: "telraam_segments",
 };
 
 // Noch NICHT in die Pipeline migriert -> altes Bucket + alte Dateinamen.
