@@ -22,7 +22,7 @@ const MIGRATED = {
 // Noch NICHT in die Pipeline migriert -> altes Bucket + alte Dateinamen.
 // (statische Kontextdaten + scenario8/Lärm; scenario4/5/7 = Mapillary wurden entfernt.)
 const OLD_BASE = "https://tiles.vizsim.de/file/unfallkarte-data/";
-const LEGACY = {
+export const LEGACY = {
   movebis: "movebis_speed_germany_2020_min10cnt.pmtiles",
   hvs: "Hauptverkehrstraßennetz.pmtiles",
   uspeed: "uber_movement_osm_q2_2019_allHoures_osm200101.pmtiles",

@@ -1,6 +1,8 @@
 
 // popupHandlers.js
 
+import { formatDateDE } from "../utils/formatDate.js";
+
 
 // Beteiligung Popup Handler
 
@@ -641,8 +643,8 @@ export function setupMapillaryTrafficsignPopups(map) {
 
             const content = `
             <table style="font-size:12px; border-collapse:collapse;">
-            ${props.first_seen_at ? `<tr><td><strong>first_seen_at</strong></td><td>${new Date(+props.first_seen_at).toISOString().slice(0, 10)}</td></tr>` : ""}
-            ${props.last_seen_at ? `<tr><td><strong>last_seen_at</strong></td><td>${new Date(+props.last_seen_at).toISOString().slice(0, 10)}</td></tr>` : ""}
+            ${props.first_seen_at ? `<tr><td><strong>first_seen_at</strong></td><td>${formatDateDE(new Date(+props.first_seen_at).toISOString().slice(0, 10))}</td></tr>` : ""}
+            ${props.last_seen_at ? `<tr><td><strong>last_seen_at</strong></td><td>${formatDateDE(new Date(+props.last_seen_at).toISOString().slice(0, 10))}</td></tr>` : ""}
             ${props.value ? `<tr><td><strong>value</strong></td><td>${props.value}</td></tr>` : ""}
 
             </table>
