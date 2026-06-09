@@ -19,11 +19,13 @@ osm_app = typer.Typer(no_args_is_help=True, help="OSM via Geofabrik + osmium")
 scenario_app = typer.Typer(no_args_is_help=True, help="Szenarien rechnen")
 telraam_app = typer.Typer(no_args_is_help=True, help="Telraam-Verkehrszähl-Segmente")
 hvs_app = typer.Typer(no_args_is_help=True, help="UBA-Verkehrsmengen (Hauptverkehrsstraßen)")
+laerm_app = typer.Typer(no_args_is_help=True, help="UBA-Umgebungslärm (Lärmkartierung)")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
 app.add_typer(telraam_app, name="telraam")
 app.add_typer(hvs_app, name="hvs")
+app.add_typer(laerm_app, name="laerm")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -152,6 +154,33 @@ def hvs_build(
 
     out = hvs.build(dry_run=dry_run)
     typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
+
+
+# --- laerm / UBA-Umgebungslärm ---
+@laerm_app.command("fetch")
+def laerm_fetch(
+    variant: str = typer.Argument(..., help="laerm_den | laerm_night"),
+    force: bool = typer.Option(False, "--force", help="Erneut laden"),
+) -> None:
+    """Zieht einen UBA-Lärmindex (Layer 4110/4120) nach data/raw/laerm/."""
+    from unfallkarte import laerm
+
+    dest = laerm.fetch(variant, force=force)
+    typer.secho(f"GeoJSON: {dest}", fg=typer.colors.GREEN)
+
+
+@laerm_app.command("build")
+def laerm_build(
+    variant: str = typer.Argument("all", help="laerm_den | laerm_night | all"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """Lärmindex -> noise/laerm_*.pmtiles (interner Layer = Frontend-Vertrag)."""
+    from unfallkarte import laerm
+
+    names = list(laerm.VARIANTS) if variant == "all" else [variant]
+    for n in names:
+        out = laerm.build(n, dry_run=dry_run)
+        typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 
 # --- scenarios (Phase 3) ---

@@ -50,12 +50,6 @@ datasets:
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
     date: auto
 
-  laerm_den:
-    file: "noise/laerm_den.pmtiles"
-    label: "Lärm (Tag-Abend-Nacht)"
-    attribution: "Umweltbundesamt"
-    date: { fixed: "2017" }   # statische Kartierung
-
   uber_speed:
     file: "traffic/uber_speed.pmtiles"
     label: "Pkw-Geschwindigkeiten (Berlin)"
@@ -97,6 +91,19 @@ datasets:
     label: "Lärm vor Schulen"
     attribution: "Umweltbundesamt (UBA-Lärmkartierung), © OpenStreetMap (ODbL)"
     date: { fixed: "2017" }   # UBA-Lärmkartierung (lärmgetrieben, statisch)
+
+  # --- Kontextlayer UBA-Umgebungslärm (Hauptverkehrsstraßen, END-Lärmkartierung) ---
+  laerm_den:
+    file: "noise/laerm_den.pmtiles"
+    label: "Lärm (Tag-Abend-Nacht)"
+    attribution: "© Umweltbundesamt-DE (END-Lärmkartierung, Hauptverkehrsstraßen)"
+    date: { fixed: "2017" }   # statische END-Kartierung (UBA-Layer 4110, Lden)
+
+  laerm_night:
+    file: "noise/laerm_night.pmtiles"
+    label: "Lärm (Nacht)"
+    attribution: "© Umweltbundesamt-DE (END-Lärmkartierung, Hauptverkehrsstraßen)"
+    date: { fixed: "2017" }   # statische END-Kartierung (UBA-Layer 4120, Lnight)
 
   # --- Kontextlayer UBA-Verkehrsmengen (Hauptverkehrsstraßen) ---
   hvs:

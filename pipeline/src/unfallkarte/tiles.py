@@ -39,6 +39,10 @@ def _profile_args(profile: dict[str, Any], layer_override: str | None = None) ->
         args.append(f"--drop-rate={profile['drop_rate']}")
     if profile.get("drop_densest_as_needed"):
         args.append("--drop-densest-as-needed")
+    if profile.get("coalesce"):
+        args.append("--coalesce")
+    if profile.get("coalesce_densest_as_needed"):
+        args.append("--coalesce-densest-as-needed")
     if "cluster_distance" in profile:
         args.append(f"--cluster-distance={profile['cluster_distance']}")
     for acc in profile.get("accumulate", []):

@@ -82,6 +82,20 @@ profiles:
     maxzoom: 15
     no_tile_size_limit: true
 
+  # UBA-Umgebungslärm (Lärmpegelklassen-Polygone). Layer-Name je Variante via
+  # layer_override (laerm_hlq_den-polys / laerm_4120_hlq_night-polys = Frontend-Vertrag).
+  # Flags 1:1 aus den alten Notebooks: nichts droppen/limitieren, coalesce gegen Tile-Größe.
+  laerm:
+    minzoom: 6
+    maxzoom: 14
+    drop_rate: 0
+    drop_densest_as_needed: true
+    coalesce: true
+    coalesce_densest_as_needed: true
+    no_feature_limit: true
+    no_tile_size_limit: true
+    force_feature_limit: true
+
   # Telraam-Zählstellen (kurze Straßensegmente, Linien). Layer-Name = Frontend-Vertrag.
   # Wenige Features (~1,4k DE) → kein Dropping, ab z9 sichtbar, z14 überzoomt nach oben.
   telraam_segments:

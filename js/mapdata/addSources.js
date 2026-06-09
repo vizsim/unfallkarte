@@ -18,17 +18,17 @@ const MIGRATED = {
   scenario8: "scenario8",
   telraam_segments: "telraam_segments",
   hvs: "hvs",
+  laerm1: "laerm_den",
+  laerm2: "laerm_night",
 };
 
 // Noch NICHT in die Pipeline migriert -> altes Bucket + alte Dateinamen.
-// (statische Kontextdaten + scenario8/Lärm; scenario4/5/7 = Mapillary wurden entfernt.)
+// (statische Kontextdaten; scenario4/5/7 = Mapillary wurden entfernt.)
 const OLD_BASE = "https://tiles.vizsim.de/file/unfallkarte-data/";
 export const LEGACY = {
   movebis: "movebis_speed_germany_2020_min10cnt.pmtiles",
   uspeed: "uber_movement_osm_q2_2019_allHoures_osm200101.pmtiles",
   obs: "OBS_data_2025-06-11.pmtiles",
-  laerm1: "laerm/laerm_hlq_den.pmtiles",
-  laerm2: "laerm/laerm_4120_hlq_night.pmtiles",
 };
 
 export async function addSources(map, { MAPILLARY_TOKEN }) {
