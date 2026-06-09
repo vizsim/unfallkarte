@@ -18,10 +18,12 @@ accidents_app = typer.Typer(no_args_is_help=True, help="Unfalldaten: laden & bau
 osm_app = typer.Typer(no_args_is_help=True, help="OSM via Geofabrik + osmium")
 scenario_app = typer.Typer(no_args_is_help=True, help="Szenarien rechnen")
 telraam_app = typer.Typer(no_args_is_help=True, help="Telraam-Verkehrszähl-Segmente")
+hvs_app = typer.Typer(no_args_is_help=True, help="UBA-Verkehrsmengen (Hauptverkehrsstraßen)")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
 app.add_typer(telraam_app, name="telraam")
+app.add_typer(hvs_app, name="hvs")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -128,6 +130,27 @@ def telraam_build(
     from unfallkarte import telraam
 
     out = telraam.build(refresh=refresh, dry_run=dry_run)
+    typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
+
+
+# --- hvs / UBA-Verkehrsmengen ---
+@hvs_app.command("fetch")
+def hvs_fetch(force: bool = typer.Option(False, "--force", help="Erneut laden")) -> None:
+    """Lädt Layer 81002 (Hauptverkehrsstraßennetz, 2021) nach data/raw/hvs/."""
+    from unfallkarte import hvs
+
+    dest = hvs.fetch(force=force)
+    typer.secho(f"GeoJSON: {dest}", fg=typer.colors.GREEN)
+
+
+@hvs_app.command("build")
+def hvs_build(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """Verkehrsmengen -> uba/hvs_verkehrsmengen.pmtiles (interner Layer `lines`)."""
+    from unfallkarte import hvs
+
+    out = hvs.build(dry_run=dry_run)
     typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 

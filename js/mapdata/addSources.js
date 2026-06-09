@@ -17,6 +17,7 @@ const MIGRATED = {
   scenario6: "scenario6",
   scenario8: "scenario8",
   telraam_segments: "telraam_segments",
+  hvs: "hvs",
 };
 
 // Noch NICHT in die Pipeline migriert -> altes Bucket + alte Dateinamen.
@@ -24,7 +25,6 @@ const MIGRATED = {
 const OLD_BASE = "https://tiles.vizsim.de/file/unfallkarte-data/";
 export const LEGACY = {
   movebis: "movebis_speed_germany_2020_min10cnt.pmtiles",
-  hvs: "Hauptverkehrstraßennetz.pmtiles",
   uspeed: "uber_movement_osm_q2_2019_allHoures_osm200101.pmtiles",
   obs: "OBS_data_2025-06-11.pmtiles",
   laerm1: "laerm/laerm_hlq_den.pmtiles",

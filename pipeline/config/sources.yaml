@@ -98,6 +98,13 @@ datasets:
     attribution: "Umweltbundesamt (UBA-Lärmkartierung), © OpenStreetMap (ODbL)"
     date: { fixed: "2017" }   # UBA-Lärmkartierung (lärmgetrieben, statisch)
 
+  # --- Kontextlayer UBA-Verkehrsmengen (Hauptverkehrsstraßen) ---
+  hvs:
+    file: "uba/hvs_verkehrsmengen.pmtiles"
+    label: "Verkehrsmengen (Hauptverkehrsstraßen)"
+    attribution: "© Umweltbundesamt-DE (END-Lärmkartierung, Hauptverkehrsstraßen)"
+    date: { fixed: "2021" }   # END 4. Runde, Bezugsjahr 2021 (Layer 81002, versionId 2021)
+
   # --- Kontextlayer Telraam ---
   telraam_segments:
     file: "telraam/telraam_segments.pmtiles"

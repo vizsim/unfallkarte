@@ -48,4 +48,12 @@ export async function applyDataVintages(manifest) {
       el.title = `Quelle: Umweltbundesamt-DE (Lärmkartierung), Stand ${formatDateDE(lv)} – Lizenz: dl-by-de/2.0`;
     });
   }
+
+  // UBA-Verkehrsmengen (Hauptverkehrsstraßen, END 4. Runde): Stand aus Manifest (hvs).
+  const hv = mf && mf.hvs && mf.hvs.vintage;
+  if (hv) {
+    document.querySelectorAll("[data-hvs-vintage]").forEach((el) => {
+      el.title = `Quelle: © Umweltbundesamt-DE (Hauptverkehrsstraßen, END), Stand ${formatDateDE(hv)} – Lizenz: dl-by-de/2.0`;
+    });
+  }
 }

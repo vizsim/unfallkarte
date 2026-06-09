@@ -74,6 +74,14 @@ profiles:
     no_feature_limit: true
     no_tile_size_limit: true
 
+  # UBA-Verkehrsmengen Hauptverkehrsstraßen (Linien). Layer-Name = Frontend-Vertrag (`lines`).
+  # Settings wie die bewährte Altdatei: volle Geometrie behalten, nichts vereinfachen/droppen.
+  hvs_lines:
+    layer: lines
+    minzoom: 9
+    maxzoom: 15
+    no_tile_size_limit: true
+
   # Telraam-Zählstellen (kurze Straßensegmente, Linien). Layer-Name = Frontend-Vertrag.
   # Wenige Features (~1,4k DE) → kein Dropping, ab z9 sichtbar, z14 überzoomt nach oben.
   telraam_segments:
