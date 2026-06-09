@@ -661,20 +661,35 @@ export function setupMapillaryTrafficsignPopups(map) {
 }
 
 
-// Telraam-Zählstellen: Klick öffnet die zugehörige Telraam-Location-Seite.
-// Keine Popup-Tabelle — `oidn` (Segment-ID) ist die einzige Property.
-export function setupTelraamLinks(map) {
+// Telraam-Zählstellen: Hover zeigt Ø Auto/Rad pro Tag (letzte 2 Wochen),
+// Klick öffnet die Telraam-Location-Seite mit dem vollen Verlauf.
+export function setupTelraamInteractivity(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+    const fmt = (v) =>
+        (v === undefined || v === null || v === "") ? "—" : Math.round(Number(v)).toLocaleString("de-DE");
+
+    map.on("mouseenter", "telraam", (e) => {
+        map.getCanvas().style.cursor = "pointer";
+        const p = e.features?.[0]?.properties ?? {};
+        popup.setLngLat(e.lngLat).setHTML(`
+            <div style="font-size:12px;">
+              <div><strong>Ø Rad/Tag:</strong> ${fmt(p.bike_per_day)}</div>
+              <div><strong>Ø Auto/Tag:</strong> ${fmt(p.car_per_day)}</div>
+              <div style="color:#666; margin-top:4px;">Ø letzte 2 Wochen · Klick öffnet Telraam</div>
+            </div>`).addTo(map);
+    });
+    map.on("mousemove", "telraam", (e) => {
+        popup.setLngLat(e.lngLat);
+    });
+    map.on("mouseleave", "telraam", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
+    });
     map.on("click", "telraam", (e) => {
         const oidn = e.features?.[0]?.properties?.oidn;
         if (oidn != null) {
             window.open(`https://telraam.net/en/location/${oidn}`, "_blank", "noopener");
         }
-    });
-    map.on("mouseenter", "telraam", () => {
-        map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", "telraam", () => {
-        map.getCanvas().style.cursor = "";
     });
 }
 

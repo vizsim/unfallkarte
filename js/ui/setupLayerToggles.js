@@ -7,6 +7,7 @@
 
 import { applyZoomLock } from "../utils/zoomLock.js";
 import { updateLegendVisibilityByZoom } from "./legendHandlers.js";
+import { telraamColorExpr } from "../mapdata/addLayers.js";
 
 
 
@@ -42,6 +43,7 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
   setupToggle(map, "toggle-laerm1", ["laerm1"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-laerm2", ["laerm2"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-telraam", ["telraam"], zoomLock, applyLegendVisibility);
+  setupTelraamMode(map);
 
   // Für "maxspeed" Layer mit mehreren Layern
   setupToggle(map, "toggle-maxspeed", [
@@ -87,4 +89,29 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
   setupToggle(map, "toggle-schools", ["schools-points", "schools-polygons"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-health", ["health-points", "health-polygons"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-playgrounds", ["playgrounds-points", "playgrounds-polygons"], zoomLock, applyLegendVisibility);
+}
+
+
+// Telraam-Umschalter Auto/Rad: setzt die Linienfarbe auf den gewählten Modus und
+// zeigt die passende Farb-Rampe. Wird einmal beim Setup initialisiert.
+function setupTelraamMode(map) {
+  const radios = document.querySelectorAll('input[name="telraam-mode"]');
+  if (!radios.length) return;
+
+  const apply = (mode) => {
+    if (map.getLayer("telraam")) {
+      map.setPaintProperty("telraam", "line-color", telraamColorExpr(mode));
+    }
+    document.querySelectorAll(".telraam-ramp").forEach(el => {
+      el.style.display = el.dataset.mode === mode ? "block" : "none";
+    });
+  };
+
+  radios.forEach(r => r.addEventListener("change", () => {
+    const sel = document.querySelector('input[name="telraam-mode"]:checked');
+    apply(sel ? sel.value : "bike");
+  }));
+
+  const init = document.querySelector('input[name="telraam-mode"]:checked');
+  apply(init ? init.value : "bike");
 }

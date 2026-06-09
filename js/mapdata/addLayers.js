@@ -1267,7 +1267,7 @@ export function addLayers(map) {
         "line-join": "round"
       },
       paint: {
-        "line-color": "#6a1b9a",
+        "line-color": telraamColorExpr("bike"),   // Default-Modus; setupTelraamMode schaltet um
         "line-opacity": 0.9,
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
@@ -1376,4 +1376,29 @@ export function addLayers(map) {
 
   addMapillaryLayer(map);
   addMapillaryTSLayer(map);
+}
+
+
+// Telraam: Linienfarbe nach Modus (Auto/Rad), Skala = Ø/Tag (letzte 2 Wochen).
+// Segmente ohne aggregierte Daten (Attribut fehlt) -> grau. Breakpoints aus den
+// Daten-Perzentilen (siehe pipeline). Wird von addLayers (initial) und
+// setupTelraamMode (Umschalter) genutzt -> eine Quelle.
+export function telraamColorExpr(mode) {
+  // Breakpoints ≈ Perzentile der 452 aktiven DE-Segmente (Auto-Median ~1040, Rad ~350).
+  const scales = {
+    car: {
+      attr: "car_per_day",
+      stops: [0, 300, 1000, 3500, 9000],
+      colors: ["#ffffb2", "#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"]
+    },
+    bike: {
+      attr: "bike_per_day",
+      stops: [0, 100, 350, 750, 1500],
+      colors: ["#ffffcc", "#c2e699", "#78c679", "#31a354", "#006837"]
+    }
+  };
+  const c = scales[mode] || scales.bike;
+  const interp = ["interpolate", ["linear"], ["to-number", ["get", c.attr]]];
+  for (let i = 0; i < c.stops.length; i++) interp.push(c.stops[i], c.colors[i]);
+  return ["case", ["has", c.attr], interp, "#bbbbbb"];
 }

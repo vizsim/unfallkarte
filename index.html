@@ -942,11 +942,25 @@ MAIN HEADER
         </div>
 
         <div id="telraam-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="display:inline-block; width:24px; height:3px; background:#6a1b9a;"></span>
-            Verkehrszähl-Segment
+          <div style="display:flex; gap:14px; margin-bottom:6px;">
+            <label style="display:flex; align-items:center; gap:4px;">
+              <input type="radio" name="telraam-mode" value="bike" checked /> Rad
+            </label>
+            <label style="display:flex; align-items:center; gap:4px;">
+              <input type="radio" name="telraam-mode" value="car" /> Auto
+            </label>
           </div>
-          <div style="margin-top: 4px; color:#666;">Klick öffnet die Telraam-Seite mit den Zähldaten.</div>
+
+          <div class="telraam-ramp" data-mode="bike">
+            <div style="height:8px; border-radius:2px; background:linear-gradient(to right,#ffffcc,#c2e699,#78c679,#31a354,#006837);"></div>
+            <div style="display:flex; justify-content:space-between; color:#666;"><span>0</span><span>Ø Rad/Tag</span><span>1500+</span></div>
+          </div>
+          <div class="telraam-ramp" data-mode="car" style="display:none;">
+            <div style="height:8px; border-radius:2px; background:linear-gradient(to right,#ffffb2,#fecc5c,#fd8d3c,#f03b20,#bd0026);"></div>
+            <div style="display:flex; justify-content:space-between; color:#666;"><span>0</span><span>Ø Auto/Tag</span><span>9000+</span></div>
+          </div>
+
+          <div style="margin-top:6px; color:#666;">Ø der letzten 2 Wochen · grau = keine Daten · Klick öffnet Telraam.</div>
         </div>
 
 

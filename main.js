@@ -36,7 +36,7 @@ import {
   setupPlaygroundsPopups,
   // setupMapillaryPopups,
   setupMapillaryTrafficsignPopups,
-  setupTelraamLinks,
+  setupTelraamInteractivity,
   setupScenario1Popups,
   setupScenario2Popups,
   setupScenario3Popups,
@@ -344,7 +344,7 @@ function setupPopups(map) {
   setupPlaygroundsPopups(map);
   // setupMapillaryPopups(map);
   setupMapillaryTrafficsignPopups(map);
-  setupTelraamLinks(map);
+  setupTelraamInteractivity(map);
   setupScenario1Popups(map);
   setupScenario2Popups(map);
   setupScenario3Popups(map);

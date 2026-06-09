@@ -121,12 +121,13 @@ def telraam_fetch(force: bool = typer.Option(False, "--force", help="Erneut lade
 
 @telraam_app.command("build")
 def telraam_build(
+    refresh: bool = typer.Option(False, "--refresh", help="Snapshot+Traffic neu ziehen"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
 ) -> None:
-    """Reprojiziert+filtert (DE) und tilet -> telraam/telraam_segments.pmtiles."""
+    """Aktive DE-Segmente + Ø Auto/Rad pro Tag -> telraam/telraam_segments.pmtiles."""
     from unfallkarte import telraam
 
-    out = telraam.build(dry_run=dry_run)
+    out = telraam.build(refresh=refresh, dry_run=dry_run)
     typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 
