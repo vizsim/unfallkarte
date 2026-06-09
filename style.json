@@ -27,7 +27,7 @@
       "attribution": "© OpenStreetMap contributors | Tiles © OpenFreeMap (OpenMapTiles)"
     }
   },
-  "sprite": "https://vizsim.github.io/unfallkarte/icons/sprite",
+  "sprite": "./icons/sprite",
   "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   "layers": [
     {

@@ -129,12 +129,18 @@ async function initMap() {
 
   const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
 
-
-
+  // Style laden und relative sprite-URL gegen die Seitenherkunft absolut machen.
+  // MapLibre verlangt absolute sprite-URLs; der Host variiert (localhost / vizsim.de /
+  // github.io), darum aus document.baseURI ableiten statt im style.json zu hardcoden.
+  const styleUrl = new URL("./style.json", document.baseURI).href;
+  const style = await fetch(styleUrl).then(r => r.json());
+  if (style.sprite && !/^https?:\/\//.test(style.sprite)) {
+    style.sprite = new URL(style.sprite, styleUrl).href;
+  }
 
   window.map = new maplibregl.Map({
     container: "map",
-    style: "./style.json", // lokaler Positron-Style (keyless); Tiles von OpenFreeMap (gehostet)
+    style, // lokaler Positron-Style (keyless); Tiles von OpenFreeMap (gehostet)
     center: hasPermalink ? [lng, lat] : [13.634, 52.315],
     zoom: hasPermalink ? zoom : 12,
     minZoom: 6,
