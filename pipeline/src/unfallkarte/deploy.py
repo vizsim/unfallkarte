@@ -49,11 +49,17 @@ def sync(*, dry_run: bool = False, bucket: str | None = None) -> None:
     if missing:
         raise RuntimeError(f"Fehlende .env-Werte: {missing}")
 
-    # Authorize (Credentials werden danach von b2 gecached). Keys NICHT loggen.
+    # Authorize (Credentials werden danach von b2 gecached). Keys NICHT loggen:
+    # `b2 account authorize` gibt das Account-JSON inkl. applicationKey auf stdout aus —
+    # daher stdout/stderr abfangen und bei Fehler eine generische (argv-freie) Meldung
+    # werfen, sonst leakt der Key über die Logs/den Traceback.
     print("  $ b2 account authorize <KEY_ID> ***")
-    subprocess.run(
+    auth = subprocess.run(
         ["b2", "account", "authorize", settings.b2_application_key_id, settings.b2_application_key],
-        check=True,
+        capture_output=True,
+        text=True,
     )
+    if auth.returncode != 0:
+        raise RuntimeError("b2 account authorize fehlgeschlagen — B2-Credentials in .env prüfen.")
     print(f"  $ {' '.join(sync_cmd)}")
     subprocess.run(sync_cmd, check=True)

@@ -84,13 +84,13 @@ datasets:
     file: "scenarios/scenario3_tempo30_conti.pmtiles"
     label: "Tempo-30 durchgängig (50er-Lückenschlüsse)"
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
-    date: { fixed: "2025-07-31" }   # OSM-getrieben (kein Unfallbezug)
+    date: osm            # OSM-getrieben (kein Unfallbezug) -> trackt PBF-Stand
 
   scenario6:
     file: "scenarios/scenario6_tempo50_30mbuffer_schulen.pmtiles"
     label: "Tempo-50-Straßen vor Schulen"
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
-    date: { fixed: "2025-07-31" }   # OSM-getrieben (kein Unfallbezug)
+    date: osm            # OSM-getrieben (kein Unfallbezug) -> trackt PBF-Stand
 
   scenario8:
     file: "scenarios/scenario8_laerm_schulen.pmtiles"

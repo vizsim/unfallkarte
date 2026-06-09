@@ -36,6 +36,8 @@ def _osm_vintage() -> str | None:
 def _resolve_date(dataset_id: str, date_spec: Any) -> str | None:
     if isinstance(date_spec, dict) and "fixed" in date_spec:
         return str(date_spec["fixed"])
+    if date_spec == "osm":  # explizit OSM-getrieben (z.B. OSM-Szenarien ohne Unfallbezug)
+        return _osm_vintage()
     if date_spec == "auto":
         # Szenarien sind unfallgetrieben -> Datenstand = max. Unfalljahr
         if dataset_id.startswith("accidents") or dataset_id.startswith("scenario"):
