@@ -65,6 +65,9 @@ export function addLayers(map) {
             ["case", ["any", ["all", ["==", ["get", "IstSonstig"], 1], ["any", ["==", ["get", "IstRad"], 1], ["==", ["get", "IstPKW"], 1], ["==", ["get", "IstFuss"], 1], ["==", ["get", "IstKrad"], 1], ["==", ["get", "IstGkfz"], 1]]]], ", ", ""],
             ["case", ["==", ["get", "IstSonstig"], 1], "S", ""]
           ],
+          // OpenFreeMap-Glyphs liefern nur "Noto Sans Regular"; ohne explizites text-font
+          // fällt MapLibre auf "Open Sans Regular" zurück -> Glyph-404 -> kein Text.
+          "text-font": ["Noto Sans Regular"],
           "text-size": 14,
           "text-offset": [0, 0],
           "text-anchor": "top",
