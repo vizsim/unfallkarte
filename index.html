@@ -723,6 +723,18 @@ MAIN HEADER
             <img src="icons/regulatory--maximum-speed-limit-100--g1.svg" style="width: 20px; height: 20px;" />
             VZ 274-100
           </label>
+
+          <!-- Zeitfilter: letzte Bestätigung (last_seen_at) -->
+          <div style="margin-top: 12px; margin-left: -10px;">
+            <label for="mapillary-ts-year" style="display: block; font-weight: bold; margin-bottom: 4px;">
+              Zuletzt gesehen ab: <span id="mapillary-ts-year-value">alle</span>
+            </label>
+            <input type="range" id="mapillary-ts-year" min="2014" max="2026" step="1" value="2014"
+              style="width: 100%;" />
+            <div style="font-size: 10px; color: #666; margin-top: 2px;">
+              Nur Schilder, die seit dem gewählten Jahr noch in Mapillary-Bildern bestätigt wurden (last_seen_at).
+            </div>
+          </div>
         </div>
 
 

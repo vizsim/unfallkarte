@@ -193,6 +193,16 @@ function setupMapillaryTSCheckboxHandlers(map, applyLegendVisibility) {
 
     updateMapillaryTSFilter(map, applyLegendVisibility);
   });
+
+  // Zeit-Slider: filtert nach last_seen_at (letzte Bestätigung in Mapillary-Bildern).
+  // max dynamisch aufs aktuelle Jahr setzen, damit der Regler nicht veraltet.
+  const yearSlider = document.getElementById("mapillary-ts-year");
+  if (yearSlider) {
+    yearSlider.max = String(new Date().getFullYear());
+    yearSlider.addEventListener("input", () => {
+      updateMapillaryTSFilter(map, applyLegendVisibility);
+    });
+  }
 }
 
 function updateMapillaryTSFilter(map, applyLegendVisibility) {
@@ -229,8 +239,22 @@ function updateMapillaryTSFilter(map, applyLegendVisibility) {
     baseFilter = ["==", "value", "__never__"];
   }
 
+  // Zeitfilter über last_seen_at (ms-Epoch). Slider am Minimum = "alle" (kein Zeitfilter).
+  const yearSlider = document.getElementById("mapillary-ts-year");
+  const yearLabel = document.getElementById("mapillary-ts-year-value");
+  let filter = baseFilter;
+  if (yearSlider) {
+    const year = Number(yearSlider.value);
+    const minYear = Number(yearSlider.min);
+    if (yearLabel) yearLabel.textContent = year <= minYear ? "alle" : year;
+    if (year > minYear) {
+      const cutoffMs = Date.UTC(year, 0, 1);
+      filter = ["all", baseFilter, [">=", ["to-number", ["get", "last_seen_at"]], cutoffMs]];
+    }
+  }
+
   if (map.getLayer("mapillary-ts")) {
-    map.setFilter("mapillary-ts", baseFilter);
+    map.setFilter("mapillary-ts", filter);
     map.setLayoutProperty("mapillary-ts", "visibility", selectedValues.length > 0 ? "visible" : "none");
   }
 
