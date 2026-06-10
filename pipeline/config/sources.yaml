@@ -90,27 +90,27 @@ datasets:
     file: "scenarios/scenario8_laerm_schulen.pmtiles"
     label: "Lärm vor Schulen"
     attribution: "Umweltbundesamt (UBA-Lärmkartierung), © OpenStreetMap (ODbL)"
-    date: { fixed: "2017" }   # UBA-Lärmkartierung (lärmgetrieben, statisch)
+    date: { fixed: "2021" }   # UBA-Lärmkartierung (lärmgetrieben, statisch)
 
   # --- Kontextlayer UBA-Umgebungslärm (Hauptverkehrsstraßen, END-Lärmkartierung) ---
   laerm_den:
     file: "noise/laerm_den.pmtiles"
     label: "Lärm (Tag-Abend-Nacht)"
     attribution: "© Umweltbundesamt-DE (END-Lärmkartierung, Hauptverkehrsstraßen)"
-    date: { fixed: "2017" }   # statische END-Kartierung (UBA-Layer 4110, Lden)
+    date: { fixed: "2021" }   # statische END-Kartierung (UBA-Layer 4110, Lden)
 
   laerm_night:
     file: "noise/laerm_night.pmtiles"
     label: "Lärm (Nacht)"
     attribution: "© Umweltbundesamt-DE (END-Lärmkartierung, Hauptverkehrsstraßen)"
-    date: { fixed: "2017" }   # statische END-Kartierung (UBA-Layer 4120, Lnight)
+    date: { fixed: "2021" }   # statische END-Kartierung (UBA-Layer 4120, Lnight)
 
   # --- Kontextlayer UBA-Verkehrsmengen (Hauptverkehrsstraßen) ---
   hvs:
     file: "uba/hvs_verkehrsmengen.pmtiles"
     label: "Verkehrsmengen (Hauptverkehrsstraßen)"
     attribution: "© Umweltbundesamt-DE (END-Lärmkartierung, Hauptverkehrsstraßen)"
-    date: { fixed: "2021" }   # END 4. Runde, Bezugsjahr 2021 (Layer 81002, versionId 2021)
+    date: { fixed: "2021" }   # END 4. Runde, Bezugsjahr 2021 (Layer 8100, versionId 2021)
 
   # --- Kontextlayer Telraam ---
   telraam_segments:
