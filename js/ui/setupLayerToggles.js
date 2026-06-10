@@ -89,6 +89,7 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
   setupToggle(map, "toggle-schools", ["schools-points", "schools-polygons"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-health", ["health-points", "health-polygons"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-playgrounds", ["playgrounds-points", "playgrounds-polygons"], zoomLock, applyLegendVisibility);
+  setupToggle(map, "toggle-crossings", ["crossings-points", "crossings-lines"], zoomLock, applyLegendVisibility);
 }
 
 

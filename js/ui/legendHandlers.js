@@ -29,7 +29,7 @@ function isSpecialLegendElement(el, legends) {
 
 export function applyLegendVisibility() {
   const keys = [
-    "schools", "health", "playgrounds",
+    "schools", "health", "playgrounds", "crossings",
     "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2", "uspeed", "telraam",
     "bikelanes",
     "scenario1", "scenario2", "scenario3", "scenario6"

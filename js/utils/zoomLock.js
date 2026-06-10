@@ -9,6 +9,7 @@ export function applyZoomLock(map, originalMinZoom, setCurrentZoomLock) {
   const schoolsVisible = getVis("schools-points") || getVis("schools-polygons");
   const healthVisible = getVis("health-points") || getVis("health-polygons");
   const playgroundsVisible = getVis("playgrounds-points") || getVis("playgrounds-polygons");
+  const crossingsVisible = getVis("crossings-points") || getVis("crossings-lines");
   // maxspeed: KEIN Zoom-Lock mehr — stattdessen Zoom-Hinweis unter z11 (wie Radinfra).
   const uspeedVisible = getVis("uspeed-reverse") || getVis("uspeed-forward");
   const obsVisible = getVis("obs");
@@ -16,7 +17,7 @@ export function applyZoomLock(map, originalMinZoom, setCurrentZoomLock) {
 
   const minZooms = [];
   if (movebisVisible) minZooms.push(13);
-  if (schoolsVisible || healthVisible || playgroundsVisible || hvsVisible || uspeedVisible || obsVisible || laermVisible) minZooms.push(11);
+  if (schoolsVisible || healthVisible || playgroundsVisible || crossingsVisible || hvsVisible || uspeedVisible || obsVisible || laermVisible) minZooms.push(11);
   if (mapillaryVisible) minZooms.push(14);
 
   const strictestMinZoom = minZooms.length > 0 ? Math.max(...minZooms) : originalMinZoom;

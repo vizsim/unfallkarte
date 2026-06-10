@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import geopandas as gpd
-from shapely.geometry import Point
+from shapely.geometry import LineString, Point
 
 from unfallkarte import geo, osm
 
@@ -57,3 +57,34 @@ def test_osm_build_dry_run_constructs_commands(capsys) -> None:
     assert "ogr2ogr" not in out and "GeoJSON" not in out
     assert "PBF-Layer" in out and "lines" in out
     assert "-l highways" in out
+
+
+def test_osm_build_crossings_dry_run(capsys) -> None:
+    # Crossings: Nodes (highway=crossing) + Ways (footway/cycleway/path=crossing)
+    # in EINEM Layer -> osm_layers points+lines, tippecanoe_layer germany_osm_crossings.
+    osm.build("crossings", dry_run=True)
+    out = capsys.readouterr().out
+    assert "osmium tags-filter" in out
+    assert "n/highway=crossing" in out and "w/footway=crossing" in out
+    assert "PBF-Layer ['points', 'lines']" in out
+    assert "-l germany_osm_crossings" in out
+
+
+def test_crossings_tag_filters_keep_points_and_lines() -> None:
+    # OR-Semantik: Punkte über highway=crossing, Linien über footway=crossing behalten;
+    # ein Stray-Node (highway!=crossing, kein footway/cycleway/path=crossing) fällt raus.
+    points = gpd.GeoDataFrame(
+        {"highway": ["crossing", "traffic_signals"], "footway": [None, None],
+         "geometry": [Point(10, 50), Point(10.1, 50.1)]},
+        crs="EPSG:4326",
+    )
+    lines = gpd.GeoDataFrame(
+        {"highway": ["footway"], "footway": ["crossing"],
+         "geometry": [LineString([(10, 50), (10.001, 50)])]},
+        crs="EPSG:4326",
+    )
+    tag_filters = {"highway": ["crossing"], "footway": ["crossing"],
+                   "cycleway": ["crossing"], "path": ["crossing"]}
+    merged = osm._filter_and_merge([points, lines], tag_filters)
+    assert len(merged) == 2  # crossing-Node + footway=crossing-Way; Stray-Node raus
+    assert set(merged.geom_type) == {"Point", "LineString"}

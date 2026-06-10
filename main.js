@@ -34,6 +34,7 @@ import {
   setupSchoolsPopups,
   setupHealthPopups,
   setupPlaygroundsPopups,
+  setupCrossingsPopups,
   // setupMapillaryPopups,
   setupMapillaryTrafficsignPopups,
   setupTelraamInteractivity,
@@ -342,6 +343,7 @@ function setupPopups(map) {
   setupSchoolsPopups(map);
   setupHealthPopups(map);
   setupPlaygroundsPopups(map);
+  setupCrossingsPopups(map);
   // setupMapillaryPopups(map);
   setupMapillaryTrafficsignPopups(map);
   setupTelraamInteractivity(map);

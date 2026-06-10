@@ -72,5 +72,28 @@ layers:
     tile_profile: "highways_minor"
     output: "osm/maxspeed_minor.pmtiles"
 
-  # crossings/cycleways wurden entfernt (nur Inputs der gedroppten Mapillary-
-  # Szenarien sc5/sc7). osmconf_cycleways.ini bleibt als Template.
+  # Querungen/Übergänge: highway=crossing-Nodes (points) + footway/cycleway/path=
+  # crossing-Ways (lines). Eingefärbt nach `crossing`-Wert (Ampel/markiert/unmarkiert).
+  # tag_filters greift dank OR-Semantik für BEIDE Geometrietypen sauber: Nodes über
+  # highway=crossing, Ways über footway/cycleway/path=crossing → Stray-Nodes (Kerbs
+  # der Way-Stützpunkte) fallen raus. crossing=no bewusst weggelassen (Negativ-Tag).
+  # Erweiterbar: weitere crossing=*-Werte später nur im Frontend-Match ergänzen.
+  crossings:
+    osmium_filter:
+      - "n/highway=crossing"
+      - "w/footway=crossing"
+      - "w/cycleway=crossing"
+      - "w/path=crossing"
+    osmconf: "osmconf_crossings.ini"
+    osm_layers: ["points", "lines"]
+    tag_filters:
+      highway: ["crossing"]
+      footway: ["crossing"]
+      cycleway: ["crossing"]
+      path: ["crossing"]
+    tippecanoe_layer: "germany_osm_crossings"
+    tile_profile: "osm_features"
+    output: "osm/crossings.pmtiles"
+
+  # cycleways wurde entfernt (nur Input des gedroppten Mapillary-Szenarios sc7).
+  # osmconf_cycleways.ini bleibt als Template.

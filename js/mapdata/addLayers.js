@@ -698,6 +698,53 @@ export function addLayers(map) {
   }
 
 
+  // add Crossings layer (OSM highway=crossing-Nodes + footway/cycleway/path=crossing-Ways)
+  function addCrossingsLayer(map) {
+    // Einfärbung nach crossing-Wert: Ampel (grün) / markiert (amber) / unmarkiert (rot)
+    // / sonstige (grau). Erweiterbar: weitere crossing=*-Werte hier ergänzen.
+    const crossingColor = [
+      "match",
+      ["get", "crossing"],
+      "traffic_signals", "#2ECC40",
+      ["marked", "uncontrolled", "zebra"], "#FF851B",
+      "unmarked", "#FF4136",
+      /* default */ "#9aa0a6"
+    ];
+
+    // Querungs-LINIEN (footway/cycleway/path=crossing) — zuerst, damit Punkte oben liegen
+    map.addLayer({
+      id: "crossings-lines",
+      type: "line",
+      source: "crossings",
+      "source-layer": "germany_osm_crossings",
+      filter: ["==", ["geometry-type"], "LineString"],
+      layout: { visibility: "none", "line-cap": "round" },
+      paint: {
+        "line-color": crossingColor,
+        "line-width": ["interpolate", ["linear"], ["zoom"], 12, 2, 16, 5],
+        "line-opacity": 0.85
+      }
+    });
+
+    // Querungs-PUNKTE (highway=crossing-Nodes)
+    map.addLayer({
+      id: "crossings-points",
+      type: "circle",
+      source: "crossings",
+      "source-layer": "germany_osm_crossings",
+      filter: ["==", ["geometry-type"], "Point"],
+      layout: { visibility: "none" },
+      paint: {
+        "circle-color": crossingColor,
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 3, 14, 5, 16, 8],
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1,
+        "circle-opacity": 0.85
+      }
+    });
+  }
+
+
   // add health layer
   function addHealthLayer(map) {
     // health POINTS
@@ -1353,6 +1400,7 @@ export function addLayers(map) {
   addSchoolsLayer(map);
   addHealthLayer(map);
   addPlaygroundsLayer(map);
+  addCrossingsLayer(map);
 
 
   addAccidentLayersToMap(map);

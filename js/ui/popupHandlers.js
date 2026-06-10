@@ -473,6 +473,52 @@ export function setupSchoolsPopups(map) {
     handleLayer("schools-polygons");
 }
 
+export function setupCrossingsPopups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const crossingLabels = {
+        traffic_signals: "Ampel (Lichtzeichen)",
+        marked: "Markiert (Zebra/Markierung)",
+        uncontrolled: "Markiert (Zebra/Markierung)",
+        zebra: "Zebrastreifen",
+        unmarked: "Unmarkiert",
+    };
+
+    const handleLayer = (layerId, osmType) => {
+        map.on("mouseenter", layerId, (e) => {
+            map.getCanvas().style.cursor = "pointer";
+            const props = e.features[0].properties;
+            const typ = crossingLabels[props.crossing] || props.crossing || "unbekannt";
+
+            const content = `
+            <table style="font-size:12px; border-collapse:collapse;">
+            <tr><td><strong>Übergang</strong></td><td>${typ}</td></tr>
+            ${props.crossing_markings ? `<tr><td><strong>Markierung</strong></td><td>${props.crossing_markings}</td></tr>` : ""}
+            ${props.tactile_paving ? `<tr><td><strong>Blindenleitsystem</strong></td><td>${props.tactile_paving}</td></tr>` : ""}
+            ${props.kerb ? `<tr><td><strong>Bordstein</strong></td><td>${props.kerb}</td></tr>` : ""}
+            <tr><td colspan="2" style="color:#666;padding-top:4px;">Klick → OSM (${osmType}/${props.osm_id})</td></tr>
+            </table>
+        `;
+
+            popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+        });
+
+        map.on("mouseleave", layerId, () => {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+        });
+
+        // Klick auf einen Übergang -> zugehörige OSM-Objektseite (Node bzw. Way)
+        map.on("click", layerId, (e) => {
+            const id = e.features[0].properties.osm_id;
+            if (id) window.open(`https://www.openstreetmap.org/${osmType}/${id}`, "_blank", "noopener");
+        });
+    };
+
+    handleLayer("crossings-points", "node");
+    handleLayer("crossings-lines", "way");
+}
+
 export function setupHealthPopups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 

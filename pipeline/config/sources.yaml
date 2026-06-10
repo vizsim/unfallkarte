@@ -38,6 +38,12 @@ datasets:
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
     date: auto
 
+  osm_crossings:
+    file: "osm/crossings.pmtiles"
+    label: "Querungen/Übergänge"
+    attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
+    date: auto            # OSM-getrieben -> trackt PBF-Stand
+
   maxspeed_major:
     file: "osm/maxspeed_major.pmtiles"
     label: "Tempolimits (Hauptstraßen)"

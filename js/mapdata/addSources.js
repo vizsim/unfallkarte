@@ -9,6 +9,7 @@ const MIGRATED = {
   schools: "osm_schools",
   health: "osm_health",
   playgrounds: "osm_playgrounds",
+  crossings: "osm_crossings",
   maxspeed: "maxspeed_major",
   maxspeed_minor: "maxspeed_minor",
   scenario1: "scenario1",

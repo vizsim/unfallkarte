@@ -29,6 +29,7 @@ export const kontextKeys = {
     schools: "k",
     health: "e",
     playgrounds: "p",
+    crossings: "c",
     terrain: "t",
     hillshade: "i",
     obs: "o",
