@@ -1,5 +1,3 @@
-
-
 // 📦 Geocoder & Styles
 import { setupPhotonGeocoder } from './js/utils/geocoder.js';
 import { paintStyles, getCircleColorPaint } from './js/styleConfig.js';
@@ -19,7 +17,6 @@ import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 
-
 // 📦 Popups
 import {
   setupAccidentPopups,
@@ -35,7 +32,6 @@ import {
   setupHealthPopups,
   setupPlaygroundsPopups,
   setupCrossingsPopups,
-  // setupMapillaryPopups,
   setupMapillaryTrafficsignPopups,
   setupTelraamInteractivity,
   setupScenario1Popups,
@@ -59,26 +55,18 @@ import {
 // 📦 Permalink
 import {
   Permalink,
-  // applyPermalink,
   updatePermalink,
   cleanupLegacyPermalink,
-  // encodeList, beteiligungMap, yearMap,
   setupPermalinkHandling
 } from './js/utils/permalink.js';
-
-
 
 // 📦 Sonstiges
 import { setupPieChartImageGeneration } from './js/utils/generatePieIcon.js';
 import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 
-
-
-
 let MAPILLARY_TOKEN = '';
 
 let originalMinZoom = 6;
-let originalMaxZoom = 20;
 
 let currentZoomLock = null;
 
@@ -94,12 +82,6 @@ export const LAYERS = {
 
 // (Alte Basemap-Thumb-Hintergründe entfernt — Vorschau-Thumbnails kommen jetzt
 //  über das Karten-Panel/panel.css.)
-
-
-
-
-
-
 
 (async () => {
   try {
@@ -117,15 +99,11 @@ export const LAYERS = {
   }
 })();
 
-
-
 async function initMap() {
-  /// somehow this is needed to load the pmtiles protocol
-  const pmtilesBaseURL = "https://tiles.vizsim.de/file/unfallkarte-data/";
-  const protocol = new pmtiles.Protocol(name => `${pmtilesBaseURL}${name}`);
+  // PMTiles-Protokoll registrieren. Quellen binden volle pmtiles://https://… URLs ein
+  // (siehe resolveSources.js/addSources.js) -> kein Basis-URL-Mapping nötig.
+  const protocol = new pmtiles.Protocol();
   maplibregl.addProtocol("pmtiles", protocol.tile);
-
-
 
   const { lat, lng, zoom } = Permalink.parse();
 
@@ -150,30 +128,24 @@ async function initMap() {
   });
 
   originalMinZoom = map.getMinZoom();
-  originalMaxZoom = map.getMaxZoom();
 
-
-
-  /// load MAP
   map.on("load", async () => {
 
     // addSources ist async (Local-first-Auflösung) -> erst Module/Layer, dann UI.
-    await initializeMapModules(map);         // 2. Module initialisieren
-    setupUI(map);                                     // 3. UI & Layer-Toggles
+    await initializeMapModules(map);
+    setupUI(map);
     setupScenarioControls(map);
-    setupLegend(map);                          // 4. Legende initialisieren 
+    setupLegend(map);
     setupMapillary(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
-
 
     setupMapillaryTS(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
 
-    setupPopups(map);                          // 5. Popups initialisieren
+    setupPopups(map);
 
     // WICHTIG: mit `map` aufrufen — ohne Argument returnt die Funktion sofort, dann
     // wird die Cluster-Legende erst spät (per zoomend/idle) korrigiert -> Flackern.
     updateLegendVisibilityByZoom(map);
 
-    // setupPermalinkHandling(map); // 6. Permalink-Handling initialisieren
     setupPermalinkHandling(map, {
       paintStyles,
       updateLayerFilter,
@@ -181,26 +153,14 @@ async function initMap() {
       isInitializingRef
     });
 
-
-    setupEventHandlers(map);                          // 8. moveend / zoomend etc.
+    setupEventHandlers(map);
 
   });
 
 }
 
-
-
-
-
-//////////////////////// some funcions ////////////////
-
-
-
 // (Alte Hillshade/Terrain-Toggles entfernt — Relief/3D-Gelände läuft jetzt über das
 //  Karten-Panel via setRelief() aus js/map/basemapTerrain.js, siehe setupMapPanel.)
-
-
-
 
 function getSelectedCheckboxValues(group) {
   return Array.from(document.querySelectorAll(`input[data-group="${group}"]:checked`))
@@ -245,8 +205,6 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
     : ["==", "UKATEGORIE", -1]; // "unschädlicher" Filter
   filter.push(beteiligungExpr);
 
-
-
   // Filter anwenden
   [...LAYERS.accidents, ...LAYERS.symbols].forEach(layerId => {
     if (map.getLayer(layerId)) map.setFilter(layerId, filter);
@@ -265,7 +223,6 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
     if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", (willShow && detailsChecked) ? "visible" : "none");
   });
 
-  // map.once("idle", updateVisibleFeatureCount);
   map.once("idle", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
 
   if (shouldUpdatePermalink && !isInitializingRef.value) {
@@ -273,11 +230,6 @@ function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
   }
 }
 
-
-
-
-
-// 4. Farbwechsel anwenden
 function updateColorStyle() {
   const selected = document.querySelector('input[name="color-style"]:checked').value;
 
@@ -300,13 +252,8 @@ function updateColorStyle() {
     }
   });
 
-  updateLegendColors(selected, paintStyles); /// hier angepasst!!!
+  updateLegendColors(selected, paintStyles);
 }
-
-
-
-
-
 
 function addNavigationControl(map) {
   const nav = new maplibregl.NavigationControl();
@@ -327,8 +274,6 @@ function addNavigationControl(map) {
   }, 100);
 }
 
-
-
 function setupPopups(map) {
   setupAccidentPopups(map);
   setupAccClusterPopups(map);
@@ -344,7 +289,6 @@ function setupPopups(map) {
   setupHealthPopups(map);
   setupPlaygroundsPopups(map);
   setupCrossingsPopups(map);
-  // setupMapillaryPopups(map);
   setupMapillaryTrafficsignPopups(map);
   setupTelraamInteractivity(map);
   setupScenario1Popups(map);
@@ -360,15 +304,12 @@ function setupLegend(map) {
   setupLegendSectionCheckboxes(updateLayerFilter);
 
   updateColorStyle();
-  // updateVisibleFeatureCount();
   updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles);
 }
-
 
 function setupUI(map) {
   setupBaseLayerControls(map, isInitializingRef);
   setupMapPanel(map);
-  // setupLayerToggles(map, applyZoomLock, applyLegendVisibility);
   setupLayerToggles(
     map,
     originalMinZoom,
@@ -376,7 +317,7 @@ function setupUI(map) {
     applyLegendVisibility
   );
 
-  // Radinfrastruktur (TILDA) — Kontext-Layer im rechten Panel unter "Straßen & Verkehr".
+  // Radinfrastruktur (TILDA) — Kontext-Layer im rechten Panel unter "Infrastruktur".
   // Layer-Sichtbarkeit + Legende (applyLegendVisibility schaltet #bikelanes-legend).
   const bikelanesToggle = document.getElementById('toggle-bikelanes');
   if (bikelanesToggle) {
@@ -421,7 +362,6 @@ function setupUI(map) {
   });
 }
 
-
 // Karten-Panel unten links: Basemaps (Positron/OSM/Esri), Relief, 3D-Gebäude, Radinfra.
 function setupMapPanel(map) {
   const panel = document.getElementById('map-settings-panel');
@@ -448,29 +388,23 @@ function setupMapPanel(map) {
   if (buildingsToggle) buildingsToggle.addEventListener('change', (e) => setBuildings(map, e.target.checked));
 }
 
-
 function setupEventHandlers(map) {
   map.on("zoomend", () => updateLegendVisibilityByZoom(map));
   map.on("moveend", () => updateLegendVisibilityByZoom(map));
   map.on("zoom", updateScenarioLegendVisibility);
   map.on("load", updateScenarioLegendVisibility);
 
-  // map.on("moveend", updateVisibleFeatureCount);
-  // map.on("zoomend", updateVisibleFeatureCount);
   map.on("moveend", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
   map.on("zoomend", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
 
   applyLegendVisibility();
 }
 
-
-
 async function initializeMapModules(map) {
   setupPhotonGeocoder(map);
   setupPieChartImageGeneration(map);
   addNavigationControl(map);
   await addSources(map, { MAPILLARY_TOKEN });  // async: Local-first-Auflösung (manifest)
-  // await loadAllIcons(map); // falls wieder benötigt
 
   addLayers(map);
 
@@ -496,43 +430,3 @@ async function initializeMapModules(map) {
   // OSM-Quellen-Tooltips dynamisch mit dem Datenstand (vintage) aus dem Manifest füllen.
   applyDataVintages();
 }
-
-
-
-//////////////////
-
-
-// function loadTrafficSignIcons(map) {
-
-//   console.log("🚧 loadTrafficSignIcons() aufgerufen");
-
-
-//   const iconNames = [
-//     "regulatory--bicycles-only--g1",
-//     "regulatory--dual-path-pedestrians-and-bicycles--g1"
-//     // ... weitere nach Bedarf
-//   ];
-
-//   let loaded = 0;
-
-//   iconNames.forEach((name) => {
-//     map.loadImage(`/icons/${name}.png`, (err, image) => {
-//       if (err) {
-//         console.warn(`❌ Icon konnte nicht geladen werden: ${name}`, err);
-//       } else if (!map.hasImage(name)) {
-//         map.addImage(name, image, { sdf: false });
-//       }
-
-//       loaded++;
-
-//       if (loaded === iconNames.length) {
-//         console.log("✅ Alle Icons geladen → setupMapillaryTS()");
-//         setupMapillaryTS(map, {
-//           originalMinZoom,
-//           setCurrentZoomLock: z => currentZoomLock = z,
-//           applyLegendVisibility
-//         });
-//       }
-//     });
-//   });
-// }
