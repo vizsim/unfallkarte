@@ -11,19 +11,31 @@
 const LOCAL_BASE = "./data/";
 const REMOTE_BASE = "https://tiles.vizsim.de/file/unfallkarte-data-v2/";
 
-// Manifest local-first laden, sonst von B2. So braucht die deployte Seite (Pages)
-// kein eigenes data/manifest.json — sie nimmt das aus dem Bucket.
-export async function loadManifest(localPath = "./data/manifest.json", remoteBase = REMOTE_BASE) {
-  for (const url of [localPath, `${remoteBase}manifest.json`]) {
-    try {
-      const res = await fetch(url, { cache: "no-cache" });
-      if (res.ok) return await res.json();
-    } catch {
-      /* nächste Quelle versuchen */
-    }
+async function fetchJson(url) {
+  try {
+    const res = await fetch(url, { cache: "no-cache" });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
   }
+}
+
+// Manifest local-first laden — und festhalten, OB es lokal kam. Kam es lokal, existiert
+// ein data/-Baum und per-Datei-Probing lohnt; sonst (deployt/ohne data/) gehen wir direkt
+// auf B2 und sparen pro Datei einen sinnlosen 404-HEAD-Probe.
+async function loadManifestWithSource(localPath, remoteBase) {
+  const local = await fetchJson(localPath);
+  if (local) return { manifest: local, fromLocal: true };
+  const remote = await fetchJson(`${remoteBase}manifest.json`);
+  if (remote) return { manifest: remote, fromLocal: false };
   console.warn("[resolveSources] manifest weder lokal noch auf B2 ladbar");
-  return {};
+  return { manifest: {}, fromLocal: false };
+}
+
+// Öffentliche API (unverändert): nur das Manifest-Objekt. So braucht die deployte Seite
+// (Pages) kein eigenes data/manifest.json — sie nimmt es aus dem Bucket.
+export async function loadManifest(localPath = "./data/manifest.json", remoteBase = REMOTE_BASE) {
+  return (await loadManifestWithSource(localPath, remoteBase)).manifest;
 }
 
 async function existsLocally(url) {
@@ -36,17 +48,18 @@ async function existsLocally(url) {
 }
 
 // Liefert ein Lookup-Objekt: url(id) -> "pmtiles://<lokal|remote>".
-// Local-first wird pro Datei via HEAD-Probe entschieden; live/external-Einträge
-// werden übersprungen (die binden ihre URL direkt ein).
+// Local-first wird pro Datei via HEAD-Probe entschieden — aber NUR, wenn das Manifest
+// lokal kam (sonst existiert kein data/ und die Probes wären sinnlose 404s, die den
+// ersten Render blockieren). live/external-Einträge werden übersprungen (binden ihre
+// URL direkt ein).
 export async function resolveSources({ localBase = LOCAL_BASE, remoteBase = REMOTE_BASE } = {}) {
-  const manifest = await loadManifest("./data/manifest.json", remoteBase);
+  const { manifest, fromLocal } = await loadManifestWithSource(`${localBase}manifest.json`, remoteBase);
   const resolved = {};
 
   const entries = Object.entries(manifest).filter(([, m]) => m.file && !m.live && !m.external);
   await Promise.all(
     entries.map(async ([id, meta]) => {
-      const localUrl = `${localBase}${meta.file}`;
-      const useLocal = await existsLocally(localUrl);
+      const useLocal = fromLocal && (await existsLocally(`${localBase}${meta.file}`));
       const base = useLocal ? localBase : remoteBase;
       resolved[id] = `pmtiles://${base}${meta.file}`;
       console.info(`[resolveSources] ${id}: ${useLocal ? "lokal" : "B2"} (${meta.file})`);
