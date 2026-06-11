@@ -80,7 +80,10 @@ function updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLe
   if (showPano) baseFilter.push(["==", ["to-string", ["get", "is_pano"]], "true"]);
   if (showNonPano) baseFilter.push(["==", ["to-string", ["get", "is_pano"]], "false"]);
 
-  if (baseFilter.length === 1) baseFilter = ["==", "id", "__never__"];
+  // Nichts treffen: Expression-Literal `false` (NICHT der Legacy-Filter
+  // ["==","id","__never__"] — der würde, mit der Expression-Zeitklausel via
+  // ["all",…] kombiniert, den ganzen Filter als Legacy validieren lassen).
+  if (baseFilter.length === 1) baseFilter = false;
 
   // Zeitfilter über captured_at (ms-Epoch). Slider am Minimum = "alle" (kein Zeitfilter).
   const yearSlider = document.getElementById("mapillary-img-year");
@@ -104,7 +107,7 @@ function updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLe
   if (map.getLayer("mapillary-images-halo")) {
     const haloFilter = showPano
       ? ["==", ["to-string", ["get", "is_pano"]], "true"]
-      : ["==", "id", "__never__"];
+      : false;  // Expression-Literal statt Legacy-Fallback (s. baseFilter oben)
     map.setFilter("mapillary-images-halo", withTime(haloFilter));
     map.setLayoutProperty("mapillary-images-halo", "visibility", showPano ? "visible" : "none");
   }
