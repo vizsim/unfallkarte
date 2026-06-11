@@ -4,7 +4,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 #map {
@@ -12,16 +12,34 @@ body {
   height: 100%;
 }
 
+/* ───── UI Design Tokens (an Bottom-Left-Panel/Geocoder angelehnt) ───── */
+:root {
+  --ui-surface: #ffffff;
+  --ui-border: #e3e5e9;
+  --ui-divider: #eceef1;
+  --ui-shadow: 0 14px 40px rgba(15, 23, 42, 0.18);
+  --ui-shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.12);
+  --ui-radius: 16px;
+  --ui-radius-sm: 12px;
+  --ui-text: #1f2937;
+  --ui-text-strong: #111827;
+  --ui-text-muted: #6b7280;
+  --ui-accent: #1d4ed8;
+  --ui-hover: #f3f4f6;
+}
+
 /* ────────────── Legend Style ────────────── */
 
 .legend-heading {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ui-text-strong);
 }
 
 .legend-subtext {
   font-size: 12px;
-  color: #555;
+  color: var(--ui-text-muted);
 }
 
 .legend {
@@ -30,17 +48,18 @@ body {
   right: 10px;
   width: 320px;
   max-width: 100%;
-  max-height: calc(100dvh - 160px);
-  /* 60 top + 80 bottom */
-  /* background: rgb(254, 253, 255); */
-  background: white;
-  padding: 10px;
+  max-height: calc(100dvh - 160px);  /* 60 top + 80 bottom */
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  padding: 16px 16px 14px;
   font-size: 12px;
-  border-radius: 5px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  /* overflow-y: auto; */
-  overflow-y: scroll;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-shadow);
+  overflow-y: auto;
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
 }
 
 
@@ -64,7 +83,7 @@ body {
 
 
 .legend-section-divider {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--ui-divider);
   margin: 12px 0 6px;
 }
 
@@ -105,21 +124,14 @@ body {
   /* prevents overflow on long labels */
 }
 
-
-/* .legend-section {
-    margin-top: 10px;
-} */
-
-
-
 .legend-section-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 14px;
   margin-bottom: 6px;
-  color: #333;
+  color: var(--ui-text-strong);
   cursor: pointer;
   gap: 6px;
 }
@@ -216,13 +228,13 @@ body {
 
 .count-badge {
   font-size: 10px;
-  padding: 0 4px;
-  background: #eee;
-  border-radius: 10px;
+  padding: 1px 7px;
+  background: #eef2f7;
+  border-radius: 999px;
   min-width: 24px;
   text-align: center;
   white-space: nowrap;
-  color: #333;
+  color: #475569;
   display: inline-block;
   flex-shrink: 0;
 }
@@ -245,8 +257,8 @@ body {
 [data-arrow="legend-root"] {
   width: 14px !important;
   height: 14px !important;
-  border-right: 5px solid #000 !important;
-  border-bottom: 5px solid #000 !important;
+  border-right: 5px solid #9ca3af !important;
+  border-bottom: 5px solid #9ca3af !important;
   margin-left: auto;
 }
 
@@ -254,8 +266,8 @@ body {
 .section-arrow {
   width: 10px;
   height: 10px;
-  border-right: 4px solid #000;
-  border-bottom: 4px solid #000;
+  border-right: 4px solid #9ca3af;
+  border-bottom: 4px solid #9ca3af;
   margin-left: 8px;
 }
 
@@ -263,8 +275,8 @@ body {
 .legend-header .toggle-arrow {
   width: 6px;
   height: 6px;
-  border-right: 3px solid #000;
-  border-bottom: 3px solid #000;
+  border-right: 3px solid #b0b6bf;
+  border-bottom: 3px solid #b0b6bf;
   margin-left: 6px;
 }
 
@@ -282,15 +294,8 @@ body {
 
 
 
-/* ───── Hidden Section Defaults ───── */
-#mapillary-legend,
-#movebis-legend,
-#hvs-legend,
-#maxspeed-legend,
-#obs-legend,
-#schools-legend {
-  display: none;
-}
+/* (Kontext-Legenden starten versteckt via inline display:none im HTML —
+   früherer CSS-Default hier war redundant/teils tot und wurde entfernt.) */
 
 
 
@@ -455,65 +460,8 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
 }
 
-/* ───── Basemap Thumbnails ───── */
-
-#basemap-thumbnails {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-}
-
-.basemap-thumb {
-  width: 60px;
-  height: 60px;
-  background-size: cover;
-  background-position: center;
-  border: 2px solid #ccc;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-  transition: border 0.2s;
-  margin-bottom: -2px;
-}
-
-.basemap-thumb.selected {
-  border-color: #0077ff;
-}
-
-/* ───── Terrain Controls ───── */
-#terrain-controls {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 63px;
-  /* Match thumbs */
-  padding: 4px 6px;
-  font-size: 12px;
-  border: 2px solid #ccc;
-  border-radius: 6px;
-  background: white;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-  transition: border 0.2s;
-  box-sizing: border-box;
-  margin-bottom: -1px;
-  margin-left: -4px;
-}
-
-#terrain-controls label {
-  display: flex;
-  align-items: center;
-  height: 50%;
-}
-
-
-
-/* ─── ─── */
-
-.spacer {
-  /* width: 160px; */
-  display: none;
-  /* Erzwingt Breite für rechte Spalte */
-}
+/* (Alte Basemap-Thumbnails + Terrain-Controls + .spacer entfernt — ersetzt durch
+   das Karten-Panel unten links: .basemap-btn/.basemap-grid/.terrain-row/.switch.) */
 
 
 /* Toggle-Labels in Szenarien + Kontext: hängender Einzug, damit umgebrochene Zeilen
@@ -525,6 +473,8 @@ body {
   display: block;
   padding-left: 1.45em;
   text-indent: -1.45em;
+  font-weight: 500;       /* medium: die Toggle-Zeilen wirkten bei 400 zu dünn */
+  color: var(--ui-text);
 }
 
 /* slider */
@@ -572,10 +522,12 @@ body {
 
 
 .legend-section-subtitle {
-  font-weight: 600;
-  font-size: 12px;
-  margin: 12px 10px 4px 10px;
-  color: #333;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 14px 10px 5px 10px;
+  color: #374151;          /* kräftiger/dunkler als das frühere Muted-Grau */
 }
 
 /* ===== Radinfrastruktur-Legende (rechtes Kontext-Panel, Stil aus mapillary_coverage_analysis) ===== */
@@ -670,5 +622,46 @@ body {
   content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px;
   background: #fff; border-radius: 50%; transition: .2s;
 }
-.switch input:checked + .switch-slider { background: #1d4ed8; }
+.switch input:checked + .switch-slider { background: var(--ui-accent); }
 .switch input:checked + .switch-slider::before { transform: translateX(18px); }
+
+
+/* ───── Modernes Restyle: Auswahl-Controls, Scrollbar, Popups ───── */
+
+/* Akzentfarbe für alle Checkboxen/Radios im Panel (statt Browser-Default) */
+.legend input[type="checkbox"],
+.legend input[type="radio"] {
+  accent-color: var(--ui-accent);
+}
+
+/* Dezente Scrollbar (WebKit) — passend zum schlanken Firefox-scrollbar oben */
+.legend::-webkit-scrollbar { width: 10px; }
+.legend::-webkit-scrollbar-track { background: transparent; }
+.legend::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+  border: 3px solid var(--ui-surface);
+}
+.legend::-webkit-scrollbar-thumb:hover { background: #b6bcc6; }
+
+/* Popups/Tooltips an die Panel-/Button-Sprache angleichen */
+.maplibregl-popup-content {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  box-shadow: var(--ui-shadow);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--ui-text);
+}
+.maplibregl-popup-close-button {
+  width: 22px;
+  height: 22px;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--ui-text-muted);
+  border-radius: 8px;
+}
+.maplibregl-popup-close-button:hover {
+  background: var(--ui-hover);
+  color: var(--ui-text);
+}
