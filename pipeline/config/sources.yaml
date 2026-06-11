@@ -125,5 +125,31 @@ datasets:
     attribution: "© Telraam-Mitwirkende (CC BY-NC 4.0)"
     date: telraam         # Build-/Harvest-Datum (Segment-Standorte ändern sich selten)
 
+  # --- Kontextlayer OpenBikeSensor (Überholabstände aus Community-Portalen) ---
+  obs:
+    file: "obs/obs_data.pmtiles"
+    label: "Überholabstände (OpenBikeSensor)"
+    attribution: "© OpenBikeSensor-Community (Portale)"
+    date: obs             # Harvest-Datum (Build-Zeit; Portale liefern laufend neue Messungen)
+    # Öffentliche OBS-Portale (api/export/events) — DACH-weit gezogen, dann auf DE geclippt.
+    # Stand 2026-06: nantes.1metre.fr (FR, down) + openbikesensor.hlrs.de (offline) ausgelassen;
+    # obs.adfc-ac.de liefert derzeit 404 → wird beim Fetch übersprungen (bleibt drin für Wiederkehr).
+    portals:
+      - "https://obs.adfc-brandenburg.de/"
+      - "https://obs.adfc-bw.de/"
+      - "https://obs.adfc-darmstadt.de/"
+      - "https://obs.adfc-hessen.de/"
+      - "https://obs.adfc-niedersachsen.de/"
+      - "https://obs.adfc-osnabrueck.de/"
+      - "https://obs.adfc-luebeck.de/"
+      - "https://obs.adfc-ac.de/"
+      - "https://obs.radentscheid-essen.de/"
+      - "https://obs-portal.pub.solar/"
+      - "https://portal.openbikesensor.org/"
+      - "https://portal.openbikesensor.hamburg/"
+      - "https://portal.1meter50.at/"
+    # DE-Außengrenze (low-res) für den Clip; einmalig gezogen + gecacht.
+    boundary_url: "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/1_deutschland/4_niedrig.geo.json"
+
   # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
   # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.

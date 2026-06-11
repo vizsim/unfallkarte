@@ -6,7 +6,6 @@
 // z. B. "2025-07-31". Markup: <span class="info-icon" data-osm-vintage="<manifest-id>">.
 
 import { loadManifest } from "../mapdata/resolveSources.js";
-import { LEGACY } from "../mapdata/addSources.js";
 import { formatDateDE } from "./formatDate.js";
 
 export async function applyDataVintages(manifest) {
@@ -31,12 +30,11 @@ export async function applyDataVintages(manifest) {
     if (note) note.textContent = ` (Stand: ${formatDateDE(tv)})`;
   }
 
-  // OBS (Legacy-Layer, altes Bucket, kein Manifest): Stand DRY aus dem Dateinamen
-  // (OBS_data_<YYYY-MM-DD>.pmtiles in addSources.js) ableiten.
-  const obsDate = /(\d{4}-\d{2}-\d{2})/.exec((LEGACY && LEGACY.obs) || "");
-  if (obsDate) {
+  // OBS (jetzt Pipeline-Layer): Harvest-/Build-Stand aus dem Manifest (obs.vintage).
+  const ov = mf && mf.obs && mf.obs.vintage;
+  if (ov) {
     document.querySelectorAll("[data-obs-vintage]").forEach((el) => {
-      el.title = `Quelle: OpenBikeSensor community, Stand ${formatDateDE(obsDate[1])} – Lizenz: ???`;
+      el.title = `Quelle: OpenBikeSensor-Community (Portale), Stand ${formatDateDE(ov)} – Lizenz: siehe jeweiliges Portal`;
     });
   }
 

@@ -39,6 +39,12 @@ def _telraam_vintage() -> str | None:
     return date.fromtimestamp(f.stat().st_mtime).isoformat() if f.exists() else None
 
 
+def _obs_vintage() -> str | None:
+    """Datenstand = Harvest-/Build-Zeit des OBS-PMTiles (Portale liefern laufend neu)."""
+    f = get_paths().out("obs") / "obs_data.pmtiles"
+    return date.fromtimestamp(f.stat().st_mtime).isoformat() if f.exists() else None
+
+
 def _resolve_date(dataset_id: str, date_spec: Any) -> str | None:
     if isinstance(date_spec, dict) and "fixed" in date_spec:
         return str(date_spec["fixed"])
@@ -46,6 +52,8 @@ def _resolve_date(dataset_id: str, date_spec: Any) -> str | None:
         return _osm_vintage()
     if date_spec == "telraam":  # Harvest-getrieben (Telraam-API)
         return _telraam_vintage()
+    if date_spec == "obs":  # Harvest-getrieben (OpenBikeSensor-Portale)
+        return _obs_vintage()
     if date_spec == "auto":
         # Szenarien sind unfallgetrieben -> Datenstand = max. Unfalljahr
         if dataset_id.startswith("accidents") or dataset_id.startswith("scenario"):

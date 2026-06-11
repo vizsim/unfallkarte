@@ -106,6 +106,19 @@ profiles:
     no_feature_limit: true
     no_tile_size_limit: true
 
+  # OpenBikeSensor-Überholabstände (Punkte). Layer-Name = Frontend-Vertrag
+  # (obs_data-points). Flags 1:1 aus dem Alt-Notebook: nichts vereinfachen/
+  # limitieren, nur die dichtesten Punkte bei Bedarf droppen.
+  obs_points:
+    layer: obs_data-points
+    minzoom: 6
+    maxzoom: 14
+    drop_rate: 0
+    drop_densest_as_needed: true
+    no_feature_limit: true
+    no_tile_size_limit: true
+    force_feature_limit: true
+
   # (osm_crossings / osm_cycleways entfernt — Mapillary-Szenarien sc5/sc7 gedroppt.)
 
   # --- Szenarien (Phase 3): Dual-Layer (Punkte niedrig-zoom, Polygone hoch-zoom) ---

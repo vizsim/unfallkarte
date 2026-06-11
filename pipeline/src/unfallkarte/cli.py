@@ -20,12 +20,14 @@ scenario_app = typer.Typer(no_args_is_help=True, help="Szenarien rechnen")
 telraam_app = typer.Typer(no_args_is_help=True, help="Telraam-Verkehrszähl-Segmente")
 hvs_app = typer.Typer(no_args_is_help=True, help="UBA-Verkehrsmengen (Hauptverkehrsstraßen)")
 laerm_app = typer.Typer(no_args_is_help=True, help="UBA-Umgebungslärm (Lärmkartierung)")
+obs_app = typer.Typer(no_args_is_help=True, help="OpenBikeSensor-Überholabstände")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
 app.add_typer(telraam_app, name="telraam")
 app.add_typer(hvs_app, name="hvs")
 app.add_typer(laerm_app, name="laerm")
+app.add_typer(obs_app, name="obs")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -181,6 +183,28 @@ def laerm_build(
     for n in names:
         out = laerm.build(n, dry_run=dry_run)
         typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
+
+
+# --- obs / OpenBikeSensor ---
+@obs_app.command("fetch")
+def obs_fetch(force: bool = typer.Option(False, "--force", help="Erneut laden")) -> None:
+    """Zieht je OBS-Portal den Export (DACH-Bbox) nach data/raw/obs/."""
+    from unfallkarte import obs
+
+    files = obs.fetch(force=force)
+    typer.secho(f"Portale mit Daten: {len(files)}", fg=typer.colors.GREEN)
+
+
+@obs_app.command("build")
+def obs_build(
+    refresh: bool = typer.Option(False, "--refresh", help="Portal-Exporte neu ziehen"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """Portale -> dedupen -> DE-Clip -> obs/obs_data.pmtiles (Layer `obs_data-points`)."""
+    from unfallkarte import obs
+
+    out = obs.build(refresh=refresh, dry_run=dry_run)
+    typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 
 # --- scenarios (Phase 3) ---
