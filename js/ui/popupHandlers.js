@@ -950,12 +950,12 @@ export function setupScenario8Popups(map) {
 
 // Scenario 9 popups (Unfallschwerpunkte / M Uko, vereinfacht)
 export function setupScenario9Popups(map) {
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "340px" });
 
     const ruleLabels = {
-        up5_3y: "≥ 5 Unfälle mit Personenschaden / 3 Jahre",
+        up5_3y: "≥ 5 Unfälle / 3 Jahre",
         usp3_3y: "≥ 3 schwere Unfälle / 3 Jahre",
-        utyp5_3y: "≥ 5 Unfälle gleichen Typs / 3 Jahre"
+        utyp5_3y: "≥ 5 gleicher Unfalltyp / 3 Jahre"
     };
 
     const renderScenario9Tooltip = (props) => {
@@ -966,19 +966,24 @@ export function setupScenario9Popups(map) {
             : null;
 
         return `
-        <div style="font-size: 12px;">
-          <strong>Unfallschwerpunkt</strong><br/>
-          <table style="border-collapse: collapse;">
-            <tr><td><strong>Kriterium</strong></td><td>${ruleLabels[props.rule] ?? props.rule ?? "-"}</td></tr>
-            ${utypText ? `<tr><td><strong>Unfalltyp</strong></td><td>${utypText}</td></tr>` : ""}
-            ${props.n_max !== undefined ? `<tr><td><strong>Unfälle (stärkstes Fenster)</strong></td><td>${props.n_max}</td></tr>` : ""}
-            ${props.window_best !== undefined ? `<tr><td><strong>Zeitfenster</strong></td><td>${props.window_best}</td></tr>` : ""}
-            ${props.n_windows !== undefined ? `<tr><td><strong>auffällige Fenster</strong></td><td>${props.n_windows}</td></tr>` : ""}
-            ${props.UKATEGORIE__1 !== undefined ? `<tr><td><strong># Getötete</strong></td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
-            ${props.UKATEGORIE__2 !== undefined ? `<tr><td><strong># Schwerverletzte</strong></td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
-            ${props.UKATEGORIE__3 !== undefined ? `<tr><td><strong># Leichtverletzte</strong></td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
+        <div class="sc9-popup" style="font-size: 12px;">
+          <style>
+            .sc9-popup table { border-collapse: collapse; margin-top: 4px; }
+            .sc9-popup td { vertical-align: top; padding: 1px 0; }
+            .sc9-popup td.k { padding-right: 12px; white-space: nowrap; color: #555; font-weight: 600; }
+          </style>
+          <strong>Unfallschwerpunkt</strong>
+          <table>
+            <tr><td class="k">Kriterium</td><td>${ruleLabels[props.rule] ?? props.rule ?? "-"}</td></tr>
+            ${utypText ? `<tr><td class="k">Unfalltyp</td><td>${utypText}</td></tr>` : ""}
+            ${props.n_max !== undefined ? `<tr><td class="k">Unfälle (max.)</td><td>${props.n_max}</td></tr>` : ""}
+            ${props.window_best !== undefined ? `<tr><td class="k">Zeitfenster</td><td>${props.window_best}</td></tr>` : ""}
+            ${props.n_windows !== undefined ? `<tr><td class="k">auffällige Fenster</td><td>${props.n_windows}</td></tr>` : ""}
+            ${props.UKATEGORIE__1 !== undefined ? `<tr><td class="k"># Getötete</td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
+            ${props.UKATEGORIE__2 !== undefined ? `<tr><td class="k"># Schwerverletzte</td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
+            ${props.UKATEGORIE__3 !== undefined ? `<tr><td class="k"># Leichtverletzte</td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
           </table>
-          <div style="margin-top: 6px; color: #777; font-size: 10px; max-width: 230px;">
+          <div style="margin-top: 6px; color: #777; font-size: 10px;">
             Nur Unfälle mit Personenschaden (Unfallatlas) — Annäherung an die M-Uko-Kriterien,
             keine amtliche Unfalltypen-Karte der Unfallkommissionen.
           </div>
