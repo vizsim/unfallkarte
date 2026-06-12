@@ -1,7 +1,8 @@
 """Szenario-Registry: name -> run-Funktion. Reihenfolge für run-all.
 
-Implementiert: scenario2, scenario6. Die übrigen sind als PLANNED gelistet (nach
-gleichem Muster portieren — geo.py-Helfer + tiles.build_dual_layer/build_multi_layer).
+Implementiert: scenario1/2/3/6/8/9. scenario4/5/7 (Mapillary-Mapping) wurden
+bewusst NICHT übernommen. Neue Szenarien nach gleichem Muster portieren
+(geo.py-Helfer + tiles.build_dual_layer/build_multi_layer).
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from .scenario2_schools import run as run_scenario2
 from .scenario3_tempo30_continuous import run as run_scenario3
 from .scenario6_schools_tempo50 import run as run_scenario6
 from .scenario8_schools_noise import run as run_scenario8
+from .scenario9_hotspots import run as run_scenario9
 
 REGISTRY: dict[str, Callable[[ScenarioContext], Path]] = {
     "scenario1": run_scenario1,
@@ -22,6 +24,7 @@ REGISTRY: dict[str, Callable[[ScenarioContext], Path]] = {
     "scenario3": run_scenario3,
     "scenario6": run_scenario6,
     "scenario8": run_scenario8,
+    "scenario9": run_scenario9,
 }
 
 # scenario4/5/7 (Mapillary-Mapping) wurden bewusst NICHT übernommen. Alle übrigen
@@ -29,4 +32,4 @@ REGISTRY: dict[str, Callable[[ScenarioContext], Path]] = {
 PLANNED: dict[str, str] = {}
 
 # Reihenfolge für run-all (nur implementierte).
-ORDER: list[str] = ["scenario1", "scenario2", "scenario3", "scenario6", "scenario8"]
+ORDER: list[str] = ["scenario1", "scenario2", "scenario3", "scenario6", "scenario8", "scenario9"]

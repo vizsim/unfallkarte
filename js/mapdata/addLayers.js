@@ -1242,6 +1242,53 @@ export function addLayers(map) {
 
 
 
+  // add Scenario9 layers (Unfallschwerpunkte / M Uko, vereinfacht)
+  function addScenario9Layers(map) {
+    // Polygon Layer: zoom 14+
+    map.addLayer({
+      id: "scenario9-polys",
+      type: "fill",
+      source: "scenario9",
+      "source-layer": "scenario9-polys",
+      filter: ["all"],
+      minzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "fill-color": "#c0392b",
+        "fill-opacity": 0.8,
+        "fill-outline-color": "#1B4D3E"
+      }
+    });
+
+    // Points Layer: zoom 6–14
+    map.addLayer({
+      id: "scenario9-points",
+      type: "circle",
+      source: "scenario9",
+      "source-layer": "scenario9-points",
+      filter: ["all"],
+      minzoom: 6,
+      maxzoom: 14,
+      layout: {
+        visibility: "none"
+      },
+      paint: {
+        "circle-color": "#c0392b",
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          6, 4,
+          10, 8
+        ],
+        "circle-opacity": 0.8,
+        "circle-stroke-color": "#1B4D3E",
+        "circle-stroke-width": 1
+      }
+    });
+  }
+
+
   function addMapillaryTSLayer(map) {
     map.addLayer({
       id: "mapillary-ts",
@@ -1411,6 +1458,7 @@ export function addLayers(map) {
   addScenario3Layers(map);
   addScenario6Layers(map);
   addScenario8Layers(map);
+  addScenario9Layers(map);
 
   addMaxspeedLayers(map);
   addMaxspeedMinorLayers(map);

@@ -947,3 +947,56 @@ export function setupScenario8Popups(map) {
     });
 }
 
+
+// Scenario 9 popups (Unfallschwerpunkte / M Uko, vereinfacht)
+export function setupScenario9Popups(map) {
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    const ruleLabels = {
+        up5_3y: "≥ 5 Unfälle mit Personenschaden / 3 Jahre",
+        usp3_3y: "≥ 3 schwere Unfälle / 3 Jahre",
+        utyp5_3y: "≥ 5 Unfälle gleichen Typs / 3 Jahre"
+    };
+
+    const renderScenario9Tooltip = (props) => {
+        // pmtiles liefert Integer-Attribute ggf. als String -> Number(...)
+        const utyp = Number(props.utyp);
+        const utypText = utyp > 0
+            ? `${translations.UTYP1[utyp] ?? "-"} (${utyp})`
+            : null;
+
+        return `
+        <div style="font-size: 12px;">
+          <strong>Unfallschwerpunkt</strong><br/>
+          <table style="border-collapse: collapse;">
+            <tr><td><strong>Kriterium</strong></td><td>${ruleLabels[props.rule] ?? props.rule ?? "-"}</td></tr>
+            ${utypText ? `<tr><td><strong>Unfalltyp</strong></td><td>${utypText}</td></tr>` : ""}
+            ${props.n_max !== undefined ? `<tr><td><strong>Unfälle (stärkstes Fenster)</strong></td><td>${props.n_max}</td></tr>` : ""}
+            ${props.window_best !== undefined ? `<tr><td><strong>Zeitfenster</strong></td><td>${props.window_best}</td></tr>` : ""}
+            ${props.n_windows !== undefined ? `<tr><td><strong>auffällige Fenster</strong></td><td>${props.n_windows}</td></tr>` : ""}
+            ${props.UKATEGORIE__1 !== undefined ? `<tr><td><strong># Getötete</strong></td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
+            ${props.UKATEGORIE__2 !== undefined ? `<tr><td><strong># Schwerverletzte</strong></td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
+            ${props.UKATEGORIE__3 !== undefined ? `<tr><td><strong># Leichtverletzte</strong></td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
+          </table>
+          <div style="margin-top: 6px; color: #777; font-size: 10px; max-width: 230px;">
+            Nur Unfälle mit Personenschaden (Unfallatlas) — Annäherung an die M-Uko-Kriterien,
+            keine amtliche Unfalltypen-Karte der Unfallkommissionen.
+          </div>
+        </div>
+      `;
+    };
+
+    ["scenario9-polys", "scenario9-points"].forEach((layerId) => {
+        map.on("mousemove", layerId, (e) => {
+            const html = renderScenario9Tooltip(e.features[0].properties);
+            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+            map.getCanvas().style.cursor = "pointer";
+        });
+
+        map.on("mouseleave", layerId, () => {
+            popup.remove();
+            map.getCanvas().style.cursor = "";
+        });
+    });
+}
+

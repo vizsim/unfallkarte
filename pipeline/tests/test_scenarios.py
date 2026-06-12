@@ -236,6 +236,6 @@ def test_scenario8_noise(tmp_path, capsys):
 
 
 def test_registry_all_scenarios():
-    expected = {"scenario1", "scenario2", "scenario3", "scenario6", "scenario8"}
+    expected = {"scenario1", "scenario2", "scenario3", "scenario6", "scenario8", "scenario9"}
     assert expected == set(registry.REGISTRY)
     assert registry.PLANNED == {}

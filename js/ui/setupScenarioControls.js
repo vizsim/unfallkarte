@@ -87,6 +87,44 @@ export function setupScenarioControls(map) {
     if (checked) applyScenario8ClusterSizeFilter(0);
   });
 
+
+  // scenario9: Unfallschwerpunkte (M Uko). Kombinierter Filter aus Min-Anzahl (n_max)
+  // und Kriterium (rule). Beide Layer (Punkte/Polygone) teilen denselben Filter.
+  function applyScenario9Filter(minN, rule) {
+    const parts = [[">=", ["to-number", ["get", "n_max"]], parseInt(minN, 10)]];
+    if (rule && rule !== "all") parts.push(["==", ["get", "rule"], rule]);
+    const filter = ["all", ...parts];
+    if (map.getLayer("scenario9-points")) map.setFilter("scenario9-points", filter);
+    if (map.getLayer("scenario9-polys")) map.setFilter("scenario9-polys", filter);
+  }
+
+  const slider9 = document.getElementById("scenario9-slider");
+  const sliderVal9 = document.getElementById("scenario9-slider-value");
+  const select9 = document.getElementById("scenario9-rule");
+  const controls9 = document.getElementById("scenario9-controls");
+
+  function updateScenario9() {
+    applyScenario9Filter(slider9.value, select9.value);
+  }
+
+  slider9.addEventListener("input", () => {
+    const val = parseInt(slider9.value, 10);
+    sliderVal9.textContent = val;
+    updateScenario9();
+    const percent = ((val - slider9.min) / (slider9.max - slider9.min)) * 100;
+    slider9.style.setProperty("--progress", `${percent}%`);
+  });
+
+  select9.addEventListener("change", updateScenario9);
+
+  document.getElementById("toggle-scenario9").addEventListener("change", function (e) {
+    const checked = e.target.checked;
+    map.setLayoutProperty("scenario9-points", "visibility", checked ? "visible" : "none");
+    map.setLayoutProperty("scenario9-polys", "visibility", checked ? "visible" : "none");
+    controls9.style.display = checked ? "block" : "none";
+    if (checked) updateScenario9();
+  });
+
 let uspeedDebounceTimer = null;
 
 document.getElementById("uspeed-slider").addEventListener("input", (e) => {

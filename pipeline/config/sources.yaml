@@ -98,6 +98,12 @@ datasets:
     attribution: "Umweltbundesamt (UBA-Lärmkartierung), © OpenStreetMap (ODbL)"
     date: { fixed: "2021" }   # UBA-Lärmkartierung (lärmgetrieben, statisch)
 
+  scenario9:
+    file: "scenarios/scenario9_hotspots.pmtiles"
+    label: "Unfallschwerpunkte (M Uko, vereinfacht)"
+    attribution: "Unfallatlas der Statistischen Ämter (dl-de/by-2-0)"
+    date: auto            # unfallgetrieben -> max. Unfalljahr
+
   # --- Kontextlayer UBA-Umgebungslärm (Hauptverkehrsstraßen, END-Lärmkartierung) ---
   laerm_den:
     file: "noise/laerm_den.pmtiles"

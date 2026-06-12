@@ -17,6 +17,7 @@ const MIGRATED = {
   scenario3: "scenario3",
   scenario6: "scenario6",
   scenario8: "scenario8",
+  scenario9: "scenario9",
   telraam_segments: "telraam_segments",
   hvs: "hvs",
   laerm1: "laerm_den",

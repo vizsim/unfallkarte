@@ -38,7 +38,8 @@ import {
   setupScenario2Popups,
   setupScenario3Popups,
   setupScenario6Popups,
-  setupScenario8Popups
+  setupScenario8Popups,
+  setupScenario9Popups
 } from './js/ui/popupHandlers.js';
 
 // 📦 Legende
@@ -296,6 +297,7 @@ function setupPopups(map) {
   setupScenario3Popups(map);
   setupScenario6Popups(map);
   setupScenario8Popups(map);
+  setupScenario9Popups(map);
 }
 
 function setupLegend(map) {

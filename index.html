@@ -543,6 +543,28 @@ MAIN HEADER
             <input type="range" id="scenario2-slider" min="3" max="20" step="1" value="3" />
           </div>
         </div>
+
+        <!-- Szenario 9 -->
+        <div style="margin-top: 6px;">
+          <label style="margin-left: 10px;">
+            <input type="checkbox" id="toggle-scenario9" name="scenario" value="sc9" />
+            Sc9: Unfallschwerpunkte (M Uko, vereinfacht)
+            <span class="info-icon"
+              title="Vereinfachte M-Uko-Kriterien auf Unfallatlas-Daten (nur Unfälle mit Personenschaden!) — Annäherung, keine amtliche UKo-Typenkarte. Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
+          </label>
+          <div id="scenario9-controls" style="margin-left: 24px; margin-top: 6px; display: none;">
+            <label for="scenario9-rule">Kriterium:</label>
+            <select id="scenario9-rule">
+              <option value="all" selected>alle</option>
+              <option value="up5_3y">≥5 Unfälle (Personenschaden) / 3 Jahre</option>
+              <option value="usp3_3y">≥3 schwere Unfälle / 3 Jahre</option>
+              <option value="utyp5_3y">≥5 gleicher Unfalltyp / 3 Jahre</option>
+            </select><br>
+            <label for="scenario9-slider">Min. Anzahl Unfälle: <span
+                id="scenario9-slider-value">3</span></label><br>
+            <input type="range" id="scenario9-slider" min="3" max="20" step="1" value="3" />
+          </div>
+        </div>
       </div>
 
 
