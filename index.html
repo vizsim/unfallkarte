@@ -834,27 +834,59 @@ MAIN HEADER
 
         <div class="legend-section-subtitle" style="margin-top: 12px;">Verkehrsmengen & Zählungen</div>
 
+        <!-- Verkehrsmengen: 1 Master-Toggle + 3 Quellen-Unterhaken (Länder/BASt/UBA). -->
         <div style="margin-top: 6px;">
           <label style="margin-left: 10px;">
-            <input type="checkbox" id="toggle-hvs" />
+            <input type="checkbox" id="toggle-svz" />
             Verkehrsmengen anzeigen
-            <span class="info-icon" data-hvs-vintage title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
+            <span class="info-icon" title="Straßenverkehrszählung der Länder (11 Länder) + BASt-Backbone (Bundesfernstraßen A+B) + UBA-Hauptverkehrsstraßen. Quelle/Lizenz je Feature: dl-de/by-2.0 · CC-BY-4.0 · dl-de/zero-2.0 · © BASt · © UBA.">ⓘ</span>
           </label>
         </div>
-        <div id="hvs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
-          <div><strong>Linienstärke (Jahresverkehrsmenge)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:2px;background:#444;margin-right:6px;"></span> ≤
-              3
-              Mio Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:4px;background:#444;margin-right:6px;"></span> ≈
-              6
-              Mio Fahrzeuge/Jahr</div>
-            <div><span style="display:inline-block;width:24px;height:8px;background:#444;margin-right:6px;"></span> ≥
-              10
-              Mio Fahrzeuge/Jahr</div>
-          </div>
+
+        <!-- Quellen-Unterhaken (nur sichtbar, wenn der Master an ist); UBA initial aus. -->
+        <div id="svz-children" style="margin-left: 30px; margin-top: 2px; font-size: 12px; display: none;">
+          <div style="margin-top: 3px;"><label><input type="checkbox" class="svz-src" id="toggle-svz-laender" checked /> Alle Länder (SVZ)</label></div>
+          <div style="margin-top: 3px;"><label><input type="checkbox" class="svz-src" id="toggle-svz-bast" checked /> BASt (A+B)</label></div>
+          <div style="margin-top: 3px;"><label><input type="checkbox" class="svz-src" id="toggle-hvs" /> UBA (&gt;3 Mio/Jahr) <span class="info-icon" data-hvs-vintage title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span></label></div>
         </div>
+
+        <div id="svz-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          <div style="display:flex; gap:14px; margin-bottom:6px;">
+            <label style="display:flex; align-items:center; gap:4px;">
+              <input type="radio" name="svz-mode" value="dtv" checked /> DTV
+            </label>
+            <label style="display:flex; align-items:center; gap:4px;">
+              <input type="radio" name="svz-mode" value="sv" /> SV-Anteil
+            </label>
+          </div>
+
+          <!-- DTV-Rampe (Kfz/24h): monochrom schwarz, Größe = Menge; Linie + Punkt je Klasse parallel. -->
+          <div class="svz-ramp" data-mode="dtv">
+            <div style="margin-bottom:4px; color:#444;"><strong>Menge</strong> (Kfz/24h) · Größe</div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:2px;background:#222;"></span><span class="svz-dot" style="width:6px;height:6px;background:#222;"></span></span><span class="svz-label">&lt; 5.000</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:3px;background:#222;"></span><span class="svz-dot" style="width:8px;height:8px;background:#222;"></span></span><span class="svz-label">5–15.000</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:4px;background:#222;"></span><span class="svz-dot" style="width:10px;height:10px;background:#222;"></span></span><span class="svz-label">15–30.000</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:6px;background:#222;"></span><span class="svz-dot" style="width:13px;height:13px;background:#222;"></span></span><span class="svz-label">30–50.000</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:8px;background:#222;"></span><span class="svz-dot" style="width:16px;height:16px;background:#222;"></span></span><span class="svz-label">&gt; 50.000</span></div>
+          </div>
+
+          <!-- SV-Anteil-Rampe (% Schwerverkehr) — ebenfalls monochrom, Größe = Anteil. -->
+          <div class="svz-ramp" data-mode="sv" style="display:none;">
+            <div style="margin-bottom:4px; color:#444;"><strong>SV-Anteil</strong> (Schwerverkehr %) · Größe</div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:2px;background:#222;"></span><span class="svz-dot" style="width:6px;height:6px;background:#222;"></span></span><span class="svz-label">&lt; 5 %</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:3px;background:#222;"></span><span class="svz-dot" style="width:8px;height:8px;background:#222;"></span></span><span class="svz-label">5–10 %</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:4px;background:#222;"></span><span class="svz-dot" style="width:10px;height:10px;background:#222;"></span></span><span class="svz-label">10–20 %</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:6px;background:#222;"></span><span class="svz-dot" style="width:13px;height:13px;background:#222;"></span></span><span class="svz-label">20–30 %</span></div>
+            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:8px;background:#222;"></span><span class="svz-dot" style="width:16px;height:16px;background:#222;"></span></span><span class="svz-label">&gt; 30 %</span></div>
+          </div>
+
+          <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:3px;background:#b4b4b4;"></span><span class="svz-dot" style="width:9px;height:9px;background:#b4b4b4;"></span></span><span class="svz-label">keine Angabe</span></div>
+          <div style="margin-top:6px; color:#666;">Dick = viel Verkehr · Linien = Länder-Segmente &amp; UBA-Hauptverkehrsstraßen (Jahresmenge ÷ 365) · Punkte = Zählstellen (BW/SL) &amp; BASt (A+B) · Klick für Details.<br/>Ganze Karte, alle Länder &amp; Quellen → <a href="https://vizsim.de/svz" target="_blank" rel="noopener">vizsim.de/svz</a></div>
+        </div>
+
+        <!-- UBA-HVS hat keine eigene Legende mehr — es teilt die SVZ-Größenlegende oben
+             (annualTrafficFlow ÷ 365 = Tages-DTV≈, gleiche schwarze Größenkodierung). -->
+
 
 
         <div style="margin-top: 6px;">

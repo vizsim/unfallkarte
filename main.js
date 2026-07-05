@@ -23,6 +23,7 @@ import {
   setupAccClusterPopups,
   setupMovebisPopups,
   setupHVSPopups,
+  setupSvzPopups,
   setupMaxspeedPopups,
   setupUspeedPopups,
   setupOBSPopups,
@@ -279,7 +280,7 @@ function setupPopups(map) {
   setupAccidentPopups(map);
   setupAccClusterPopups(map);
   setupMovebisPopups(map);
-  setupHVSPopups(map);
+  setupSvzPopups(map);   // deckt SVZ (Länder/BASt) UND UBA-Hauptverkehrsstraßen (hvs) ab
   setupMaxspeedPopups(map);
   setupUspeedPopups(map);
   setupOBSPopups(map);

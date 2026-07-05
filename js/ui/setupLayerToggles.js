@@ -8,6 +8,7 @@
 import { applyZoomLock } from "../utils/zoomLock.js";
 import { updateLegendVisibilityByZoom } from "./legendHandlers.js";
 import { telraamColorExpr } from "../mapdata/addLayers.js";
+import { svzColorExpr, svzWidthExpr, svzRadiusExpr } from "../mapdata/addLayers.js";
 
 
 
@@ -38,7 +39,8 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
 
   // Einfachere Handhabung der Layer
   setupToggle(map, "toggle-movebis", ["movebis"], zoomLock, applyLegendVisibility);
-  setupToggle(map, "toggle-hvs", ["hvs"], zoomLock, applyLegendVisibility);
+  // Verkehrsmengen: 1 Master-Toggle + 3 Quellen-Unterhaken (Länder/BASt/UBA) + DTV/SV.
+  setupVerkehrsmengen(map, zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-obs", ["obs"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-laerm1", ["laerm1"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-laerm2", ["laerm2"], zoomLock, applyLegendVisibility);
@@ -115,4 +117,81 @@ function setupTelraamMode(map) {
 
   const init = document.querySelector('input[name="telraam-mode"]:checked');
   apply(init ? init.value : "bike");
+}
+
+
+// Verkehrsmengen-Gruppe: 1 Master-Toggle (#toggle-svz) + 3 Quellen-Unterhaken
+// (Länder / BASt / UBA) + DTV/SV-Umschalter in EINER Steuerung.
+//   Master AUS  -> alle Layer aus, Unterhaken/Legende eingeklappt.
+//   Master AN   -> je Unterhaken: Länder (svz-lines/points), BASt (bast-points),
+//                  UBA (hvs; startet aus).
+//   Modus       -> setzt Farbe/Größe der SVZ-Layer; UBA gibt es NUR im DTV-Modus
+//                  (Hauptverkehrsstraßen haben keinen SV-Anteil) -> im SV-Modus wird
+//                  der UBA-Layer ausgeblendet und der Unterhaken deaktiviert.
+// Der UBA-Unterhaken behält die id toggle-hvs -> hvs-legend/permalink unverändert.
+function setupVerkehrsmengen(map, zoomLock, applyLegendVisibility) {
+  const master = document.getElementById("toggle-svz");
+  if (!master) return;
+  const kids = document.getElementById("svz-children");
+  const ubaCb = document.getElementById("toggle-hvs");
+  const groups = [
+    { cb: document.getElementById("toggle-svz-laender"), layers: ["svz-lines", "svz-points"], dtvOnly: false },
+    { cb: document.getElementById("toggle-svz-bast"), layers: ["bast-points"], dtvOnly: false },
+    { cb: ubaCb, layers: ["hvs"], dtvOnly: true },
+  ];
+  let mode = "dtv";
+
+  const applyLayers = () => {
+    const on = master.checked;
+    for (const g of groups) {
+      const modeOk = !g.dtvOnly || mode === "dtv";
+      const vis = (on && g.cb && g.cb.checked && modeOk) ? "visible" : "none";
+      for (const id of g.layers) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
+      }
+    }
+    if (kids) kids.style.display = on ? "block" : "none";
+    // UBA hat keinen SV-Anteil -> im SV-Modus Unterhaken deaktivieren (+ Hinweis).
+    if (ubaCb) {
+      const off = mode !== "dtv";
+      ubaCb.disabled = off;
+      const lab = ubaCb.closest("label");
+      if (lab) {
+        lab.style.opacity = off ? "0.45" : "";
+        lab.title = off ? "UBA-Hauptverkehrsstraßen haben keinen SV-Anteil — nur im DTV-Modus." : "";
+      }
+    }
+    zoomLock();
+    applyLegendVisibility();
+    updateLegendVisibilityByZoom(map);
+  };
+
+  const applyMode = (m) => {
+    mode = m;
+    if (map.getLayer("svz-lines")) {
+      map.setPaintProperty("svz-lines", "line-color", svzColorExpr(mode));
+      map.setPaintProperty("svz-lines", "line-width", svzWidthExpr(mode));
+    }
+    for (const id of ["svz-points", "bast-points"]) {
+      if (!map.getLayer(id)) continue;
+      map.setPaintProperty(id, "circle-color", svzColorExpr(mode));
+      map.setPaintProperty(id, "circle-radius", svzRadiusExpr(mode));
+    }
+    document.querySelectorAll(".svz-ramp").forEach(el => {
+      el.style.display = el.dataset.mode === mode ? "block" : "none";
+    });
+    applyLayers(); // UBA-Sichtbarkeit + disabled-Status an den Modus anpassen
+  };
+
+  master.addEventListener("change", applyLayers);
+  for (const g of groups) if (g.cb) g.cb.addEventListener("change", applyLayers);
+  document.querySelectorAll('input[name="svz-mode"]').forEach(r =>
+    r.addEventListener("change", () => {
+      const sel = document.querySelector('input[name="svz-mode"]:checked');
+      applyMode(sel ? sel.value : "dtv");
+    })
+  );
+
+  const initMode = document.querySelector('input[name="svz-mode"]:checked');
+  applyMode(initMode ? initMode.value : "dtv"); // ruft applyLayers()
 }

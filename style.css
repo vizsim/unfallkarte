@@ -544,6 +544,38 @@ body {
   color: #374151;          /* kräftiger/dunkler als das frühere Muted-Grau */
 }
 
+/* ===== SVZ-Verkehrsmengen-Legende: 5 Klassen, Linie + Punkt je Klasse parallel =====
+   Farbe UND Größe kodieren die Menge -> Swatches wachsen mit. Feste Swatch-Breite,
+   damit die Labels trotz variabler Punktgröße bündig bleiben. */
+#svz-legend .svz-row {
+  display: flex;
+  align-items: center;
+  margin: 3px 0;
+}
+#svz-legend .svz-swatch {
+  width: 54px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+#svz-legend .svz-line {
+  display: inline-block;
+  width: 22px;
+  border-radius: 2px;
+  flex: none;
+}
+#svz-legend .svz-dot {
+  display: inline-block;
+  border-radius: 50%;
+  flex: none;
+}
+#svz-legend .svz-label {
+  color: #333;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Radinfrastruktur-Legende (rechtes Kontext-Panel, Stil aus mapillary_coverage_analysis) ===== */
 #bikelanes-legend .bl-row {
   display: flex;
@@ -704,3 +736,13 @@ body {
   background: var(--ui-hover);
   color: var(--ui-text);
 }
+
+/* ===== SVZ-Verkehrsmengen-Popup (Hero-Zahl + Metrik-Badge + Meta) ===== */
+.popup-road { font-weight: 700; font-size: 15px; color: #111; }
+.popup-dtv { color: #d73027; font-weight: 700; font-size: 16px; margin: 3px 0 1px; }
+.popup-unit { color: #9a9a9a; font-weight: 600; font-size: 11px; }
+.popup-sv { color: #555; font-size: 12px; margin-top: 1px; }
+.popup-meta { color: #777; font-size: 11.5px; margin-top: 1px; }
+/* Metrik-Badge + SV-Label: gepunktete Unterstreichung = „hover für Erklärung". */
+.popup-metric { color: #9a9a9a; font-weight: 600; font-size: 11px; cursor: help; border-bottom: 1px dotted #c4c4c4; }
+.popup-hint { color: #444; cursor: help; border-bottom: 1px dotted #c4c4c4; }

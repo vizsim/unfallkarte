@@ -256,29 +256,76 @@ export function addLayers(map) {
 
 
 
-  // and Verkehrsmengen layer
+  // UBA-Hauptverkehrsstraßen (Verkehrsmengen): am SVZ ausgerichtet — schwarz, Größe =
+  // Tages-DTV≈ (annualTrafficFlow ÷ 365), gleiche Schwellen -> teilt die SVZ-Legende.
   function addHvsLayer(map) {
     map.addLayer({
       id: "hvs",
       type: "line",
       source: "hvs",
       "source-layer": "lines",
-      layout: { visibility: "none" },
+      layout: { visibility: "none", "line-cap": "round", "line-join": "round" },
       paint: {
-        "line-width": [
-          "interpolate",
-          ["linear"],
-          ["to-number", ["get", "annualTrafficFlow"]],
-          3000000, 2,
-          10000000, 4,
-          20000000, 8,
-          30000000, 16
-        ],
-        "line-color": "#222"
+        "line-color": hvsColorExpr(),
+        "line-opacity": 0.9,
+        "line-width": hvsWidthExpr()
       }
     });
   }
 
+
+  // add SVZ Verkehrsmengen layers (echte DTV der Länder + BASt-Backbone A+B).
+  // Farbe UND Größe kodieren die Menge (svzColorExpr/svzWidthExpr/svzRadiusExpr,
+  // Modus "dtv"|"sv"; setupSvzMode schaltet um). source-layer = Frontend-Vertrag aus
+  // svz: svz_de.pmtiles -> `svz` (Linien) + `svz_points` (Punkte BW/SL),
+  // svz_bast.pmtiles -> `bast` (Punkte A+B). Liegt ÜBER dem groben hvs-Fallback.
+  function addSvzLayers(map) {
+    // Länder-Segmente (Zählstellenbereiche, Linien).
+    map.addLayer({
+      id: "svz-lines",
+      type: "line",
+      source: "svz",
+      "source-layer": "svz",
+      layout: { visibility: "none", "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": svzColorExpr("dtv"),
+        "line-opacity": 0.9,
+        "line-width": svzWidthExpr("dtv")
+      }
+    });
+
+    // Zählstellen-Punkte der Länder (BW/SL als Punkte).
+    map.addLayer({
+      id: "svz-points",
+      type: "circle",
+      source: "svz",
+      "source-layer": "svz_points",
+      layout: { visibility: "none" },
+      paint: {
+        "circle-color": svzColorExpr("dtv"),
+        "circle-opacity": 0.9,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 0.7,
+        "circle-radius": svzRadiusExpr("dtv")
+      }
+    });
+
+    // BASt-Backbone (Bundesfernstraßen A+B, Punkte) — eigene Quelle svz_bast.
+    map.addLayer({
+      id: "bast-points",
+      type: "circle",
+      source: "svz_bast",
+      "source-layer": "bast",
+      layout: { visibility: "none" },
+      paint: {
+        "circle-color": svzColorExpr("dtv"),
+        "circle-opacity": 0.9,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 0.7,
+        "circle-radius": svzRadiusExpr("dtv")
+      }
+    });
+  }
 
 
   function addUspeedLayer(map) {
@@ -1465,6 +1512,7 @@ export function addLayers(map) {
   addMovebisLayer(map);
   addOBSLayer(map);
   addHvsLayer(map);
+  addSvzLayers(map);   // SVZ-Verkehrsmengen ÜBER dem groben hvs-Fallback
   addLaermLayer(map);
   addUspeedLayer(map);
   addTelraamLayer(map);
@@ -1497,4 +1545,75 @@ export function telraamColorExpr(mode) {
   const interp = ["interpolate", ["linear"], ["to-number", ["get", c.attr]]];
   for (let i = 0; i < c.stops.length; i++) interp.push(c.stops[i], c.colors[i]);
   return ["case", ["has", c.attr], interp, "#bbbbbb"];
+}
+
+
+// --- SVZ-Verkehrsmengen: Größen-Expressions (Modus "dtv" | "sv") --------------------
+// MONOCHROM: alle Features schwarz — die MENGE steckt ALLEIN in der Größe
+// (Linienbreite bzw. Kreisradius), damit stark befahrene Straßen/Stellen dick
+// herausstechen. Der Modus (DTV bzw. SV-Anteil %) steuert, WELCHE Größe die Dicke
+// kodiert. Genutzt von addLayers (initial) und setupSvzMode (Umschalter) -> eine
+// Quelle. dtv_kfz/dtv_sv/sv_anteil landen z.T. als String im Tile -> immer to-number.
+const SVZ_NODATA = "#b4b4b4";
+
+// SV-Anteil je Feature: direkt sv_anteil (%), sonst aus dtv_sv/dtv_kfz berechnet.
+const svzSvShare = [
+  "case",
+  ["has", "sv_anteil"], ["to-number", ["get", "sv_anteil"]],
+  ["*", ["/", ["to-number", ["get", "dtv_sv"]], ["to-number", ["get", "dtv_kfz"]]], 100]
+];
+const svzHasSv = [
+  "any",
+  ["has", "sv_anteil"],
+  ["all", ["has", "dtv_sv"], ["has", "dtv_kfz"], [">", ["to-number", ["get", "dtv_kfz"]], 0]]
+];
+const svzValue = (mode) => (mode === "sv" ? svzSvShare : ["to-number", ["get", "dtv_kfz"]]);
+const svzHas = (mode) => (mode === "sv" ? svzHasSv : ["has", "dtv_kfz"]);
+
+// Schwarz für alle Features mit Wert; no-data bleibt grau (unterscheidbar von klein).
+const SVZ_INK = "#222";
+// 5 Klassen-Schwellen je Modus (Reihenfolge = Legendenzeilen).
+export const SVZ_BREAKS = { dtv: [0, 5000, 15000, 30000, 50000], sv: [0, 5, 10, 20, 30] };
+// Größen-Rampen (px, vor Zoom-Faktor): Linienbreite bzw. Kreisradius je Klasse.
+const SVZ_WIDTHS = [0.8, 1.5, 2.5, 4, 6];
+const SVZ_RADII = [2.5, 3.5, 5, 7, 10];
+export function svzColorExpr(mode) {
+  // Monochrom: schwarz bei vorhandenem Wert, grau bei „keine Angabe". Keine Farbrampe.
+  return ["case", svzHas(mode), SVZ_INK, SVZ_NODATA];
+}
+
+// Größe = Menge UND Zoom. MapLibre erlaubt "zoom" NUR ganz außen in interpolate/step;
+// deshalb Zoom-Kurve außen, je Zoom-Stufe eine (skalierte) Daten-Größenrampe (value->px)
+// als Output — die inneren Ausdrücke dürfen KEIN zoom enthalten. no-data -> kleinste
+// Klasse. Generisch über valueExpr/hasExpr/breaks, damit SVZ (dtv_kfz / SV-Anteil) UND
+// UBA (annualTrafficFlow ÷ 365) DIESELBE schwarze Größenkodierung + Legende teilen.
+const SVZ_ZOOM_STOPS = [[6, 0.55], [11, 0.8], [14, 1.0], [16, 1.4], [18, 1.8]];
+function sizeExpr(valueExpr, hasExpr, breaks, baseValues) {
+  const zi = ["interpolate", ["linear"], ["zoom"]];
+  for (const [z, f] of SVZ_ZOOM_STOPS) {
+    const scaled = baseValues.map((v) => Math.round(v * f * 100) / 100);
+    const ramp = ["interpolate", ["linear"], valueExpr];
+    for (let i = 0; i < breaks.length; i++) ramp.push(breaks[i], scaled[i]);
+    zi.push(z, ["case", hasExpr, ramp, scaled[0]]);
+  }
+  return zi;
+}
+const svzBreaks = (mode) => SVZ_BREAKS[mode === "sv" ? "sv" : "dtv"];
+
+export function svzWidthExpr(mode) {
+  return sizeExpr(svzValue(mode), svzHas(mode), svzBreaks(mode), SVZ_WIDTHS);
+}
+export function svzRadiusExpr(mode) {
+  return sizeExpr(svzValue(mode), svzHas(mode), svzBreaks(mode), SVZ_RADII);
+}
+
+// UBA-Hauptverkehrsstraßen: annualTrafficFlow (Kfz/Jahr) -> Tages-DTV≈ (÷365), gleiche
+// schwarze Größenkodierung + DTV-Schwellen wie SVZ -> passt in DIESELBE Legende.
+const HVS_DAILY = ["/", ["to-number", ["get", "annualTrafficFlow"]], 365];
+const HVS_HAS = ["has", "annualTrafficFlow"];
+export function hvsColorExpr() {
+  return ["case", HVS_HAS, SVZ_INK, SVZ_NODATA];
+}
+export function hvsWidthExpr() {
+  return sizeExpr(HVS_DAILY, HVS_HAS, SVZ_BREAKS.dtv, SVZ_WIDTHS);
 }

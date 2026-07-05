@@ -5,7 +5,7 @@
 const LEGEND_KEYS = [
   "cluster-legend-section",
   "movebis-legend",
-  "hvs-legend",
+  "svz-legend",
   "mapillary-legend",
   "maxspeed-legend",
   "obs-legend",
@@ -30,7 +30,7 @@ function isSpecialLegendElement(el, legends) {
 export function applyLegendVisibility() {
   const keys = [
     "schools", "health", "playgrounds", "crossings",
-    "hvs", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2", "uspeed", "telraam",
+    "svz", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2", "uspeed", "telraam",
     "bikelanes",
     "scenario1", "scenario2", "scenario3", "scenario6"
   ];
@@ -55,7 +55,7 @@ export function updateLegendVisibilityByZoom(map) {
   const {
     ["cluster-legend-section"]: clusterLegendEl,
     ["movebis-legend"]: movebisLegend,
-    ["hvs-legend"]: hvsLegend,
+    ["svz-legend"]: svzLegend,
     ["mapillary-legend"]: mapillaryLegend,
     ["maxspeed-legend"]: maxspeedLegend,
     ["obs-legend"]: obsLegend,
@@ -68,7 +68,12 @@ export function updateLegendVisibilityByZoom(map) {
 
   if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "block" : "none";
   if (movebisLegend) movebisLegend.style.display = (visibilityCheck("movebis") && zoom >= 11) ? "block" : "none";
-  if (hvsLegend) hvsLegend.style.display = (visibilityCheck("hvs") && zoom >= 11) ? "block" : "none";
+  if (svzLegend) {
+    // svz-Legende hängt am Master (#toggle-svz), nicht an einem einzelnen Layer —
+    // so bleibt sie auch bei „nur BASt" (Länder aus) sichtbar.
+    const svzMaster = document.getElementById("toggle-svz");
+    svzLegend.style.display = (svzMaster && svzMaster.checked && zoom >= 11) ? "block" : "none";
+  }
   if (maxspeedLegend) {
     const visible = visibilityCheck("maxspeed") || visibilityCheck("maxspeed_minor");
     maxspeedLegend.style.display = (visible && zoom >= 11) ? "block" : "none";

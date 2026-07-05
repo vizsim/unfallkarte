@@ -25,6 +25,7 @@ export const kontextKeys = {
     mapillary_ts: "y",
     maxspeed: "s",
     hvs: "h",
+    svz: "v",
     movebis: "b",
     schools: "k",
     health: "e",
@@ -122,7 +123,10 @@ export function applyPermalink(map, paintStyles, updateLayerFilter, updateVisibl
     if (!isNaN(zoom)) map.setZoom(zoom);
     if (style) document.querySelector(`input[name="color-style"][value="${style}"]`)?.click();
 
-    document.querySelectorAll('.legend input[type=checkbox], .legend input[data-field]').forEach(cb => cb.checked = false);
+    // SVZ-Quellen-Unterhaken (.svz-src) NICHT zurücksetzen — ihre HTML-Defaults
+    // (Länder/BASt an, UBA aus) sollen den Permalink-Reset überleben; nur der
+    // Master (#toggle-svz) wird wie andere Kontext-Layer aus der URL wiederhergestellt.
+    document.querySelectorAll('.legend input[type=checkbox]:not(.svz-src), .legend input[data-field]').forEach(cb => cb.checked = false);
 
     const checkInputs = (group, values) => values?.split("_").forEach(val => {
         document.querySelector(`input[data-group="${group}"][value="${val}"]`)?.click();

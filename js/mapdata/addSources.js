@@ -20,6 +20,8 @@ const MIGRATED = {
   scenario9: "scenario9",
   telraam_segments: "telraam_segments",
   hvs: "hvs",
+  svz: "svz",
+  svz_bast: "svz_bast",
   laerm1: "laerm_den",
   laerm2: "laerm_night",
   obs: "obs",

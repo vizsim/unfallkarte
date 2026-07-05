@@ -253,6 +253,80 @@ export function setupHVSPopups(map) {
     });
 }
 
+// SVZ-Verkehrsmengen-Popup (Klick): echte DTV (Kfz/24h) + Straße/Klasse/Jahr/Quelle,
+// optional Schwerverkehr (absolut + Anteil). Ein Handler für alle drei Layer
+// (Länder-Linien/-Punkte + BASt). Portiert aus vizsim/svz (main.js onClick).
+// dtv_kfz/dtv_sv/sv_anteil landen z.T. als String im Tile -> Number(...) beim Formatieren.
+export function setupSvzPopups(map) {
+    const fmt = (n) => (n == null || n === "" ? "–" : Number(n).toLocaleString("de-DE"));
+    const pct = (num, den) =>
+        den ? ((Number(num) / Number(den)) * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) : null;
+
+    const ROAD_CLASS = { A: "Autobahn", B: "Bundesstraße", L: "Landesstraße", K: "Kreisstraße", G: "Gemeindestraße" };
+    const providerLabel = (state) => (state === "DE" ? "BASt" : state);
+    const METRIC_TITLE = {
+        DTV: "Durchschnittliche tägliche Verkehrsstärke (Kfz/24h, alle Tage)",
+        DTVw: "Durchschnittliche tägliche Verkehrsstärke werktags (Mo–Fr)",
+        "DTV≈": "Näherung aus der Jahresmenge: Kfz/Jahr ÷ 365"
+    };
+    const metricBadge = (m) => (m ? `<span class="popup-metric" title="${METRIC_TITLE[m] || ""}">${m}</span>` : "");
+    const svLabel = (t) => `<span class="popup-hint" title="Schwerverkehr: Lkw, Lastzüge, Busse (Kfz > 3,5 t)">${t}</span>`;
+    const dtvHero = (val, metric) =>
+        `<div class="popup-dtv">${fmt(val)} <span class="popup-unit">Kfz/24h</span> ${metricBadge(metric)}</div>`;
+
+    const onClick = (e) => {
+        const p = e.features[0].properties;
+        // UBA-Hauptverkehrsstraßen (Layer hvs): annualTrafficFlow (Kfz/Jahr) -> Tages-DTV≈.
+        if (p.annualTrafficFlow != null && p.annualTrafficFlow !== "") {
+            const flow = Number(p.annualTrafficFlow);
+            new maplibregl.Popup({ closeButton: false, maxWidth: "270px" })
+                .setLngLat(e.lngLat)
+                .setHTML(
+                    `<div class="popup-road">Hauptverkehrsstraße</div>` +
+                    dtvHero(Math.round(flow / 365), "DTV≈") +
+                    `<div class="popup-meta">${fmt(flow)} Kfz/Jahr · © UBA · END 2021</div>` +
+                    `<div class="popup-meta"><a href="https://vizsim.de/svz" target="_blank" rel="noopener">Details &amp; Quellen → vizsim.de/svz</a></div>`
+                )
+                .addTo(map);
+            return;
+        }
+        const road = p.road_no || (p.road_class ? `${p.road_class}-Straße` : "Zählstelle");
+        const klass = ROAD_CLASS[p.road_class] || (p.road_class ? `Klasse ${p.road_class}` : "");
+
+        let sv = "";
+        if (p.dtv_sv != null && p.dtv_sv !== "") {
+            const share = pct(p.dtv_sv, p.dtv_kfz);
+            sv = `<div class="popup-sv">${svLabel("SV")} ${fmt(p.dtv_sv)}${share ? ` · ${share} %` : ""}</div>`;
+        } else if (p.sv_anteil != null && p.sv_anteil !== "") {
+            sv = `<div class="popup-sv">${svLabel("SV-Anteil")} ${p.sv_anteil} %</div>`;
+        }
+
+        const dtvLine =
+            (p.dtv_kfz != null && p.dtv_kfz !== "")
+                ? dtvHero(p.dtv_kfz, p.metric)
+                : `<div class="popup-meta">keine DTV-Angabe ${metricBadge(p.metric)}</div>`;
+
+        const meta = [klass, p.year, providerLabel(p.state)].filter(Boolean).join(" · ");
+
+        new maplibregl.Popup({ closeButton: false, maxWidth: "270px" })
+            .setLngLat(e.lngLat)
+            .setHTML(
+                `<div class="popup-road">${road}</div>` +
+                dtvLine +
+                sv +
+                `<div class="popup-meta">${meta}</div>` +
+                `<div class="popup-meta"><a href="https://vizsim.de/svz" target="_blank" rel="noopener">Details &amp; Quellen → vizsim.de/svz</a></div>`
+            )
+            .addTo(map);
+    };
+
+    for (const id of ["svz-lines", "svz-points", "bast-points", "hvs"]) {
+        map.on("click", id, onClick);
+        map.on("mouseenter", id, () => (map.getCanvas().style.cursor = "pointer"));
+        map.on("mouseleave", id, () => (map.getCanvas().style.cursor = ""));
+    }
+}
+
 export function setupMaxspeedPopups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 

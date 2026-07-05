@@ -124,6 +124,23 @@ datasets:
     attribution: "© Umweltbundesamt-DE (END-Lärmkartierung, Hauptverkehrsstraßen)"
     date: { fixed: "2021" }   # END 4. Runde, Bezugsjahr 2021 (Layer 8100, versionId 2021)
 
+  # --- Verkehrsmengen SVZ (Producer: eigenes Repo vizsim/svz; hier nur die fertigen
+  #     PMTiles gespiegelt). svz_de = Länder-Segmente (Layer `svz`) + Zählstellen-Punkte
+  #     (Layer `svz_points`); svz_bast = bundesweiter BASt-Backbone A+B (Layer `bast`).
+  #     Ersetzt fachlich den groben UBA-HVS-Layer (nur >3 Mio Kfz/Jahr) — der bleibt als
+  #     Fallback-Backbone (hvs) für die 5 fehlenden Länder. ---
+  svz:
+    file: "svz/svz_de.pmtiles"
+    label: "Verkehrsmengen (SVZ der Länder)"
+    attribution: "Straßenverkehrszählung der Länder (dl-de/by-2-0 · CC-BY-4.0 · dl-de/zero-2-0)"
+    date: { fixed: "2015–2024" }   # je Land unterschiedliches Erhebungsjahr (Feld `year`)
+
+  svz_bast:
+    file: "svz/svz_bast.pmtiles"
+    label: "Verkehrsmengen Bundesfernstraßen (BASt)"
+    attribution: "© BASt (Bundesfernstraßen A+B, SVZ 2021)"
+    date: { fixed: "2021" }
+
   # --- Kontextlayer Telraam ---
   telraam_segments:
     file: "telraam/telraam_segments.pmtiles"
