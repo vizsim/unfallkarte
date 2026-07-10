@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """movebis (TU Dresden / Stadtradeln): Rad-Geschwindigkeiten → PMTiles.
 
-Quelle: `data/raw/movebis_speed_germany_10.gpkg` (Layer `links`, EPSG:4326,
+Quelle: `data/raw/movebis/movebis_speed_germany_10.gpkg` (Layer `links`, EPSG:4326,
 ~9,9 Mio LineStrings, Felder `avg_speed_kmh` + `visits`, bereits auf visits>=10
 gefiltert). Verarbeitung ist minimal — die GPKG ist schon der saubere Stand:
 GPKG → FlatGeobuf → tippecanoe.
@@ -21,6 +21,10 @@ from unfallkarte.config import get_paths, load_yaml
 
 _SRC = "movebis_speed_germany_10.gpkg"
 _LAYER = "links"          # Layer in GPKG UND interner tippecanoe-Layer = Frontend-Vertrag
+
+
+def _raw() -> Path:
+    return get_paths().raw / "movebis"
 
 
 def _dataset() -> dict:
@@ -71,13 +75,13 @@ def gpkg_to_fgb(gpkg: Path, fgb: Path) -> Path:
 
 
 def build(*, dry_run: bool = False) -> Path:
-    """GPKG → FGB → traffic/movebis.pmtiles (interner Layer `links`, ab z9)."""
+    """GPKG → FGB → movebis/movebis.pmtiles (interner Layer `links`, ab z9)."""
     paths = get_paths()
-    gpkg = paths.raw / _SRC
+    gpkg = _raw() / _SRC
     if not dry_run and not gpkg.exists():
-        raise FileNotFoundError(f"GPKG fehlt: {gpkg} — movebis-Quelle nach data/raw/ legen.")
+        raise FileNotFoundError(f"GPKG fehlt: {gpkg} — Quelle nach data/raw/movebis/ legen.")
 
-    fgb = paths.raw / "movebis.fgb"
+    fgb = _raw() / "movebis.fgb"
     if not dry_run:
         gpkg_to_fgb(gpkg, fgb)
 

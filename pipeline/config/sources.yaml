@@ -63,7 +63,7 @@ datasets:
     date: { fixed: "2019-Q2" }
 
   movebis:
-    file: "traffic/movebis.pmtiles"
+    file: "movebis/movebis.pmtiles"
     label: "Rad-Geschwindigkeiten (Movebis)"
     attribution: "© TU Dresden, Movebis (CC BY-NC)"
     date: { fixed: "2020" }   # Datenstand movebis 2020 (Segmente mit ≥10 Fahrten)

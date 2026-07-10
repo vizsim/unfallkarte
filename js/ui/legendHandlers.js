@@ -14,9 +14,6 @@ const LEGEND_KEYS = [
   "uspeed-legend"
 ];
 
-// Letzter beobachteter Zoom — für die Erkennung des Übergangs ≥11 → <11 (Cluster wieder an).
-let _prevZoom = null;
-
 function getLegendElements() {
   const elements = Object.fromEntries(
     LEGEND_KEYS.map(id => [id, document.getElementById(id)])
@@ -51,18 +48,6 @@ export function updateLegendVisibilityByZoom(map) {
   if (!map || typeof map.getZoom !== "function") return;
 
   const zoom = map.getZoom();
-
-  // Beim Wechsel von Zoom ≥11 (Einzelunfälle) nach <11 die geclusterten Unfälle wieder
-  // standardmäßig einblenden + Sektions-Checkbox aktivieren. (Läuft vor dem evtl. frühen
-  // Return, damit es auch bei eingeklappter Legende greift.)
-  if (_prevZoom !== null && _prevZoom >= 11 && zoom < 11) {
-    for (const id of ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]) {
-      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "visible");
-    }
-    const clusterCb = document.querySelector('.section-checkbox[data-section="cluster"]');
-    if (clusterCb) clusterCb.checked = true;
-  }
-  _prevZoom = zoom;
 
   const legend = document.querySelector(".legend");
   if (!legend || legend.classList.contains("collapsed")) return;
