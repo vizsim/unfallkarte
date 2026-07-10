@@ -769,6 +769,7 @@ export function addLayers(map) {
     // Querungs-LINIEN (footway/cycleway/path=crossing) — zuerst, damit Punkte oben liegen
     map.addLayer({
       id: "crossings-lines",
+      minzoom: 9,
       type: "line",
       source: "crossings",
       "source-layer": "germany_osm_crossings",
@@ -776,7 +777,7 @@ export function addLayers(map) {
       layout: { visibility: "none", "line-cap": "round" },
       paint: {
         "line-color": crossingColor,
-        "line-width": ["interpolate", ["linear"], ["zoom"], 12, 2, 16, 5],
+        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.5, 12, 2, 16, 5],
         "line-opacity": 0.85
       }
     });
@@ -784,6 +785,7 @@ export function addLayers(map) {
     // Querungs-PUNKTE (highway=crossing-Nodes)
     map.addLayer({
       id: "crossings-points",
+      minzoom: 9,
       type: "circle",
       source: "crossings",
       "source-layer": "germany_osm_crossings",
@@ -791,7 +793,7 @@ export function addLayers(map) {
       layout: { visibility: "none" },
       paint: {
         "circle-color": crossingColor,
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 3, 14, 5, 16, 8],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 1.2, 11, 3, 14, 5, 16, 8],
         "circle-stroke-color": "#1B4D3E",
         "circle-stroke-width": 1,
         "circle-opacity": 0.85
