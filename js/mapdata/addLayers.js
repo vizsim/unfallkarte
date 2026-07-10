@@ -371,6 +371,7 @@ export function addLayers(map) {
     // === Layer: forward (kein Offset)
     map.addLayer({
       id: "uspeed-forward",
+      minzoom: 11,
       type: "line",
       source: "uspeed",
       "source-layer": "uber_movement_osm",
@@ -389,6 +390,7 @@ export function addLayers(map) {
     // === Layer: reverse (mit Zoom-Offset)
     map.addLayer({
       id: "uspeed-reverse",
+      minzoom: 11,
       type: "line",
       source: "uspeed",
       "source-layer": "uber_movement_osm",

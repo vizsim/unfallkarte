@@ -142,6 +142,8 @@ export function updateLegendVisibilityByZoom(map) {
     { toggleId: "toggle-crossings", legendId: "crossings-legend", dataMinZoom: 9 },
     // Schwung 3c: movebis in Pipeline migriert, ab z9 (gestufter visits-Filter im Tiling).
     { toggleId: "toggle-movebis", legendId: "movebis-legend", dataMinZoom: 9 },
+    // Schwung 3b: uspeed (Legacy-Tiles ab z11) — kein Lock mehr, nur Hinweis.
+    { toggleId: "toggle-uspeed", legendId: "uspeed-legend", dataMinZoom: 11 },
   ];
   // Die Kontext-Sektion bleibt unter z11 komplett sichtbar (siehe General-Loop oben) — die
   // Kontext-Layer reichen jetzt teils bis z9 herunter. Hier nur noch die Zoom-Hinweise je
