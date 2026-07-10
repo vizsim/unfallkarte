@@ -14,6 +14,9 @@ const LEGEND_KEYS = [
   "uspeed-legend"
 ];
 
+// Letzter beobachteter Zoom — für die Erkennung des Übergangs ≥11 → <11 (Cluster wieder an).
+let _prevZoom = null;
+
 function getLegendElements() {
   const elements = Object.fromEntries(
     LEGEND_KEYS.map(id => [id, document.getElementById(id)])
@@ -48,6 +51,19 @@ export function updateLegendVisibilityByZoom(map) {
   if (!map || typeof map.getZoom !== "function") return;
 
   const zoom = map.getZoom();
+
+  // Beim Wechsel von Zoom ≥11 (Einzelunfälle) nach <11 die geclusterten Unfälle wieder
+  // standardmäßig einblenden + Sektions-Checkbox aktivieren. (Läuft vor dem evtl. frühen
+  // Return, damit es auch bei eingeklappter Legende greift.)
+  if (_prevZoom !== null && _prevZoom >= 11 && zoom < 11) {
+    for (const id of ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "visible");
+    }
+    const clusterCb = document.querySelector('.section-checkbox[data-section="cluster"]');
+    if (clusterCb) clusterCb.checked = true;
+  }
+  _prevZoom = zoom;
+
   const legend = document.querySelector(".legend");
   if (!legend || legend.classList.contains("collapsed")) return;
 
@@ -67,30 +83,31 @@ export function updateLegendVisibilityByZoom(map) {
   const visibilityCheck = (layerId) => map.getLayoutProperty(layerId, "visibility") === "visible";
 
   if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "block" : "none";
-  if (movebisLegend) movebisLegend.style.display = (visibilityCheck("movebis") && zoom >= 11) ? "block" : "none";
+  // Kontext-Legenden folgen nur noch der Layer-/Toggle-Sichtbarkeit (kein zoom≥11-Gate mehr),
+  // damit die Kontext-Layer auch unter z11 in der Legende sichtbar bleiben.
+  if (movebisLegend) movebisLegend.style.display = visibilityCheck("movebis") ? "block" : "none";
   if (svzLegend) {
     // svz-Legende hängt am Master (#toggle-svz), nicht an einem einzelnen Layer —
     // so bleibt sie auch bei „nur BASt" (Länder aus) sichtbar.
     const svzMaster = document.getElementById("toggle-svz");
-    svzLegend.style.display = (svzMaster && svzMaster.checked && zoom >= 11) ? "block" : "none";
+    svzLegend.style.display = (svzMaster && svzMaster.checked) ? "block" : "none";
   }
   if (maxspeedLegend) {
     const visible = visibilityCheck("maxspeed") || visibilityCheck("maxspeed_minor");
-    maxspeedLegend.style.display = (visible && zoom >= 11) ? "block" : "none";
+    maxspeedLegend.style.display = visible ? "block" : "none";
   }
   if (mapillaryLegend) {
     const visible = visibilityCheck("mapillary-images-layer") || visibilityCheck("mapillary-images-halo");
     mapillaryLegend.style.display = (visible && zoom >= 14) ? "block" : "none";
   }
-  if (obsLegend) obsLegend.style.display = (visibilityCheck("obs") && zoom >= 11) ? "block" : "none";
-  if (laerm1Legend) laerm1Legend.style.display = (visibilityCheck("laerm1") && zoom >= 11) ? "block" : "none";
-  if (laerm2Legend) laerm2Legend.style.display = (visibilityCheck("laerm2") && zoom >= 11) ? "block" : "none";
+  if (obsLegend) obsLegend.style.display = visibilityCheck("obs") ? "block" : "none";
+  if (laerm1Legend) laerm1Legend.style.display = visibilityCheck("laerm1") ? "block" : "none";
+  if (laerm2Legend) laerm2Legend.style.display = visibilityCheck("laerm2") ? "block" : "none";
 
-  // if (uspeedLegend) uspeedLegend.style.display = (visibilityCheck("uspeed") && zoom >= 11) ? "block" : "none";
   if (uspeedLegend) {
     const isVisible =
       visibilityCheck("uspeed-forward") || visibilityCheck("uspeed-reverse");
-    uspeedLegend.style.display = (isVisible && zoom >= 11) ? "block" : "none";
+    uspeedLegend.style.display = isVisible ? "block" : "none";
   }
 
 
@@ -101,13 +118,16 @@ export function updateLegendVisibilityByZoom(map) {
     clusterCheckbox.checked = isVisible;
   }
 
+  const kontextSection = document.querySelector('.legend-section[data-section="kontext"]');
+
   Array.from(legend.children).forEach(el => {
     const isTitle = el.classList.contains("legend-title");
     const isFeatureCount = el.id === "feature-count-wrapper";
     const isSpecial = isSpecialLegendElement(el, legends);
+    const isKontext = el === kontextSection;   // Kontext-Sektion bleibt immer sichtbar
 
     el.style.display = zoom < 11
-      ? (isTitle || isFeatureCount || isSpecial) ? "" : "none"
+      ? (isTitle || isFeatureCount || isSpecial || isKontext) ? "" : "none"
       : (!isSpecial ? "" : el.style.display);
   });
 
@@ -131,48 +151,15 @@ export function updateLegendVisibilityByZoom(map) {
     { toggleId: "toggle-health", legendId: "health-legend", dataMinZoom: 9 },
     { toggleId: "toggle-playgrounds", legendId: "playgrounds-legend", dataMinZoom: 9 },
   ];
-  const kontextSection = document.querySelector('.legend-section[data-section="kontext"]');
-  const kontextContent = kontextSection && kontextSection.querySelector(".legend-section-content");
-
-  if (kontextSection && kontextContent) {
-    const keep = new Set();
-    let anyActive = false;
-    for (const e of EARLY_CONTEXT) {
-      const toggle = document.getElementById(e.toggleId);
-      const checked = !!(toggle && toggle.checked);
-      const legend = document.getElementById(e.legendId);
-      const row = toggle && toggle.closest("div");
-      const hint = legend && legend.querySelector(".zoom-hint");
-      if (checked) {
-        anyActive = true;
-        if (row) keep.add(row);
-        if (legend) keep.add(legend);
-      }
-      // Hinweis nur unter dataMinZoom (Daten noch nicht sichtbar)
-      if (hint) hint.style.display = (checked && zoom < e.dataMinZoom) ? "block" : "none";
-    }
-
-    const children = Array.from(kontextContent.children);
-    if (zoom < 11 && anyActive) {
-      kontextSection.style.display = "";           // Sektion offen lassen (überschreibt Loop oben)
-      children.forEach(el => {
-        if (keep.has(el)) {
-          el.style.display = (el.id && el.id.endsWith("-legend")) ? "block" : "";
-          return;
-        }
-        if (el.style.display !== "none") el.dataset.ctxhidden = "1";
-        el.style.display = "none";
-      });
-    } else {
-      // Sonderfall aufheben: nur die von uns versteckten Elemente wiederherstellen, damit
-      // eigenständig versteckte Elemente (z. B. mapillary-filter-options) ihren Zustand behalten.
-      children.forEach(el => {
-        if (el.dataset.ctxhidden) {
-          el.style.display = "";
-          delete el.dataset.ctxhidden;
-        }
-      });
-    }
+  // Die Kontext-Sektion bleibt unter z11 komplett sichtbar (siehe General-Loop oben) — die
+  // Kontext-Layer reichen jetzt teils bis z9 herunter. Hier nur noch die Zoom-Hinweise je
+  // Layer schalten: sichtbar, solange der Layer aktiv ist und die Daten noch nicht gerendert
+  // werden (zoom < dataMinZoom, z. B. Radinfra <9, Tempolimit <11, Mapillary <14).
+  for (const e of EARLY_CONTEXT) {
+    const toggle = document.getElementById(e.toggleId);
+    const legend = document.getElementById(e.legendId);
+    const hint = legend && legend.querySelector(".zoom-hint");
+    if (hint) hint.style.display = (toggle && toggle.checked && zoom < e.dataMinZoom) ? "block" : "none";
   }
 }
 
