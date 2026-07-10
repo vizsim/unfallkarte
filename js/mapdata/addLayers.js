@@ -208,6 +208,7 @@ export function addLayers(map) {
   function addOBSLayer(map) {
     map.addLayer({
       id: "obs",
+      minzoom: 9,
       type: "circle",
       source: "obs",
       "source-layer": "obs_data-points",
@@ -261,6 +262,7 @@ export function addLayers(map) {
   function addHvsLayer(map) {
     map.addLayer({
       id: "hvs",
+      minzoom: 9,
       type: "line",
       source: "hvs",
       "source-layer": "lines",
@@ -283,6 +285,7 @@ export function addLayers(map) {
     // Länder-Segmente (Zählstellenbereiche, Linien).
     map.addLayer({
       id: "svz-lines",
+      minzoom: 9,
       type: "line",
       source: "svz",
       "source-layer": "svz",
@@ -297,6 +300,7 @@ export function addLayers(map) {
     // Zählstellen-Punkte der Länder (BW/SL als Punkte).
     map.addLayer({
       id: "svz-points",
+      minzoom: 9,
       type: "circle",
       source: "svz",
       "source-layer": "svz_points",
@@ -313,6 +317,7 @@ export function addLayers(map) {
     // BASt-Backbone (Bundesfernstraßen A+B, Punkte) — eigene Quelle svz_bast.
     map.addLayer({
       id: "bast-points",
+      minzoom: 9,
       type: "circle",
       source: "svz_bast",
       "source-layer": "bast",
@@ -965,6 +970,7 @@ export function addLayers(map) {
     // laerm1 POLYGONS
     map.addLayer({
       id: "laerm1",
+      minzoom: 9,
       type: "fill",
       source: "laerm1",
       "source-layer": "laerm_hlq_den-polys",
@@ -991,6 +997,7 @@ export function addLayers(map) {
     // laerm2 POLYGONS
     map.addLayer({
       id: "laerm2",
+      minzoom: 9,
       type: "fill",
       source: "laerm2",
       "source-layer": "laerm_4120_hlq_night-polys",

@@ -118,6 +118,14 @@ export function updateLegendVisibilityByZoom(map) {
   const EARLY_CONTEXT = [
     { toggleId: "toggle-bikelanes", legendId: "bikelanes-legend", dataMinZoom: 9 },
     { toggleId: "toggle-maxspeed", legendId: "maxspeed-legend", dataMinZoom: 11 },
+    // Schwung 1: statt hartem Zoom-Lock ein Zoom-Hinweis (Tiles reichen bis z5–z9,
+    // per-Layer minzoom:9 in addLayers). svz-Eintrag deckt Länder/BASt/UBA(hvs) ab.
+    { toggleId: "toggle-svz", legendId: "svz-legend", dataMinZoom: 9 },
+    { toggleId: "toggle-obs", legendId: "obs-legend", dataMinZoom: 9 },
+    { toggleId: "toggle-laerm1", legendId: "laerm1-legend", dataMinZoom: 9 },
+    { toggleId: "toggle-laerm2", legendId: "laerm2-legend", dataMinZoom: 9 },
+    // Mapillary bleibt technisch bei z14 (externe Live-Tiles) — nur Hinweis, kein Lock.
+    { toggleId: "toggle-mapillary", legendId: "mapillary-zoomhint", dataMinZoom: 14 },
   ];
   const kontextSection = document.querySelector('.legend-section[data-section="kontext"]');
   const kontextContent = kontextSection && kontextSection.querySelector(".legend-section-content");
