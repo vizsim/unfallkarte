@@ -176,6 +176,7 @@ export function addLayers(map) {
   function addMovebisLayer(map) {
     map.addLayer({
       id: "movebis",
+      minzoom: 9,
       type: "line",
       source: "movebis",
       "source-layer": "links",
@@ -189,15 +190,13 @@ export function addLayers(map) {
           18, "#fdcc8a",
           24, "#31a354"
         ],
+        // Breite = visits-basiert, zusätzlich bei niedrigem Zoom global schmaler
+        // (z9 ~35 % → z14 volle Breite). Zoom MUSS die äußerste Interpolate sein
+        // (MapLibre erlaubt ["zoom"] nur top-level) → visits-Rampe je Zoom-Stop skaliert.
         "line-width": [
-          "interpolate",
-          ["linear"],
-          ["get", "visits"],
-          0, 0.5,
-          10, 2,
-          50, 4,
-          100, 8,
-          1000, 12
+          "interpolate", ["linear"], ["zoom"],
+          9, ["interpolate", ["linear"], ["get", "visits"], 0, 0.2, 10, 0.7, 50, 1.4, 100, 2.8, 1000, 4.2],
+          14, ["interpolate", ["linear"], ["get", "visits"], 0, 0.5, 10, 2, 50, 4, 100, 8, 1000, 12]
         ]
       }
     });

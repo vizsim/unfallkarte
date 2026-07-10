@@ -21,6 +21,7 @@ telraam_app = typer.Typer(no_args_is_help=True, help="Telraam-Verkehrszähl-Segm
 hvs_app = typer.Typer(no_args_is_help=True, help="UBA-Verkehrsmengen (Hauptverkehrsstraßen)")
 laerm_app = typer.Typer(no_args_is_help=True, help="UBA-Umgebungslärm (Lärmkartierung)")
 obs_app = typer.Typer(no_args_is_help=True, help="OpenBikeSensor-Überholabstände")
+movebis_app = typer.Typer(no_args_is_help=True, help="movebis (Stadtradeln) Rad-Geschwindigkeiten")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
@@ -28,6 +29,7 @@ app.add_typer(telraam_app, name="telraam")
 app.add_typer(hvs_app, name="hvs")
 app.add_typer(laerm_app, name="laerm")
 app.add_typer(obs_app, name="obs")
+app.add_typer(movebis_app, name="movebis")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -204,6 +206,18 @@ def obs_build(
     from unfallkarte import obs
 
     out = obs.build(refresh=refresh, dry_run=dry_run)
+    typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
+
+
+# --- movebis (Stadtradeln) ---
+@movebis_app.command("build")
+def movebis_build(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """GPKG (data/raw/) -> FGB -> traffic/movebis.pmtiles (Layer `links`, ab z9)."""
+    from unfallkarte import movebis
+
+    out = movebis.build(dry_run=dry_run)
     typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 

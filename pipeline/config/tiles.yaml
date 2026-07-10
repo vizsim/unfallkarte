@@ -74,6 +74,29 @@ profiles:
     no_feature_limit: true
     no_tile_size_limit: true
 
+  # movebis (TU Dresden / Stadtradeln): Rad-Geschwindigkeiten (Linien, ~9,9 Mio Segmente,
+  # Quelle bereits visits>=10). Layer `links` + Felder avg_speed_kmh/visits = Frontend-Vertrag.
+  # Ab z9 sichtbar; bei niedrigem Zoom nur Hauptkorridore (gestufter visits-Filter via -j),
+  # ab z13 alles. drop_densest + Tile-Byte-Budget als zusätzliches Sicherheitsnetz.
+  movebis:
+    layer: links
+    minzoom: 9
+    maxzoom: 14
+    drop_densest_as_needed: true
+    no_feature_limit: true
+    # KEIN no_tile_size_limit — sonst greift maximum_tile_bytes nicht und die dichten
+    # z9–z12-Kacheln blähen sich auf >1 MB. So klemmt drop_densest auf 500 KB.
+    force_feature_limit: true
+    maximum_tile_bytes: 500000
+    # Sanft & gestuft: nur so viel wegfiltern wie nötig (max visits>=50 bei z9),
+    # den Rest übernimmt drop_densest + Tile-Byte-Budget. z12+ = alles.
+    feature_filter:
+      "*": ["any",
+            [">=", "$zoom", 12],
+            ["all", [">=", "$zoom", 11], [">=", "visits", 20]],
+            ["all", [">=", "$zoom", 10], [">=", "visits", 40]],
+            [">=", "visits", 50]]
+
   # UBA-Verkehrsmengen Hauptverkehrsstraßen (Linien). Layer-Name = Frontend-Vertrag (`lines`).
   # Settings wie die bewährte Altdatei: volle Geometrie behalten, nichts vereinfachen/droppen.
   hvs_lines:

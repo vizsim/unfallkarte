@@ -62,6 +62,12 @@ datasets:
     attribution: "Uber Movement, Q2 2019"
     date: { fixed: "2019-Q2" }
 
+  movebis:
+    file: "traffic/movebis.pmtiles"
+    label: "Rad-Geschwindigkeiten (Movebis)"
+    attribution: "© TU Dresden, Movebis (CC BY-NC)"
+    date: { fixed: "2020" }   # Datenstand movebis 2020 (Segmente mit ≥10 Fahrten)
+
   bikelanes:
     live: true            # externer TILDA-Tile-Server, kein Build-Artefakt
     label: "Radinfrastruktur"

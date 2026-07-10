@@ -8,6 +8,7 @@ ausgeführt — so kannst du die Pipeline auch ohne installiertes tippecanoe pr�
 from __future__ import annotations
 
 import gzip
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -55,6 +56,9 @@ def _profile_args(profile: dict[str, Any], layer_override: str | None = None) ->
         args.append("--force-feature-limit")
     if "maximum_tile_bytes" in profile:
         args.append(f"--maximum-tile-bytes={profile['maximum_tile_bytes']}")
+    if "feature_filter" in profile:
+        # tippecanoe -j: per-Layer GL-Filter (unterstützt "$zoom") → zoom-abhängiges Droppen.
+        args += ["-j", json.dumps(profile["feature_filter"], separators=(",", ":"))]
     return args
 
 

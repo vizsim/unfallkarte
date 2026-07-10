@@ -80,7 +80,10 @@ export function updateLegendVisibilityByZoom(map) {
     ["uspeed-legend"]: uspeedLegend
   } = legends;
 
-  const visibilityCheck = (layerId) => map.getLayoutProperty(layerId, "visibility") === "visible";
+  // Defensiv: fehlt der Layer (noch nicht geladen / Add fehlgeschlagen), nicht werfen —
+  // sonst crasht die ganze Legenden-Funktion in einer Render-Schleife.
+  const visibilityCheck = (layerId) =>
+    !!map.getLayer(layerId) && map.getLayoutProperty(layerId, "visibility") === "visible";
 
   if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "block" : "none";
   // Kontext-Legenden folgen nur noch der Layer-/Toggle-Sichtbarkeit (kein zoom≥11-Gate mehr),
@@ -152,6 +155,8 @@ export function updateLegendVisibilityByZoom(map) {
     { toggleId: "toggle-playgrounds", legendId: "playgrounds-legend", dataMinZoom: 9 },
     // Schwung 3a: Querungen ab z9 (osm_features neu getilt, minzoom 9).
     { toggleId: "toggle-crossings", legendId: "crossings-legend", dataMinZoom: 9 },
+    // Schwung 3c: movebis in Pipeline migriert, ab z9 (gestufter visits-Filter im Tiling).
+    { toggleId: "toggle-movebis", legendId: "movebis-legend", dataMinZoom: 9 },
   ];
   // Die Kontext-Sektion bleibt unter z11 komplett sichtbar (siehe General-Loop oben) — die
   // Kontext-Layer reichen jetzt teils bis z9 herunter. Hier nur noch die Zoom-Hinweise je
