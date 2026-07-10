@@ -82,20 +82,21 @@ profiles:
     layer: links
     minzoom: 9
     maxzoom: 14
-    drop_densest_as_needed: true
+    # KEIN Droppen (erzeugt Löcher). Größe stattdessen über zwei semantische Filter:
+    # (1) ab z11 abwärts nur die Hauptrichtung je Kantenpaar (is_major) → ~halbe Feature-Zahl,
+    # (2) zusätzlich ein sanfter visits-Schwellwert. z12+ = volle Daten (beide Richtungen).
     no_feature_limit: true
-    # KEIN no_tile_size_limit — sonst greift maximum_tile_bytes nicht und die dichten
-    # z9–z12-Kacheln blähen sich auf >1 MB. So klemmt drop_densest auf 500 KB.
-    force_feature_limit: true
-    maximum_tile_bytes: 500000
-    # Sanft & gestuft: nur so viel wegfiltern wie nötig (max visits>=50 bei z9),
-    # den Rest übernimmt drop_densest + Tile-Byte-Budget. z12+ = alles.
+    no_tile_size_limit: true
+    # is_major = String "1" (tippecanoe legt FGB-Integer als String ab!), visits = Zahl.
+    # z13+ = volle Daten (beide Richtungen, wie im Original). z9–z12: nur Hauptrichtung
+    # (is_major) UND gestufter visits-Schwellwert → kleine Tiles ohne Droppen/Löcher.
     feature_filter:
       "*": ["any",
-            [">=", "$zoom", 12],
-            ["all", [">=", "$zoom", 11], [">=", "visits", 20]],
-            ["all", [">=", "$zoom", 10], [">=", "visits", 40]],
-            [">=", "visits", 50]]
+            [">=", "$zoom", 13],
+            ["all", [">=", "$zoom", 12], ["==", "is_major", "1"], [">=", "visits", 30]],
+            ["all", [">=", "$zoom", 11], ["==", "is_major", "1"], [">=", "visits", 60]],
+            ["all", [">=", "$zoom", 10], ["==", "is_major", "1"], [">=", "visits", 75]],
+            ["all", ["==", "is_major", "1"], [">=", "visits", 90]]]
 
   # UBA-Verkehrsmengen Hauptverkehrsstraßen (Linien). Layer-Name = Frontend-Vertrag (`lines`).
   # Settings wie die bewährte Altdatei: volle Geometrie behalten, nichts vereinfachen/droppen.

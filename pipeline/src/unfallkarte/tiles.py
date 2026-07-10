@@ -38,6 +38,10 @@ def _profile_args(profile: dict[str, Any], layer_override: str | None = None) ->
         args.append(f"--base-zoom={profile['base_zoom']}")
     if "drop_rate" in profile:
         args.append(f"--drop-rate={profile['drop_rate']}")
+    if "simplification" in profile:
+        # DP-Vereinfachung bei Zooms < maxzoom (höher = stärker) → weniger Stützpunkte,
+        # kleinere Tiles, ohne Features zu droppen.
+        args.append(f"--simplification={profile['simplification']}")
     if profile.get("drop_densest_as_needed"):
         args.append("--drop-densest-as-needed")
     if profile.get("coalesce"):

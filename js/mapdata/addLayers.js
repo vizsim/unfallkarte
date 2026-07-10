@@ -195,7 +195,8 @@ export function addLayers(map) {
         // (MapLibre erlaubt ["zoom"] nur top-level) → visits-Rampe je Zoom-Stop skaliert.
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
-          9, ["interpolate", ["linear"], ["get", "visits"], 0, 0.2, 10, 0.7, 50, 1.4, 100, 2.8, 1000, 4.2],
+          9, ["interpolate", ["linear"], ["get", "visits"], 0, 0.13, 10, 0.5, 50, 1.0, 100, 2.0, 1000, 3.0],
+          11, ["interpolate", ["linear"], ["get", "visits"], 0, 0.2, 10, 0.8, 50, 1.6, 100, 3.2, 1000, 4.8],
           14, ["interpolate", ["linear"], ["get", "visits"], 0, 0.5, 10, 2, 50, 4, 100, 8, 1000, 12]
         ]
       }

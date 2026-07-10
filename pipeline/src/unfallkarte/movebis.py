@@ -27,11 +27,44 @@ def _dataset() -> dict:
     return load_yaml("sources.yaml")["datasets"]["movebis"]
 
 
+def add_major_direction(gdf):
+    """Markiert je ungerichtetem Kantenpaar (Hin/Rück, gleiche Endpunkte) die Richtung mit
+    den meisten `visits` als `is_major=1` (Gleichstand → beide 1, Einzelrichtung → 1).
+
+    Damit kann der Tile-Filter bei niedrigem Zoom die schwächere Gegenrichtung ausblenden
+    (eine Linie pro Straße statt zwei überlappender) — halbiert die Feature-Zahl ~sauber,
+    ohne Droppen/Löcher. Endpunkt-Schlüssel genügt (im Test 0 Gruppen mit >2 Segmenten).
+    """
+    import numpy as np
+    import pandas as pd
+    import shapely
+
+    geom = gdf.geometry.values
+    last_idx = shapely.get_num_points(geom) - 1
+    first, last = shapely.get_point(geom, 0), shapely.get_point(geom, last_idx)
+    r = 1_000_000  # ~1e-6 Grad Raster
+    fx = np.round(shapely.get_x(first) * r).astype("int64")
+    fy = np.round(shapely.get_y(first) * r).astype("int64")
+    lx = np.round(shapely.get_x(last) * r).astype("int64")
+    ly = np.round(shapely.get_y(last) * r).astype("int64")
+    swap = (fx > lx) | ((fx == lx) & (fy > ly))            # Endpunkte kanonisch sortieren
+    k1x, k1y = np.where(swap, lx, fx), np.where(swap, ly, fy)
+    k2x, k2y = np.where(swap, fx, lx), np.where(swap, fy, ly)
+    key = pd.DataFrame({"k1x": k1x, "k1y": k1y, "k2x": k2x, "k2y": k2y})
+    key["visits"] = gdf["visits"].to_numpy()
+    maxv = key.groupby(["k1x", "k1y", "k2x", "k2y"])["visits"].transform("max")
+    gdf = gdf.copy()
+    gdf["is_major"] = (gdf["visits"].to_numpy() >= maxv.to_numpy()).astype("int32")
+    return gdf
+
+
 def gpkg_to_fgb(gpkg: Path, fgb: Path) -> Path:
-    """Liest den `links`-Layer der GPKG (EPSG:4326) und schreibt FlatGeobuf für tippecanoe."""
+    """Liest den `links`-Layer der GPKG (EPSG:4326), markiert die Hauptrichtung und
+    schreibt FlatGeobuf für tippecanoe."""
     from pyogrio import read_dataframe
 
     gdf = read_dataframe(gpkg, layer=_LAYER)
+    gdf = add_major_direction(gdf)
     fgb.parent.mkdir(parents=True, exist_ok=True)
     gdf.to_file(fgb, driver="FlatGeobuf")
     return fgb
