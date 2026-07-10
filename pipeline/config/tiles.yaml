@@ -48,7 +48,7 @@ profiles:
   # POI/Polygon-Features (schools/health/playgrounds): Layer-Name wird je OSM-Layer
   # via layer_override gesetzt.
   osm_features:
-    minzoom: 11
+    minzoom: 9
     maxzoom: 15
     drop_rate: 0
     drop_densest_as_needed: true

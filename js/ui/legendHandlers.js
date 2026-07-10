@@ -126,6 +126,10 @@ export function updateLegendVisibilityByZoom(map) {
     { toggleId: "toggle-laerm2", legendId: "laerm2-legend", dataMinZoom: 9 },
     // Mapillary bleibt technisch bei z14 (externe Live-Tiles) — nur Hinweis, kein Lock.
     { toggleId: "toggle-mapillary", legendId: "mapillary-zoomhint", dataMinZoom: 14 },
+    // Schwung 2: Orte & Einrichtungen ab z9 (PMTiles neu getilt, minzoom 9).
+    { toggleId: "toggle-schools", legendId: "schools-legend", dataMinZoom: 9 },
+    { toggleId: "toggle-health", legendId: "health-legend", dataMinZoom: 9 },
+    { toggleId: "toggle-playgrounds", legendId: "playgrounds-legend", dataMinZoom: 9 },
   ];
   const kontextSection = document.querySelector('.legend-section[data-section="kontext"]');
   const kontextContent = kontextSection && kontextSection.querySelector(".legend-section-content");

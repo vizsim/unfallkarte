@@ -691,6 +691,7 @@ export function addLayers(map) {
 
     map.addLayer({
       id: "schools-points",
+      minzoom: 9,
       type: "symbol",
       source: "schools",
       "source-layer": "germany_osm_schools",
@@ -711,6 +712,7 @@ export function addLayers(map) {
           "interpolate",
           ["linear"],
           ["zoom"],
+          9, 0.3,
           10, 0.5,
           14, 1,
           16, 1.8
@@ -728,6 +730,7 @@ export function addLayers(map) {
     // Schulen POLYGONS
     map.addLayer({
       id: "schools-polygons",
+      minzoom: 9,
       type: "fill",
       source: "schools",
       "source-layer": "germany_osm_schools",
@@ -803,6 +806,7 @@ export function addLayers(map) {
 
     map.addLayer({
       id: "health-points",
+      minzoom: 9,
       type: "symbol",
       source: "health",
       "source-layer": "germany_osm_health", // must match tippecanoe `-l` name
@@ -838,6 +842,7 @@ export function addLayers(map) {
           "interpolate",
           ["linear"],
           ["zoom"],
+          9, 0.35,
           10, 0.6,
           14, 1,
           16, 1.7
@@ -855,6 +860,7 @@ export function addLayers(map) {
     // health POLYGONS
     map.addLayer({
       id: "health-polygons",
+      minzoom: 9,
       type: "fill",
       source: "health",
       "source-layer": "germany_osm_health",
@@ -895,6 +901,7 @@ export function addLayers(map) {
 
     map.addLayer({
       id: "playgrounds-points",
+      minzoom: 9,
       type: "symbol",
       source: "playgrounds",
       "source-layer": "germany_osm_playgrounds", // must match tippecanoe `-l` name
@@ -921,6 +928,7 @@ export function addLayers(map) {
           "interpolate",
           ["linear"],
           ["zoom"],
+          9, 0.35,
           10, 0.6,
           14, 1,
           16, 1.7
@@ -940,6 +948,7 @@ export function addLayers(map) {
     // playgrounds POLYGONS
     map.addLayer({
       id: "playgrounds-polygons",
+      minzoom: 9,
       type: "fill",
       source: "playgrounds",
       "source-layer": "germany_osm_playgrounds",
