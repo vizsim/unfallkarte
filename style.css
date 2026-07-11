@@ -775,3 +775,7 @@ body {
 .swatch-line { display: inline-block; width: 24px; height: 3px; margin-right: 6px; }
 .swatch-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
 .swatch-square { display: inline-block; width: 12px; height: 12px; margin-right: 6px; }
+
+/* "Zoomstufe X+" in den Zoom-Hinweisen: Klick zoomt auf die Stufe (legendHandlers.js). */
+.zoom-hint .zoom-link { color: inherit; text-decoration: underline; cursor: pointer; }
+.zoom-hint .zoom-link:hover { color: var(--ui-text-strong, #111); }

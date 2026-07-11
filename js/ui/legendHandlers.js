@@ -130,10 +130,12 @@ export function updateLegendVisibilityByZoom(map) {
     // per-Layer minzoom:9 in addLayers). svz-Eintrag deckt Länder/BASt/UBA(hvs) ab.
     { toggleId: "toggle-svz", legendId: "svz-legend", dataMinZoom: 9 },
     { toggleId: "toggle-obs", legendId: "obs-legend", dataMinZoom: 9 },
+    { toggleId: "toggle-telraam", legendId: "telraam-legend", dataMinZoom: 9 },
     { toggleId: "toggle-laerm1", legendId: "laerm1-legend", dataMinZoom: 9 },
     { toggleId: "toggle-laerm2", legendId: "laerm2-legend", dataMinZoom: 9 },
     // Mapillary bleibt technisch bei z14 (externe Live-Tiles) — nur Hinweis, kein Lock.
     { toggleId: "toggle-mapillary", legendId: "mapillary-zoomhint", dataMinZoom: 14 },
+    { toggleId: "toggle-mapillary_ts", legendId: "mapillary-ts-zoomhint", dataMinZoom: 14 },
     // Schwung 2: Orte & Einrichtungen ab z9 (PMTiles neu getilt, minzoom 9).
     { toggleId: "toggle-schools", legendId: "schools-legend", dataMinZoom: 9 },
     { toggleId: "toggle-health", legendId: "health-legend", dataMinZoom: 9 },
@@ -153,8 +155,21 @@ export function updateLegendVisibilityByZoom(map) {
     const toggle = document.getElementById(e.toggleId);
     const legend = document.getElementById(e.legendId);
     const hint = legend && legend.querySelector(".zoom-hint");
-    if (hint) hint.style.display = (toggle && toggle.checked && zoom < e.dataMinZoom) ? "block" : "none";
+    // indeterminate zählt als aktiv (z. B. nur "Panorama-Bilder" oder einzelne VZ-Gruppen an).
+    const active = toggle && (toggle.checked || toggle.indeterminate);
+    if (hint) hint.style.display = (active && zoom < e.dataMinZoom) ? "block" : "none";
   }
+}
+
+// "Zoomstufe X+" in den Zoom-Hinweisen ist ein Link: Klick zoomt die Karte auf die
+// Stufe, ab der der Layer rendert (Hinweis verschwindet dann über zoomend-Handler).
+export function setupZoomHintLinks(map) {
+  document.querySelectorAll(".zoom-hint .zoom-link").forEach(a => {
+    a.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      map.easeTo({ zoom: Number(a.dataset.zoom) });
+    });
+  });
 }
 
 

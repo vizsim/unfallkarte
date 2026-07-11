@@ -1,4 +1,5 @@
 import { applyZoomLock } from './zoomLock.js';
+import { updateLegendVisibilityByZoom } from '../ui/legendHandlers.js';
 
 
 export function setupMapillary(map, {
@@ -118,6 +119,7 @@ function updateMapillaryFilter(map, originalMinZoom, setCurrentZoomLock, applyLe
 
   applyZoomLock(map, originalMinZoom, setCurrentZoomLock);
   applyLegendVisibility();
+  updateLegendVisibilityByZoom(map);  // Zoom-Hinweis sofort schalten (nicht erst bei zoomend)
 }
 
 
@@ -288,5 +290,6 @@ function updateMapillaryTSFilter(map, applyLegendVisibility) {
   filterOptions.style.display = selectedValues.length > 0 ? "block" : "none";
 
   applyLegendVisibility();
+  updateLegendVisibilityByZoom(map);  // Zoom-Hinweis sofort schalten (nicht erst bei zoomend)
 }
 

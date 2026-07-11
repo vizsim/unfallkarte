@@ -51,7 +51,8 @@ import {
   updateLegendColors,
   setupLegendClusterCheckboxSync,
   setupLegendToggleHandlers,
-  setupLegendSectionCheckboxes
+  setupLegendSectionCheckboxes,
+  setupZoomHintLinks
 } from './js/ui/legendHandlers.js';
 
 // 📦 Permalink
@@ -305,6 +306,7 @@ function setupLegend(map) {
   setupLegendClusterCheckboxSync(map);
   setupLegendToggleHandlers();
   setupLegendSectionCheckboxes(updateLayerFilter);
+  setupZoomHintLinks(map);
 
   updateColorStyle();
   updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles);
