@@ -102,7 +102,7 @@ profiles:
   # Settings wie die bewährte Altdatei: volle Geometrie behalten, nichts vereinfachen/droppen.
   hvs_lines:
     layer: lines
-    minzoom: 9
+    minzoom: 6           # Übersicht ab z6 (Frontend filtert dort auf große Mengen)
     maxzoom: 15
     no_tile_size_limit: true
 

@@ -260,12 +260,19 @@ export function addLayers(map) {
   // UBA-Hauptverkehrsstraßen (Verkehrsmengen): am SVZ ausgerichtet — schwarz, Größe =
   // Tages-DTV≈ (annualTrafficFlow ÷ 365), gleiche Schwellen -> teilt die SVZ-Legende.
   function addHvsLayer(map) {
+    // Ab z6 (Tiles seit Rebuild ab z6), unterhalb z9 gestaffelt wie SVZ — nur auf
+    // Basis des Tages-DTV≈ (annualTrafficFlow ÷ 365): z6-7 >= 15000, z8 >= 5000.
     map.addLayer({
       id: "hvs",
-      minzoom: 9,
+      minzoom: 6,
       type: "line",
       source: "hvs",
       "source-layer": "lines",
+      filter: ["any",
+        [">=", ["zoom"], 9],
+        ["all", [">=", ["zoom"], 8], [">=", HVS_DAILY, 5000]],
+        [">=", HVS_DAILY, 15000],
+      ],
       layout: { visibility: "none", "line-cap": "round", "line-join": "round" },
       paint: {
         "line-color": hvsColorExpr(),
@@ -282,13 +289,27 @@ export function addLayers(map) {
   // svz: svz_de.pmtiles -> `svz` (Linien) + `svz_points` (Punkte BW/SL),
   // svz_bast.pmtiles -> `bast` (Punkte A+B). Liegt ÜBER dem groben hvs-Fallback.
   function addSvzLayers(map) {
+    // Ab z6 sichtbar (Tiles reichen bis z5), aber unterhalb z9 gestaffelt gefiltert,
+    // sonst wird die Übersicht ein Teppich: z6-7 nur DTV >= 15000, z8 >= 5000, ab z9
+    // alles. no-data (ohne dtv_kfz) fällt darunter mit raus (to-number(fehlend) = 0).
+    // Der Filter ist bewusst DTV-basiert, unabhängig vom Anzeige-Modus dtv|sv
+    // (setupSvzMode ändert nur paint). ["zoom"] in Filtern wird an ganzzahligen
+    // Zoomstufen ausgewertet.
+    const svzDtv = ["to-number", ["get", "dtv_kfz"]];
+    const svzLowZoomFilter = ["any",
+      [">=", ["zoom"], 9],
+      ["all", [">=", ["zoom"], 8], [">=", svzDtv, 5000]],
+      [">=", svzDtv, 15000],
+    ];
+
     // Länder-Segmente (Zählstellenbereiche, Linien).
     map.addLayer({
       id: "svz-lines",
-      minzoom: 9,
+      minzoom: 6,
       type: "line",
       source: "svz",
       "source-layer": "svz",
+      filter: svzLowZoomFilter,
       layout: { visibility: "none", "line-cap": "round", "line-join": "round" },
       paint: {
         "line-color": svzColorExpr("dtv"),
@@ -300,10 +321,11 @@ export function addLayers(map) {
     // Zählstellen-Punkte der Länder (BW/SL als Punkte).
     map.addLayer({
       id: "svz-points",
-      minzoom: 9,
+      minzoom: 6,
       type: "circle",
       source: "svz",
       "source-layer": "svz_points",
+      filter: svzLowZoomFilter,
       layout: { visibility: "none" },
       paint: {
         "circle-color": svzColorExpr("dtv"),
@@ -317,10 +339,11 @@ export function addLayers(map) {
     // BASt-Backbone (Bundesfernstraßen A+B, Punkte) — eigene Quelle svz_bast.
     map.addLayer({
       id: "bast-points",
-      minzoom: 9,
+      minzoom: 6,
       type: "circle",
       source: "svz_bast",
       "source-layer": "bast",
+      filter: svzLowZoomFilter,
       layout: { visibility: "none" },
       paint: {
         "circle-color": svzColorExpr("dtv"),
