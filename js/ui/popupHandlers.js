@@ -833,213 +833,168 @@ export function setupTelraamInteractivity(map) {
 
 
 
-export function setupScenario1Popups(map) {
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+// Alle Szenarien in EINEM Popup: liegen mehrere Szenario-Polygone übereinander,
+// werden ihre Karten UNTEREINANDER gestapelt (statt sich als separate Popups zu
+// überdecken). Ein map-weiter mousemove fragt alle Szenario-Layer am Cursor ab;
+// nur sichtbare zählen (queryRenderedFeatures) -> deaktivierte Szenarien tauchen
+// automatisch nicht auf. Ersetzt die früheren 6 Einzel-Handler.
+export function setupScenarioPopups(map) {
+    // Hover = transiente Vorschau (folgt dem Cursor); Klick = fixiertes Fenster
+    // (bleibt stehen, mit Schließen-Button) -> darin sind Info-Icon/Links anklickbar.
+    const hoverPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "340px" });
+    let pinPopup = null;
 
-    const renderScenario1Tooltip = (props) => `
-      <div class="pop-title">Unfall-Häufung · Tempo 100</div>
-      <table class="pop-table">
-        ${props.cluster_size !== undefined ? `<tr><td>Unfälle im Cluster</td><td>${props.cluster_size}</td></tr>` : ""}
-        ${props.UKATEGORIE__1 !== undefined ? `<tr><td>Getötete</td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
-        ${props.UKATEGORIE__2 !== undefined ? `<tr><td>Schwerverletzte</td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
-        ${props.UKATEGORIE__3 !== undefined ? `<tr><td>Leichtverletzte</td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
-      </table>
-  `;
-
-    ["scenario1-polys", "scenario1-points"].forEach((layerId) => {
-        map.on("mousemove", layerId, (e) => {
-            const html = renderScenario1Tooltip(e.features[0].properties);
-            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-            map.getCanvas().style.cursor = "pointer";
-        });
-
-        map.on("mouseleave", layerId, () => {
-            popup.remove();
-            map.getCanvas().style.cursor = "";
-        });
-    });
-}
-
-
-export function setupScenario2Popups(map) {
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-
-    const renderScenario2Tooltip = (props) => `
-          <div class="pop-title">${props.name ?? "Schule / Kindergarten"}</div>
-          <table class="pop-table">
-            ${props.amenity ? `<tr><td>Art</td><td>${props.amenity}</td></tr>` : ""}
-            ${props.total_count !== undefined ? `<tr><td>Rad-/Fuß-Unfälle</td><td>${props.total_count}</td></tr>` : ""}
-            ${props.bike_count !== undefined ? `<tr><td>… mit Rad</td><td>${props.bike_count}</td></tr>` : ""}
-            ${props.ped_count !== undefined ? `<tr><td>… zu Fuß</td><td>${props.ped_count}</td></tr>` : ""}
-            ${props.biped_counts !== undefined ? `<tr><td>… beide beteiligt</td><td>${props.biped_counts}</td></tr>` : ""}
-          </table>
-          <div class="pop-meta" style="margin-top:8px;">Nur Unfälle mit Rad- oder Fußbeteiligung im Umfeld der Einrichtung.</div>
-      `;
-
-    ["scenario2-polys", "scenario2-points"].forEach((layerId) => {
-        map.on("mousemove", layerId, (e) => {
-            const html = renderScenario2Tooltip(e.features[0].properties);
-            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-            map.getCanvas().style.cursor = "pointer";
-        });
-
-        map.on("mouseleave", layerId, () => {
-            popup.remove();
-            map.getCanvas().style.cursor = "";
-        });
-    });
-}
-
-
-// Scenario 3 popups
-export function setupScenario3Popups(map) {
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-
-    const renderScenario3Tooltip = (props) => `
-          <div class="pop-title">Kurzes Tempo-50-Segment</div>
-          <table class="pop-table">
-            <tr><td>Tempolimit</td><td>${props.maxspeed ? `${props.maxspeed} km/h` : "–"}</td></tr>
-            <tr><td>Straße</td><td>${props.name ?? "–"}</td></tr>
-            <tr><td>Länge</td><td>${props.length_m !== undefined ? `${Number(props.length_m).toFixed(0)} m` : "–"}</td></tr>
-          </table>
-      `;
-
-    ["scenario3-polys", "scenario3-points"].forEach((layerId) => {
-        map.on("mousemove", layerId, (e) => {
-            const html = renderScenario3Tooltip(e.features[0].properties);
-            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-            map.getCanvas().style.cursor = "pointer";
-        });
-
-        map.on("mouseleave", layerId, () => {
-            popup.remove();
-            map.getCanvas().style.cursor = "";
-        });
-    });
-}
-
-
-// Scenario 6 popups
-export function setupScenario6Popups(map) {
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-
-    const renderScenario6Tooltip = (props) => `
-          <div class="pop-title">${props.name ?? "Schule / Kindergarten"}</div>
-          <table class="pop-table">
-            ${props.amenity ? `<tr><td>Art</td><td>${props.amenity}</td></tr>` : ""}
-            <tr><td>Hinweis</td><td>Tempo 50 in ≤ 30 m Nähe</td></tr>
-          </table>
-      `;
-
-    ["scenario6-polys", "scenario6-points"].forEach((layerId) => {
-        map.on("mousemove", layerId, (e) => {
-            const html = renderScenario6Tooltip(e.features[0].properties);
-            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-            map.getCanvas().style.cursor = "pointer";
-        });
-
-        map.on("mouseleave", layerId, () => {
-            popup.remove();
-            map.getCanvas().style.cursor = "";
-        });
-
-    });
-}
-
-
-
-
-
-
-// Scenario 8 popups
-export function setupScenario8Popups(map) {
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-
-    const renderScenario8Tooltip = (props) => {
-        const laermValue = Number(props.max_laerm_num);  // pmtiles liefert ggf. String
-        let laermText = "-";
-
-        if (laermValue === 55) laermText = "55–59 dB(A)";
-        else if (laermValue === 60) laermText = "60–64 dB(A)";
-        else if (laermValue === 65) laermText = "65–69 dB(A)";
-        else if (laermValue === 70) laermText = "70–74 dB(A)";
-        else if (laermValue === 75) laermText = "> 75 dB(A)";
-
-        return `
-          <div class="pop-title">${props.name ?? "Unbenannte Schule"}</div>
-          <div class="pop-hero">bis ${laermText}</div>
-          <div class="pop-meta">${props.amenity ?? "Schule"} · Lärm am Gebäude</div>
-    `;
-    };
-
-    ["scenario8-polys", "scenario8-points"].forEach((layerId) => {
-        map.on("mousemove", layerId, (e) => {
-            const html = renderScenario8Tooltip(e.features[0].properties);
-            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-            map.getCanvas().style.cursor = "pointer";
-        });
-
-        map.on("mouseleave", layerId, () => {
-            popup.remove();
-            map.getCanvas().style.cursor = "";
-        });
-    });
-}
-
-
-// Scenario 9 popups (Unfallhäufungen, Kriterien nach M Uko)
-export function setupScenario9Popups(map) {
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "340px" });
-
-    // Bewusst NEUTRAL: die Stelle ist nach einem überprüfbaren Kriterium "auffällig" —
-    // das ist KEINE amtliche Feststellung einer Unfallhäufungsstelle (die ist Sache der
-    // Unfallkommission) und kein Erfolg (darum kein grünes ✓/"erfüllt"). up5/usp3
-    // entsprechen der 3-Jahres-Karte der M Uko; utyp5 ist nur angelehnt.
     const ruleCriteria = {
         up5_3y: "≥ 5 Unfälle mit Personenschaden in 3 Jahren (M-Uko-3-Jahres-Kriterium).",
         usp3_3y: "≥ 3 Unfälle mit schwerem Personenschaden in 3 Jahren (M-Uko-3-Jahres-Kriterium).",
         utyp5_3y: "≥ 5 gleichartige Unfälle (gleicher Unfalltyp) in 3 Jahren (angelehnt an die M-Uko-Typenkarte)."
     };
 
-    const renderScenario9Tooltip = (props) => {
-        // pmtiles liefert Integer-Attribute ggf. als String -> Number(...)
-        const utyp = Number(props.utyp);
-        const utypText = utyp > 0
-            ? `${translations.UTYP1[utyp] ?? "-"} (${utyp})`
-            : null;
-        const crit = ruleCriteria[props.rule];
-
-        return `
-          <div class="pop-title">Unfall-Häufung</div>
-          <div><span class="pop-flag">Auffällig</span></div>
-          ${crit ? `<div class="pop-meta" style="margin-top:0;">${crit}</div>` : ""}
-          <table class="pop-table" style="margin-top:7px;">
-            ${utypText ? `<tr><td>Unfalltyp</td><td>${utypText}</td></tr>` : ""}
-            ${props.n_max !== undefined ? `<tr><td>Unfälle (max.)</td><td>${props.n_max}</td></tr>` : ""}
-            ${props.window_best !== undefined ? `<tr><td>Zeitfenster</td><td>${props.window_best}</td></tr>` : ""}
-            ${props.n_windows !== undefined ? `<tr><td>auffällige Fenster</td><td>${props.n_windows}</td></tr>` : ""}
-            ${props.UKATEGORIE__1 !== undefined ? `<tr><td>Getötete</td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
-            ${props.UKATEGORIE__2 !== undefined ? `<tr><td>Schwerverletzte</td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
-            ${props.UKATEGORIE__3 !== undefined ? `<tr><td>Leichtverletzte</td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
-          </table>
-          <div class="pop-meta" style="margin-top:8px;">
-            Vereinfachte Analyse auf Unfallatlas-Basis (nur Unfälle mit Personenschaden) —
-            keine amtliche Feststellung einer Unfallhäufungsstelle durch die Unfallkommission.
-          </div>
-      `;
+    const laermText = (v) => {
+        const n = Number(v);
+        if (n === 55) return "55–59 dB(A)";
+        if (n === 60) return "60–64 dB(A)";
+        if (n === 65) return "65–69 dB(A)";
+        if (n === 70) return "70–74 dB(A)";
+        if (n === 75) return "> 75 dB(A)";
+        return "–";
     };
 
-    ["scenario9-polys", "scenario9-points"].forEach((layerId) => {
-        map.on("mousemove", layerId, (e) => {
-            const html = renderScenario9Tooltip(e.features[0].properties);
-            popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-            map.getCanvas().style.cursor = "pointer";
-        });
+    // Registry (feste Reihenfolge = feste Stapel-Reihenfolge). render() liefert nur
+    // den Karten-Body; die Eyebrow + Trenner setzt der Sammel-Handler.
+    const scenarios = [
+        {
+            layers: ["scenario1-polys", "scenario1-points"], eyebrow: "Unfall-Häufung · Tempo 100",
+            render: (p) => `
+                <table class="pop-table">
+                    ${p.cluster_size !== undefined ? `<tr><td>Unfälle im Cluster</td><td>${p.cluster_size}</td></tr>` : ""}
+                    ${p.UKATEGORIE__1 !== undefined ? `<tr><td>Getötete</td><td>${p.UKATEGORIE__1}</td></tr>` : ""}
+                    ${p.UKATEGORIE__2 !== undefined ? `<tr><td>Schwerverletzte</td><td>${p.UKATEGORIE__2}</td></tr>` : ""}
+                    ${p.UKATEGORIE__3 !== undefined ? `<tr><td>Leichtverletzte</td><td>${p.UKATEGORIE__3}</td></tr>` : ""}
+                </table>`
+        },
+        {
+            layers: ["scenario2-polys", "scenario2-points"], eyebrow: "Schulumfeld · Unfälle",
+            render: (p) => `
+                <div class="pop-title">${p.name ?? "Schule / Kindergarten"} <span class="info-icon" data-tip="Gezählt: Unfälle ab 2020 (seit 2020 bundesweit einheitlich erfasst, inkl. 2025) im 50-m-Umfeld. Die Karte zeigt dagegen alle Jahre 2017–2025 — ältere Unfälle erscheinen als Punkte, ohne mitgezählt zu werden.">i</span></div>
+                <table class="pop-table">
+                    ${p.amenity ? `<tr><td>Art</td><td>${p.amenity}</td></tr>` : ""}
+                    ${p.total_count !== undefined ? `<tr><td>Unfälle gesamt</td><td>${p.total_count}</td></tr>` : ""}
+                    ${p.bike_count !== undefined ? `<tr><td>… mit Radbeteiligung</td><td>${p.bike_count}</td></tr>` : ""}
+                    ${p.ped_count !== undefined ? `<tr><td>… mit Fußgängerbeteiligung</td><td>${p.ped_count}</td></tr>` : ""}
+                </table>
+                <div class="pop-meta" style="margin-top:8px;">Im 50-m-Umfeld der Einrichtung. Ausgewählt: Schulen mit mehr als 2 Unfällen mit Rad-/Fußbeteiligung.</div>`
+        },
+        {
+            layers: ["scenario3-polys", "scenario3-points"], eyebrow: "Kurzes Tempo-50-Segment",
+            render: (p) => `
+                <table class="pop-table">
+                    <tr><td>Tempolimit</td><td>${p.maxspeed ? `${p.maxspeed} km/h` : "–"}</td></tr>
+                    <tr><td>Straße</td><td>${p.name ?? "–"}</td></tr>
+                    <tr><td>Länge</td><td>${p.length_m !== undefined ? `${Number(p.length_m).toFixed(0)} m` : "–"}</td></tr>
+                </table>`
+        },
+        {
+            layers: ["scenario6-polys", "scenario6-points"], eyebrow: "Schule · Tempo 50 nah",
+            render: (p) => `
+                <div class="pop-title">${p.name ?? "Schule / Kindergarten"}</div>
+                ${p.amenity ? `<table class="pop-table"><tr><td>Art</td><td>${p.amenity}</td></tr></table>` : ""}
+                <div class="pop-meta" style="margin-top:6px;">Im direkten Umfeld (30-m-Buffer) gibt es Straßenabschnitte, auf denen noch Tempo 50 gilt — rot umrandet auf der Karte.</div>`
+        },
+        {
+            layers: ["scenario8-polys", "scenario8-points"], eyebrow: "Schule · Lärm",
+            render: (p) => `
+                <div class="pop-title">${p.name ?? "Unbenannte Schule"}</div>
+                <div class="pop-hero pop-hero--sm">bis ${laermText(p.max_laerm_num)}</div>
+                <div class="pop-meta">Lärm am Gebäude · Orientierungswert ~57 dB(A)</div>
+                <div class="pop-foot"><a href="https://www.umweltbundesamt.de/themen/laerm/verkehrslaerm/strassenverkehrslaerm" target="_blank" rel="noopener">Umweltbundesamt · Straßenverkehrslärm →</a></div>`
+        },
+        {
+            layers: ["scenario9-polys", "scenario9-points"], eyebrow: "Unfall-Häufung · M-Uko",
+            render: (p) => {
+                const utyp = Number(p.utyp);
+                const utypText = utyp > 0 ? `${translations.UTYP1[utyp] ?? "-"} (${utyp})` : null;
+                const crit = ruleCriteria[p.rule];
+                return `
+                    <div><span class="pop-flag">Auffällig</span></div>
+                    ${crit ? `<div class="pop-meta" style="margin-top:0;">${crit}</div>` : ""}
+                    <table class="pop-table" style="margin-top:7px;">
+                        ${utypText ? `<tr><td>Unfalltyp</td><td>${utypText}</td></tr>` : ""}
+                        ${p.n_max !== undefined ? `<tr><td>Unfälle (max.)</td><td>${p.n_max}</td></tr>` : ""}
+                        ${p.window_best !== undefined ? `<tr><td>Zeitfenster</td><td>${p.window_best}</td></tr>` : ""}
+                        ${p.n_windows !== undefined ? `<tr><td>auffällige Fenster</td><td>${p.n_windows}</td></tr>` : ""}
+                        ${p.UKATEGORIE__1 !== undefined ? `<tr><td>Getötete</td><td>${p.UKATEGORIE__1}</td></tr>` : ""}
+                        ${p.UKATEGORIE__2 !== undefined ? `<tr><td>Schwerverletzte</td><td>${p.UKATEGORIE__2}</td></tr>` : ""}
+                        ${p.UKATEGORIE__3 !== undefined ? `<tr><td>Leichtverletzte</td><td>${p.UKATEGORIE__3}</td></tr>` : ""}
+                    </table>
+                    <div class="pop-meta" style="margin-top:8px;">
+                        Vereinfachte Analyse auf Unfallatlas-Basis (nur Unfälle mit Personenschaden) —
+                        keine amtliche Feststellung einer Unfallhäufungsstelle durch die Unfallkommission.
+                    </div>`;
+            }
+        }
+    ];
 
-        map.on("mouseleave", layerId, () => {
-            popup.remove();
+    const layerToScenario = {};
+    for (const s of scenarios) for (const l of s.layers) layerToScenario[l] = s;
+    const allLayers = scenarios.flatMap((s) => s.layers);
+
+    // Karten aller Szenarien am Punkt einsammeln (gestapelt, feste Reihenfolge) -> HTML oder "".
+    const collectHTML = (point) => {
+        const layers = allLayers.filter((l) => map.getLayer(l)); // sonst wirft queryRenderedFeatures
+        const feats = layers.length ? map.queryRenderedFeatures(point, { layers }) : [];
+        if (!feats.length) return "";
+        const cards = [];
+        for (const s of scenarios) {
+            const f = feats.find((ft) => layerToScenario[ft.layer.id] === s);
+            if (f) cards.push(`<div class="pop-card"><div class="pop-eyebrow">${s.eyebrow}</div>${s.render(f.properties)}</div>`);
+        }
+        if (!cards.length) return "";
+        const header = cards.length > 1
+            ? `<div class="pop-multi">${cards.length} Szenarien an diesem Punkt</div>`
+            : "";
+        return header + cards.join("");
+    };
+
+    map.on("mousemove", (e) => {
+        if (pinPopup) return; // fixiertes Fenster hat Vorrang, keine Hover-Vorschau
+        const html = collectHTML(e.point);
+        if (!html) {
+            hoverPopup.remove();
             map.getCanvas().style.cursor = "";
-        });
+            return;
+        }
+        map.getCanvas().style.cursor = "pointer";
+        hoverPopup.setLngLat(e.lngLat)
+            .setHTML(html + `<div class="pop-pinhint">→ Klick fixiert das Fenster</div>`)
+            .addTo(map);
+    });
+
+    map.on("mouseout", () => {
+        if (!pinPopup) hoverPopup.remove();
+    });
+
+    // Klick auf eine Szenario-Fläche: Vorschau wird zum fixierten Popup (bleibt stehen,
+    // ist hover-/anklickbar). Klick ins Leere: fixiertes Fenster schließen.
+    map.on("click", (e) => {
+        const html = collectHTML(e.point);
+        if (!html) {
+            if (pinPopup) pinPopup.remove();
+            return;
+        }
+        hoverPopup.remove();
+        if (pinPopup) pinPopup.remove();
+        pinPopup = new maplibregl.Popup({ closeButton: true, closeOnClick: false, maxWidth: "340px" })
+            .setLngLat(e.lngLat).setHTML(html).addTo(map);
+        pinPopup.on("close", () => { pinPopup = null; });
     });
 }
+
+
+
+
+
+
+
+
 

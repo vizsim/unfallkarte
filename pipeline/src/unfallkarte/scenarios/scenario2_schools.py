@@ -21,7 +21,7 @@ NAME = "scenario2"
 DESCRIPTION = "Unfälle nahe Schulen (50 m Buffer, > 2 Rad/Fuß-Unfälle ab 2020)"
 OUTPUT = "scenarios/scenario2_accidents_close2schools.pmtiles"
 
-YEARS = [2020, 2021, 2022, 2023, 2024]  # ab 2020 bundesweit vollständig (inkl. 2024)
+MIN_YEAR = 2020  # ab 2020 bundesweit einheitlich erfasst; alle Folgejahre inkl. (2025, …)
 BUFFER_M = 50
 BIPED_THRESHOLD = 2
 COUNT_COLS = ["total_count", "biped_count", "bike_count", "ped_count"]
@@ -33,7 +33,7 @@ def run(ctx: ScenarioContext) -> Path:
 
     buffered = geo.buffer(schools, BUFFER_M)  # in EPSG:4326 zurück
 
-    acc = accidents[accidents["UJAHR"].isin(YEARS)].copy()
+    acc = accidents[accidents["UJAHR"] >= MIN_YEAR].copy()
     # biped = Rad ODER Fuß; als Hilfsspalte, damit count_accidents_per_feature (col==val) greift
     acc["__biped"] = ((acc["IstRad"] == 1) | (acc["IstFuss"] == 1)).astype(int)
 

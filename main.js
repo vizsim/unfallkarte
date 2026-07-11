@@ -37,12 +37,7 @@ import {
   setupCrossingsPopups,
   setupMapillaryTrafficsignPopups,
   setupTelraamInteractivity,
-  setupScenario1Popups,
-  setupScenario2Popups,
-  setupScenario3Popups,
-  setupScenario6Popups,
-  setupScenario8Popups,
-  setupScenario9Popups
+  setupScenarioPopups
 } from './js/ui/popupHandlers.js';
 
 // 📦 Legende
@@ -309,12 +304,7 @@ function setupPopups(map) {
   setupCrossingsPopups(map);
   setupMapillaryTrafficsignPopups(map);
   setupTelraamInteractivity(map);
-  setupScenario1Popups(map);
-  setupScenario2Popups(map);
-  setupScenario3Popups(map);
-  setupScenario6Popups(map);
-  setupScenario8Popups(map);
-  setupScenario9Popups(map);
+  setupScenarioPopups(map);
 }
 
 function setupLegend(map) {

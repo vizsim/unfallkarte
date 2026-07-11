@@ -756,6 +756,7 @@ body {
 
 /* Tier Hero: eine große Leitzahl (neutral) + Einheit/Zusatz */
 .pop-hero { font-size: 21px; font-weight: 700; line-height: 1.1; margin: 1px 0 3px; color: var(--ui-text-strong); }
+.pop-hero.pop-hero--sm { font-size: 16px; }   /* längere Text-Werte (z. B. dB-Bereich) */
 .pop-hero .pop-unit { color: var(--ui-text-muted); font-weight: 600; font-size: 11px; }
 .pop-note { font-size: 11px; font-weight: 600; color: var(--ui-text-muted); margin-left: 4px; }
 
@@ -775,6 +776,24 @@ body {
 
 /* gepunktete Erklärung — nutzt den gemeinsamen data-tip-Tooltip unten */
 .pop-hint { border-bottom: 1px dotted #b9bec6; cursor: help; }
+
+/* Mehrere Szenarien an einem Punkt: Karten UNTEREINANDER stapeln (ein Popup).
+   Eyebrow benennt das Szenario, damit gleiche Ortstitel unterscheidbar bleiben. */
+.pop-card + .pop-card { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--ui-divider); }
+.pop-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ui-text-muted); margin-bottom: 4px;
+}
+/* Kopfzeile, wenn mehrere Szenarien an einem Punkt gestapelt sind */
+.pop-multi {
+  font-size: 11px; font-weight: 700; color: var(--ui-text-strong);
+  margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--ui-divider);
+}
+/* Hinweis in der Hover-Vorschau: Klick fixiert das Fenster (im Pin-Popup weggelassen) */
+.pop-pinhint {
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--ui-divider);
+  font-size: 11px; color: var(--ui-text-muted); text-align: center;
+}
 
 /* ===== Gemeinsamer schneller Tooltip (100 ms) — ein Bauteil, löst natives title ab.
    JS-positioniert (js/ui/tooltip.js) auf document.body (position:fixed), damit er
