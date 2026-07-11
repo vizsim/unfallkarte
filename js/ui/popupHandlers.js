@@ -634,7 +634,7 @@ export function setupPlaygroundsPopups(map) {
                     ${props.name ? `<tr><td>Name</td><td>${props.name}</td></tr>` : ""}
                     ${props.leisure ? `<tr><td>Art</td><td>${props.leisure}</td></tr>` : ""}
                     ${props.playground ? `<tr><td>Ausstattung</td><td>${props.playground}</td></tr>` : ""}
-                    ${props.amenity ? `<tr><td>Amenity</td><td>${props.amenity}</td></tr>` : ""}
+                    ${props.amenity ? `<tr><td>Kategorie</td><td>${props.amenity}</td></tr>` : ""}
                     ${props.operator ? `<tr><td>Träger</td><td>${props.operator}</td></tr>` : ""}
                 </table>
             `;
@@ -837,15 +837,13 @@ export function setupScenario1Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
     const renderScenario1Tooltip = (props) => `
-    <div style="font-size: 12px;">
-      <strong>Szenario 1</strong><br/>
-      <table style="border-collapse: collapse;">
-        ${props.cluster_size !== undefined ? `<tr><td><strong>Cluster-Größe</strong></td><td>${props.cluster_size}</td></tr>` : ""}
-        ${props.UKATEGORIE__1 !== undefined ? `<tr><td><strong># Getötete</strong></td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
-        ${props.UKATEGORIE__2 !== undefined ? `<tr><td><strong># Schwerverletzte</strong></td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
-        ${props.UKATEGORIE__3 !== undefined ? `<tr><td><strong># Leichtverletzte</strong></td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
+      <div class="pop-title">Unfall-Häufung · Tempo 100</div>
+      <table class="pop-table">
+        ${props.cluster_size !== undefined ? `<tr><td>Unfälle im Cluster</td><td>${props.cluster_size}</td></tr>` : ""}
+        ${props.UKATEGORIE__1 !== undefined ? `<tr><td>Getötete</td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
+        ${props.UKATEGORIE__2 !== undefined ? `<tr><td>Schwerverletzte</td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
+        ${props.UKATEGORIE__3 !== undefined ? `<tr><td>Leichtverletzte</td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
       </table>
-    </div>
   `;
 
     ["scenario1-polys", "scenario1-points"].forEach((layerId) => {
@@ -867,20 +865,15 @@ export function setupScenario2Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
     const renderScenario2Tooltip = (props) => `
-        <div style="font-size: 12px;">
-          <strong>Szenario 2</strong><br/>
-          <table style="border-collapse: collapse;">
-            ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
-            ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
-            ${props.source_layer ? `<tr><td><strong>Source Layer</strong></td><td>${props.source_layer}</td></tr>` : ""}
-            ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
-            ${props.oid ? `<tr><td><strong>OID</strong></td><td>${props.oid}</td></tr>` : ""}
-            ${props.total_count !== undefined ? `<tr><td><strong>Total Count</strong></td><td>${props.total_count}</td></tr>` : ""}
-            ${props.biped_counts !== undefined ? `<tr><td><strong>Biped Count</strong></td><td>${props.biped_counts}</td></tr>` : ""}
-            ${props.bike_count !== undefined ? `<tr><td><strong>Bike Count</strong></td><td>${props.bike_count}</td></tr>` : ""}
-            ${props.ped_count !== undefined ? `<tr><td><strong>Ped Count</strong></td><td>${props.ped_count}</td></tr>` : ""}
+          <div class="pop-title">${props.name ?? "Schule / Kindergarten"}</div>
+          <table class="pop-table">
+            ${props.amenity ? `<tr><td>Art</td><td>${props.amenity}</td></tr>` : ""}
+            ${props.total_count !== undefined ? `<tr><td>Rad-/Fuß-Unfälle</td><td>${props.total_count}</td></tr>` : ""}
+            ${props.bike_count !== undefined ? `<tr><td>… mit Rad</td><td>${props.bike_count}</td></tr>` : ""}
+            ${props.ped_count !== undefined ? `<tr><td>… zu Fuß</td><td>${props.ped_count}</td></tr>` : ""}
+            ${props.biped_counts !== undefined ? `<tr><td>… beide beteiligt</td><td>${props.biped_counts}</td></tr>` : ""}
           </table>
-        </div>
+          <div class="pop-meta" style="margin-top:8px;">Nur Unfälle mit Rad- oder Fußbeteiligung im Umfeld der Einrichtung.</div>
       `;
 
     ["scenario2-polys", "scenario2-points"].forEach((layerId) => {
@@ -903,14 +896,12 @@ export function setupScenario3Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
     const renderScenario3Tooltip = (props) => `
-        <div style="font-size: 12px;">
-          <strong>Szenario 3</strong><br/>
-          <table style="border-collapse: collapse;">
-            <tr><td><strong>maxspeed</strong></td><td>${props.maxspeed ?? "-"}</td></tr>
-            <tr><td><strong>Name</strong></td><td>${props.name ?? "-"}</td></tr>
-            <tr><td><strong>Länge (m)</strong></td><td>${props.length_m !== undefined ? Number(props.length_m).toFixed(2) : "-"}</td></tr>
+          <div class="pop-title">Kurzes Tempo-50-Segment</div>
+          <table class="pop-table">
+            <tr><td>Tempolimit</td><td>${props.maxspeed ? `${props.maxspeed} km/h` : "–"}</td></tr>
+            <tr><td>Straße</td><td>${props.name ?? "–"}</td></tr>
+            <tr><td>Länge</td><td>${props.length_m !== undefined ? `${Number(props.length_m).toFixed(0)} m` : "–"}</td></tr>
           </table>
-        </div>
       `;
 
     ["scenario3-polys", "scenario3-points"].forEach((layerId) => {
@@ -933,14 +924,11 @@ export function setupScenario6Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
     const renderScenario6Tooltip = (props) => `
-        <div style="font-size: 12px;">
-          <strong>Szenario 6</strong><br/>
-          <table style="border-collapse: collapse;">
-            ${props.oid ? `<tr><td><strong>OID</strong></td><td>${props.oid}</td></tr>` : ""}
-            ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
-            ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
+          <div class="pop-title">${props.name ?? "Schule / Kindergarten"}</div>
+          <table class="pop-table">
+            ${props.amenity ? `<tr><td>Art</td><td>${props.amenity}</td></tr>` : ""}
+            <tr><td>Hinweis</td><td>Tempo 50 in ≤ 30 m Nähe</td></tr>
           </table>
-        </div>
       `;
 
     ["scenario6-polys", "scenario6-points"].forEach((layerId) => {
@@ -978,13 +966,9 @@ export function setupScenario8Popups(map) {
         else if (laermValue === 75) laermText = "> 75 dB(A)";
 
         return `
-        <div style="font-size: 12px;">
-          <strong>${props.name ?? "Unbenannte Schule"}</strong><br/>
-          <table style="border-collapse: collapse;">
-            <tr><td><strong>Typ</strong></td><td>${props.amenity ?? "-"}</td></tr>
-            <tr><td><strong>Lärm</strong></td><td>bis zu ${laermText}</td></tr>
-          </table>
-        </div>
+          <div class="pop-title">${props.name ?? "Unbenannte Schule"}</div>
+          <div class="pop-hero">bis ${laermText}</div>
+          <div class="pop-meta">${props.amenity ?? "Schule"} · Lärm am Gebäude</div>
     `;
     };
 
@@ -1007,14 +991,14 @@ export function setupScenario8Popups(map) {
 export function setupScenario9Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "340px" });
 
-    // Bewusste Wortwahl: "erfüllt das Kriterium" ist eine überprüfbare Tatsachenaussage —
-    // NICHT "ist eine Unfallhäufungsstelle" (deren Feststellung ist Sache der Unfall-
-    // kommission). up5/usp3 entsprechen der 3-Jahres-Karte der M Uko; utyp5 ist nur
-    // angelehnt (die amtliche Typenkarte ist die 1-Jahres-Karte inkl. Sachschaden).
+    // Bewusst NEUTRAL: die Stelle ist nach einem überprüfbaren Kriterium "auffällig" —
+    // das ist KEINE amtliche Feststellung einer Unfallhäufungsstelle (die ist Sache der
+    // Unfallkommission) und kein Erfolg (darum kein grünes ✓/"erfüllt"). up5/usp3
+    // entsprechen der 3-Jahres-Karte der M Uko; utyp5 ist nur angelehnt.
     const ruleCriteria = {
-        up5_3y: "Erfüllt das 3-Jahres-Kriterium der M Uko: ≥ 5 Unfälle mit Personenschaden in 3 Jahren.",
-        usp3_3y: "Erfüllt das 3-Jahres-Kriterium der M Uko: ≥ 3 Unfälle mit schwerem Personenschaden in 3 Jahren.",
-        utyp5_3y: "≥ 5 gleichartige Unfälle (gleicher Unfalltyp) in 3 Jahren — angelehnt an die M-Uko-Typenkarte."
+        up5_3y: "≥ 5 Unfälle mit Personenschaden in 3 Jahren (M-Uko-3-Jahres-Kriterium).",
+        usp3_3y: "≥ 3 Unfälle mit schwerem Personenschaden in 3 Jahren (M-Uko-3-Jahres-Kriterium).",
+        utyp5_3y: "≥ 5 gleichartige Unfälle (gleicher Unfalltyp) in 3 Jahren (angelehnt an die M-Uko-Typenkarte)."
     };
 
     const renderScenario9Tooltip = (props) => {
@@ -1026,28 +1010,22 @@ export function setupScenario9Popups(map) {
         const crit = ruleCriteria[props.rule];
 
         return `
-        <div class="sc9-popup" style="font-size: 12px;">
-          <style>
-            .sc9-popup table { border-collapse: collapse; margin-top: 4px; }
-            .sc9-popup td { vertical-align: top; padding: 1px 0; }
-            .sc9-popup td.k { padding-right: 12px; white-space: nowrap; color: #555; font-weight: 600; }
-          </style>
-          <strong>Unfallhäufung</strong>
-          ${crit ? `<div style="margin-top: 4px; color: #2e7d32; font-weight: 600;">✔ ${crit}</div>` : ""}
-          <table>
-            ${utypText ? `<tr><td class="k">Unfalltyp</td><td>${utypText}</td></tr>` : ""}
-            ${props.n_max !== undefined ? `<tr><td class="k">Unfälle (max.)</td><td>${props.n_max}</td></tr>` : ""}
-            ${props.window_best !== undefined ? `<tr><td class="k">Zeitfenster</td><td>${props.window_best}</td></tr>` : ""}
-            ${props.n_windows !== undefined ? `<tr><td class="k">auffällige Fenster</td><td>${props.n_windows}</td></tr>` : ""}
-            ${props.UKATEGORIE__1 !== undefined ? `<tr><td class="k"># Getötete</td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
-            ${props.UKATEGORIE__2 !== undefined ? `<tr><td class="k"># Schwerverletzte</td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
-            ${props.UKATEGORIE__3 !== undefined ? `<tr><td class="k"># Leichtverletzte</td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
+          <div class="pop-title">Unfall-Häufung</div>
+          <div><span class="pop-flag">Auffällig</span></div>
+          ${crit ? `<div class="pop-meta" style="margin-top:0;">${crit}</div>` : ""}
+          <table class="pop-table" style="margin-top:7px;">
+            ${utypText ? `<tr><td>Unfalltyp</td><td>${utypText}</td></tr>` : ""}
+            ${props.n_max !== undefined ? `<tr><td>Unfälle (max.)</td><td>${props.n_max}</td></tr>` : ""}
+            ${props.window_best !== undefined ? `<tr><td>Zeitfenster</td><td>${props.window_best}</td></tr>` : ""}
+            ${props.n_windows !== undefined ? `<tr><td>auffällige Fenster</td><td>${props.n_windows}</td></tr>` : ""}
+            ${props.UKATEGORIE__1 !== undefined ? `<tr><td>Getötete</td><td>${props.UKATEGORIE__1}</td></tr>` : ""}
+            ${props.UKATEGORIE__2 !== undefined ? `<tr><td>Schwerverletzte</td><td>${props.UKATEGORIE__2}</td></tr>` : ""}
+            ${props.UKATEGORIE__3 !== undefined ? `<tr><td>Leichtverletzte</td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
           </table>
-          <div style="margin-top: 6px; color: #777; font-size: 10px;">
+          <div class="pop-meta" style="margin-top:8px;">
             Vereinfachte Analyse auf Unfallatlas-Basis (nur Unfälle mit Personenschaden) —
             keine amtliche Feststellung einer Unfallhäufungsstelle durch die Unfallkommission.
           </div>
-        </div>
       `;
     };
 
