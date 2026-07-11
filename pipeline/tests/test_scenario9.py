@@ -148,5 +148,5 @@ def test_coverage_excludes_incomplete_land() -> None:
         },
         crs="EPSG:25832",
     )
-    with pytest.raises(ValueError, match="keine Unfallschwerpunkte"):
+    with pytest.raises(ValueError, match="keine Unfallhäufungen"):
         compute_hotspots(acc)

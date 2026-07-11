@@ -38,7 +38,7 @@ Zwei Teile in einem Repo:
   - **sc3** — Tempo-30 durchgängig: kurze 50er-Lücken zwischen 30er-Zonen
   - **sc6** — Tempo-50-Straßen vor Schulen (30 m, ≥60 m)
   - **sc8** — Lärm vor Schulen (UBA-Lärmkartierung, >56 dB)
-  - **sc9** — Unfallschwerpunkte (M-Uko-Kriterien vereinfacht: 3-Jahres-Fenster + DBSCAN)
+  - **sc9** — Unfallhäufungen (Kriterien nach M Uko, vereinfacht: 3-Jahres-Fenster + DBSCAN)
 - **Verkehr & Umwelt** (aus der Pipeline): Verkehrsmengen (SVZ der Länder,
   BASt-Bundesfernstraßen, UBA-Hauptverkehrsstraßen), Rad-Geschwindigkeiten (movebis),
   Überholabstände ([OpenBikeSensor](https://www.openbikesensor.org/)), Umgebungslärm

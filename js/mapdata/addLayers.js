@@ -1334,7 +1334,7 @@ export function addLayers(map) {
 
 
 
-  // add Scenario9 layers (Unfallschwerpunkte / M Uko, vereinfacht)
+  // add Scenario9 layers (Unfallhäufungen, Kriterien nach M Uko)
   function addScenario9Layers(map) {
     // Polygon Layer: zoom 14+
     map.addLayer({

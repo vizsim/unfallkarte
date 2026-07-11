@@ -106,7 +106,7 @@ datasets:
 
   scenario9:
     file: "scenarios/scenario9_hotspots.pmtiles"
-    label: "Unfallschwerpunkte (M Uko, vereinfacht)"
+    label: "Unfallhäufungen (Kriterien nach M Uko)"
     attribution: "Unfallatlas der Statistischen Ämter (dl-de/by-2-0)"
     date: auto            # unfallgetrieben -> max. Unfalljahr
 

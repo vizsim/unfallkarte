@@ -88,7 +88,7 @@ export function setupScenarioControls(map) {
   });
 
 
-  // scenario9: Unfallschwerpunkte (M Uko). Kombinierter Filter aus Min-Anzahl (n_max)
+  // scenario9: Unfallhäufungen (Kriterien nach M Uko). Kombinierter Filter aus Min-Anzahl (n_max)
   // und Kriterium (rule). Beide Layer (Punkte/Polygone) teilen denselben Filter.
   function applyScenario9Filter(minN, rule) {
     const parts = [[">=", ["to-number", ["get", "n_max"]], parseInt(minN, 10)]];

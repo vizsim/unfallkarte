@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Szenario 9: Unfallschwerpunkte nach M Uko (vereinfacht), regelgetrieben.
+"""Szenario 9: Unfallhäufungen nach M-Uko-Kriterien (vereinfacht), regelgetrieben.
+
+Wortwahl: bewusst "Unfallhäufungen", NICHT "Unfallschwerpunkte"/"Unfallhäufungsstellen" —
+deren Feststellung ist Sache der Unfallkommission (M Uko / VwV-StVO zu §44); wir weisen
+nur nach, dass Kriterien rechnerisch erfüllt sind.
 
 Rollierende 3-Jahres-Fenster über die Unfallatlas-Daten; je Regel (U(P)>=5,
 U(SP)>=3, gleicher UTYP1>=5) DBSCAN-Cluster (eps=25 m). Überlappende Fenster-
@@ -29,7 +33,7 @@ from unfallkarte import geo, tiles
 from .base import ScenarioContext
 
 NAME = "scenario9"
-DESCRIPTION = "Unfallschwerpunkte nach M Uko (vereinfacht): 3-Jahres-Fenster + DBSCAN"
+DESCRIPTION = "Unfallhäufungen nach M-Uko-Kriterien (vereinfacht): 3-Jahres-Fenster + DBSCAN"
 OUTPUT = "scenarios/scenario9_hotspots.pmtiles"
 
 EPS_M = 25          # "geringer Abstand" ~ Knotenbereich
@@ -165,7 +169,7 @@ def compute_hotspots(acc: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
                     window_hulls.append(hulls)
 
     if not window_hulls:
-        raise ValueError("scenario9: keine Unfallschwerpunkte gefunden")
+        raise ValueError("scenario9: keine Unfallhäufungen gefunden")
 
     all_hulls = gpd.GeoDataFrame(
         pd.concat(window_hulls, ignore_index=True),

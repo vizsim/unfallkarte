@@ -1022,14 +1022,18 @@ export function setupScenario8Popups(map) {
 }
 
 
-// Scenario 9 popups (Unfallschwerpunkte / M Uko, vereinfacht)
+// Scenario 9 popups (Unfallhäufungen, Kriterien nach M Uko)
 export function setupScenario9Popups(map) {
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "340px" });
 
-    const ruleLabels = {
-        up5_3y: "≥ 5 Unfälle / 3 Jahre",
-        usp3_3y: "≥ 3 schwere Unfälle / 3 Jahre",
-        utyp5_3y: "≥ 5 gleicher Unfalltyp / 3 Jahre"
+    // Bewusste Wortwahl: "erfüllt das Kriterium" ist eine überprüfbare Tatsachenaussage —
+    // NICHT "ist eine Unfallhäufungsstelle" (deren Feststellung ist Sache der Unfall-
+    // kommission). up5/usp3 entsprechen der 3-Jahres-Karte der M Uko; utyp5 ist nur
+    // angelehnt (die amtliche Typenkarte ist die 1-Jahres-Karte inkl. Sachschaden).
+    const ruleCriteria = {
+        up5_3y: "Erfüllt das 3-Jahres-Kriterium der M Uko: ≥ 5 Unfälle mit Personenschaden in 3 Jahren.",
+        usp3_3y: "Erfüllt das 3-Jahres-Kriterium der M Uko: ≥ 3 Unfälle mit schwerem Personenschaden in 3 Jahren.",
+        utyp5_3y: "≥ 5 gleichartige Unfälle (gleicher Unfalltyp) in 3 Jahren — angelehnt an die M-Uko-Typenkarte."
     };
 
     const renderScenario9Tooltip = (props) => {
@@ -1038,6 +1042,7 @@ export function setupScenario9Popups(map) {
         const utypText = utyp > 0
             ? `${translations.UTYP1[utyp] ?? "-"} (${utyp})`
             : null;
+        const crit = ruleCriteria[props.rule];
 
         return `
         <div class="sc9-popup" style="font-size: 12px;">
@@ -1046,9 +1051,9 @@ export function setupScenario9Popups(map) {
             .sc9-popup td { vertical-align: top; padding: 1px 0; }
             .sc9-popup td.k { padding-right: 12px; white-space: nowrap; color: #555; font-weight: 600; }
           </style>
-          <strong>Unfallschwerpunkt</strong>
+          <strong>Unfallhäufung</strong>
+          ${crit ? `<div style="margin-top: 4px; color: #2e7d32; font-weight: 600;">✔ ${crit}</div>` : ""}
           <table>
-            <tr><td class="k">Kriterium</td><td>${ruleLabels[props.rule] ?? props.rule ?? "-"}</td></tr>
             ${utypText ? `<tr><td class="k">Unfalltyp</td><td>${utypText}</td></tr>` : ""}
             ${props.n_max !== undefined ? `<tr><td class="k">Unfälle (max.)</td><td>${props.n_max}</td></tr>` : ""}
             ${props.window_best !== undefined ? `<tr><td class="k">Zeitfenster</td><td>${props.window_best}</td></tr>` : ""}
@@ -1058,8 +1063,8 @@ export function setupScenario9Popups(map) {
             ${props.UKATEGORIE__3 !== undefined ? `<tr><td class="k"># Leichtverletzte</td><td>${props.UKATEGORIE__3}</td></tr>` : ""}
           </table>
           <div style="margin-top: 6px; color: #777; font-size: 10px;">
-            Nur Unfälle mit Personenschaden (Unfallatlas) — Annäherung an die M-Uko-Kriterien,
-            keine amtliche Unfalltypen-Karte der Unfallkommissionen.
+            Vereinfachte Analyse auf Unfallatlas-Basis (nur Unfälle mit Personenschaden) —
+            keine amtliche Feststellung einer Unfallhäufungsstelle durch die Unfallkommission.
           </div>
         </div>
       `;
