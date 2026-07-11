@@ -47,7 +47,7 @@ MAIN HEADER
         <div class="legend-heading">Unfallkarte</div>
         <div class="legend-subtext">
           Unfalldaten aus Unfallatlas<br />von 2017–2025
-          <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">i</span>
+          <span class="info-icon" data-tip="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">i</span>
         </div>
       </div>
       <!-- <span class="toggle-arrow open" data-arrow="legend-root"></span> -->
@@ -526,7 +526,7 @@ MAIN HEADER
             <input type="checkbox" id="toggle-scenario1" name="scenario" value="sc1" />
             Sc1: Unfall-Häufungen bei Tempo100 anzeigen
             <span class="info-icon"
-              title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">i</span>
+              data-tip="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
           <div id="scenario1-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario1-slider">Min. Anzahl Unfälle (Cluster-Größe): <span
@@ -543,7 +543,7 @@ MAIN HEADER
 
             Sc2: Unfall-Häufungen an Schulen/Kita anzeigen (ab 2020)
             <span class="info-icon"
-              title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">i</span>
+              data-tip="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
           <div id="scenario2-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario2-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
@@ -558,7 +558,7 @@ MAIN HEADER
             <input type="checkbox" id="toggle-scenario9" name="scenario" value="sc9" />
             Sc9: Unfallhäufungen (Kriterien nach M Uko)
             <span class="info-icon"
-              title="Vereinfachte M-Uko-Kriterien auf Unfallatlas-Daten (nur Unfälle mit Personenschaden!) — Annäherung, keine amtliche UKo-Typenkarte. Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">i</span>
+              data-tip="Vereinfachte M-Uko-Kriterien auf Unfallatlas-Daten (nur Unfälle mit Personenschaden!) — Annäherung, keine amtliche UKo-Typenkarte. Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">i</span>
           </label>
           <div id="scenario9-controls" class="ml-24 mt-6" style="display: none;">
             <label for="scenario9-rule">Kriterium:</label>
@@ -586,7 +586,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-scenario3" name="scenario" value="sc3" />
             Sc3: Kurze Tempo50 Segmente (< 400m) zw. Tempo30 Segmenten anzeigen <span class="info-icon"
-              title="Quelle: OpenStreetMap – Lizenz: ODbL">i</span>
+              data-tip="Quelle: OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
           <!-- <div id="scenario3-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario3-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
@@ -601,7 +601,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-scenario6" name="scenario" value="sc6" />
             Sc6: Schulen mit Tempo 50 in der Nähe (30m) anzeigen <span class="info-icon"
-              title="Quelle: OpenStreetMap – Lizenz: ODbL">i</span>
+              data-tip="Quelle: OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
           <!-- <div id="scenario3-slider-container" class="ml-24 mt-6" style="display: none;">
           <label for="scenario3-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
@@ -619,7 +619,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-scenario8" name="scenario" value="sc8" />
             Sc8: Schulen mit vermutlich zu viel Lärm anzeigen <span class="info-icon"
-              title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0 & OpenStreetMap – Lizenz: ODbL">i</span>
+              data-tip="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0 & OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
           <div id="scenario8-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario8-slider">Min. Lärm an Schulen: <span id="scenario8-slider-value">60</span>
@@ -659,7 +659,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-mapillary" />
             Mapillary-Bilder anzeigen
-            <span class="info-icon" title="Quelle: Mapillary Coverage · live – Lizenz: CC BY-SA 4.0">i</span>
+            <span class="info-icon" data-tip="Quelle: Mapillary Coverage · live – Lizenz: CC BY-SA 4.0">i</span>
           </label>
         </div>
 
@@ -696,7 +696,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-mapillary_ts" />
             Mapillary-Verkehrszeichen anzeigen
-            <span class="info-icon" title="Quelle: Mapillary Map Data (© Mapillary) · live – Lizenz: CC BY-SA 4.0">i</span>
+            <span class="info-icon" data-tip="Quelle: Mapillary Map Data (© Mapillary) · live – Lizenz: CC BY-SA 4.0">i</span>
           </label>
         </div>
 
@@ -794,7 +794,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-maxspeed" />
             Geschwindigkeitsbegrenzung anzeigen
-            <span class="info-icon" data-osm-vintage="maxspeed_major" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
+            <span class="info-icon" data-osm-vintage="maxspeed_major" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
         <div id="maxspeed-legend" class="ml-20 mt-6 fs-11" style="display: none;">
@@ -826,7 +826,7 @@ MAIN HEADER
             <input type="checkbox" id="toggle-uspeed" />
             Gemessene Pkw-Geschwindigkeit (nur Berlin) anzeigen
             <span class="info-icon"
-              title="Quelle: Data from Q2 2019 originally provided by Uber Movement, accessed in [01/2020] – Lizenz: CC BY-NC 4.0">i</span>
+              data-tip="Quelle: Data from Q2 2019 originally provided by Uber Movement, accessed in [01/2020] – Lizenz: CC BY-NC 4.0">i</span>
           </label>
         </div>
         <div id="uspeed-legend" class="ml-20 mt-6 fs-11" style="display: none;">
@@ -855,7 +855,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-svz" />
             Verkehrsmengen anzeigen
-            <span class="info-icon" title="Straßenverkehrszählung der Länder (11 Länder) + BASt-Backbone (Bundesfernstraßen A+B) + UBA-Hauptverkehrsstraßen. Quelle/Lizenz je Feature: dl-de/by-2.0 · CC-BY-4.0 · dl-de/zero-2.0 · © BASt · © UBA.">i</span>
+            <span class="info-icon" data-tip="Straßenverkehrszählung der Länder (11 Länder) + BASt-Backbone (Bundesfernstraßen A+B) + UBA-Hauptverkehrsstraßen. Quelle/Lizenz je Feature: dl-de/by-2.0 · CC-BY-4.0 · dl-de/zero-2.0 · © BASt · © UBA.">i</span>
           </label>
         </div>
 
@@ -863,7 +863,7 @@ MAIN HEADER
         <div id="svz-children" style="margin-left: 30px; margin-top: 2px; font-size: 12px; display: none;">
           <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-svz-laender" checked /> Alle Länder (SVZ)</label></div>
           <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-svz-bast" checked /> BASt (A+B)</label></div>
-          <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-hvs" /> UBA (&gt;3 Mio/Jahr) <span class="info-icon" data-hvs-vintage title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">i</span></label></div>
+          <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-hvs" /> UBA (&gt;3 Mio/Jahr) <span class="info-icon" data-hvs-vintage data-tip="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">i</span></label></div>
         </div>
 
         <div id="svz-legend" class="ml-20 mt-6 fs-11" style="display: none;">
@@ -910,7 +910,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-telraam" />
             Telraam-Zählstellen anzeigen
-            <span class="info-icon" data-telraam-vintage="telraam_segments" title="Quelle: Telraam (© Telraam-Mitwirkende) – Lizenz: CC BY-NC 4.0">i</span>
+            <span class="info-icon" data-telraam-vintage="telraam_segments" data-tip="Quelle: Telraam (© Telraam-Mitwirkende) – Lizenz: CC BY-NC 4.0">i</span>
           </label>
         </div>
 
@@ -942,7 +942,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-movebis" />
             Stadtradeln 2020 anzeigen
-            <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">i</span>
+            <span class="info-icon" data-tip="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">i</span>
           </label>
         </div>
         <div id="movebis-legend" class="ml-20 mt-6 fs-11" style="display: none;">
@@ -978,7 +978,7 @@ MAIN HEADER
             <input type="checkbox" id="toggle-bikelanes" />
             Radinfrastruktur anzeigen
             <span class="info-icon"
-              title="Fahrradinfrastruktur & Führungsformen aus OpenStreetMap, klassifiziert nach tilda-geo / radinfra.de. Quelle: tilda-geo.de – Lizenz: ODbL. Daten ab Zoomstufe 9 sichtbar.">i</span>
+              data-tip="Fahrradinfrastruktur & Führungsformen aus OpenStreetMap, klassifiziert nach tilda-geo / radinfra.de. Quelle: tilda-geo.de – Lizenz: ODbL. Daten ab Zoomstufe 9 sichtbar.">i</span>
           </label>
         </div>
         <div id="bikelanes-legend"
@@ -1004,7 +1004,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-crossings" />
             Fußgänger-/Radüberwege anzeigen
-            <span class="info-icon" data-osm-vintage="osm_crossings" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
+            <span class="info-icon" data-osm-vintage="osm_crossings" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
         <div id="crossings-legend" class="ml-20 mt-6 fs-11" style="display: none;">
@@ -1041,7 +1041,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-laerm1" />
             Lärm (Tag-Abend-Nacht) anzeigen
-            <span class="info-icon" data-laerm-vintage title="Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">i</span>
+            <span class="info-icon" data-laerm-vintage data-tip="Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">i</span>
           </label>
         </div>
 
@@ -1079,7 +1079,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-laerm2" />
             Lärm (Nacht) anzeigen
-            <span class="info-icon" data-laerm-vintage title="Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">i</span>
+            <span class="info-icon" data-laerm-vintage data-tip="Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">i</span>
           </label>
         </div>
 
@@ -1117,7 +1117,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-obs" />
             Überholabstände (OBS) anzeigen
-            <span class="info-icon" data-obs-vintage title="Quelle: OpenBikeSensor-Community (Portale) – Lizenz: siehe jeweiliges Portal">i</span>
+            <span class="info-icon" data-obs-vintage data-tip="Quelle: OpenBikeSensor-Community (Portale) – Lizenz: siehe jeweiliges Portal">i</span>
           </label>
         </div>
 
@@ -1164,7 +1164,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-schools" />
             Schulen/Kindergärten anzeigen
-            <span class="info-icon" data-osm-vintage="osm_schools" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
+            <span class="info-icon" data-osm-vintage="osm_schools" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
         <div id="schools-legend" class="ml-20 mt-6 fs-11" style="display: none;">
@@ -1186,7 +1186,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-health" />
             Gesundheitseinrichtungen anzeigen
-            <span class="info-icon" data-osm-vintage="osm_health" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
+            <span class="info-icon" data-osm-vintage="osm_health" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
         <div id="health-legend" class="ml-20 mt-6 fs-11" style="display: none;">
@@ -1213,7 +1213,7 @@ MAIN HEADER
           <label class="ml-10">
             <input type="checkbox" id="toggle-playgrounds" />
             Spielplätze anzeigen
-            <span class="info-icon" data-osm-vintage="osm_playgrounds" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
+            <span class="info-icon" data-osm-vintage="osm_playgrounds" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
         <div id="playgrounds-legend" class="ml-20 mt-6 fs-11" style="display: none;">

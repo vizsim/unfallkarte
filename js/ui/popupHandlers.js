@@ -80,7 +80,7 @@ export function setupAccidentPopups(map) {
                 USTUNDE: "Stunde"
             };
 
-            const propsToShow = ["OBJECTID", "UKATEGORIE", "UJAHR", "UMONAT", "UWOCHENTAG", "USTUNDE", "UART", "UTYP1"];
+            const propsToShow = ["UKATEGORIE", "UJAHR", "UMONAT", "UWOCHENTAG", "USTUNDE", "UART", "UTYP1"];
 
             let rows = propsToShow.map(key => {
                 const label = labels[key] || key;
@@ -92,7 +92,7 @@ export function setupAccidentPopups(map) {
                 } else if (value == null) {
                     value = "?";
                 }
-                return `<tr><td><strong>${label}</strong></td><td>${value}</td></tr>`;
+                return `<tr><td>${label}</td><td>${value}</td></tr>`;
             }).join("");
 
             const beteiligungLabels = {
@@ -109,10 +109,10 @@ export function setupAccidentPopups(map) {
                 .map(([, label]) => label);
 
             if (beteiligte.length > 0) {
-                rows += `<tr><td><strong>Beteiligung</strong></td><td>${beteiligte.join(", ")}</td></tr>`;
+                rows += `<tr><td>Beteiligung</td><td>${beteiligte.join(", ")}</td></tr>`;
             }
 
-            const content = `<table style="border-collapse: collapse; font-size: 12px;">${rows}</table>`;
+            const content = `<div class="pop-title">Unfall</div><table class="pop-table">${rows}</table>`;
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
             map.getCanvas().style.cursor = "pointer";
         });
@@ -147,12 +147,12 @@ export function setupAccClusterPopups(map) {
                 const total = k1 + k2 + k3;
 
                 const html = `
-          <div><strong>Anzahl nach Unfall-Kategorie</strong></div>
-          <table style="font-size:12px; border-collapse:collapse;">
-            <tr><td style="padding-right:8px;"><strong>Getötete</strong></td><td style="text-align:right;">${k1}</td></tr>
-            <tr><td style="padding-right:8px;"><strong>Schwerverletzte</strong></td><td style="text-align:right;">${k2}</td></tr>
-            <tr><td style="padding-right:8px;"><strong>Leichtverletzte</strong></td><td style="text-align:right;">${k3}</td></tr>
-            <tr><td style="padding-right:8px;"><strong>Gesamt</strong></td><td style="text-align:right;"><strong>${total}</strong></td></tr>
+          <div class="pop-title">Cluster · Unfälle nach Schwere</div>
+          <table class="pop-table">
+            <tr><td>Getötete</td><td>${k1}</td></tr>
+            <tr><td>Schwerverletzte</td><td>${k2}</td></tr>
+            <tr><td>Leichtverletzte</td><td>${k3}</td></tr>
+            <tr><td>Gesamt</td><td><strong>${total}</strong></td></tr>
           </table>
         `;
 
@@ -186,13 +186,11 @@ export function setupMovebisPopups(map) {
         const speed = props.avg_speed_kmh != null ? parseFloat(props.avg_speed_kmh).toFixed(1) + " km/h" : "-";
 
         const content = `
-    <div style="font-size: 12px;">
-        <strong>Stadtradeln</strong><br/>
-        <table style="border-collapse: collapse;">
-            <tr><td><strong>Anzahl: </strong></td><td>${visits}</td></tr>
-            <tr><td><strong>Ø Geschwindigkeit: </strong></td><td>${speed}</td></tr>
-        </table>
-    </div>`;
+            <div class="pop-title">Stadtradeln 2020</div>
+            <table class="pop-table">
+                <tr><td>Anzahl</td><td>${visits}</td></tr>
+                <tr><td>Ø Geschwindigkeit</td><td>${speed}</td></tr>
+            </table>`;
 
         popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
     });
@@ -211,19 +209,18 @@ export function setupOBSPopups(map) {
         map.getCanvas().style.cursor = "pointer";
         const props = e.features[0].properties;
 
-        const overtaker = props.distance_overtaker != null ? props.distance_overtaker.toFixed(2) + " m" : "-";
-        const speed = props.speed != null ? (props.speed * 3.6).toFixed(1) + " km/h" : "-"; const zone = props.zone ?? "-";
-
+        const speed = props.speed != null ? (props.speed * 3.6).toFixed(1) + " km/h" : null;
+        const zoneMap = { urban: ["innerorts", 1.5], innerorts: ["innerorts", 1.5], rural: ["außerorts", 2.0], "außerorts": ["außerorts", 2.0] };
+        const [zoneLabel, minDist] = zoneMap[String(props.zone).toLowerCase()] || [props.zone, null];
+        const dist = props.distance_overtaker != null ? Number(props.distance_overtaker) : null;
+        const heroVal = dist != null ? `${dist.toFixed(2).replace(".", ",")} m` : "—";
+        const under = (dist != null && minDist != null && dist < minDist) ? ` <span class="pop-note">unter Mindestabstand</span>` : "";
+        const zoneMeta = zoneLabel ? `${zoneLabel}${minDist ? ` · Mindestabstand ${String(minDist).replace(".", ",")} m` : ""}` : null;
+        const metaBits = [speed, zoneMeta].filter(Boolean).join(" · ");
         const content = `
-    <div style="font-size: 12px;">
-        <strong>Beobachtung</strong><br/>
-        <table style="border-collapse: collapse;">
-            <tr><td><strong>Überholabstand: </strong></td><td>${overtaker}</td></tr>
-            <tr><td><strong>Geschwindigkeit: </strong></td><td>${speed}</td></tr>
-            <tr><td><strong>Zone: </strong></td><td>${zone}</td></tr>
- 
-        </table>
-    </div>`;
+            <div class="pop-title">Überholabstand</div>
+            <div class="pop-hero">${heroVal}${under}</div>
+            ${metaBits ? `<div class="pop-meta">${metaBits}</div>` : ""}`;
 
         popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
     });
@@ -245,23 +242,13 @@ export function setupHVSPopups(map) {
         const props = e.features[0].properties;
 
         const flow = Number(props.annualTrafficFlow);
-        const formattedFlow = isNaN(flow)
-            ? "?"
-            : `${(flow / 1_000_000).toFixed(1).replace(".", ",")} Mio`;
-
-        const dailyFlow = isNaN(flow)
-            ? "?"
-            : `${(Math.round(flow / 365 / 1000) * 1000).toLocaleString("de-DE")} Fzg`;
+        const annual = isNaN(flow) ? "?" : `${(flow / 1_000_000).toFixed(1).replace(".", ",")} Mio`;
+        const daily = isNaN(flow) ? "?" : (Math.round(flow / 365 / 1000) * 1000).toLocaleString("de-DE");
 
         const content = `
-        <div style="font-size: 12px;">
-            <strong>Verkehrsmengen</strong><br/>
-            <table style="border-collapse: collapse;">
-            <tr><td><strong>Annual Traffic: </strong></td><td>${formattedFlow}</td></tr>
-            <tr><td><strong>Est. daily Traffic: </strong></td><td>~${dailyFlow}</td></tr>
-            </table>
-        </div>
-        `;
+            <div class="pop-title">Hauptverkehrsstraße</div>
+            <div class="pop-hero">~${daily} <span class="pop-unit">Kfz/Tag</span></div>
+            <div class="pop-meta">${annual} Kfz/Jahr · © UBA</div>`;
 
         popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
     });
@@ -288,10 +275,10 @@ export function setupSvzPopups(map) {
         DTVw: "Durchschnittliche tägliche Verkehrsstärke werktags (Mo–Fr)",
         "DTV≈": "Näherung aus der Jahresmenge: Kfz/Jahr ÷ 365"
     };
-    const metricBadge = (m) => (m ? `<span class="popup-metric" title="${METRIC_TITLE[m] || ""}">${m}</span>` : "");
-    const svLabel = (t) => `<span class="popup-hint" title="Schwerverkehr: Lkw, Lastzüge, Busse (Kfz > 3,5 t)">${t}</span>`;
+    const metricBadge = (m) => (m ? `<span class="pop-note pop-hint" data-tip="${METRIC_TITLE[m] || ""}">${m}</span>` : "");
+    const svLabel = (t) => `<span class="pop-hint" data-tip="Schwerverkehr: Lkw, Lastzüge, Busse (Kfz > 3,5 t)">${t}</span>`;
     const dtvHero = (val, metric) =>
-        `<div class="popup-dtv">${fmt(val)} <span class="popup-unit">Kfz/24h</span> ${metricBadge(metric)}</div>`;
+        `<div class="pop-hero">${fmt(val)} <span class="pop-unit">Kfz/24h</span> ${metricBadge(metric)}</div>`;
 
     const onClick = (e) => {
         const p = e.features[0].properties;
@@ -301,10 +288,10 @@ export function setupSvzPopups(map) {
             new maplibregl.Popup({ closeButton: false, maxWidth: "270px" })
                 .setLngLat(e.lngLat)
                 .setHTML(
-                    `<div class="popup-road">Hauptverkehrsstraße</div>` +
+                    `<div class="pop-title">Hauptverkehrsstraße</div>` +
                     dtvHero(Math.round(flow / 365), "DTV≈") +
-                    `<div class="popup-meta">${fmt(flow)} Kfz/Jahr · © UBA · END 2021</div>` +
-                    `<div class="popup-meta"><a href="https://vizsim.de/svz" target="_blank" rel="noopener">Details &amp; Quellen → vizsim.de/svz</a></div>`
+                    `<div class="pop-meta">${fmt(flow)} Kfz/Jahr · © UBA · END 2021</div>` +
+                    `<div class="pop-foot"><a href="https://vizsim.de/svz" target="_blank" rel="noopener">Details &amp; Quellen → vizsim.de/svz</a></div>`
                 )
                 .addTo(map);
             return;
@@ -315,26 +302,26 @@ export function setupSvzPopups(map) {
         let sv = "";
         if (p.dtv_sv != null && p.dtv_sv !== "") {
             const share = pct(p.dtv_sv, p.dtv_kfz);
-            sv = `<div class="popup-sv">${svLabel("SV")} ${fmt(p.dtv_sv)}${share ? ` · ${share} %` : ""}</div>`;
+            sv = `<div class="pop-meta">${svLabel("SV")} ${fmt(p.dtv_sv)}${share ? ` · ${share} %` : ""}</div>`;
         } else if (p.sv_anteil != null && p.sv_anteil !== "") {
-            sv = `<div class="popup-sv">${svLabel("SV-Anteil")} ${p.sv_anteil} %</div>`;
+            sv = `<div class="pop-meta">${svLabel("SV-Anteil")} ${p.sv_anteil} %</div>`;
         }
 
         const dtvLine =
             (p.dtv_kfz != null && p.dtv_kfz !== "")
                 ? dtvHero(p.dtv_kfz, p.metric)
-                : `<div class="popup-meta">keine DTV-Angabe ${metricBadge(p.metric)}</div>`;
+                : `<div class="pop-meta">keine DTV-Angabe ${metricBadge(p.metric)}</div>`;
 
         const meta = [klass, p.year, providerLabel(p.state)].filter(Boolean).join(" · ");
 
         new maplibregl.Popup({ closeButton: false, maxWidth: "270px" })
             .setLngLat(e.lngLat)
             .setHTML(
-                `<div class="popup-road">${road}</div>` +
+                `<div class="pop-title">${road}</div>` +
                 dtvLine +
                 sv +
-                `<div class="popup-meta">${meta}</div>` +
-                `<div class="popup-meta"><a href="https://vizsim.de/svz" target="_blank" rel="noopener">Details &amp; Quellen → vizsim.de/svz</a></div>`
+                `<div class="pop-meta">${meta}</div>` +
+                `<div class="pop-foot"><a href="https://vizsim.de/svz" target="_blank" rel="noopener">Details &amp; Quellen → vizsim.de/svz</a></div>`
             )
             .addTo(map);
     };
@@ -368,22 +355,15 @@ export function setupMaxspeedPopups(map) {
             // const speed = Number(props.maxspeed);
             // const formattedSpeed = isNaN(speed) ? "?" : `${speed} km/h`;
             //  <tr><td><strong>maxspeed</strong></td><td>${formattedSpeed}</td></tr> 
-            const content = `
-            <div style="font-size: 12px;">
-            <strong>OSM (insb. maxspeed infos)</strong><br/>
-            <table style="border-collapse: collapse;">
-                <tr><td><strong>maxspeed</strong></td><td>${props.maxspeed || "-"}</td></tr>
-                <tr><td><strong>maxspeed:conditional</strong></td><td>${props.maxspeed_conditional || "-"}</td></tr>
-                <tr><td><strong>maxspeed:type</strong></td><td>${props.maxspeed_type || "-"}</td></tr>
-                <tr><td><strong>maxspeed:forward</strong></td><td>${props.maxspeed_forward || "-"}</td></tr>
-                <tr><td><strong>maxspeed:backward</strong></td><td>${props.maxspeed_backward || "-"}</td></tr>
-                <tr><td><strong>ref</strong></td><td>${props.ref || "-"}</td></tr>
-                <tr><td><strong>name</strong></td><td>${props.name || "-"}</td></tr>
-                <tr><td><strong>highway</strong></td><td>${props.highway || "-"}</td></tr>
-                <tr><td><strong>osm_id</strong></td><td>${props.osm_id || "-"}</td></tr>
-            </table>
-            </div>
-        `;
+            const kmh = (v) => (v && /^\d+$/.test(String(v).trim())) ? `${v} km/h` : v;
+            const einordnung = props.maxspeed_type || props.highway;
+            const rows = [
+                props.maxspeed ? `<tr><td>Erlaubt</td><td>${kmh(props.maxspeed)}</td></tr>` : "",
+                props.maxspeed_conditional ? `<tr><td>Bedingt</td><td>${props.maxspeed_conditional}</td></tr>` : "",
+                props.name ? `<tr><td>Straße</td><td>${props.name}</td></tr>` : "",
+                einordnung ? `<tr><td>Einordnung</td><td>${einordnung}</td></tr>` : "",
+            ].join("") || `<tr><td>Tempolimit</td><td>keine Angabe in OSM</td></tr>`;
+            const content = `<div class="pop-title">Tempolimit</div><table class="pop-table">${rows}</table><div class="pop-foot">→ Klick öffnet OpenStreetMap</div>`;
 
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
         });
@@ -417,19 +397,14 @@ export function setupUspeedPopups(map) {
             const hour = parseInt(document.getElementById("uspeed-slider").value, 10);
             const speed = p[`speed_${hour}`];
 
+            const speedNum = (speed !== undefined && speed !== null) ? Number(speed).toFixed(0) : null;
+            const dirMap = { forward: "in Fahrtrichtung", backward: "Gegenrichtung" };
+            const dir = dirMap[p.reconstruction_direction] || p.reconstruction_direction;
             const content = `
-        <div style="font-size: 12px;">
-            <strong>Segment Details</strong><br/>
-            <table style="border-collapse: collapse;">
-                <tr><td><strong>OSM Way ID:</strong></td><td>${p.osm_way_id}</td></tr>
-                <tr><td><strong>Start Node:</strong></td><td>${p.osm_start_node_id}</td></tr>
-                <tr><td><strong>End Node:</strong></td><td>${p.osm_end_node_id}</td></tr>
-                <tr><td><strong>Hour:</strong></td><td>${hour}</td></tr>
-                <tr><td><strong>Avg. Speed:</strong></td><td>${speed !== undefined ? Number(speed).toFixed(1) + " km/h" : "—"}</td></tr>
-                <tr><td><strong>Direction:</strong></td><td>${p.reconstruction_direction}</td></tr>
-            </table>
-        </div>
-      `;
+                <div class="pop-title">Ø Geschwindigkeit</div>
+                <div class="pop-hero">${speedNum != null ? `${speedNum} <span class="pop-unit">km/h</span>` : "—"}</div>
+                <div class="pop-meta">um ${hour}:00 Uhr${dir ? ` · ${dir}` : ""}</div>
+                <div class="pop-foot">→ Klick zeigt den Tagesverlauf</div>`;
 
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
         });
@@ -453,7 +428,10 @@ function showUspeedChartPopup(e) {
     );
 
     const container = document.createElement("div");
-    container.innerHTML = `<canvas id="speed-chart" width="320" height="180"></canvas>`;
+    container.innerHTML = `
+        <div class="pop-title">Ø Geschwindigkeit je Stunde</div>
+        <div class="pop-meta" style="margin:-2px 0 6px;">OSM-Segment · Berlin, Q2 2019</div>
+        <canvas id="speed-chart" width="320" height="180"></canvas>`;
 
     const popup = new maplibregl.Popup()
         .setLngLat(e.lngLat)
@@ -537,15 +515,15 @@ export function setupSchoolsPopups(map) {
             map.getCanvas().style.cursor = "pointer";
             const props = e.features[0].properties;
 
+            const titleMap = { school: "Schule", kindergarten: "Kindergarten" };
             const content = `
-            <table style="font-size:12px; border-collapse:collapse;">
-            ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
-            ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
-            ${props.isced_level ? `<tr><td><strong>ISCED</strong></td><td>${props.isced_level}</td></tr>` : ""}
-            ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
-            ${props.osm_id ? `<tr><td><strong>OSM ID</strong></td><td>${props.osm_id}</td></tr>` : ""}
-            </table>
-        `;
+                <div class="pop-title">${titleMap[props.amenity] || "Schule / Kindergarten"}</div>
+                <table class="pop-table">
+                    ${props.name ? `<tr><td>Name</td><td>${props.name}</td></tr>` : ""}
+                    ${props.amenity ? `<tr><td>Art</td><td>${props.amenity}</td></tr>` : ""}
+                    ${props.isced_level ? `<tr><td>Bildungsstufe</td><td>ISCED ${props.isced_level}</td></tr>` : ""}
+                </table>
+            `;
 
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
         });
@@ -578,14 +556,15 @@ export function setupCrossingsPopups(map) {
             const typ = crossingLabels[props.crossing] || props.crossing || "unbekannt";
 
             const content = `
-            <table style="font-size:12px; border-collapse:collapse;">
-            <tr><td><strong>Übergang</strong></td><td>${typ}</td></tr>
-            ${props.crossing_markings ? `<tr><td><strong>Markierung</strong></td><td>${props.crossing_markings}</td></tr>` : ""}
-            ${props.tactile_paving ? `<tr><td><strong>Blindenleitsystem</strong></td><td>${props.tactile_paving}</td></tr>` : ""}
-            ${props.kerb ? `<tr><td><strong>Bordstein</strong></td><td>${props.kerb}</td></tr>` : ""}
-            <tr><td colspan="2" style="color:#666;padding-top:4px;">Klick → OSM (${osmType}/${props.osm_id})</td></tr>
-            </table>
-        `;
+                <div class="pop-title">Übergang</div>
+                <table class="pop-table">
+                    <tr><td>Typ</td><td>${typ}</td></tr>
+                    ${props.crossing_markings ? `<tr><td>Markierung</td><td>${props.crossing_markings}</td></tr>` : ""}
+                    ${props.tactile_paving ? `<tr><td>Blindenleitsystem</td><td>${props.tactile_paving}</td></tr>` : ""}
+                    ${props.kerb ? `<tr><td>Bordstein</td><td>${props.kerb}</td></tr>` : ""}
+                </table>
+                <div class="pop-foot">→ Klick öffnet OpenStreetMap</div>
+            `;
 
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
         });
@@ -615,18 +594,17 @@ export function setupHealthPopups(map) {
             const props = e.features[0].properties;
 
             const content = `
-        <table style="font-size:12px; border-collapse:collapse;">
-          ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
-          ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
-          ${props.healthcare ? `<tr><td><strong>Healthcare</strong></td><td>${props.healthcare}</td></tr>` : ""}
-          ${props["healthcare:speciality"] ? `<tr><td><strong>Fachgebiet</strong></td><td>${props["healthcare:speciality"]}</td></tr>` : ""}
-          ${props.social_facility ? `<tr><td><strong>Einrichtung</strong></td><td>${props.social_facility}</td></tr>` : ""}
-          ${props["social_facility:for"] ? `<tr><td><strong>Zielgruppe</strong></td><td>${props["social_facility:for"]}</td></tr>` : ""}
-          ${props.operator ? `<tr><td><strong>Träger</strong></td><td>${props.operator}</td></tr>` : ""}
-          ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
-          ${props.osm_id ? `<tr><td><strong>OSM ID</strong></td><td>${props.osm_id}</td></tr>` : ""}
-        </table>
-      `;
+                <div class="pop-title">Gesundheitseinrichtung</div>
+                <table class="pop-table">
+                    ${props.name ? `<tr><td>Name</td><td>${props.name}</td></tr>` : ""}
+                    ${props.amenity ? `<tr><td>Art</td><td>${props.amenity}</td></tr>` : ""}
+                    ${props.healthcare ? `<tr><td>Versorgung</td><td>${props.healthcare}</td></tr>` : ""}
+                    ${props["healthcare:speciality"] ? `<tr><td>Fachgebiet</td><td>${props["healthcare:speciality"]}</td></tr>` : ""}
+                    ${props.social_facility ? `<tr><td>Einrichtung</td><td>${props.social_facility}</td></tr>` : ""}
+                    ${props["social_facility:for"] ? `<tr><td>Zielgruppe</td><td>${props["social_facility:for"]}</td></tr>` : ""}
+                    ${props.operator ? `<tr><td>Träger</td><td>${props.operator}</td></tr>` : ""}
+                </table>
+            `;
 
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
         });
@@ -651,14 +629,13 @@ export function setupPlaygroundsPopups(map) {
             const props = e.features[0].properties;
 
             const content = `
-                <table style="font-size:12px; border-collapse:collapse;">
-                    ${props.leisure ? `<tr><td><strong>Leisure</strong></td><td>${props.leisure}</td></tr>` : ""}
-                    ${props.name ? `<tr><td><strong>Name</strong></td><td>${props.name}</td></tr>` : ""}
-                    ${props.amenity ? `<tr><td><strong>Amenity</strong></td><td>${props.amenity}</td></tr>` : ""}
-                    ${props.playground ? `<tr><td><strong>Playground Type</strong></td><td>${props.playground}</td></tr>` : ""}
-                    ${props.operator ? `<tr><td><strong>Träger</strong></td><td>${props.operator}</td></tr>` : ""}
-                    ${props.osm_way_id ? `<tr><td><strong>OSM Way ID</strong></td><td>${props.osm_way_id}</td></tr>` : ""}
-                    ${props.osm_id ? `<tr><td><strong>OSM ID</strong></td><td>${props.osm_id}</td></tr>` : ""}
+                <div class="pop-title">Spielplatz</div>
+                <table class="pop-table">
+                    ${props.name ? `<tr><td>Name</td><td>${props.name}</td></tr>` : ""}
+                    ${props.leisure ? `<tr><td>Art</td><td>${props.leisure}</td></tr>` : ""}
+                    ${props.playground ? `<tr><td>Ausstattung</td><td>${props.playground}</td></tr>` : ""}
+                    ${props.amenity ? `<tr><td>Amenity</td><td>${props.amenity}</td></tr>` : ""}
+                    ${props.operator ? `<tr><td>Träger</td><td>${props.operator}</td></tr>` : ""}
                 </table>
             `;
 
@@ -697,13 +674,9 @@ export function setupLaerm1Popups(map) {
             const readableClass = laermpegelklasseLabels[props.Lärmpegelklasse] || props.Lärmpegelklasse;
 
             const content = `
-                <div style="font-size:12px;">
-                    <strong>Lärmbelastung (Tag, HLQ)</strong><br/>
-                    <table style="font-size:12px; border-collapse:collapse;">
-                        ${props.Lärmpegelklasse ? `<tr><td><strong>Lärmpegelklasse</strong></td><td>${readableClass}</td></tr>` : ""}
-                    </table>
-                </div>
-            `;
+                <div class="pop-title">Lärm · Tag-Abend-Nacht</div>
+                <div class="pop-hero">${readableClass || "—"}</div>
+                <div class="pop-meta">L<sub>DEN</sub> · Hauptlärmquelle · © UBA</div>`;
             // const content = `
             //     <table style="font-size:12px; border-collapse:collapse;">
             //         ${props.OBJECTID ? `<tr><td><strong>OBJECTID</strong></td><td>${props.OBJECTID}</td></tr>` : ""}
@@ -746,13 +719,9 @@ export function setupLaerm2Popups(map) {
             const readableClass = laermpegelklasseLabels[props.Lärmpegelklasse] || props.Lärmpegelklasse;
 
             const content = `
-                <div style="font-size:12px;">
-                    <strong>Lärmbelastung (Nacht, HLQ)</strong><br/>
-                    <table style="font-size:12px; border-collapse:collapse;">
-                        ${props.Lärmpegelklasse ? `<tr><td><strong>Lärmpegelklasse</strong></td><td>${readableClass}</td></tr>` : ""}
-                    </table>
-                </div>
-            `;
+                <div class="pop-title">Lärm · Nacht</div>
+                <div class="pop-hero">${readableClass || "—"}</div>
+                <div class="pop-meta">L<sub>night</sub> · Hauptlärmquelle · © UBA</div>`;
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
         });
 
@@ -775,13 +744,13 @@ export function setupMapillaryTrafficsignPopups(map) {
             const props = e.features[0].properties;
 
             const content = `
-            <table style="font-size:12px; border-collapse:collapse;">
-            ${props.first_seen_at ? `<tr><td><strong>first_seen_at</strong></td><td>${formatDateDE(new Date(+props.first_seen_at).toISOString().slice(0, 10))}</td></tr>` : ""}
-            ${props.last_seen_at ? `<tr><td><strong>last_seen_at</strong></td><td>${formatDateDE(new Date(+props.last_seen_at).toISOString().slice(0, 10))}</td></tr>` : ""}
-            ${props.value ? `<tr><td><strong>value</strong></td><td>${props.value}</td></tr>` : ""}
-
-            </table>
-        `;
+                <div class="pop-title">Verkehrszeichen</div>
+                <table class="pop-table">
+                    ${props.value ? `<tr><td>Zeichen</td><td>${props.value}</td></tr>` : ""}
+                    ${props.first_seen_at ? `<tr><td>Zuerst gesehen</td><td>${formatDateDE(new Date(+props.first_seen_at).toISOString().slice(0, 10))}</td></tr>` : ""}
+                    ${props.last_seen_at ? `<tr><td>Zuletzt gesehen</td><td>${formatDateDE(new Date(+props.last_seen_at).toISOString().slice(0, 10))}</td></tr>` : ""}
+                </table>
+            `;
 
             popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
         });
@@ -807,11 +776,10 @@ export function setupTelraamInteractivity(map) {
         map.getCanvas().style.cursor = "pointer";
         const p = e.features?.[0]?.properties ?? {};
         popup.setLngLat(e.lngLat).setHTML(`
-            <div style="font-size:12px;">
-              <div><strong>Ø Rad/Tag:</strong> ${fmt(p.bike_per_day)}</div>
-              <div><strong>Ø Auto/Tag:</strong> ${fmt(p.car_per_day)}</div>
-              <div style="color:#666; margin-top:4px;">Ø letzte 2 Wochen · Klick öffnet Telraam</div>
-            </div>`).addTo(map);
+            <div class="pop-title">Telraam-Zählstelle</div>
+            <div class="pop-hero">${fmt(p.bike_per_day)} <span class="pop-unit">Ø Rad/Tag</span></div>
+            <div class="pop-meta">${fmt(p.car_per_day)} Ø Auto/Tag · Ø letzte 2 Wochen</div>
+            <div class="pop-foot">→ Klick öffnet Telraam</div>`).addTo(map);
     });
     map.on("mousemove", "telraam", (e) => {
         popup.setLngLat(e.lngLat);

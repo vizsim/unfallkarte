@@ -17,6 +17,7 @@ import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
+import { setupTooltips } from './js/ui/tooltip.js';
 
 // 📦 Popups
 import {
@@ -152,6 +153,7 @@ async function initMap() {
     setupUI(map);
     setupScenarioControls(map);
     setupLegend(map);
+    setupTooltips();
     setupMapillary(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
 
     setupMapillaryTS(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });

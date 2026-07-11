@@ -652,15 +652,8 @@ body {
 .fc-stat #fc-count, .fc-stat #fc-zoom { font-weight: 700; }
 .fc-stat #fc-lock { margin-left: 4px; }
 
-/* Schneller Tooltip (100ms) statt nativem title (~1s Browser-Delay). */
-.fc-stat[data-tip]::after {
-  content: attr(data-tip);
-  position: absolute; left: 0; bottom: calc(100% + 4px);
-  background: #111827; color: #fff; font-size: 11px; font-weight: 400; line-height: 1.3;
-  padding: 3px 7px; border-radius: 5px; white-space: nowrap;
-  opacity: 0; pointer-events: none; transition: opacity 80ms ease 0s; z-index: 20;
-}
-.fc-stat[data-tip]:hover::after { opacity: 1; transition-delay: 100ms; }
+/* Feature-Count-Chips: Tooltip-Text steht in data-tip="…" (gemeinsames Bauteil). */
+.fc-stat[data-tip] { cursor: help; }
 
 /* Badge + Icons als EINE rechtsbündige Gruppe -> feste Position von rechts,
    unabhängig von der Zahlenbreite links. */
@@ -733,9 +726,10 @@ body {
 }
 .legend::-webkit-scrollbar-thumb:hover { background: #b6bcc6; }
 
-/* Popups/Tooltips — klare Hierarchie statt monotoner Zeilen:
-   Label-Spalte gemutet-grau, Wert dunkel/prominent (value-forward), Titel als
-   kleine Überschrift. So „poppt" der Wert und jede Zeile hat sichtbare Schritte. */
+/* ===== Popup-System — ein Baukasten, drei Tiers (Detail / Hero / Chart) =====
+   Basis: heller Rahmen; value-forward (Label gemutet, Wert dunkel/prominent).
+   .pop-* sind die gemeinsamen Bausteine. Hero-Zahlen bleiben NEUTRAL — sie
+   „poppen" über Größe/Gewicht, nicht über Farbe. */
 .maplibregl-popup-content {
   border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius-sm);
@@ -744,51 +738,46 @@ body {
   font-size: 12px;
   line-height: 1.5;
   font-weight: 500;
-  color: var(--ui-text-strong);   /* Werte: dunkel/prominent */
-}
-
-/* Titel (führendes <strong> direkt im Wrapper-Div, vor der Tabelle) */
-.maplibregl-popup-content > div > strong {
-  display: inline-block;
-  margin-bottom: 6px;
-  font-size: 13px;
-  font-weight: 700;
   color: var(--ui-text-strong);
 }
-
-/* Label-Spalte: gemutet + semibold → klarer Kontrast zum dunklen Wert */
-.maplibregl-popup-content table { border-collapse: collapse; }
-.maplibregl-popup-content td { padding: 2px 0; vertical-align: top; }
-.maplibregl-popup-content td:first-child {
-  padding-right: 16px;
-  white-space: nowrap;
-  font-weight: 600;
-  color: var(--ui-text-muted);
-}
-/* das <strong> in der Label-Spalte erbt die gemutete Farbe (kein hartes Schwarz mehr) */
-.maplibregl-popup-content td:first-child strong { font-weight: inherit; color: inherit; }
 .maplibregl-popup-close-button {
-  width: 22px;
-  height: 22px;
-  font-size: 16px;
-  line-height: 22px;
-  color: var(--ui-text-muted);
-  border-radius: 8px;
+  width: 22px; height: 22px; font-size: 16px; line-height: 22px;
+  color: var(--ui-text-muted); border-radius: 8px;
 }
-.maplibregl-popup-close-button:hover {
-  background: var(--ui-hover);
-  color: var(--ui-text);
-}
+.maplibregl-popup-close-button:hover { background: var(--ui-hover); color: var(--ui-text); }
 
-/* ===== SVZ-Verkehrsmengen-Popup (Hero-Zahl + Metrik-Badge + Meta) ===== */
-.popup-road { font-weight: 700; font-size: 15px; color: #111; }
-.popup-dtv { color: #d73027; font-weight: 700; font-size: 16px; margin: 3px 0 1px; }
-.popup-unit { color: #9a9a9a; font-weight: 600; font-size: 11px; }
-.popup-sv { color: #555; font-size: 12px; margin-top: 1px; }
-.popup-meta { color: #777; font-size: 11.5px; margin-top: 1px; }
-/* Metrik-Badge + SV-Label: gepunktete Unterstreichung = „hover für Erklärung". */
-.popup-metric { color: #9a9a9a; font-weight: 600; font-size: 11px; cursor: help; border-bottom: 1px dotted #c4c4c4; }
-.popup-hint { color: #444; cursor: help; border-bottom: 1px dotted #c4c4c4; }
+/* Titel */
+.pop-title { font-size: 13px; font-weight: 700; color: var(--ui-text-strong); margin-bottom: 7px; }
+
+/* Tier Detail: Label/Wert-Tabelle (Label gemutet-semibold, Wert dunkel) */
+.pop-table { border-collapse: collapse; width: 100%; }
+.pop-table td { padding: 2px 0; vertical-align: top; }
+.pop-table td:first-child { padding-right: 14px; white-space: nowrap; font-weight: 600; color: var(--ui-text-muted); }
+
+/* Tier Hero: eine große Leitzahl (neutral) + Einheit/Zusatz */
+.pop-hero { font-size: 21px; font-weight: 700; line-height: 1.1; margin: 1px 0 3px; color: var(--ui-text-strong); }
+.pop-hero .pop-unit { color: var(--ui-text-muted); font-weight: 600; font-size: 11px; }
+.pop-note { font-size: 11px; font-weight: 600; color: var(--ui-text-muted); margin-left: 4px; }
+
+/* Meta-Zeilen + Fußzeile (Quelle / „→ OSM"-Link) */
+.pop-meta { color: var(--ui-text-muted); font-size: 11.5px; margin-top: 2px; }
+.pop-foot { margin-top: 9px; padding-top: 7px; border-top: 1px solid var(--ui-divider); font-size: 11.5px; color: var(--ui-accent); }
+.pop-foot a { color: inherit; text-decoration: none; }
+.pop-foot a:hover { text-decoration: underline; }
+
+/* gepunktete Erklärung — nutzt den gemeinsamen data-tip-Tooltip unten */
+.pop-hint { border-bottom: 1px dotted #b9bec6; cursor: help; }
+
+/* ===== Gemeinsamer schneller Tooltip (100 ms) — ein Bauteil, löst natives title ab.
+   JS-positioniert (js/ui/tooltip.js) auf document.body (position:fixed), damit er
+   auch aus scrollenden Panels/Popups nie abgeschnitten wird. Markup: data-tip="…". */
+.app-tooltip {
+  position: fixed; z-index: 9999; pointer-events: none; max-width: 240px;
+  background: #111827; color: #fff; font: 400 11.5px/1.35 system-ui, -apple-system, sans-serif;
+  padding: 5px 8px; border-radius: 6px; box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
+  opacity: 0; transition: opacity 80ms ease;
+}
+.app-tooltip.is-visible { opacity: 1; }
 
 /* ---------- Utility-Klassen (Abbau der style="…"-Muster in index.html) ----------
    Wiederkehrende Inline-Styles der Legende als Klassen. Swatch-FARBEN bleiben

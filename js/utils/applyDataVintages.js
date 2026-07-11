@@ -14,7 +14,7 @@ export async function applyDataVintages(manifest) {
     const id = el.getAttribute("data-osm-vintage");
     const vintage = mf && mf[id] && mf[id].vintage;
     if (vintage) {
-      el.title = `Quelle: © OpenStreetMap (${formatDateDE(vintage)}) – Lizenz: ODbL`;
+      el.dataset.tip = `Quelle: © OpenStreetMap (${formatDateDE(vintage)}) – Lizenz: ODbL`;
     }
   });
 
@@ -24,7 +24,7 @@ export async function applyDataVintages(manifest) {
   const tv = mf && mf.telraam_segments && mf.telraam_segments.vintage;
   if (tv) {
     document.querySelectorAll("[data-telraam-vintage]").forEach((el) => {
-      el.title = `Quelle: Telraam (© Telraam-Mitwirkende) · Verkehrsmengen Ø letzte 2 Wochen, Stand ${formatDateDE(tv)} – Lizenz: CC BY-NC 4.0`;
+      el.dataset.tip = `Quelle: Telraam (© Telraam-Mitwirkende) · Verkehrsmengen Ø letzte 2 Wochen, Stand ${formatDateDE(tv)} – Lizenz: CC BY-NC 4.0`;
     });
     const note = document.getElementById("telraam-vintage-note");
     if (note) note.textContent = ` (Stand: ${formatDateDE(tv)})`;
@@ -34,7 +34,7 @@ export async function applyDataVintages(manifest) {
   const ov = mf && mf.obs && mf.obs.vintage;
   if (ov) {
     document.querySelectorAll("[data-obs-vintage]").forEach((el) => {
-      el.title = `Quelle: OpenBikeSensor-Community (Portale), Stand ${formatDateDE(ov)} – Lizenz: siehe jeweiliges Portal`;
+      el.dataset.tip = `Quelle: OpenBikeSensor-Community (Portale), Stand ${formatDateDE(ov)} – Lizenz: siehe jeweiliges Portal`;
     });
   }
 
@@ -43,7 +43,7 @@ export async function applyDataVintages(manifest) {
   const lv = mf && mf.laerm_den && mf.laerm_den.vintage;
   if (lv) {
     document.querySelectorAll("[data-laerm-vintage]").forEach((el) => {
-      el.title = `Quelle: Umweltbundesamt-DE (Lärmkartierung), Stand ${formatDateDE(lv)} – Lizenz: dl-by-de/2.0`;
+      el.dataset.tip = `Quelle: Umweltbundesamt-DE (Lärmkartierung), Stand ${formatDateDE(lv)} – Lizenz: dl-by-de/2.0`;
     });
   }
 
@@ -51,7 +51,7 @@ export async function applyDataVintages(manifest) {
   const hv = mf && mf.hvs && mf.hvs.vintage;
   if (hv) {
     document.querySelectorAll("[data-hvs-vintage]").forEach((el) => {
-      el.title = `Quelle: © Umweltbundesamt-DE (Hauptverkehrsstraßen, END), Stand ${formatDateDE(hv)} – Lizenz: dl-by-de/2.0`;
+      el.dataset.tip = `Quelle: © Umweltbundesamt-DE (Hauptverkehrsstraßen, END), Stand ${formatDateDE(hv)} – Lizenz: dl-by-de/2.0`;
     });
   }
 }
