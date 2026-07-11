@@ -43,8 +43,23 @@ unfallkarte deploy                        # b2 sync (PMTiles + manifest)
 `scenario run-all` rechnet: **1** (Unfall-Cluster auf Tempo-100-Straßen, DBSCAN) ·
 **2** (Unfälle nahe Schulen) · **3** (Tempo-30 durchgängig, 50er-Lückenschlüsse) ·
 **6** (Tempo-50-Straßen vor Schulen) · **8** (Lärm vor Schulen, UBA) ·
-**9** (Unfallschwerpunkte, M-Uko-Kriterien vereinfacht: 3-Jahres-Fenster + DBSCAN).
+**9** (Unfallhäufungen, M-Uko-Kriterien vereinfacht: 3-Jahres-Fenster + DBSCAN).
 sc8 braucht die UBA-Lärm-fgb unter `data/raw/laerm/` (statisch, verlinkt).
+
+## Laufzeiten (grobe Richtwerte)
+
+Gemessen beim Jahres-Update 2026-07 (WSL2, lokale SSD). Reihenfolge = typischer
+Update-Ablauf; accidents- und osm-Strang sind unabhängig und können parallel laufen.
+
+| Schritt | Dauer | Anmerkung |
+| --- | --- | --- |
+| `accidents fetch` | Sekunden/Jahr | ~13 MB ZIP pro Jahr |
+| `accidents build` | ~2 min | 9 Jahre, 2,2 Mio. Zeilen → GeoParquet |
+| `accidents tiles` | ~10 min | single ~6 min, cluster ~4 min (Tippecanoe) |
+| `osm fetch` | ~10 min | 4,5 GB Geofabrik-PBF (netzabhängig) |
+| `osm build all` | ~20 min | 6 Layer; je Layer osmium-Filter über die volle PBF + Tippecanoe |
+| `scenario run-all` | ~30 min | Szenarien 1/2/3/6/8/9; teuerstes: 3 (Tempo-30-Netz-Analyse, ~18 min) |
+| `manifest` + `deploy` | ~3 min | b2 sync; ~2,5 min für ~1,1 GB Upload bei Voll-Update |
 
 ## Layout
 
