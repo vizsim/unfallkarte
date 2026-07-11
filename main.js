@@ -353,6 +353,7 @@ function setupUI(map) {
       const content = section.querySelector('.legend-section-content');
       const isOpen = arrow.classList.contains('open');
       arrow.classList.toggle('open', !isOpen);
+      arrow.setAttribute('aria-expanded', String(!isOpen));
       section.classList.toggle('collapsed', isOpen);
     });
   });

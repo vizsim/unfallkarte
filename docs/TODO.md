@@ -18,8 +18,10 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
 - [ ] **Fehler-Banner** — sind Manifest/B2 nicht erreichbar, gibt es nur ein
       `console.warn` (`js/mapdata/resolveSources.js`); Nutzer sehen eine leere Karte
       ohne Erklärung.
-- [ ] **Tastatur/A11y** — die Auf-/Zuklapp-Pfeile der Legende sind `<span>`s mit
-      Click-Handler: nicht fokussierbar. Umbau auf `<button>` + `aria-expanded`.
+- [x] **Tastatur/A11y (Klapp-Pfeile)** — erledigt 2026-07: alle 10 Pfeile sind
+      `<button>` mit `aria-expanded` + `aria-label` und `:focus-visible`-Ring;
+      per Enter/Space bedienbar (headless verifiziert). Offen bleibt A11y darüber
+      hinaus (z. B. Kontrast-Audit, Screenreader-Test der Filterlisten).
 - [x] **Inline-Styles abbauen** — erledigt 2026-07: 175 wiederkehrende `style="…"`
       durch Utility-Klassen ersetzt (`.row`, `.mt-*`, `.swatch-*` … am Ende von
       `style.css`), verifiziert per Computed-Style-Diff (811 Elemente, 0 Abweichungen).

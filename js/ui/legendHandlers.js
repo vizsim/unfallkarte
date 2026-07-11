@@ -263,7 +263,10 @@ export function setupLegendToggleHandlers() {
         if (section) section.classList.toggle("collapsed");
       }
 
-      if (arrow) arrow.classList.toggle("open");
+      if (arrow) {
+        const open = arrow.classList.toggle("open");
+        arrow.setAttribute("aria-expanded", String(open));
+      }
     });
   });
 }

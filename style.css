@@ -241,43 +241,63 @@ body {
 
 /* ───── Toggle Arrows ───── */
 
-/* Basis-Pfeil-Logik */
+/* Basis-Pfeil-Logik. Die Pfeile sind <button> (Tastatur/Screenreader, aria-expanded).
+   Chevron = SVG-Maske im ::before: EIN durchgehender Strich mit runden Schenkel-
+   Enden (stroke-linecap: round) und spitzer Ecke (miter). Die Maske liegt auf dem
+   Pseudo-Element, NICHT auf dem Button — sonst würde der :focus-visible-Ring
+   mitmaskiert. Farbe über --arrow-color, Größe über width/height der Varianten. */
 .toggle-arrow {
+  --arrow-color: #9ca3af;
+  position: relative;
   display: inline-block;
-  transform: rotate(135deg);
+  width: 18px;
+  height: 18px;
+  transform: rotate(90deg);      /* zugeklappt: Spitze zeigt nach links */
   transition: transform 0.2s ease;
+  appearance: none;
+  background: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.toggle-arrow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--arrow-color);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 6.5 10 12.5 16 6.5' fill='none' stroke='%23000' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='miter'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 6.5 10 12.5 16 6.5' fill='none' stroke='%23000' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='miter'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.toggle-arrow:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
 }
 
-/* Offener Zustand */
+/* Offener Zustand: Spitze zeigt nach unten */
 .toggle-arrow.open {
-  transform: rotate(45deg);
+  transform: rotate(0deg);
 }
 
-/* Großer Root-Pfeil (nur bei legend-root) */
-[data-arrow="legend-root"] {
-  width: 14px !important;
-  height: 14px !important;
-  border-right: 5px solid #9ca3af !important;
-  border-bottom: 5px solid #9ca3af !important;
-  margin-left: auto;
-}
-
-/* Mittlere Section-Pfeile */
+/* Mittlere Section-Pfeile (Größe = Basis 18px) */
 .section-arrow {
-  width: 10px;
-  height: 10px;
-  border-right: 4px solid #9ca3af;
-  border-bottom: 4px solid #9ca3af;
   margin-left: 8px;
 }
 
 /* Kleine Pfeile bei legend-header */
 .legend-header .toggle-arrow {
-  width: 6px;
-  height: 6px;
-  border-right: 3px solid #b0b6bf;
-  border-bottom: 3px solid #b0b6bf;
+  --arrow-color: #b0b6bf;
+  width: 13px;
+  height: 13px;
   margin-left: 6px;
+}
+
+/* Großer Root-Pfeil — steht NACH der legend-header-Regel und ist spezifischer,
+   damit Größe/Farbe gewinnen (der Root-Pfeil liegt selbst in einem .legend-header). */
+.legend-header .toggle-arrow.toggle-root {
+  --arrow-color: #9ca3af;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
 }
 
 
