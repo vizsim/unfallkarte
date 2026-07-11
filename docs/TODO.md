@@ -26,9 +26,10 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
 
 ## Sichtbarkeit / Auffindbarkeit
 
-- [ ] **Meta-Tags** — `index.html` hat weder `<meta name="description">` noch
-      OpenGraph/Twitter-Cards; geteilte Links haben keine Vorschau.
-      `docs/screenshot.png` taugt als `og:image`.
+- [x] **Meta-Tags** — `<meta name="description">` + OpenGraph/Twitter-Cards ergänzt
+      (erledigt 2026-07); `og:image` = `docs/screenshot.png`, absolute URLs auf
+      `vizsim.de/unfallkarte/` (kanonisch; Crawler führen kein JS aus).
+      Beim Erneuern des Screenshots mitdenken.
 - [ ] **Favicon ersetzen** — aktuell `stationary-bike-gym-svgrepo-com.svg`
       (Heimtrainer-Icon).
 
