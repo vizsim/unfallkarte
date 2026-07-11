@@ -63,10 +63,31 @@ body {
 }
 
 
-.legend .legend-title .info-icon {
-  font-size: 14px;
+/* Quellen-/Lizenz-Hinweis: CSS-gezeichnetes ⓘ-Badge (Markup: <span class="info-icon">i</span>).
+   Bewusst KEIN Unicode-ⓘ/U+24D8 — das Glyph fehlt in vielen System-Fonts und
+   renderte als leeres Kästchen. */
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Höhe == Text-em (12px) inkl. Rand (border-box): das Badge belegt exakt die
+     em-Box der Schrift und kann so — wie ein echtes Glyph — die Zeilenhöhe nicht
+     strecken. font-size steuert nur das "i" im Kreis, nicht die Box-Größe. */
+  box-sizing: border-box;
+  width: 11px;
+  height: 11px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  text-indent: 0;   /* Szenario-/Kontext-Labels vererben text-indent:-1.45em (hängender
+                       Einzug) — ohne Reset wandert das "i" aus dem Kreis heraus */
+  vertical-align: middle;
   cursor: help;
-  color: #555;
+  color: var(--ui-text-muted, #6b7280);
+  user-select: none;
 }
 
 .legend-header {
