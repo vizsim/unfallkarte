@@ -467,9 +467,9 @@ body {
 /* Toggle-Labels in Szenarien + Kontext: hängender Einzug, damit umgebrochene Zeilen
    unter dem Text (nicht links unter der Checkbox) weiterlaufen. Ausgenommen:
    Sektions-Header (liegen außerhalb .legend-section-content), Slider-Labels (for=…)
-   und Flex-Labels (Mapillary-Filter mit Icon). */
-.scenario-legend-section .legend-section-content label:not([for]):not([style*="flex"]),
-.legend-section[data-section="kontext"] .legend-section-content label:not([for]):not([style*="flex"]) {
+   und Flex-Labels (.row, z. B. Mapillary-Filter mit Icon). */
+.scenario-legend-section .legend-section-content label:not([for]):not(.row):not([style*="flex"]),
+.legend-section[data-section="kontext"] .legend-section-content label:not([for]):not(.row):not([style*="flex"]) {
   display: block;
   padding-left: 1.45em;
   text-indent: -1.45em;
@@ -746,3 +746,32 @@ body {
 /* Metrik-Badge + SV-Label: gepunktete Unterstreichung = „hover für Erklärung". */
 .popup-metric { color: #9a9a9a; font-weight: 600; font-size: 11px; cursor: help; border-bottom: 1px dotted #c4c4c4; }
 .popup-hint { color: #444; cursor: help; border-bottom: 1px dotted #c4c4c4; }
+
+/* ---------- Utility-Klassen (Abbau der style="…"-Muster in index.html) ----------
+   Wiederkehrende Inline-Styles der Legende als Klassen. Swatch-FARBEN bleiben
+   bewusst inline (sind Dateninhalt je Layer), Geometrie/Layout leben hier.
+   display:none bleibt ebenfalls inline — das ist JS-gemanagter Zustand
+   (el.style.display = "" muss auf den CSS-Default zurückfallen können).
+   Am Dateiende, damit sie gleich-spezifische Komponenten-Regeln überstimmen. */
+.row { display: flex; align-items: center; gap: 6px; }
+.row--between { justify-content: space-between; }
+.gap-2 { gap: 2px; }
+.gap-4 { gap: 4px; }
+.grow { flex-grow: 1; }
+.mt-3 { margin-top: 3px; }
+.mt-4 { margin-top: 4px; }
+.mt-6 { margin-top: 6px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mb-4 { margin-bottom: 4px; }
+.ml-10 { margin-left: 10px; }
+.ml-20 { margin-left: 20px; }
+.ml-24 { margin-left: 24px; }
+.ml-32 { margin-left: 32px; }
+.fs-11 { font-size: 11px; }
+.icon-20 { width: 20px; height: 20px; }
+/* Legenden-Swatches: <span class="swatch-…" style="background:#…"> */
+.swatch-rect { width: 24px; height: 12px; }
+.swatch-line { display: inline-block; width: 24px; height: 3px; margin-right: 6px; }
+.swatch-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
+.swatch-square { display: inline-block; width: 12px; height: 12px; margin-right: 6px; }

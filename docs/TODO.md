@@ -20,9 +20,15 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
       ohne Erklärung.
 - [ ] **Tastatur/A11y** — die Auf-/Zuklapp-Pfeile der Legende sind `<span>`s mit
       Click-Handler: nicht fokussierbar. Umbau auf `<button>` + `aria-expanded`.
-- [ ] **Inline-Styles abbauen** — ~250 `style="…"` in `index.html` → CSS-Klassen.
-      Langfristig: die repetitiven Legenden-Blöcke aus einer Config generieren
-      (Hauptquelle für Drift zwischen Layern und Legende).
+- [x] **Inline-Styles abbauen** — erledigt 2026-07: 175 wiederkehrende `style="…"`
+      durch Utility-Klassen ersetzt (`.row`, `.mt-*`, `.swatch-*` … am Ende von
+      `style.css`), verifiziert per Computed-Style-Diff (811 Elemente, 0 Abweichungen).
+      Bewusst inline geblieben: `display:none` (JS-gemanagter Zustand — Code setzt
+      `el.style.display = ""` als Reset), Swatch-**Farben** (Dateninhalt je Layer)
+      und Einzelfälle (~149 Reste).
+- [ ] **Legende aus Config generieren** (langfristig) — die repetitiven
+      Legenden-Blöcke in `index.html` sind Hauptquelle für Drift zwischen Layern
+      und Legende.
 
 ## Sichtbarkeit / Auffindbarkeit
 

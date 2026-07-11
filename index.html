@@ -38,7 +38,7 @@
 MAIN HEADER
 ======================= -->
     <div class="legend-header legend-title" data-toggle="legend-root">
-      <div style="flex-grow: 1;">
+      <div class="grow">
         <div class="legend-heading">Unfallkarte</div>
         <div class="legend-subtext">
           Unfalldaten aus Unfallatlas<br />von 2017–2024
@@ -55,9 +55,8 @@ MAIN HEADER
      Sektion 1: Unfälle einzeln
 ======================= -->
     <div class="legend-section" data-section="einzeln">
-      <div class="legend-section-title" data-section-id="einzeln"
-        style="display: flex; align-items: center; justify-content: space-between;">
-        <label style="display: flex; align-items: center; gap: 6px;">
+      <div class="legend-section-title row row--between" data-section-id="einzeln">
+        <label class="row">
           <input type="checkbox" class="section-checkbox" data-section="einzeln" checked />
           Unfälle einzeln
         </label>
@@ -67,7 +66,7 @@ MAIN HEADER
         <!-- <div class="legend-subsection-divider"></div> -->
 
         <div class="legend-header" data-toggle="UKATEGORIE">
-          <label style="flex-grow: 1;">
+          <label class="grow">
             <input type="radio" name="color-style" value="UKATEGORIE" checked />
             <strong>Schweregrad (UKATEGORIE)</strong>
           </label>
@@ -111,7 +110,7 @@ MAIN HEADER
           <!-- <div class="legend-section-divider"></div> -->
           <div class="legend-subsection-divider"></div>
           <div class="legend-header" data-toggle="beteiligung">
-            <label style="flex-grow: 1;">
+            <label class="grow">
               <input type="radio" name="color-style" value="BETEILIGUNG" />
               <strong>Beteiligung (IstRad, IstPKW, ...)</strong>
             </label>
@@ -183,7 +182,7 @@ MAIN HEADER
         <div class="legend-subsection-divider"></div>
 
         <div class="legend-header" data-toggle="UJAHR">
-          <label style="flex-grow: 1;">
+          <label class="grow">
             <input type="radio" name="color-style" value="UJAHR" />
             <strong>Jahr (UJAHR)</strong>
           </label>
@@ -262,7 +261,7 @@ MAIN HEADER
         <div class="legend-subsection-divider"></div>
 
         <div class="legend-header" data-toggle="UTYP1">
-          <label style="flex-grow: 1;">
+          <label class="grow">
             <input type="radio" name="color-style" value="UTYP1" />
             <strong>Unfalltyp (UTYP1)</strong>
           </label>
@@ -332,7 +331,7 @@ MAIN HEADER
         <div class="legend-subsection-divider"></div>
 
         <div class="legend-header" data-toggle="UART">
-          <label style="flex-grow: 1;">
+          <label class="grow">
             <input type="radio" name="color-style" value="UART" />
             <strong>Unfallart (UART)</strong>
           </label>
@@ -514,9 +513,8 @@ MAIN HEADER
 ======================= -->
 
     <div class="legend-section scenario-legend-section" data-section="scenario">
-      <div class="legend-section-title" data-section-id="scenario"
-        style="display: flex; align-items: center; justify-content: space-between;">
-        <label style="display: flex; align-items: center; gap: 6px;">
+      <div class="legend-section-title row row--between" data-section-id="scenario">
+        <label class="row">
           <input type="checkbox" class="section-checkbox" data-section="scenario" checked />
           Szenarien
         </label>
@@ -529,15 +527,15 @@ MAIN HEADER
 
 
         <!-- Szenario 1 -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <!-- <input type="checkbox" id="toggle-scenario1" /> -->
             <input type="checkbox" id="toggle-scenario1" name="scenario" value="sc1" />
             Sc1: Unfall-Häufungen bei Tempo100 anzeigen
             <span class="info-icon"
               title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
-          <div id="scenario1-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <div id="scenario1-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario1-slider">Min. Anzahl Unfälle (Cluster-Größe): <span
                 id="scenario1-slider-value">3</span></label><br>
             <input type="range" id="scenario1-slider" min="3" max="20" step="1" value="3" />
@@ -545,8 +543,8 @@ MAIN HEADER
         </div>
 
         <!-- Szenario 2 -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <!-- <input type="checkbox" id="toggle-scenario2" /> -->
             <input type="checkbox" id="toggle-scenario2" name="scenario" value="sc2" />
 
@@ -554,7 +552,7 @@ MAIN HEADER
             <span class="info-icon"
               title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
-          <div id="scenario2-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <div id="scenario2-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario2-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
                 id="scenario2-slider-value">3</span></label><br>
             <input type="range" id="scenario2-slider" min="3" max="20" step="1" value="3" />
@@ -562,14 +560,14 @@ MAIN HEADER
         </div>
 
         <!-- Szenario 9 -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-scenario9" name="scenario" value="sc9" />
             Sc9: Unfallschwerpunkte (M Uko, vereinfacht)
             <span class="info-icon"
               title="Vereinfachte M-Uko-Kriterien auf Unfallatlas-Daten (nur Unfälle mit Personenschaden!) — Annäherung, keine amtliche UKo-Typenkarte. Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
           </label>
-          <div id="scenario9-controls" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <div id="scenario9-controls" class="ml-24 mt-6" style="display: none;">
             <label for="scenario9-rule">Kriterium:</label>
             <select id="scenario9-rule">
               <option value="all" selected>alle</option>
@@ -591,13 +589,13 @@ MAIN HEADER
         <div class="legend-section-subtitle">Straßennetz-Szenarien</div>
 
         <!-- Szenario 3 -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-scenario3" name="scenario" value="sc3" />
             Sc3: Kurze Tempo50 Segmente (< 400m) zw. Tempo30 Segmenten anzeigen <span class="info-icon"
               title="Quelle: OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
-          <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <!-- <div id="scenario3-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario3-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
                 id="scenario3-slider-value">3</span></label><br>
             <input type="range" id="scenario3-slider" min="3" max="20" step="1" value="3" />
@@ -606,13 +604,13 @@ MAIN HEADER
         <!-- </div> -->
 
         <!-- Szenario 6 -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-scenario6" name="scenario" value="sc6" />
             Sc6: Schulen mit Tempo 50 in der Nähe (30m) anzeigen <span class="info-icon"
               title="Quelle: OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
-          <!-- <div id="scenario3-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <!-- <div id="scenario3-slider-container" class="ml-24 mt-6" style="display: none;">
           <label for="scenario3-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
               id="scenario3-slider-value">3</span></label><br>
           <input type="range" id="scenario3-slider" min="3" max="20" step="1" value="3" />
@@ -624,13 +622,13 @@ MAIN HEADER
         <div class="legend-section-subtitle">Lärm-Szenarien</div>
 
         <!-- Szenario 8 -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-scenario8" name="scenario" value="sc8" />
             Sc8: Schulen mit vermutlich zu viel Lärm anzeigen <span class="info-icon"
               title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0 & OpenStreetMap – Lizenz: ODbL">ⓘ</span>
           </label>
-          <div id="scenario8-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <div id="scenario8-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="scenario8-slider">Min. Lärm an Schulen: <span id="scenario8-slider-value">60</span>
               dB(A)</label><br>
             <input type="range" id="scenario8-slider" min="60" max="76" step="1" value="50" />
@@ -656,8 +654,7 @@ MAIN HEADER
      Sektion 3: Kontext
 ======================= -->
     <div class="legend-section" data-section="kontext">
-      <div class="legend-section-title section-toggle" data-section-id="kontext"
-        style="display: flex; align-items: center; justify-content: space-between;">
+      <div class="legend-section-title section-toggle row row--between" data-section-id="kontext">
         <span>Kontext</span>
         <span class="toggle-arrow section-arrow open" data-arrow="kontext"></span>
       </div>
@@ -665,32 +662,32 @@ MAIN HEADER
 
         <div class="legend-section-subtitle">Straßenfotos (Mapillary)</div>
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-mapillary" />
             Mapillary-Bilder anzeigen
             <span class="info-icon" title="Quelle: Mapillary Coverage · live – Lizenz: CC BY-SA 4.0">ⓘ</span>
           </label>
         </div>
 
-        <div id="mapillary-zoomhint" style="margin-left: 20px; margin-top: 6px; font-size: 11px;">
+        <div id="mapillary-zoomhint" class="ml-20 mt-6 fs-11">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 14+ sichtbar.</div>
         </div>
 
-        <div id="mapillary-filter-options" style="display: none; margin-left: 32px; margin-top: 6px;">
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+        <div id="mapillary-filter-options" class="ml-32 mt-6" style="display: none;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-nonpano" />
             <span style="width: 12px; height: 12px; background: #00b955; border-radius: 2px;"></span>
             normale Bilder
           </label>
-          <label style="display: flex; align-items: center; gap: 6px;">
+          <label class="row">
             <input type="checkbox" id="mapillary-pano" />
             <span style="width: 12px; height: 12px; background: #0077ff; border-radius: 2px;"></span>
             Panorama-Bilder
           </label>
 
           <!-- Zeitfilter: Aufnahmedatum (captured_at) -->
-          <div style="margin-top: 12px;">
+          <div class="mt-12">
             <label for="mapillary-img-year" style="display: block; font-weight: bold; margin-bottom: 4px;">
               Aufgenommen ab: <span id="mapillary-img-year-value">2024</span>
             </label>
@@ -702,15 +699,15 @@ MAIN HEADER
         </div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-mapillary_ts" />
             Mapillary-Verkehrszeichen anzeigen
             <span class="info-icon" title="Quelle: Mapillary Map Data (© Mapillary) · live – Lizenz: CC BY-SA 4.0">ⓘ</span>
           </label>
         </div>
 
-        <div id="mapillary-ts-filter-options" style="display: none; margin-left: 32px; margin-top: 6px;">
+        <div id="mapillary-ts-filter-options" class="ml-32 mt-6" style="display: none;">
 
           <!-- Title above first 4 labels -->
           <!-- <div style="font-weight: bold; margin-bottom: 6px; margin-top: 8px;">Radverkehr</div> -->
@@ -720,27 +717,27 @@ MAIN HEADER
             Radverkehr
           </div>
 
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz1" />
-            <img src="icons/regulatory--bicycles-only--g1.svg" style="width: 20px; height: 20px;" />
+            <img src="icons/regulatory--bicycles-only--g1.svg" class="icon-20" />
             VZ 237
           </label>
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz2" />
             <img src="icons/regulatory--shared-path-pedestrians-and-bicycles--g1.svg"
-              style="width: 20px; height: 20px;" />
+              class="icon-20" />
             VZ 240
           </label>
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz3" />
             <img src="icons/regulatory--dual-path-pedestrians-and-bicycles--g1.svg"
-              style="width: 20px; height: 20px;" />
+              class="icon-20" />
             VZ 241
           </label>
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz4" />
             <img src="icons/regulatory--dual-path-bicycles-and-pedestrians--g1.svg"
-              style="width: 20px; height: 20px;" />
+              class="icon-20" />
             VZ 241
           </label>
 
@@ -752,29 +749,29 @@ MAIN HEADER
             Geschwindigkeit
           </div>
           <!-- Add 5 more labels here -->
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz5" />
-            <img src="icons/regulatory--maximum-speed-limit-30--g1.svg" style="width: 20px; height: 20px;" />
+            <img src="icons/regulatory--maximum-speed-limit-30--g1.svg" class="icon-20" />
             VZ 274-30
           </label>
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz6" />
-            <img src="icons/regulatory--maximum-speed-limit-50--g1.svg" style="width: 20px; height: 20px;" />
+            <img src="icons/regulatory--maximum-speed-limit-50--g1.svg" class="icon-20" />
             VZ 274-50
           </label>
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz7" />
-            <img src="icons/regulatory--maximum-speed-limit-70--g1.svg" style="width: 20px; height: 20px;" />
+            <img src="icons/regulatory--maximum-speed-limit-70--g1.svg" class="icon-20" />
             VZ 274-70
           </label>
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz8" />
-            <img src="icons/regulatory--maximum-speed-limit-80--g1.svg" style="width: 20px; height: 20px;" />
+            <img src="icons/regulatory--maximum-speed-limit-80--g1.svg" class="icon-20" />
             VZ 274-80
           </label>
-          <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <label class="row mb-4">
             <input type="checkbox" id="mapillary-vz9" />
-            <img src="icons/regulatory--maximum-speed-limit-100--g1.svg" style="width: 20px; height: 20px;" />
+            <img src="icons/regulatory--maximum-speed-limit-100--g1.svg" class="icon-20" />
             VZ 274-100
           </label>
 
@@ -794,71 +791,71 @@ MAIN HEADER
 
 
 
-        <div class="legend-section-subtitle" style="margin-top: 12px;">Geschwindigkeiten</div>
+        <div class="legend-section-subtitle mt-12">Geschwindigkeiten</div>
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-maxspeed" />
             Geschwindigkeitsbegrenzung anzeigen
             <span class="info-icon" data-osm-vintage="maxspeed_major" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">ⓘ</span>
           </label>
         </div>
-        <div id="maxspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="maxspeed-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 11+ sichtbar.</div>
           <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span>
+          <div class="mt-4">
+            <div><span class="swatch-line" style="background:#31a354;"></span>
               ≤
               30 km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
+            <div><span class="swatch-line" style="background:#fdcc8a;"></span>
               50 km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span>
+            <div><span class="swatch-line" style="background:#e31a1c;"></span>
               ≥
               100 km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#000000;margin-right:6px;"></span>
+            <div><span class="swatch-line" style="background:#000000;"></span>
               kein Tempolimit</div>
             <div>
               <span
                 style="display: inline-block;width: 24px;height: 3px;margin-right: 6px;background-image: repeating-linear-gradient(to right,#999 0,#999 3.5px,transparent 3.5px,transparent 7px);"></span>
               bedingte Geschwindigkeitsbegrenzung
             </div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#ff69b4;margin-right:6px;"></span>
+            <div><span class="swatch-line" style="background:#ff69b4;"></span>
               (noch) keine Angabe in OSM</div>
           </div>
         </div>
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-uspeed" />
             Gemessene Pkw-Geschwindigkeit (nur Berlin) anzeigen
             <span class="info-icon"
               title="Quelle: Data from Q2 2019 originally provided by Uber Movement, accessed in [01/2020] – Lizenz: CC BY-NC 4.0">ⓘ</span>
           </label>
         </div>
-        <div id="uspeed-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="uspeed-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 11+ sichtbar.</div>
-          <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:24px;height:3px;background:#31a354;margin-right:6px;"></span>
+          <div class="mt-4">
+            <div><span class="swatch-line" style="background:#31a354;"></span>
               ≤
               30 km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#fdcc8a;margin-right:6px;"></span>
+            <div><span class="swatch-line" style="background:#fdcc8a;"></span>
               50 km/h</div>
-            <div><span style="display:inline-block;width:24px;height:3px;background:#e31a1c;margin-right:6px;"></span>
+            <div><span class="swatch-line" style="background:#e31a1c;"></span>
               ≥
               100 km/h</div>
           </div>
 
-          <div id="uspeed-slider-container" style="margin-left: 24px; margin-top: 6px; display: none;">
+          <div id="uspeed-slider-container" class="ml-24 mt-6" style="display: none;">
             <label for="uspeed-slider">Uhrzeit auswählen: <span id="uspeed-slider-value">14</span></label><br>
             <input type="range" id="uspeed-slider" min="0" max="23" step="1" value="14" />
           </div>
         </div>
 
-        <div class="legend-section-subtitle" style="margin-top: 12px;">Verkehrsmengen & Zählungen</div>
+        <div class="legend-section-subtitle mt-12">Verkehrsmengen & Zählungen</div>
 
         <!-- Verkehrsmengen: 1 Master-Toggle + 3 Quellen-Unterhaken (Länder/BASt/UBA). -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-svz" />
             Verkehrsmengen anzeigen
             <span class="info-icon" title="Straßenverkehrszählung der Länder (11 Länder) + BASt-Backbone (Bundesfernstraßen A+B) + UBA-Hauptverkehrsstraßen. Quelle/Lizenz je Feature: dl-de/by-2.0 · CC-BY-4.0 · dl-de/zero-2.0 · © BASt · © UBA.">ⓘ</span>
@@ -867,18 +864,18 @@ MAIN HEADER
 
         <!-- Quellen-Unterhaken (nur sichtbar, wenn der Master an ist); UBA initial aus. -->
         <div id="svz-children" style="margin-left: 30px; margin-top: 2px; font-size: 12px; display: none;">
-          <div style="margin-top: 3px;"><label><input type="checkbox" class="svz-src" id="toggle-svz-laender" checked /> Alle Länder (SVZ)</label></div>
-          <div style="margin-top: 3px;"><label><input type="checkbox" class="svz-src" id="toggle-svz-bast" checked /> BASt (A+B)</label></div>
-          <div style="margin-top: 3px;"><label><input type="checkbox" class="svz-src" id="toggle-hvs" /> UBA (&gt;3 Mio/Jahr) <span class="info-icon" data-hvs-vintage title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span></label></div>
+          <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-svz-laender" checked /> Alle Länder (SVZ)</label></div>
+          <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-svz-bast" checked /> BASt (A+B)</label></div>
+          <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-hvs" /> UBA (&gt;3 Mio/Jahr) <span class="info-icon" data-hvs-vintage title="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span></label></div>
         </div>
 
-        <div id="svz-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="svz-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
           <div style="display:flex; gap:14px; margin-bottom:6px;">
-            <label style="display:flex; align-items:center; gap:4px;">
+            <label class="row gap-4">
               <input type="radio" name="svz-mode" value="dtv" checked /> DTV
             </label>
-            <label style="display:flex; align-items:center; gap:4px;">
+            <label class="row gap-4">
               <input type="radio" name="svz-mode" value="sv" /> SV-Anteil
             </label>
           </div>
@@ -912,20 +909,20 @@ MAIN HEADER
 
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-telraam" />
             Telraam-Zählstellen anzeigen
             <span class="info-icon" data-telraam-vintage="telraam_segments" title="Quelle: Telraam (© Telraam-Mitwirkende) – Lizenz: CC BY-NC 4.0">ⓘ</span>
           </label>
         </div>
 
-        <div id="telraam-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="telraam-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div style="display:flex; gap:14px; margin-bottom:6px;">
-            <label style="display:flex; align-items:center; gap:4px;">
+            <label class="row gap-4">
               <input type="radio" name="telraam-mode" value="bike" checked /> Rad
             </label>
-            <label style="display:flex; align-items:center; gap:4px;">
+            <label class="row gap-4">
               <input type="radio" name="telraam-mode" value="car" /> Auto
             </label>
           </div>
@@ -943,26 +940,26 @@ MAIN HEADER
         </div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-movebis" />
             Stadtradeln 2020 anzeigen
             <span class="info-icon" title="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">ⓘ</span>
           </label>
         </div>
-        <div id="movebis-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="movebis-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
           <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
-          <div style="margin-top: 4px;">
-            <div><span style="display:inline-block;width:12px;height:12px;background:#e31a1c;margin-right:6px;"></span>
+          <div class="mt-4">
+            <div><span class="swatch-square" style="background:#e31a1c;"></span>
               ≤ 12 km/h</div>
-            <div><span style="display:inline-block;width:12px;height:12px;background:#fdcc8a;margin-right:6px;"></span>
+            <div><span class="swatch-square" style="background:#fdcc8a;"></span>
               ≈ 18 km/h</div>
-            <div><span style="display:inline-block;width:12px;height:12px;background:#31a354;margin-right:6px;"></span>
+            <div><span class="swatch-square" style="background:#31a354;"></span>
               ≥ 24 km/h</div>
           </div>
-          <div style="margin-top: 8px;"><strong>Linienstärke (Anzahl)</strong></div>
-          <div style="margin-top: 4px;">
+          <div class="mt-8"><strong>Linienstärke (Anzahl)</strong></div>
+          <div class="mt-4">
             <div><span
                 style="display:inline-block;width:24px;height:2px;background:#999;vertical-align:middle;margin-right:6px;"></span>
               wenige (≤ 10)</div>
@@ -976,10 +973,10 @@ MAIN HEADER
         </div>
 
 
-        <div class="legend-section-subtitle" style="margin-top: 12px;">Infrastruktur</div>
+        <div class="legend-section-subtitle mt-12">Infrastruktur</div>
         <!-- Radinfrastruktur (live: TILDA / radinfra.de, kein Preprocessing) -->
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-bikelanes" />
             Radinfrastruktur anzeigen
             <span class="info-icon"
@@ -987,7 +984,7 @@ MAIN HEADER
           </label>
         </div>
         <div id="bikelanes-legend"
-          style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+          class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
           <div class="bl-row"><span class="bl-line solid" style="--line-color:#174ed9;"></span>
             <span>Führung baul. abgesetzt von Kfz</span></div>
@@ -1005,152 +1002,152 @@ MAIN HEADER
               target="_blank" rel="noopener noreferrer">tilda-geo.de</a></div>
         </div>
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-crossings" />
             Fußgänger-/Radüberwege anzeigen
             <span class="info-icon" data-osm-vintage="osm_crossings" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">ⓘ</span>
           </label>
         </div>
-        <div id="crossings-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="crossings-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
-          <div style="margin-top: 4px;">
+          <div class="mt-4">
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#2ECC40;"></span>
               Ampel (Lichtzeichen)
             </div>
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#FF851B;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#FF851B;"></span>
               Markiert (Zebra/Markierung)
             </div>
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#FF4136;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#FF4136;"></span>
               Unmarkiert
             </div>
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#9aa0a6;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#9aa0a6;"></span>
               Ohne Typangabe
             </div>
           </div>
         </div>
 
 
-        <div class="legend-section-subtitle" style="margin-top: 12px;">Umwelt & Sicherheit</div>
+        <div class="legend-section-subtitle mt-12">Umwelt & Sicherheit</div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-laerm1" />
             Lärm (Tag-Abend-Nacht) anzeigen
             <span class="info-icon" data-laerm-vintage title="Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
           </label>
         </div>
 
-        <div id="laerm1-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="laerm1-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
           <div><strong>Tag-Abend-Nacht-Lärmindex</strong></div>
-          <div style="margin-top: 4px;">LDEN</div>
+          <div class="mt-4">LDEN</div>
 
           <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#A6AD88; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#A6AD88;"></div>
               <span>55 – 59&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#B89C63; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#B89C63;"></div>
               <span>60 – 64&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#994848; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#994848;"></div>
               <span>65 – 69&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#4B244A; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#4B244A;"></div>
               <span>70 – 74&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#2F0037; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#2F0037;"></div>
               <span>&gt; 75&nbsp;dB(A)</span>
             </div>
           </div>
         </div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-laerm2" />
             Lärm (Nacht) anzeigen
             <span class="info-icon" data-laerm-vintage title="Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">ⓘ</span>
           </label>
         </div>
 
-        <div id="laerm2-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="laerm2-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
           <div><strong>Nacht-Lärmindex</strong></div>
-          <div style="margin-top: 4px;">Lnight</div>
+          <div class="mt-4">Lnight</div>
 
           <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#A6AD88; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#A6AD88;"></div>
               <span>50 – 54&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#B89C63; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#B89C63;"></div>
               <span>55 – 59&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#994848; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#994848;"></div>
               <span>60 – 64&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#4B244A; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#4B244A;"></div>
               <span>65 – 69&nbsp;dB(A)</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="background:#2F0037; width:24px; height:12px;"></div>
+            <div class="row">
+              <div class="swatch-rect" style="background:#2F0037;"></div>
               <span>&gt; 70&nbsp;dB(A)</span>
             </div>
           </div>
         </div>
 
 
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-obs" />
             Überholabstände (OBS) anzeigen
             <span class="info-icon" data-obs-vintage title="Quelle: OpenBikeSensor-Community (Portale) – Lizenz: siehe jeweiliges Portal">ⓘ</span>
           </label>
         </div>
 
-        <div id="obs-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="obs-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
           <div><strong>Überholabstand nach Zone</strong></div>
 
           <!-- Innerorts -->
-          <div style="margin-top: 8px;"><strong>Innerorts (1.5 m)</strong></div>
-          <div style="display: flex; align-items: center; gap: 2px; margin-top: 4px;">
-            <div style="background:#67000d; width:24px; height:12px;"></div>
-            <div style="background:#ef3b2c; width:24px; height:12px;"></div>
-            <div style="background:#fdbf6f; width:24px; height:12px;"></div>
-            <div style="background:#a1d99b; width:24px; height:12px;"></div>
-            <div style="background:#31a354; width:24px; height:12px;"></div>
+          <div class="mt-8"><strong>Innerorts (1.5 m)</strong></div>
+          <div class="row gap-2 mt-4">
+            <div class="swatch-rect" style="background:#67000d;"></div>
+            <div class="swatch-rect" style="background:#ef3b2c;"></div>
+            <div class="swatch-rect" style="background:#fdbf6f;"></div>
+            <div class="swatch-rect" style="background:#a1d99b;"></div>
+            <div class="swatch-rect" style="background:#31a354;"></div>
           </div>
           <div style="display: flex; justify-content: space-between; width:120px;">
             <span>1.10</span><span>1.30</span><span>1.50</span><span>1.70</span><span>1.90</span>
           </div>
 
           <!-- Außerorts -->
-          <div style="margin-top: 12px;"><strong>Außerorts (2 m)</strong></div>
-          <div style="display: flex; align-items: center; gap: 2px; margin-top: 4px;">
-            <div style="background:#67000d; width:24px; height:12px;"></div>
-            <div style="background:#ef3b2c; width:24px; height:12px;"></div>
-            <div style="background:#fdbf6f; width:24px; height:12px;"></div>
-            <div style="background:#a1d99b; width:24px; height:12px;"></div>
-            <div style="background:#31a354; width:24px; height:12px;"></div>
+          <div class="mt-12"><strong>Außerorts (2 m)</strong></div>
+          <div class="row gap-2 mt-4">
+            <div class="swatch-rect" style="background:#67000d;"></div>
+            <div class="swatch-rect" style="background:#ef3b2c;"></div>
+            <div class="swatch-rect" style="background:#fdbf6f;"></div>
+            <div class="swatch-rect" style="background:#a1d99b;"></div>
+            <div class="swatch-rect" style="background:#31a354;"></div>
           </div>
           <div style="display: flex; justify-content: space-between; width:120px;">
             <span>1.60</span><span>1.80</span><span>2.00</span><span>2.20</span><span>2.40</span>
@@ -1164,69 +1161,69 @@ MAIN HEADER
 
 
 
-        <div class="legend-section-subtitle" style="margin-top: 12px;">Orte & Einrichtungen</div>
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="legend-section-subtitle mt-12">Orte & Einrichtungen</div>
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-schools" />
             Schulen/Kindergärten anzeigen
             <span class="info-icon" data-osm-vintage="osm_schools" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">ⓘ</span>
           </label>
         </div>
-        <div id="schools-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="schools-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
-          <div style="margin-top: 4px;">
+          <div class="mt-4">
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#0074D9;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#0074D9;"></span>
               Schule
             </div>
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#2ECC40;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#2ECC40;"></span>
               Kindergarten
             </div>
           </div>
         </div>
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-health" />
             Gesundheitseinrichtungen anzeigen
             <span class="info-icon" data-osm-vintage="osm_health" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">ⓘ</span>
           </label>
         </div>
-        <div id="health-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="health-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
-          <div style="margin-top: 4px;">
+          <div class="mt-4">
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#D62728;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#D62728;"></span>
               Medizinische Einrichtungen (Krankenhaus, Klinik, Reha)
             </div>
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#17BECF;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#17BECF;"></span>
               Pflege & Senioren (Pflegeheim, Betreutes Wohnen)
             </div>
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:#BCBD22;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:#BCBD22;"></span>
               Einrichtungen für Menschen mit Behinderung
             </div>
           </div>
         </div>
-        <div style="margin-top: 6px;">
-          <label style="margin-left: 10px;">
+        <div class="mt-6">
+          <label class="ml-10">
             <input type="checkbox" id="toggle-playgrounds" />
             Spielplätze anzeigen
             <span class="info-icon" data-osm-vintage="osm_playgrounds" title="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">ⓘ</span>
           </label>
         </div>
-        <div id="playgrounds-legend" style="margin-left: 20px; margin-top: 6px; font-size: 11px; display: none;">
+        <div id="playgrounds-legend" class="ml-20 mt-6 fs-11" style="display: none;">
           <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab Zoomstufe 9+ sichtbar.</div>
-          <div style="margin-top: 4px;">
+          <div class="mt-4">
             <div>
               <span
-                style="display:inline-block;width:12px;height:12px;background:green;border-radius:50%;margin-right:6px;"></span>
+                class="swatch-dot" style="background:green;"></span>
               Spielplätze
             </div>
           </div>
