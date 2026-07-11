@@ -43,10 +43,9 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
 
 ## Deploy-Status klären
 
-- [ ] **Telraam-Layer**: lokal gebaut, vermutlich noch nicht auf B2.
-- [ ] **Neu getilte PMTiles** (schools/health/playgrounds/crossings mit minzoom 9,
-      `movebis/movebis.pmtiles`): prüfen, ob der Stand im Bucket `unfallkarte-data-v2`
-      aktuell ist (`b2 sync` + Manifest).
+- [x] Geklärt (2026-07-11): `unfallkarte deploy` (b2 sync) zeigte den Bucket als
+      aktuell — Telraam, Crossings, movebis & Co. lagen schon auf B2; hochgeladen
+      wurden nur die neu gebauten z6-hvs-Tiles + Manifest.
 
 ## Aufräumen
 
