@@ -15,9 +15,9 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
 - [ ] **Mobile-Breakpoint** — `style.css` hat keine einzige `@media`-Query; die
       320-px-Legende verdeckt auf Handys die halbe Karte. Idee: Legende auf kleinen
       Screens als einklappbares Bottom-Sheet.
-- [ ] **Fehler-Banner** — sind Manifest/B2 nicht erreichbar, gibt es nur ein
-      `console.warn` (`js/mapdata/resolveSources.js`); Nutzer sehen eine leere Karte
-      ohne Erklärung.
+- [x] **Fehler-Banner** (2026-07-11) — ist das Manifest weder lokal noch auf B2
+      ladbar, zeigt `js/ui/errorBanner.js` ein schließbares Banner oben mittig
+      (+ "Neu laden"); Wiring über `resolveSources().manifestOk` in addSources.js.
 - [x] **Tastatur/A11y (Klapp-Pfeile)** — erledigt 2026-07: alle 10 Pfeile sind
       `<button>` mit `aria-expanded` + `aria-label` und `:focus-visible`-Ring;
       per Enter/Space bedienbar (headless verifiziert). Offen bleibt A11y darüber

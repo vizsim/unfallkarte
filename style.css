@@ -799,3 +799,45 @@ body {
 /* "Zoomstufe X+" in den Zoom-Hinweisen: Klick zoomt auf die Stufe (legendHandlers.js). */
 .zoom-hint .zoom-link { color: inherit; text-decoration: underline; cursor: pointer; }
 .zoom-hint .zoom-link:hover { color: var(--ui-text-strong, #111); }
+
+/* ───── Fehler-Banner (js/ui/errorBanner.js) ─────
+   Oben mittig über der Karte, wenn die Karte sonst kommentarlos leer bliebe
+   (z.B. Manifest/B2 nicht erreichbar). Schließbar + "Neu laden". */
+.error-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(92vw, 560px);
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--ui-radius-sm, 12px);
+  box-shadow: var(--ui-shadow-sm, 0 6px 16px rgba(0, 0, 0, 0.12));
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.error-banner-reload {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.error-banner-close {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  margin-left: 2px;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.error-banner-close:hover { color: #7f1d1d; }

@@ -25,11 +25,11 @@ async function fetchJson(url) {
 // auf B2 und sparen pro Datei einen sinnlosen 404-HEAD-Probe.
 async function loadManifestWithSource(localPath, remoteBase) {
   const local = await fetchJson(localPath);
-  if (local) return { manifest: local, fromLocal: true };
+  if (local) return { manifest: local, fromLocal: true, ok: true };
   const remote = await fetchJson(`${remoteBase}manifest.json`);
-  if (remote) return { manifest: remote, fromLocal: false };
+  if (remote) return { manifest: remote, fromLocal: false, ok: true };
   console.warn("[resolveSources] manifest weder lokal noch auf B2 ladbar");
-  return { manifest: {}, fromLocal: false };
+  return { manifest: {}, fromLocal: false, ok: false };
 }
 
 // Öffentliche API (unverändert): nur das Manifest-Objekt. So braucht die deployte Seite
@@ -53,7 +53,7 @@ async function existsLocally(url) {
 // ersten Render blockieren). live/external-Einträge werden übersprungen (binden ihre
 // URL direkt ein).
 export async function resolveSources({ localBase = LOCAL_BASE, remoteBase = REMOTE_BASE } = {}) {
-  const { manifest, fromLocal } = await loadManifestWithSource(`${localBase}manifest.json`, remoteBase);
+  const { manifest, fromLocal, ok } = await loadManifestWithSource(`${localBase}manifest.json`, remoteBase);
   const resolved = {};
 
   const entries = Object.entries(manifest).filter(([, m]) => m.file && !m.live && !m.external);
@@ -69,6 +69,9 @@ export async function resolveSources({ localBase = LOCAL_BASE, remoteBase = REMO
   return {
     manifest,
     map: resolved,
+    // false, wenn das Manifest weder lokal noch auf B2 ladbar war -> Datenlayer
+    // bleiben leer; addSources.js zeigt dann das Fehler-Banner (js/ui/errorBanner.js).
+    manifestOk: ok,
     url(id) {
       return resolved[id] ?? `pmtiles://${remoteBase}${id}.pmtiles`;
     },

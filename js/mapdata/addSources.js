@@ -1,4 +1,5 @@
 import { resolveSources } from "./resolveSources.js";
+import { showErrorBanner } from "../ui/errorBanner.js";
 
 // Layer aus der neuen Python-Pipeline: Frontend-Source-ID -> Manifest-ID.
 // URL kommt aus resolveSources() (Local-first ./data/, Fallback B2 unfallkarte-data-v2).
@@ -39,6 +40,12 @@ export async function addSources(map, { MAPILLARY_TOKEN }) {
 
   // Pipeline-Layer: Local-first + B2-v2-Fallback über data/manifest.json.
   const sources = await resolveSources();
+  if (!sources.manifestOk) {
+    showErrorBanner(
+      "Die Kartendaten sind gerade nicht erreichbar (Manifest weder lokal noch " +
+      "vom Datenserver ladbar) — Unfall- und Kontextlayer bleiben leer."
+    );
+  }
   for (const [id, manifestId] of Object.entries(MIGRATED)) {
     addVector(id, sources.url(manifestId));
   }
