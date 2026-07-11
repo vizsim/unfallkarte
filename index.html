@@ -1318,10 +1318,10 @@ MAIN HEADER
   </section>
 
 
-  <!-- Vendored Libs (kein CDN): chart.js 4.5.1 · maplibre-gl 5.24.0 · pmtiles 4.4.1
-       Update: neue Dist-Datei nach vendor/ + Versionen hier & in vendor/README.md anpassen -->
-  <script src="./vendor/chart.umd.min.js"></script>
-
+  <!-- Vendored Libs (kein CDN): maplibre-gl 5.24.0 · pmtiles 4.4.1 · chart.js 4.5.1
+       (chart.js wird lazy geladen — erst beim ersten Uspeed-Chart-Popup, siehe
+       popupHandlers.js). Update: neue Dist-Datei nach vendor/ + Versionen hier &
+       in vendor/README.md anpassen -->
   <script src="./vendor/maplibre-gl.js"></script>
   <script src="./vendor/pmtiles.js"></script>
   <script type="module" src="./main.js"></script>

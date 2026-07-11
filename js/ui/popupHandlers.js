@@ -3,6 +3,25 @@
 
 import { formatDateDE } from "../utils/formatDate.js";
 
+// chart.js (vendored, ~200 KB) erst beim ersten Uspeed-Chart-Popup nachladen —
+// einziger Nutzer ist showUspeedChartPopup, darum raus aus dem kritischen
+// Startpfad (kein <script>-Tag mehr in index.html).
+let chartJsReady = null;
+function loadChartJs() {
+    chartJsReady ??= new Promise((resolve, reject) => {
+        if (window.Chart) return resolve();
+        const s = document.createElement("script");
+        s.src = "./vendor/chart.umd.min.js";
+        s.onload = () => resolve();
+        s.onerror = () => {
+            chartJsReady = null; // nächster Klick versucht es erneut
+            reject(new Error("vendor/chart.umd.min.js nicht ladbar"));
+        };
+        document.head.appendChild(s);
+    });
+    return chartJsReady;
+}
+
 
 // Beteiligung Popup Handler
 
@@ -442,6 +461,7 @@ function showUspeedChartPopup(e) {
         .addTo(map);
 
     setTimeout(() => {
+        loadChartJs().then(() => {
         new Chart(document.getElementById("speed-chart"), {
             type: "line",
             data: {
@@ -502,6 +522,7 @@ function showUspeedChartPopup(e) {
                 }
             }
         });
+        }).catch(err => console.error("❌ Chart.js konnte nicht geladen werden:", err));
     }, 50);
 }
 
