@@ -413,8 +413,15 @@ function setupEventHandlers(map) {
   map.on("zoom", updateScenarioLegendVisibility);
   map.on("load", updateScenarioLegendVisibility);
 
-  map.on("moveend", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
-  map.on("zoomend", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
+  // Beim Überschreiten der Zoom-11-Grenze (Cluster <-> Einzelpunkte) sind die neuen
+  // Tiles auf moveend/zoomend oft noch nicht gerendert -> queryRenderedFeatures = 0.
+  // Darum zusätzlich einmal auf das nächste "idle" nach einem Move nachzählen (nicht
+  // bei jedem idle, sonst läuft es auch bei Hover/Popup-Redraws).
+  let recountOnIdle = false;
+  const recount = () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles);
+  map.on("moveend", () => { recount(); recountOnIdle = true; });
+  map.on("zoomend", () => { recount(); recountOnIdle = true; });
+  map.on("idle", () => { if (recountOnIdle) { recountOnIdle = false; recount(); } });
 
   applyLegendVisibility();
 }

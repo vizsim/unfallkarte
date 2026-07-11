@@ -205,17 +205,26 @@ export function updateLegendColors(activeKey, paintStyles) {
   });
 }
 
+// Cluster-Sektion ("Unfälle-Cluster nach Schwere"): beim ersten Laden der Session
+// aktiviert, danach merkt sich sessionStorage den zuletzt gewählten Zustand.
+export const CLUSTER_SESSION_KEY = "clusterSectionOn";
+
+export function isClusterSectionOn() {
+  const stored = sessionStorage.getItem(CLUSTER_SESSION_KEY);
+  return stored === null ? true : stored === "true";
+}
+
 export function setupLegendClusterCheckboxSync(map) {
   const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
-  if (clusterCheckbox) {
-    const layerId = "pie-clusters-fine-layer";
-    map.once("idle", () => {
-      if (map.getLayer(layerId)) {
-        const isVisible = map.getLayoutProperty(layerId, "visibility") !== "none";
-        clusterCheckbox.checked = isVisible;
-      }
-    });
-  }
+  if (!clusterCheckbox) return;
+
+  const on = isClusterSectionOn();
+  clusterCheckbox.checked = on;
+  ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"].forEach(layerId => {
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, "visibility", on ? "visible" : "none");
+    }
+  });
 }
 
 export function setupLegendToggleHandlers() {
@@ -289,6 +298,7 @@ export function setupLegendSectionCheckboxes(updateLayerFilter) {
             window.map.setLayoutProperty(layerId, "visibility", visibility);
           }
         });
+        sessionStorage.setItem(CLUSTER_SESSION_KEY, String(checked));
         return;
       }
 

@@ -4,19 +4,25 @@ export function updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintSty
   const zoom = map.getZoom();
   let features = [];
 
-  const zoomLockText = currentZoomLock
-    ? `<span class="zoom-lock">🔒 ${currentZoomLock}</span>`
-    : "";
-
-  const zoomText = `Zoomlevel: ${zoom.toFixed(2)}${zoomLockText ? ` [${zoomLockText}]` : ""}`;
+  // Nur noch die Zahlen-Spans aktualisieren (Symbole/Layout stehen statisch im HTML).
+  const setCount = n => {
+    const el = document.getElementById("fc-count");
+    if (el) el.textContent = n.toLocaleString();
+  };
+  const el = document.getElementById("fc-zoom");
+  if (el) el.textContent = zoom.toFixed(1);
+  const lockEl = document.getElementById("fc-lock");
+  if (lockEl) lockEl.textContent = currentZoomLock ? `🔒 ${currentZoomLock}` : "";
 
   if (zoom < 11) {
     features = map.queryRenderedFeatures({ layers: LAYERS.clusters });
-    const total = features.reduce((sum, f) => sum + (f.properties.point_count || 0), 0);
-
-    document.getElementById("feature-count").innerHTML =
-      `<div>Sichtbare Unfälle: ${total.toLocaleString()}</div>
-       <div>${zoomText}</div>`;
+    // Cluster-Tiles haben kein point_count, nur Zählungen je Schwere
+    // (UKATEGORIE__1/__2/__3, als String abgelegt) — Summe = Unfälle im Cluster.
+    const total = features.reduce((sum, f) => {
+      const p = f.properties;
+      return sum + (Number(p.UKATEGORIE__1) || 0) + (Number(p.UKATEGORIE__2) || 0) + (Number(p.UKATEGORIE__3) || 0);
+    }, 0);
+    setCount(total);
     return;
   }
 
@@ -53,7 +59,5 @@ export function updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintSty
     if (badge) badge.textContent = count > 0 ? `${count}` : "";
   });
 
-  document.getElementById("feature-count").innerHTML =
-    `<div>Sichtbare Unfälle: ${features.length.toLocaleString()}</div>
-     <div>${zoomText}</div>`;
+  setCount(features.length);
 }
