@@ -457,59 +457,40 @@ MAIN HEADER
         <button type="button" class="toggle-arrow section-arrow open" data-arrow="cluster" aria-expanded="true" aria-label="Sektion Unfall-Cluster auf-/zuklappen"></button>
       </div>
 
-      <div class="legend-section-allcontent">
-        <!-- Unfallanzahl -->
-        <div class="legend-section-content">
-          <!-- <div class="cluster-legend-entry">
-            <div class="cluster-dot" style="width:4.8px; height:4.8px;"></div>
-            <div class="cluster-label">1 Unfall</div>
-          </div> -->
-          <div style="text-align: center; font-weight: bold;">Anzahl Unfälle</div>
-          <div style="height: 6px;"></div>
-          <div class="cluster-legend-entry">
-            <div class="cluster-dot" style="width:9.6px; height:9.6px;"></div>
-            <div class="cluster-label">2–10</div>
-          </div>
-          <div class="cluster-legend-entry">
-            <div class="cluster-dot" style="width:19.2px; height:19.2px;"></div>
-            <div class="cluster-label">11–100</div>
-          </div>
-          <div class="cluster-legend-entry">
-            <div class="cluster-dot" style="width:28.8px; height:28.8px;"></div>
-            <div class="cluster-label">101–1.000</div>
-          </div>
-          <div class="cluster-legend-entry">
-            <div class="cluster-dot" style="width:36px; height:36px;"></div>
-            <div class="cluster-label">1.001–10.000</div>
-          </div>
-          <div class="cluster-legend-entry">
-            <div class="cluster-dot" style="width:48px; height:48px;"></div>
-            <div class="cluster-label">10.001+</div>
-          </div>
-        </div>
-
-        <!-- Verletzten-Farben -->
-        <div id="cluster-legend-color">
-          <div style="text-align: center; font-weight: bold;">Anteil Unfallschwere</div>
-
-          <div class="cluster-color-item">
-            <svg viewBox="0 0 32 32">
-              <path d="M16,16 L32,16 A16,16 0 0,1 27.3,27.3 Z" fill="rgba(228,26,28,1)" />
+      <div class="legend-section-allcontent cluster-legend-body">
+        <p class="cluster-hint">Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl,
+          <b>Farbanteile</b> = Schweregrad.</p>
+        <div class="cluster-legend-grid">
+          <!-- Größe = Anzahl: verschachtelte Kreise (flächen-proportional) mit Leader-Labels -->
+          <div>
+            <div class="cluster-legend-sub">Größe = Anzahl</div>
+            <svg viewBox="0 0 150 70" width="100%" height="70" style="max-width:150px"
+              font-size="10" font-family="sans-serif" aria-hidden="true">
+              <g fill="rgba(120,120,120,.14)" stroke="#8a8f96" stroke-width="1">
+                <circle cx="34" cy="37" r="27" /><circle cx="34" cy="44" r="20" />
+                <circle cx="34" cy="51" r="13" /><circle cx="34" cy="57" r="7" />
+              </g>
+              <g stroke="#c3c7cc" stroke-width="1">
+                <line x1="34" y1="10" x2="72" y2="10" /><line x1="34" y1="24" x2="72" y2="24" />
+                <line x1="34" y1="38" x2="72" y2="38" /><line x1="34" y1="50" x2="72" y2="50" />
+              </g>
+              <g fill="#4b5563">
+                <text x="76" y="13">10.000+</text><text x="76" y="27">1.000</text>
+                <text x="76" y="41">100</text><text x="76" y="53">10</text>
+              </g>
             </svg>
-            <span>Anteil<br>Getötete</span>
           </div>
-          <div class="cluster-color-item">
-            <svg viewBox="0 0 32 32">
-              <path d="M16,16 L27.3,27.3 A16,16 0 0,1 4.7,27.3 Z" fill="rgba(55,126,184,0.9)" />
-            </svg>
-            <span>Anteil<br>Schwerverletzte</span>
-          </div>
-          <div class="cluster-color-item">
-            <svg viewBox="0 0 32 32">
-              <path d="M16,16 L4.7,27.3 A16,16 0 0,1 16,0 A16,16 0 0,1 27.3,4.7 A16,16 0 0,1 32,16 Z"
-                fill="rgba(77,175,74,0.6)" />
-            </svg>
-            <span>Anteil<br>Leichtverletzte</span>
+          <!-- Farbe = Schwere: eine Beispiel-Torte (wie die Karten-Pies) + Farb-Key -->
+          <div>
+            <div class="cluster-legend-sub">Farbe = Schwere</div>
+            <div class="cluster-legend-pie-row">
+              <div class="cluster-legend-pie" aria-hidden="true"></div>
+              <ul class="cluster-legend-key">
+                <li><span class="cluster-legend-dot" style="background:rgba(228,26,28,1)"></span>Getötete</li>
+                <li><span class="cluster-legend-dot" style="background:rgba(55,126,184,.9)"></span>Schwerverletzte</li>
+                <li><span class="cluster-legend-dot" style="background:rgba(77,175,74,.6)"></span>Leichtverletzte</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

@@ -184,54 +184,31 @@ body {
 }
 
 
-/* ─── Linke Spalte: Cluster Entries ─── */
+/* ─── Cluster-Legende (Redesign): verschachtelte Kreise + Beispiel-Torte ───
+   Ersetzt die alte 5er-Kreisliste + Wedge-Formen. Die Beispiel-Torte matcht die
+   Karten-Pies: Start bei 3 Uhr, im Uhrzeigersinn rot -> blau -> grün. */
+.legend-section-allcontent.cluster-legend-body { display: block; margin-top: 12px; }
 
-.cluster-legend-entry {
-  display: grid;
-  grid-template-columns: 35px 1fr;
-  align-items: center;
-  column-gap: 6px;
-  margin-bottom: 6px;
-  padding-left: 8px;
+.cluster-hint { font-size: 11.5px; color: var(--ui-text); line-height: 1.45; margin: 0 0 12px; }
+.cluster-hint b { color: var(--ui-text-strong); }
+
+.cluster-legend-grid { display: flex; gap: 14px; align-items: flex-start; }
+.cluster-legend-grid > div { flex: 1; min-width: 0; }
+.cluster-legend-sub { font-size: 11px; font-weight: 700; color: var(--ui-text); margin-bottom: 6px; }
+
+.cluster-legend-pie-row { display: flex; gap: 10px; align-items: center; }
+.cluster-legend-pie {
+  width: 52px; height: 52px; border-radius: 50%; flex: none;
+  /* 3 Uhr = from 90deg; im Uhrzeigersinn rot -> blau -> grün (wie die Karten-Pies) */
+  background: conic-gradient(from 90deg,
+    rgba(228, 26, 28, 1) 0 5%,
+    rgba(55, 126, 184, .9) 5% 28%,
+    rgba(77, 175, 74, .6) 28% 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
 }
-
-.cluster-dot {
-  justify-self: center;
-  background-color: #999;
-  border-radius: 50%;
-  border: 0.5px solid #e6e6e6;
-  box-sizing: border-box;
-}
-
-.cluster-label {
-  text-align: center;
-  white-space: nowrap;
-}
-
-
-/* ─── Rechte Spalte: Verletztenanteile ─── */
-
-#cluster-legend-color {
-  margin-left: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cluster-color-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cluster-color-item svg {
-  width: 30px;
-  height: 30px;
-  display: block;
-  /* wichtig! */
-  min-width: 30px;
-  /* stellt konsistente Breite sicher */
-}
+.cluster-legend-key { list-style: none; margin: 0; padding: 0; font-size: 11.5px; color: var(--ui-text); display: flex; flex-direction: column; gap: 5px; }
+.cluster-legend-key li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cluster-legend-key .cluster-legend-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
 
 
 

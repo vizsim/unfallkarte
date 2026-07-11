@@ -334,16 +334,21 @@ export function setupLegendSectionCheckboxes(updateLayerFilter) {
       });
     });
 
-    const checkedCount = Array.from(itemCheckboxes).filter(c => c.checked).length;
-    if (checkedCount === 0) {
-      sectionCb.checked = false;
-      sectionCb.indeterminate = false;
-    } else if (checkedCount === itemCheckboxes.length) {
-      sectionCb.checked = true;
-      sectionCb.indeterminate = false;
-    } else {
-      sectionCb.checked = false;
-      sectionCb.indeterminate = true;
+    // Sektionen ohne eigene Item-Checkboxen (z. B. "cluster") NICHT aus – nicht
+    // vorhandenen – Kindern ableiten, sonst wird die Checkbox fälschlich abgehakt.
+    // Deren Zustand steuern setupLegendClusterCheckboxSync + der change-Handler.
+    if (itemCheckboxes.length > 0) {
+      const checkedCount = Array.from(itemCheckboxes).filter(c => c.checked).length;
+      if (checkedCount === 0) {
+        sectionCb.checked = false;
+        sectionCb.indeterminate = false;
+      } else if (checkedCount === itemCheckboxes.length) {
+        sectionCb.checked = true;
+        sectionCb.indeterminate = false;
+      } else {
+        sectionCb.checked = false;
+        sectionCb.indeterminate = true;
+      }
     }
   });
 }
