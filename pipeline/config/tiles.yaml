@@ -144,9 +144,9 @@ profiles:
     force_feature_limit: true
 
   # Uber Movement Berlin Q2/2019 (Pkw-Speed je Stunde, Linien). Layer-Name = Frontend-
-  # Vertrag (uber_movement_osm). Flags 1:1 aus dem Alt-Notebook. Long-Format: 24 Features
-  # je Segment/Richtung (Slider filtert hour_of_day) — ein Wide-Format (speed_0..speed_23,
-  # 1/24 der Features) würde funktionieren, braucht aber den Slider-Umbau im Frontend.
+  # Vertrag (uber_movement_osm). Wide-Format: 1 Feature je Segment mit speed_0..speed_23
+  # (33k statt 537k Features — Geometrie nur 1x in den Tiles); Slider setzt Filter (has)
+  # + line-color neu. Flags vom Alt-Notebook beibehalten (Droppen greift kaum noch).
   uber_speed:
     layer: uber_movement_osm
     minzoom: 11

@@ -13,17 +13,18 @@ zerlegen (osmium-tool: tags-filter → add-locations-to-ways → OPL, kein pyosm
 dann je CSV-Segment die Geometrie per BFS im Way-Graph rekonstruieren (Tiefen-
 Staffel 6→100, Rückrichtung als Fallback → `reconstruction_direction`).
 
-Frontend-Vertrag: Source-ID `uspeed`, interner Layer `uber_movement_osm`, Felder
-`hour_of_day` / `reconstruction_direction` ("forward"/"reverse") / `speed_kph_mean`
-(js/mapdata/addLayers.js, js/ui/setupLayerToggles.js, js/ui/popupHandlers.js).
+Output im WIDE-Format (seit 2026-07-11, davor 1:1-Long-Port): EIN Feature je
+Segment mit `speed_0`…`speed_23` statt 24 Features mit `hour_of_day` — Geometrie
+liegt nur noch einmal in den Tiles (33k statt 537k Features), und der Klick-Popup-
+Chart liest alle 24 Werte direkt aus dem Feature statt sie per querySourceFeatures
+aus geladenen Tiles zusammenzusuchen. Stunden ohne Messwert fehlen als Attribut
+(NaN → FGB-null → tippecanoe lässt sie weg) → Frontend filtert ["has", "speed_<h>"].
 
-Bewusst im Long-Format portiert (24 Features je Segment/Richtung, Stunden-Slider
-filtert auf `hour_of_day`). Ein Wide-Format — ein Feature je Segment/Richtung mit
-`speed_0`…`speed_23` — würde nachweislich funktionieren (das Alt-Notebook hat den
-Wide-Stand `df_final` sogar als Zwischenschritt) und die Featurezahl auf 1/24
-drücken; dafür müsste der Slider im Frontend aber per setPaintProperty auf
-["get", "speed_"+h] umgestellt werden statt per Filter → Vertragsänderung an drei
-Stellen, daher als Folgeschritt notiert (docs/TODO.md).
+Frontend-Vertrag: Source-ID `uspeed`, interner Layer `uber_movement_osm`, Felder
+`reconstruction_direction` ("forward"/"reverse") + `speed_0`…`speed_23`; der
+Stunden-Slider setzt Filter (`has`) + line-color (`speed_<h>`) neu
+(js/mapdata/addLayers.js:applyUspeedHour, setupLayerToggles.js,
+setupScenarioControls.js, popupHandlers.js).
 """
 
 from __future__ import annotations
@@ -212,15 +213,13 @@ def reconstruct_geometries(df_movement, graph: dict):
 
 
 def csv_to_fgb(csv: Path, opl: Path, fgb: Path) -> tuple[Path, int]:
-    """Uber-CSV + Way-Graph → Long-Format-FGB (24 Zeilen je Segment/Richtung).
+    """Uber-CSV + Way-Graph → Wide-Format-FGB (1 Feature je Segment, speed_0..23).
 
-    Entspricht dem Notebook-Pivot/Melt-Roundtrip: die CSV hat keine Duplikate je
-    (Segment, Stunde), damit ist inner-merge + Spaltenauswahl exakt äquivalent.
-    Für ein Wide-Format würde man hier stattdessen auf speed_0..speed_23 pivoten
-    (ein Feature je Segment/Richtung) — funktioniert, braucht aber den Frontend-
-    Umbau des Stunden-Sliders (s. Modul-Docstring).
+    Die CSV (long, keine Duplikate je Segment+Stunde) wird auf 24 Stunden-Spalten
+    pivotiert; Stunden ohne Messwert bleiben NaN → im FGB unset → tippecanoe lässt
+    das Attribut weg (Frontend-Vertrag: ["has", "speed_<h>"]-Filter). Speeds auf
+    eine Nachkommastelle gerundet (spart Tile-Bytes, Anzeige nutzt eh toFixed(1)).
     """
-    import geopandas as gpd
     import pandas as pd
 
     df_movement = pd.read_csv(csv)
@@ -228,13 +227,13 @@ def csv_to_fgb(csv: Path, opl: Path, fgb: Path) -> tuple[Path, int]:
     graph = build_way_graph(opl, set(df_movement["osm_way_id"].astype(int)))
     geometry_df = reconstruct_geometries(df_movement, graph)
 
-    merged = df_movement.merge(geometry_df, on=keys, how="inner")
-    gdf = gpd.GeoDataFrame(
-        merged[[*keys, "reconstruction_direction", "speed_kph_mean", "hour_of_day"]],
-        geometry=merged["geometry"],
-        crs="EPSG:4326",
+    wide = (
+        df_movement.pivot_table(index=keys, columns="hour_of_day", values="speed_kph_mean")
+        .round(1)
+        .add_prefix("speed_")
+        .reset_index()
     )
-    gdf = gdf[~gdf["speed_kph_mean"].isna()]
+    gdf = geometry_df.merge(wide, on=keys, how="inner")
     fgb.parent.mkdir(parents=True, exist_ok=True)
     gdf.to_file(fgb, driver="FlatGeobuf")
     return fgb, len(gdf)
@@ -252,7 +251,7 @@ def build(*, dry_run: bool = False) -> Path:
         print("  [skip] FGB (kein OPL / dry-run)")
     else:
         _, k = csv_to_fgb(_raw() / _CSV, opl, fgb)
-        print(f"  Features (long, 24h): {k}")
+        print(f"  Features (wide, 1/Segment): {k}")
 
     out = get_paths().data / _dataset()["file"]
     return tiles.tippecanoe("uber_speed", fgb, out, layer_override=_LAYER, dry_run=dry_run)

@@ -1,5 +1,7 @@
 // setupScenarioControls.js
 
+import { applyUspeedHour } from "../mapdata/addLayers.js";
+
 function applyClusterSizeFilter(minSize) {
   const value = parseInt(minSize, 10);
   const filter = [">=", ["to-number", ["get", "cluster_size"]], value];
@@ -136,27 +138,15 @@ document.getElementById("uspeed-slider").addEventListener("input", (e) => {
   }
 
   uspeedDebounceTimer = setTimeout(() => {
-    const filters = {
-      "uspeed-forward": [
-        "all",
-        ["==", ["to-number", ["get", "hour_of_day"]], hour],
-        ["==", ["get", "reconstruction_direction"], "forward"]
-      ],
-      "uspeed-reverse": [
-        "all",
-        ["==", ["to-number", ["get", "hour_of_day"]], hour],
-        ["==", ["get", "reconstruction_direction"], "reverse"]
-      ]
-    };
-
     for (const layer of ["uspeed-forward", "uspeed-reverse"]) {
       if (map.getLayer(layer)) {
         map.setLayoutProperty(layer, "visibility", "visible");
-        map.setFilter(layer, filters[layer]);
       } else {
         console.warn(`⚠️ Layer '${layer}' not found.`);
       }
     }
+    // Wide-Format: Stunde wechselt Filter (has speed_<h>) + Farbe (get speed_<h>)
+    applyUspeedHour(map, hour);
   }, 200);
 });
 

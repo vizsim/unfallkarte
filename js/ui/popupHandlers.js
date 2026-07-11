@@ -394,6 +394,9 @@ export function setupUspeedPopups(map) {
         map.on("mousemove", layer, (e) => {
             map.getCanvas().style.cursor = "pointer";
             const p = e.features[0].properties;
+            // Wide-Format: Speed der aktuell im Slider gewählten Stunde aus speed_<h>
+            const hour = parseInt(document.getElementById("uspeed-slider").value, 10);
+            const speed = p[`speed_${hour}`];
 
             const content = `
         <div style="font-size: 12px;">
@@ -402,9 +405,9 @@ export function setupUspeedPopups(map) {
                 <tr><td><strong>OSM Way ID:</strong></td><td>${p.osm_way_id}</td></tr>
                 <tr><td><strong>Start Node:</strong></td><td>${p.osm_start_node_id}</td></tr>
                 <tr><td><strong>End Node:</strong></td><td>${p.osm_end_node_id}</td></tr>
-                <tr><td><strong>Hour:</strong></td><td>${p.hour_of_day}</td></tr>
-                <tr><td><strong>Avg. Speed:</strong></td><td>${Number(p.speed_kph_mean).toFixed(1)} km/h</td></tr>
-                <tr><td><strong>Direction:</strong></td><td>${p.reconstruction_direction}</td></tr>               
+                <tr><td><strong>Hour:</strong></td><td>${hour}</td></tr>
+                <tr><td><strong>Avg. Speed:</strong></td><td>${speed !== undefined ? Number(speed).toFixed(1) + " km/h" : "—"}</td></tr>
+                <tr><td><strong>Direction:</strong></td><td>${p.reconstruction_direction}</td></tr>
             </table>
         </div>
       `;
@@ -422,24 +425,13 @@ export function setupUspeedPopups(map) {
 }
 
 function showUspeedChartPopup(e) {
-    const feature = e.features[0];
-    const osmId = feature.properties.osm_way_id;
-    const startNode = feature.properties.osm_start_node_id;
-    const endNode = feature.properties.osm_end_node_id;
-
-    const allFeatures = map.querySourceFeatures("uspeed", {
-        sourceLayer: "uber_movement_osm"
-    }).filter(f =>
-        f.properties.osm_way_id === osmId &&
-        f.properties.osm_start_node_id === startNode &&
-        f.properties.osm_end_node_id === endNode
+    // Wide-Format: das Feature trägt alle 24 Stunden-Werte selbst (speed_0..speed_23)
+    // -> kein querySourceFeatures-Sammeln mehr (das fand nur geladene Tiles und
+    // konnte Stunden im Chart unterschlagen). Fehlende Stunde = Attribut fehlt = null.
+    const p = e.features[0].properties;
+    const hourlySpeeds = [...Array(24).keys()].map(h =>
+        p[`speed_${h}`] !== undefined ? Number(p[`speed_${h}`]) : null
     );
-
-    const hourlySpeeds = Array(24).fill(null);
-    for (const f of allFeatures) {
-        const hour = parseInt(f.properties.hour_of_day);
-        hourlySpeeds[hour] = Number(f.properties.speed_kph_mean);
-    }
 
     const container = document.createElement("div");
     container.innerHTML = `<canvas id="speed-chart" width="320" height="180"></canvas>`;

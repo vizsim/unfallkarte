@@ -357,10 +357,6 @@ export function addLayers(map) {
 
 
   function addUspeedLayer(map) {
-    //     if (map.getLayer("uspeed")) {
-    //   map.removeLayer("uspeed");
-    // }
-
     // === Offset-Funktion (wie bei maxspeed)
     function getZoomBasedOffset_uspeed() {
       return [
@@ -372,24 +368,14 @@ export function addLayers(map) {
       ];
     }
 
-    const commonPaint = {
-      "line-color": [
-        "interpolate", ["linear"],
-        ["to-number", ["get", "speed_kph_mean"]],
-        10, "#006400",
-        30, "#31a354",
-        50, "#fdcc8a",
-        100, "#e31a1c"
-      ],
-      "line-width": [
-        "interpolate", ["linear"], ["zoom"],
-        10, 0.5,
-        12, 1.5,
-        13, 2.5,
-        16, 3.5,
-        20, 5
-      ]
-    };
+    const lineWidth = [
+      "interpolate", ["linear"], ["zoom"],
+      10, 0.5,
+      12, 1.5,
+      13, 2.5,
+      16, 3.5,
+      20, 5
+    ];
 
     // === Layer: forward (kein Offset)
     map.addLayer({
@@ -399,13 +385,10 @@ export function addLayers(map) {
       source: "uspeed",
       "source-layer": "uber_movement_osm",
       layout: { visibility: "none" },
-      filter: [
-        "all",
-        ["==", ["to-number", ["get", "hour_of_day"]], 14],
-        ["==", ["get", "reconstruction_direction"], "forward"]
-      ],
+      filter: uspeedFilterExpr(14, "forward"),
       paint: {
-        ...commonPaint,
+        "line-color": uspeedColorExpr(14),
+        "line-width": lineWidth,
         "line-offset": 0
       }
     });
@@ -418,13 +401,10 @@ export function addLayers(map) {
       source: "uspeed",
       "source-layer": "uber_movement_osm",
       layout: { visibility: "none" },
-      filter: [
-        "all",
-        ["==", ["to-number", ["get", "hour_of_day"]], 14],
-        ["==", ["get", "reconstruction_direction"], "reverse"]
-      ],
+      filter: uspeedFilterExpr(14, "reverse"),
       paint: {
-        ...commonPaint,
+        "line-color": uspeedColorExpr(14),
+        "line-width": lineWidth,
         "line-offset": getZoomBasedOffset_uspeed()
       }
     });
@@ -1567,6 +1547,40 @@ export function addLayers(map) {
   addMapillaryTSLayer(map);
 }
 
+
+// uspeed (Uber Movement, Wide-Format): 1 Feature je Segment mit speed_0..speed_23.
+// Der Stunden-Slider wechselt Attribut statt Feature: Filter prüft ["has", "speed_<h>"]
+// (Stunden ohne Messwert fehlen als Attribut — sonst würde null->0 dunkelgrün rendern),
+// line-color liest ["get", "speed_<h>"]. Genutzt von addLayers (initial, h=14) und
+// applyUspeedHour (Toggle + Slider) -> eine Quelle.
+export function uspeedFilterExpr(hour, direction) {
+  return [
+    "all",
+    ["has", `speed_${hour}`],
+    ["==", ["get", "reconstruction_direction"], direction]
+  ];
+}
+
+export function uspeedColorExpr(hour) {
+  return [
+    "interpolate", ["linear"],
+    ["to-number", ["get", `speed_${hour}`]],
+    10, "#006400",
+    30, "#31a354",
+    50, "#fdcc8a",
+    100, "#e31a1c"
+  ];
+}
+
+export function applyUspeedHour(map, hour) {
+  const directions = { "uspeed-forward": "forward", "uspeed-reverse": "reverse" };
+  for (const [layer, direction] of Object.entries(directions)) {
+    if (map.getLayer(layer)) {
+      map.setFilter(layer, uspeedFilterExpr(hour, direction));
+      map.setPaintProperty(layer, "line-color", uspeedColorExpr(hour));
+    }
+  }
+}
 
 // Telraam: Linienfarbe nach Modus (Auto/Rad), Skala = Ø/Tag (letzte 2 Wochen).
 // Segmente ohne aggregierte Daten (Attribut fehlt) -> grau. Breakpoints aus den

@@ -51,23 +51,22 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
 
 - [ ] `schrott/` (~810 MB, gitignored): OBS/Lärm/HVS/Uber sind inzwischen in die
       Pipeline migriert — die Notebooks dort sind obsolet.
-- [ ] `preprocessing/` (~6,2 GB): durch die Uber-Migration (2026-07-11) obsolet —
-      die Roh-CSV ist nach `pipeline/data/raw/uber/` übernommen, `laerm_blr/` ist
-      durch `laerm.py` (HLQ-Layer 4110/4120) überholt. Vor dem Löschen: Roh-CSV
-      zusätzlich auf B2 sichern (Uber Movement ist abgeschaltet, unersetzlich!).
-- [ ] `preprocessing/uber_movement/prepare_uber_movement_allhours.ipynb` ist die
-      einzige git-getrackte Datei unter `preprocessing/` — nach der Migration
-      (Logik lebt jetzt in `pipeline/src/unfallkarte/uber.py`) entfernbar.
+- [x] `preprocessing/` (~6,2 GB): gelöscht (2026-07-11). Die unersetzliche
+      Uber-Roh-CSV liegt in `pipeline/data/raw/uber/` UND als Backup auf B2
+      (`unfallkarte-data-v2/raw/uber/…csv.zip`, manuell hochgeladen — der normale
+      Deploy synct nur PMTiles+Manifest).
+- [x] `preprocessing/uber_movement/prepare_uber_movement_allhours.ipynb` entfernt
+      (Logik lebt in `pipeline/src/unfallkarte/uber.py`, Output war byte-identisch
+      verifiziert).
 - [ ] Altes B2-Bucket `unfallkarte-data` hat nach der Uber-Migration keinen
       Verbraucher mehr → stilllegbar (vorher kurz verifizieren, dass nichts
       Externes darauf zeigt).
 
-## Uber-Speed-Layer (Folgeideen)
+## Uber-Speed-Layer
 
-- [ ] **Wide-Format statt Long-Format:** aktuell 24 Features je Segment/Richtung
-      (`hour_of_day`, Slider filtert). Ein Feature je Segment/Richtung mit
-      `speed_0`…`speed_23` würde die Featurezahl auf 1/24 drücken (kleinere Tiles,
-      schnelleres Rendering); das Alt-Notebook hatte den Wide-Stand (`df_final`)
-      schon als Zwischenschritt. Braucht Frontend-Umbau: Slider per
-      `setPaintProperty(["get", "speed_"+h])` statt `setFilter`, Popup-Chart liest
-      die 24 Felder direkt (addLayers.js, setupLayerToggles.js, popupHandlers.js).
+- [x] **Wide-Format** (2026-07-11): 1 Feature je Segment mit `speed_0`…`speed_23`
+      statt 24 Long-Features — 33.480 statt 536.759 Features, PMTiles 12,9 statt
+      31,3 MB. Stunden ohne Messwert fehlen als Attribut → Slider setzt Filter
+      (`["has", "speed_<h>"]`) + line-color neu (`applyUspeedHour` in addLayers.js);
+      Klick-Chart liest die 24 Werte direkt aus dem Feature (vorher
+      querySourceFeatures über geladene Tiles — konnte Stunden unterschlagen).

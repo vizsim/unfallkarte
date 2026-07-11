@@ -7,7 +7,7 @@
 
 import { applyZoomLock } from "../utils/zoomLock.js";
 import { updateLegendVisibilityByZoom } from "./legendHandlers.js";
-import { telraamColorExpr } from "../mapdata/addLayers.js";
+import { telraamColorExpr, applyUspeedHour } from "../mapdata/addLayers.js";
 import { svzColorExpr, svzWidthExpr, svzRadiusExpr } from "../mapdata/addLayers.js";
 
 
@@ -55,30 +55,17 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
     "maxspeed_minor-backward", "maxspeed_minor-conditional-forward", "maxspeed_minor-conditional-backward"
   ], zoomLock, applyLegendVisibility);
 
-  // Für "uspeed" mit zusätzlicher Filterlogik
+  // Für "uspeed" mit zusätzlicher Filter-/Farblogik (Wide-Format: speed_<h>-Attribut)
   document.getElementById("toggle-uspeed").addEventListener("change", (e) => {
     const visible = e.target.checked ? "visible" : "none";
     const hour = parseInt(document.getElementById("uspeed-slider").value);
 
-    const filters = {
-      "uspeed-forward": [
-        "all",
-        ["==", ["to-number", ["get", "hour_of_day"]], hour],
-        ["==", ["get", "reconstruction_direction"], "forward"]
-      ],
-      "uspeed-reverse": [
-        "all",
-        ["==", ["to-number", ["get", "hour_of_day"]], hour],
-        ["==", ["get", "reconstruction_direction"], "reverse"]
-      ]
-    };
-
     for (const layer of ["uspeed-forward", "uspeed-reverse"]) {
       if (map.getLayer(layer)) {
         map.setLayoutProperty(layer, "visibility", visible);
-        map.setFilter(layer, filters[layer]);
       }
     }
+    applyUspeedHour(map, hour);
 
     document.getElementById("uspeed-legend").style.display = visible === "visible" ? "block" : "none";
     document.getElementById("uspeed-slider-container").style.display = visible === "visible" ? "block" : "none";
