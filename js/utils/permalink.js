@@ -255,20 +255,22 @@ export function setupPermalinkHandling(map, {
         return;
     }
 
-    map.on("idle", () => {
-        if (!isInitializingRef.value) return;
-
-        requestAnimationFrame(() => {
-            applyPermalink(
-                map,
-                paintStyles,
-                updateLayerFilter,
-                updateVisibleFeatureCount,
-                isInitializingRef
-            );
-            map.on("moveend", () => updatePermalink(map, isInitializingRef));
-            map.on("zoomend", () => updatePermalink(map, isInitializingRef));
-            isInitializingRef.value = false;
-        });
+    // Sofort anwenden statt auf das erste "idle" zu warten: idle feuert erst, wenn
+    // Basemap + alle Quellen fertig gerendert sind — bis dahin blieben die
+    // Unfall-Layer unsichtbar (visibility: none) und ihre Tiles wurden gar nicht
+    // erst angefragt. Layer/Toggles stehen hier bereits (Aufruf aus dem
+    // load-Handler nach setupUI/setupLegend), das rAF entkoppelt nur vom
+    // laufenden Event-Handler.
+    requestAnimationFrame(() => {
+        applyPermalink(
+            map,
+            paintStyles,
+            updateLayerFilter,
+            updateVisibleFeatureCount,
+            isInitializingRef
+        );
+        map.on("moveend", () => updatePermalink(map, isInitializingRef));
+        map.on("zoomend", () => updatePermalink(map, isInitializingRef));
+        isInitializingRef.value = false;
     });
 }
