@@ -1,8 +1,8 @@
 """CLI-Einstieg: `unfallkarte <gruppe> <befehl>`.
 
-Phase 0 = Gerüst: Struktur + Config-Wiring stehen, die eigentliche Logik folgt in
-den späteren Phasen (Stubs sagen, was sie tun werden). Kein Verhaltenswechsel an
-den Daten.
+Gruppen: accidents/osm/scenario (Kern), hvs/laerm/obs/telraam/movebis (Kontextlayer),
+dazu top-level `manifest` + `deploy`. Die Logik lebt in den gleichnamigen Modulen;
+hier nur Typer-Wiring (Imports lazy, damit die CLI schnell startet).
 """
 
 from __future__ import annotations
@@ -142,7 +142,7 @@ def telraam_build(
 # --- hvs / UBA-Verkehrsmengen ---
 @hvs_app.command("fetch")
 def hvs_fetch(force: bool = typer.Option(False, "--force", help="Erneut laden")) -> None:
-    """Lädt Layer 81002 (Hauptverkehrsstraßennetz, 2021) nach data/raw/hvs/."""
+    """Lädt Layer 8100 (Hauptverkehrsstraßennetz, volle Geometrie, 2021) nach data/raw/hvs/."""
     from unfallkarte import hvs
 
     dest = hvs.fetch(force=force)

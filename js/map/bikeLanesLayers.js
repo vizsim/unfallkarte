@@ -1,6 +1,6 @@
 // js/map/bikeLanesLayers.js
 //
-// Kontextlayer "Radinfrastruktur" — live aus dem TILDA/radverkehrsatlas-
+// Kontextlayer "Radinfrastruktur" — live aus dem TILDA/radinfra.de-
 // Vektor-Tile-Server (kein Preprocessing, kein B2). Portiert aus
 // vizsim/mapillary_coverage_analysis (viz/map/bikeLanesLayers.js); Styling +
 // Klassifizierung (Property `category`) 1:1 von dort übernommen — die dortigen
@@ -101,7 +101,7 @@ export function addBikeLanesSource(map) {
     tiles: ["https://tiles.tilda-geo.de/atlas_generalized_bikelanes/{z}/{x}/{y}"],
     minzoom: 9,
     maxzoom: 22,
-    attribution: "Radinfrastruktur: radverkehrsatlas / TILDA",
+    attribution: "Radinfrastruktur: radinfra.de / TILDA",
   });
 }
 

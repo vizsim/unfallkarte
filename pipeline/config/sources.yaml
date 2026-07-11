@@ -71,7 +71,7 @@ datasets:
   bikelanes:
     live: true            # externer TILDA-Tile-Server, kein Build-Artefakt
     label: "Radinfrastruktur"
-    attribution: "radverkehrsatlas / TILDA"
+    attribution: "radinfra.de / TILDA"
 
   # --- Szenarien ---
   scenario1:

@@ -1,11 +1,11 @@
 # unfallkarte — Pipeline
 
-Python-Pipeline (uv) für die Unfallkarte: Unfalldaten laden/harmonisieren, OSM-
+Python-Pipeline (uv) für die Unfallkarte: Unfalldaten laden/harmonisieren, OSM- und
 Kontextlayer bauen, Szenarien rechnen, PMTiles erzeugen und nach B2 deployen.
-Ersetzt die alten Notebooks in `../preprocessing/` und `../scenarios/`.
+Ersetzt die früheren Jupyter-Notebooks (Refactor abgeschlossen).
 
-Strategie & Begründung: `../REFACTORING_PLAN.md`. Regeln: `../CLAUDE.md`.
-Status/Offenes: `../WRAPUP.md`.
+Historie & Begründung: `../docs/REFACTORING_PLAN.md`. Regeln: `../CLAUDE.md`.
+Offene Punkte: `../docs/TODO.md`.
 
 ## Setup
 
@@ -20,10 +20,15 @@ uvx ruff check                # Lint
 
 ## CLI
 
-```
+```text
 unfallkarte accidents fetch|build|tiles   # Unfalldaten → GeoParquet → PMTiles
 unfallkarte osm fetch|build               # Geofabrik + osmium → PMTiles
 unfallkarte scenario list|run|run-all     # Szenarien
+unfallkarte hvs fetch|build               # UBA-Verkehrsmengen (Hauptverkehrsstraßen)
+unfallkarte laerm fetch|build             # UBA-Umgebungslärm (Tag/Nacht)
+unfallkarte obs fetch|build               # OpenBikeSensor-Überholabstände
+unfallkarte telraam fetch|build           # Telraam-Zählstellen
+unfallkarte movebis build                 # movebis Rad-Geschwindigkeiten (GPKG lokal)
 unfallkarte manifest                      # data/manifest.json (Local-first + Datenstand)
 unfallkarte deploy                        # b2 sync (PMTiles + manifest)
 ```
@@ -37,8 +42,9 @@ unfallkarte deploy                        # b2 sync (PMTiles + manifest)
 
 `scenario run-all` rechnet: **1** (Unfall-Cluster auf Tempo-100-Straßen, DBSCAN) ·
 **2** (Unfälle nahe Schulen) · **3** (Tempo-30 durchgängig, 50er-Lückenschlüsse) ·
-**6** (Tempo-50-Straßen vor Schulen) · **8** (Lärm vor Schulen, UBA). sc8 braucht die
-UBA-Lärm-fgb unter `data/raw/laerm/` (statisch, verlinkt).
+**6** (Tempo-50-Straßen vor Schulen) · **8** (Lärm vor Schulen, UBA) ·
+**9** (Unfallschwerpunkte, M-Uko-Kriterien vereinfacht: 3-Jahres-Fenster + DBSCAN).
+sc8 braucht die UBA-Lärm-fgb unter `data/raw/laerm/` (statisch, verlinkt).
 
 ## Layout
 

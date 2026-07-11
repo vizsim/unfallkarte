@@ -6,11 +6,14 @@
 **Interaktive Webkarte** für Verkehrsunfälle in Deutschland. Die Unfalldaten stammen
 aus dem [Unfallatlas der Statistischen Ämter](https://unfallatlas.statistikportal.de/)
 (dl-de/by-2-0). Rohe Unfall- und OpenStreetMap-Daten werden zu **PMTiles** verarbeitet
-und **keyless** in einer MapLibre-Karte dargestellt.
+und in einer MapLibre-Karte dargestellt — komplett auf offenen, frei gehosteten
+Diensten (keine kommerzielle Karten-API).
 
 ## 🚀 Online ansehen
 
 👉 [Unfallkarte auf GitHub Pages](https://vizsim.github.io/unfallkarte/)
+
+![Screenshot der Unfallkarte: Unfallpunkte auf der Karte, rechts die Legende mit Filtern](docs/screenshot.png)
 
 ## 🏗️ Architektur
 
@@ -28,24 +31,34 @@ Zwei Teile in einem Repo:
 - **Unfälle 2017–2024** (Unfallatlas) — Einzelpunkte (hoher Zoom) + Cluster (niedriger
   Zoom mit Tortendiagrammen), filterbar nach Schwere, Art, Typ, Jahr und Beteiligung.
 - **OSM-Kontext** (ODbL): Schulen & Kindergärten, Gesundheitseinrichtungen, Spielplätze,
-  Tempolimit-Straßennetz (Haupt- und Nebenstraßen).
+  Querungen/Übergänge, Tempolimit-Straßennetz (Haupt- und Nebenstraßen).
 - **Szenarien** (Unfälle/OSM × Kontext):
   - **sc1** — Unfall-Cluster auf Tempo-100-Straßen (DBSCAN)
   - **sc2** — Unfälle nahe Schulen (50 m, ab 2020)
   - **sc3** — Tempo-30 durchgängig: kurze 50er-Lücken zwischen 30er-Zonen
   - **sc6** — Tempo-50-Straßen vor Schulen (30 m, ≥60 m)
   - **sc8** — Lärm vor Schulen (UBA-Lärmkartierung, >56 dB)
-- **Live-/Kontextlayer**: Radinfrastruktur ([radverkehrsatlas/TILDA](https://radverkehrsatlas.de/)),
-  Mapillary-Tiles (Street-View-Sprung), sowie statische Layer (Uber-Geschwindigkeiten Berlin,
-  OpenBikeSensor, UBA-Lärm, Hauptverkehrsstraßen).
+  - **sc9** — Unfallschwerpunkte (M-Uko-Kriterien vereinfacht: 3-Jahres-Fenster + DBSCAN)
+- **Verkehr & Umwelt** (aus der Pipeline): Verkehrsmengen (SVZ der Länder,
+  BASt-Bundesfernstraßen, UBA-Hauptverkehrsstraßen), Rad-Geschwindigkeiten (movebis),
+  Überholabstände ([OpenBikeSensor](https://www.openbikesensor.org/)), Umgebungslärm
+  (UBA, Tag/Nacht), Telraam-Zählstellen — dazu Pkw-Geschwindigkeiten Berlin
+  (Uber Movement 2019, statisch).
+- **Live-Layer**: Radinfrastruktur ([radinfra.de/TILDA](https://radinfra.de/)),
+  Mapillary-Tiles (Street-View-Sprung).
 
-## 🔑 Keyless — kein MapTiler
+## 🌐 Offene Dienste — ohne Registrierung/API-Key
+
+Basemap, Terrain und Suche laufen auf frei gehosteten Diensten:
 
 - **Basemap**: [OpenFreeMap](https://openfreemap.org/) Positron (gehostete OpenFreeMap-Tiles
   inkl. Fonts), dazu OSM Carto und Esri Imagery (im Karten-Panel umschaltbar).
 - **Relief / 3D-Terrain + Hillshade**: [Mapterhorn](https://mapterhorn.com/) (raster-dem, terrarium).
 - **3D-Gebäude**: OpenFreeMap-Planet. **Adress-Suche**: [Photon](https://photon.komoot.io/) (Komoot).
-- Kein API-Key im Code; Secrets nur in `.env` (gitignored).
+
+Einzige Ausnahme: der optionale Mapillary-Layer (Street-View-Sprung, Verkehrszeichen)
+nutzt einen Mapillary-**Client-Token** (`js/config/config.public.js`). Pipeline-Secrets
+(B2-Keys) liegen nur in `pipeline/.env` (gitignored).
 
 ## 🖥️ Frontend lokal starten
 
@@ -74,14 +87,24 @@ uv run unfallkarte scenario run-all
 uv run unfallkarte manifest && uv run unfallkarte deploy
 ```
 
+Kontextlayer analog: `uv run unfallkarte <hvs|laerm|obs|telraam> fetch|build` bzw.
+`movebis build` (Details in [`pipeline/README.md`](pipeline/README.md)).
+
 System-Binaries (nicht via pip): `tippecanoe` + `tile-join`, `osmium-tool`; b2-CLI via
 `uv tool install b2`. (`ogr2ogr`/gdal-bin wird **nicht** gebraucht — OSM-PBF wird direkt
 via pyogrio gelesen.)
 
+## 📚 Weitere Doku
+
+- [`docs/TODO.md`](docs/TODO.md) — offene Punkte (UX, CI, Aufräumen).
+- [`docs/REFACTORING_PLAN.md`](docs/REFACTORING_PLAN.md) — Historie & Begründung des
+  Notebook→Pipeline-Refactors (abgeschlossen).
+- [`CLAUDE.md`](CLAUDE.md) — Regeln/Konventionen für die Arbeit im Repo.
+
 ## 🧰 Tech
 
 MapLibre GL JS · PMTiles · tippecanoe · osmium-tool · GeoPandas/pyogrio (Python-Pipeline, **uv**)
-· OpenFreeMap · Mapterhorn · Backblaze B2 · Photon · radverkehrsatlas/TILDA.
+· OpenFreeMap · Mapterhorn · Backblaze B2 · Photon · radinfra.de/TILDA.
 
 ## 📄 Lizenz
 
@@ -91,4 +114,4 @@ AGPL-§13-Pflicht (Network Use).
 
 **Daten** behalten ihre eigenen Lizenzen + Attribution: Unfallatlas (dl-de/by-2-0),
 OpenStreetMap (ODbL), Umweltbundesamt (Lärm), OpenFreeMap (ODbL), Mapterhorn, Mapillary,
-radverkehrsatlas/TILDA.
+radinfra.de/TILDA.

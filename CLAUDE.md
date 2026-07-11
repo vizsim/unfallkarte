@@ -2,7 +2,8 @@
 
 Interaktive Webkarte für Verkehrsunfälle in Deutschland (Unfallatlas). Die frühere
 Notebook-Verarbeitung ist zu einer wartbaren Python-Pipeline umgebaut (Refactor
-abgeschlossen). Strategie & Historie: siehe `REFACTORING_PLAN.md`. Überblick: `README.md`.
+abgeschlossen). Strategie & Historie: siehe `docs/REFACTORING_PLAN.md`. Überblick:
+`README.md`. Offene Punkte: `docs/TODO.md`.
 Diese Datei = die Regeln, die in JEDER Session gelten.
 
 ## Repo-Layout
@@ -54,8 +55,9 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
   gespeist aus `pipeline/config/sources.yaml`.
 - **Bucket `unfallkarte-data-v2`** (public + CORS), Subfolder `accidents/ osm/ scenarios/`.
   `b2 sync` spiegelt den lokalen `data/`-Baum 1:1 → Pfade lokal == remote. Stabile Dateinamen
-  (kein Datum im Namen), Datum lebt im Manifest. Statische Kontextlayer (Uber/Lärm/OBS/HVS)
-  laufen weiterhin vom alten Bucket `unfallkarte-data`.
+  (kein Datum im Namen), Datum lebt im Manifest. Einziger Legacy-Layer: Uber-uspeed läuft
+  noch vom alten Bucket `unfallkarte-data` (siehe `LEGACY` in `js/mapdata/addSources.js`);
+  Lärm/OBS/HVS sind in die Pipeline migriert.
 
 ## Verifizieren (Sicherheitsnetz)
 - **Golden-Reference** (`pipeline/tests/golden/`): Feature-Counts/Spalten/Jahre des Accident-
@@ -64,7 +66,7 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
   Layer laden local-first/B2.
 
 ## Vorgehen
-- Refactor abgeschlossen: accidents (2017–2024), OSM-Layer und alle Szenarien (1/2/3/6/8)
+- Refactor abgeschlossen: accidents (2017–2024), OSM-Layer und alle Szenarien (1/2/3/6/8/9)
   sind portiert, gebaut und deployt; Frontend keyless mit Local-first/B2.
 - Kleine, fokussierte Commits auf `unfallkarte-2026`. Offene Punkte siehe Auto-Memory
-  bzw. `README.md`.
+  bzw. `docs/TODO.md`.
