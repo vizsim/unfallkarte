@@ -43,6 +43,14 @@ years:
     zip: "Unfallorte2024_EPSG25832_CSV.zip"
     csv_path: "csv/Unfallorte2024_LinRef.csv"
     sep: ";"
+  # 2025: am 2026-07-11 gegen den NRW-Mirror verifiziert. Neuer interner CSV-Name
+  # ("LR_BasisDLM" statt "LinRef"). Spalte OID_ ist weggefallen (25 statt 26
+  # Spalten) → OBJECTID ist für 2025 leer; Rest identisch zu 2024, renames
+  # greifen 1:1. 273.007 Rohzeilen.
+  "2025":
+    zip: "Unfallorte2025_EPSG25832_CSV.zip"
+    csv_path: "csv/Unfallorte_2025_LR_BasisDLM.csv"
+    sep: ";"
 
 # Koordinaten-Spalten: Komma->Punkt, float, dann Point-Geometrie in EPSG:4326.
 lon_col: "XGCSWGS84"
