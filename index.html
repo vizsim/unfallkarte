@@ -24,6 +24,11 @@
   <meta name="twitter:card" content="summary_large_image" />
   <!-- <link rel="icon" href="data:,"> -->
   <link rel="icon" href="stationary-bike-gym-svgrepo-com.svg" type="image/svg+xml">
+  <!-- DNS+TLS früh aufbauen: Basemap (OpenFreeMap) und Datenbucket (B2) werden
+       per fetch/CORS angesprochen -> crossorigin nötig, sonst greift die
+       vorgewärmte Verbindung nicht. -->
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+  <link rel="preconnect" href="https://tiles.vizsim.de" crossorigin>
   <link rel="stylesheet" href="./vendor/maplibre-gl.css" />
   <link rel="stylesheet" href="style.css" />
 </head>

@@ -5,6 +5,7 @@ import { paintStyles, getCircleColorPaint } from './js/styleConfig.js';
 // 📦 Kartenfunktionen
 import { addSources } from "./js/mapdata/addSources.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
+import { resolveSources } from "./js/mapdata/resolveSources.js";
 
 // 📦 Basemap/Terrain (keyless, ersetzt MapTiler) + Radinfrastruktur (TILDA)
 import { addBasemapTerrain, setBasemap, setRelief, setBuildings } from './js/map/basemapTerrain.js';
@@ -112,6 +113,10 @@ async function initMap() {
 
   const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
 
+  // Manifest + PMTiles-Auflösung sofort anstoßen — parallel zu Style-Fetch und
+  // Basemap-Tiles, statt erst im "load"-Handler (spart ~1-2 s bis zu den Unfalldaten).
+  const sourcesPromise = resolveSources();
+
   // Style laden und relative sprite-URL gegen die Seitenherkunft absolut machen.
   // MapLibre verlangt absolute sprite-URLs; der Host variiert (localhost / vizsim.de /
   // github.io), darum aus document.baseURI ableiten statt im style.json zu hardcoden.
@@ -132,10 +137,18 @@ async function initMap() {
 
   originalMinZoom = map.getMinZoom();
 
+  // Daten-Quellen/-Layer schon bei "style.load" registrieren (feuert, sobald der
+  // Style geparst ist — VOR "load", das erst nach dem ersten vollständigen
+  // Basemap-Render kommt). So laufen die PMTiles-Metadaten-Fetches parallel zu den
+  // Basemap-Tiles. ??=-Guard: falls "style.load" je erneut feuert, nur einmal laufen.
+  let modulesReady = null;
+  const ensureModules = () => (modulesReady ??= initializeMapModules(map, sourcesPromise));
+  map.on("style.load", ensureModules);
+
   map.on("load", async () => {
 
     // addSources ist async (Local-first-Auflösung) -> erst Module/Layer, dann UI.
-    await initializeMapModules(map);
+    await ensureModules();
     setupUI(map);
     setupScenarioControls(map);
     setupLegend(map);
@@ -406,11 +419,12 @@ function setupEventHandlers(map) {
   applyLegendVisibility();
 }
 
-async function initializeMapModules(map) {
+async function initializeMapModules(map, sourcesPromise) {
   setupPhotonGeocoder(map);
   setupPieChartImageGeneration(map);
   addNavigationControl(map);
-  await addSources(map, { MAPILLARY_TOKEN });  // async: Local-first-Auflösung (manifest)
+  // async: Local-first-Auflösung (manifest) — Promise wurde in initMap schon gestartet.
+  const sources = await addSources(map, { MAPILLARY_TOKEN, sourcesPromise });
 
   addLayers(map);
 
@@ -433,6 +447,7 @@ async function initializeMapModules(map) {
   addBikeLanesSource(map);
   addBikeLanesLayers(map);
 
-  // OSM-Quellen-Tooltips dynamisch mit dem Datenstand (vintage) aus dem Manifest füllen.
-  applyDataVintages();
+  // OSM-Quellen-Tooltips dynamisch mit dem Datenstand (vintage) aus dem Manifest
+  // füllen — Manifest durchreichen, sonst lädt loadManifest() es ein zweites Mal.
+  applyDataVintages(sources.manifest);
 }

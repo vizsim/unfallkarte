@@ -33,13 +33,15 @@ const MIGRATED = {
 // Alle Layer sind in die Pipeline migriert — das alte Bucket `unfallkarte-data`
 // (LEGACY) wird nicht mehr gebraucht. (scenario4/5/7 = Mapillary wurden entfernt.)
 
-export async function addSources(map, { MAPILLARY_TOKEN }) {
+export async function addSources(map, { MAPILLARY_TOKEN, sourcesPromise }) {
   const addVector = (id, url) => {
     if (!map.getSource(id)) map.addSource(id, { type: "vector", url });
   };
 
   // Pipeline-Layer: Local-first + B2-v2-Fallback über data/manifest.json.
-  const sources = await resolveSources();
+  // sourcesPromise wird in main.js schon beim Kartenstart angestoßen (parallel zum
+  // Style-/Basemap-Laden); ohne sie hier als Fallback selbst auflösen.
+  const sources = await (sourcesPromise ?? resolveSources());
   if (!sources.manifestOk) {
     showErrorBanner(
       "Die Kartendaten sind gerade nicht erreichbar (Manifest weder lokal noch " +
@@ -76,4 +78,7 @@ export async function addSources(map, { MAPILLARY_TOKEN }) {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
   });
+
+  // Manifest weiterverwenden (z. B. applyDataVintages) statt es erneut zu laden.
+  return sources;
 }
