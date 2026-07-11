@@ -17,7 +17,8 @@ export const yearMap = {
     2021: "21",
     2022: "22",
     2023: "23",
-    2024: "24"
+    2024: "24",
+    2025: "25"
 };
 
 export const kontextKeys = {

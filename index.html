@@ -6,7 +6,7 @@
   <title>Unfallkarte</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="Interaktive Karte der Verkehrsunfälle in Deutschland 2017–2024 (Unfallatlas) — filterbar nach Schwere, Beteiligung, Unfalltyp und Jahr, mit OSM-Kontextlayern, Verkehrsmengen und Analyse-Szenarien." />
+    content="Interaktive Karte der Verkehrsunfälle in Deutschland 2017–2025 (Unfallatlas) — filterbar nach Schwere, Beteiligung, Unfalltyp und Jahr, mit OSM-Kontextlayern, Verkehrsmengen und Analyse-Szenarien." />
 
   <!-- Social-Media-Vorschau (OpenGraph/Twitter). Crawler führen kein JS aus,
        darum absolute URLs auf die kanonische Instanz (vizsim.de) hardcoden. -->
@@ -14,7 +14,7 @@
   <meta property="og:site_name" content="Unfallkarte" />
   <meta property="og:title" content="Unfallkarte — Verkehrsunfälle in Deutschland" />
   <meta property="og:description"
-    content="Interaktive Karte der Verkehrsunfälle 2017–2024 aus dem Unfallatlas — filterbar nach Schwere, Beteiligung, Unfalltyp und Jahr, mit OSM-Kontextlayern und Analyse-Szenarien." />
+    content="Interaktive Karte der Verkehrsunfälle 2017–2025 aus dem Unfallatlas — filterbar nach Schwere, Beteiligung, Unfalltyp und Jahr, mit OSM-Kontextlayern und Analyse-Szenarien." />
   <meta property="og:url" content="https://vizsim.de/unfallkarte/" />
   <meta property="og:image" content="https://vizsim.de/unfallkarte/docs/screenshot.png" />
   <meta property="og:image:width" content="1280" />
@@ -41,7 +41,7 @@ MAIN HEADER
       <div class="grow">
         <div class="legend-heading">Unfallkarte</div>
         <div class="legend-subtext">
-          Unfalldaten aus Unfallatlas<br />von 2017–2024
+          Unfalldaten aus Unfallatlas<br />von 2017–2025
           <span class="info-icon" title="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">ⓘ</span>
         </div>
       </div>
@@ -251,6 +251,13 @@ MAIN HEADER
             <input type="checkbox" value="2024" data-group="UJAHR" checked />
             <div class="label-wrapper">
               <span class="color-box"></span> 2024
+            </div>
+            <span class="count-badge"></span>
+          </label>
+          <label class="legend-item" data-group="UJAHR" data-value="2025">
+            <input type="checkbox" value="2025" data-group="UJAHR" checked />
+            <div class="label-wrapper">
+              <span class="color-box"></span> 2025
             </div>
             <span class="count-badge"></span>
           </label>
