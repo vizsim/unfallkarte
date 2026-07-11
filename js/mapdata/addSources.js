@@ -26,14 +26,11 @@ const MIGRATED = {
   laerm2: "laerm_night",
   obs: "obs",
   movebis: "movebis",
+  uspeed: "uber_speed",
 };
 
-// Noch NICHT in die Pipeline migriert -> altes Bucket + alte Dateinamen.
-// (statische Kontextdaten; scenario4/5/7 = Mapillary wurden entfernt.)
-const OLD_BASE = "https://tiles.vizsim.de/file/unfallkarte-data/";
-export const LEGACY = {
-  uspeed: "uber_movement_osm_q2_2019_allHoures_osm200101.pmtiles",
-};
+// Alle Layer sind in die Pipeline migriert — das alte Bucket `unfallkarte-data`
+// (LEGACY) wird nicht mehr gebraucht. (scenario4/5/7 = Mapillary wurden entfernt.)
 
 export async function addSources(map, { MAPILLARY_TOKEN }) {
   const addVector = (id, url) => {
@@ -44,11 +41,6 @@ export async function addSources(map, { MAPILLARY_TOKEN }) {
   const sources = await resolveSources();
   for (const [id, manifestId] of Object.entries(MIGRATED)) {
     addVector(id, sources.url(manifestId));
-  }
-
-  // Noch nicht migrierte Layer: altes Bucket.
-  for (const [id, filename] of Object.entries(LEGACY)) {
-    addVector(id, `pmtiles://${OLD_BASE}${filename}`);
   }
 
   // Mapillary (Vektor-Tiles direkt von Mapillary)

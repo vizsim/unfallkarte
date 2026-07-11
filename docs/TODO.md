@@ -49,10 +49,25 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
 
 ## Aufräumen
 
-- [ ] `schrott/` (~810 MB, gitignored): OBS/Lärm/HVS sind inzwischen in die Pipeline
-      migriert — deren Notebooks dort sind obsolet. Uber-Notebooks bleiben (uspeed
-      läuft noch als Legacy-Layer vom alten Bucket).
-- [ ] `preprocessing/` (~6,2 GB): nur noch Archiv für Uber-Movement + Lärm-Rohdaten;
-      prüfen, was davon noch gebraucht wird.
+- [ ] `schrott/` (~810 MB, gitignored): OBS/Lärm/HVS/Uber sind inzwischen in die
+      Pipeline migriert — die Notebooks dort sind obsolet.
+- [ ] `preprocessing/` (~6,2 GB): durch die Uber-Migration (2026-07-11) obsolet —
+      die Roh-CSV ist nach `pipeline/data/raw/uber/` übernommen, `laerm_blr/` ist
+      durch `laerm.py` (HLQ-Layer 4110/4120) überholt. Vor dem Löschen: Roh-CSV
+      zusätzlich auf B2 sichern (Uber Movement ist abgeschaltet, unersetzlich!).
 - [ ] `preprocessing/uber_movement/prepare_uber_movement_allhours.ipynb` ist die
-      einzige git-getrackte Datei unter `preprocessing/` — Absicht oder Versehen?
+      einzige git-getrackte Datei unter `preprocessing/` — nach der Migration
+      (Logik lebt jetzt in `pipeline/src/unfallkarte/uber.py`) entfernbar.
+- [ ] Altes B2-Bucket `unfallkarte-data` hat nach der Uber-Migration keinen
+      Verbraucher mehr → stilllegbar (vorher kurz verifizieren, dass nichts
+      Externes darauf zeigt).
+
+## Uber-Speed-Layer (Folgeideen)
+
+- [ ] **Wide-Format statt Long-Format:** aktuell 24 Features je Segment/Richtung
+      (`hour_of_day`, Slider filtert). Ein Feature je Segment/Richtung mit
+      `speed_0`…`speed_23` würde die Featurezahl auf 1/24 drücken (kleinere Tiles,
+      schnelleres Rendering); das Alt-Notebook hatte den Wide-Stand (`df_final`)
+      schon als Zwischenschritt. Braucht Frontend-Umbau: Slider per
+      `setPaintProperty(["get", "speed_"+h])` statt `setFilter`, Popup-Chart liest
+      die 24 Felder direkt (addLayers.js, setupLayerToggles.js, popupHandlers.js).

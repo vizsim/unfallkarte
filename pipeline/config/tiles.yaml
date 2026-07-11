@@ -143,6 +143,20 @@ profiles:
     no_tile_size_limit: true
     force_feature_limit: true
 
+  # Uber Movement Berlin Q2/2019 (Pkw-Speed je Stunde, Linien). Layer-Name = Frontend-
+  # Vertrag (uber_movement_osm). Flags 1:1 aus dem Alt-Notebook. Long-Format: 24 Features
+  # je Segment/Richtung (Slider filtert hour_of_day) — ein Wide-Format (speed_0..speed_23,
+  # 1/24 der Features) würde funktionieren, braucht aber den Slider-Umbau im Frontend.
+  uber_speed:
+    layer: uber_movement_osm
+    minzoom: 11
+    maxzoom: 15
+    drop_rate: 0
+    drop_densest_as_needed: true
+    no_feature_limit: true
+    no_tile_size_limit: true
+    maximum_tile_bytes: 1000000
+
   # (osm_crossings / osm_cycleways entfernt — Mapillary-Szenarien sc5/sc7 gedroppt.)
 
   # --- Szenarien (Phase 3): Dual-Layer (Punkte niedrig-zoom, Polygone hoch-zoom) ---

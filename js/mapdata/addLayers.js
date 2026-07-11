@@ -402,7 +402,7 @@ export function addLayers(map) {
       filter: [
         "all",
         ["==", ["to-number", ["get", "hour_of_day"]], 14],
-        ["==", ["get", "reconstruction_direction"], "forward2"]
+        ["==", ["get", "reconstruction_direction"], "forward"]
       ],
       paint: {
         ...commonPaint,

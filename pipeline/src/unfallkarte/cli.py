@@ -1,6 +1,6 @@
 """CLI-Einstieg: `unfallkarte <gruppe> <befehl>`.
 
-Gruppen: accidents/osm/scenario (Kern), hvs/laerm/obs/telraam/movebis (Kontextlayer),
+Gruppen: accidents/osm/scenario (Kern), hvs/laerm/obs/telraam/movebis/uber (Kontextlayer),
 dazu top-level `manifest` + `deploy`. Die Logik lebt in den gleichnamigen Modulen;
 hier nur Typer-Wiring (Imports lazy, damit die CLI schnell startet).
 """
@@ -22,6 +22,7 @@ hvs_app = typer.Typer(no_args_is_help=True, help="UBA-Verkehrsmengen (Hauptverke
 laerm_app = typer.Typer(no_args_is_help=True, help="UBA-Umgebungslärm (Lärmkartierung)")
 obs_app = typer.Typer(no_args_is_help=True, help="OpenBikeSensor-Überholabstände")
 movebis_app = typer.Typer(no_args_is_help=True, help="movebis (Stadtradeln) Rad-Geschwindigkeiten")
+uber_app = typer.Typer(no_args_is_help=True, help="Uber Movement (Berlin Q2/2019) Pkw-Speed")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
@@ -30,6 +31,7 @@ app.add_typer(hvs_app, name="hvs")
 app.add_typer(laerm_app, name="laerm")
 app.add_typer(obs_app, name="obs")
 app.add_typer(movebis_app, name="movebis")
+app.add_typer(uber_app, name="uber")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -218,6 +220,27 @@ def movebis_build(
     from unfallkarte import movebis
 
     out = movebis.build(dry_run=dry_run)
+    typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
+
+
+# --- uber / Uber Movement (Berlin Q2/2019, archivierte Quelle) ---
+@uber_app.command("fetch")
+def uber_fetch(force: bool = typer.Option(False, "--force", help="PBF erneut laden")) -> None:
+    """Lädt berlin-200101.osm.pbf (Geofabrik); prüft die archivierte Uber-CSV."""
+    from unfallkarte import uber
+
+    dest = uber.fetch(force=force)
+    typer.secho(f"PBF: {dest}", fg=typer.colors.GREEN)
+
+
+@uber_app.command("build")
+def uber_build(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """CSV + BFS-Rekonstruktion -> traffic/uber_speed.pmtiles (Layer `uber_movement_osm`)."""
+    from unfallkarte import uber
+
+    out = uber.build(dry_run=dry_run)
     typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 
