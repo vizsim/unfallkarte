@@ -795,9 +795,11 @@ export function addLayers(map) {
       layout: { visibility: "none" },
       paint: {
         "circle-color": crossingColor,
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 1.2, 11, 3, 14, 5, 16, 8],
+        // Bei niedrigem Zoom klein und randlos (sonst wirken die Punkte wie ein Teppich);
+        // Rand blendet erst ab z12 ein, wenn die Punkte groß genug dafür sind.
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 0.7, 11, 2, 14, 5, 16, 8],
         "circle-stroke-color": "#1B4D3E",
-        "circle-stroke-width": 1,
+        "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 11.5, 0, 12.5, 1],
         "circle-opacity": 0.85
       }
     });
