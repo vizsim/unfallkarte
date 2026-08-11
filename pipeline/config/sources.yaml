@@ -26,6 +26,14 @@ datasets:
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
     date: auto            # aus `osmium fileinfo` der Geofabrik-PBF
 
+  # Konsument: routing_bulk (dort Layer-Toggle + Startpunkt-Gewichtung);
+  # im unfallkarte-Frontend (noch) nicht eingebunden.
+  osm_platforms:
+    file: "osm/platforms.pmtiles"
+    label: "ÖPNV-Haltestellen"
+    attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
+    date: auto            # aus `osmium fileinfo` der Geofabrik-PBF
+
   osm_health:
     file: "osm/health.pmtiles"
     label: "Gesundheit & Pflege"

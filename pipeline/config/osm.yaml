@@ -24,6 +24,24 @@ layers:
     tile_profile: "osm_features"
     output: "osm/schools.pmtiles"
 
+  # ÖPNV-Haltestellen: public_transport=platform (PTv2; Punkte, lineare Bahnsteige,
+  # Polygone) + klassische highway=bus_stop-Nodes. Konsument: routing_bulk (ersetzt
+  # dort die Overpass-Livesuche; Attribute fürs Popup und die Startpunkt-Gewichtung).
+  # Hinweis: Stops, die als bus_stop-Node UND platform-Way gemappt sind, erscheinen
+  # doppelt — für die Darstellung egal, bei Gewichtung ggf. deduplizieren.
+  platforms:
+    osmium_filter:
+      - "nwr/public_transport=platform"
+      - "n/highway=bus_stop"
+    osmconf: "osmconf_platforms.ini"
+    osm_layers: ["points", "lines", "multipolygons"]
+    tag_filters:
+      public_transport: ["platform"]
+      highway: ["bus_stop"]
+    tippecanoe_layer: "germany_osm_platforms"
+    tile_profile: "osm_features"
+    output: "osm/platforms.pmtiles"
+
   health:
     osmium_filter:
       - "nwr/amenity=hospital,clinic,doctors"
