@@ -49,8 +49,14 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
 
 ## Aufräumen
 
-- [ ] `schrott/` (~810 MB, gitignored): OBS/Lärm/HVS/Uber sind inzwischen in die
-      Pipeline migriert — die Notebooks dort sind obsolet.
+- [x] `schrott/` (war 7,0 GB, gitignored): gelöscht (2026-09-18). Alle Notebooks dort
+      waren durch die Pipeline reproduziert (Uber/OBS/Lärm/sc3/sc8) oder bewusst
+      entfernt (Mapillary sc4/5/7). Vorher geprüft: Uber-Roh-CSV + berlin-200101.pbf
+      byte-identisch in `pipeline/data/raw/uber/`; sc8 liest `data/raw/laerm/` (echte
+      Dateien, keine Symlinks); `laerm_blr/` (5,5 GB, UBA-BLR 4210/4220) nutzte kein
+      Szenario. Einzig aufbewahrt: der letzte Snapshot des inzwischen toten Portals
+      obs.adfc-ac.de als `pipeline/data/raw/obs/_archive_2025-06-11_adfc-ac.geojson`
+      (Name absichtlich außerhalb des `portal_*`-Globs von obs.py).
 - [x] `preprocessing/` (~6,2 GB): gelöscht (2026-07-11). Die unersetzliche
       Uber-Roh-CSV liegt in `pipeline/data/raw/uber/` UND als Backup auf B2
       (`unfallkarte-data-v2/raw/uber/…csv.zip`, manuell hochgeladen — der normale

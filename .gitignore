@@ -25,7 +25,6 @@ config.js
 # Ignore virtual environment
 unfallkarte_env/
 accident_data/
-schrott/
 
 
 
