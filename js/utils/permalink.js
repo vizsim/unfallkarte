@@ -1,4 +1,5 @@
-// Cleaned permalink.js
+// permalink.js
+import { registryPermalinkKeys } from "../layers/registry.js";
 
 export const beteiligungMap = {
     IstRad: "1",
@@ -21,23 +22,19 @@ export const yearMap = {
     2025: "25"
 };
 
+// Toggle-ID -> EIN Zeichen im Kontext-Teil von ?p=. Zeichen nie neu vergeben — alte Links
+// würden sonst einen anderen Layer einschalten. Reserviert (früher terrain/hillshade): t, i.
+// Einträge der Layer-Registry bringen ihr Zeichen selbst mit (js/layers/registry.js).
 export const kontextKeys = {
     mapillary: "m",
     mapillary_ts: "y",
     maxspeed: "s",
     hvs: "h",
     svz: "v",
-    movebis: "b",
-    schools: "k",
-    health: "e",
-    playgrounds: "p",
-    crossings: "c",
-    terrain: "t",
-    hillshade: "i",
-    obs: "o",
-    laerm1: "l",
-    laerm2: "r",
     uspeed: "u",
+    telraam: "z",    // fehlte bis 2026-09: Telraam ging beim Teilen des Links verloren
+    bikelanes: "f",  // dito Radinfrastruktur
+    ...registryPermalinkKeys(),
 };
 
 const reverse = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]));

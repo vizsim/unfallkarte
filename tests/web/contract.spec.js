@@ -96,3 +96,70 @@ test("Sc2-Slider filtert nach biped_count (blendete früher ALLES aus: Attribut 
   await expect.poll(count, { timeout: 30_000 }).toBe(base); // zurück = alles wieder da
   expectNoErrors(errors);
 });
+
+// Bekannte Lücken: Popup liest ein Attribut, das (noch) nicht in den Tiles steht -> die Zeile
+// erscheint nie. Jede Ausnahme braucht einen Grund; sobald die Tiles das Feld liefern, schlägt
+// der Test an ("Ausnahme überflüssig") und der Eintrag fliegt raus. Siehe docs/TODO.md.
+const KNOWN_POPUP_GAPS = {
+  health: { operator: "osmconf_health.ini exportiert `operator` nicht (Pipeline-TODO, braucht Rebuild)" },
+  playgrounds: {
+    operator: "osmconf_playgrounds.ini exportiert `operator` nicht (Pipeline-TODO)",
+    playground: "osmconf_playgrounds.ini exportiert `playground` nicht (Pipeline-TODO)",
+  },
+  scenario6: {
+    name: "Sc6-Tiles tragen nur oid + Tempo-50-Länge (Pipeline-TODO „Sc6-Tiles ohne Namen“)",
+    amenity: "dito",
+  },
+  svz: { sv_anteil: "kein Bug: nur der Linien-Layer hat sv_anteil, die Punkt-Layer liefern dtv_sv (Fallback im Popup)" },
+};
+
+test("Frontend-Vertrag: Attribute, die die Popups lesen, existieren in den PMTiles", async ({ page }) => {
+  await openMap(page);
+
+  const report = await page.evaluate(async (known) => {
+    const { allPopupEntries } = await import("/js/ui/popupHandlers.js");
+    const style = window.map.getStyle();
+    const metaCache = new Map();
+    const fieldsOfLayer = async (layerId) => {
+      const l = style.layers.find((x) => x.id === layerId);
+      const src = l && style.sources[l.source];
+      if (!src?.url?.startsWith("pmtiles://")) return null; // Laufzeit-/Fremdquellen (hover-point, Mapillary)
+      const url = new URL(src.url.slice("pmtiles://".length), document.baseURI).href;
+      if (!metaCache.has(url)) metaCache.set(url, new pmtiles.PMTiles(url).getMetadata());
+      const vl = ((await metaCache.get(url)).vector_layers ?? []).find((v) => v.id === l["source-layer"]);
+      return vl ? new Set(Object.keys(vl.fields ?? {})) : null;
+    };
+
+    const problems = [];
+    const gapsSeen = new Set(); // "eintrag.feld", das in mind. einem Layer wirklich fehlt
+    let checked = 0;
+    for (const entry of allPopupEntries(window.map)) {
+      // Welche Properties liest render()? Aufzeichnender Proxy statt handgepflegter Liste.
+      const read = new Set();
+      const recorder = new Proxy({}, { get: (_, k) => (typeof k === "string" && read.add(k), undefined), has: () => false });
+      try { entry.render(recorder, { properties: recorder, geometry: { coordinates: [0, 0] } }); } catch { /* bis zum Wurf Gelesenes zählt */ }
+      try { entry.link?.(recorder); } catch { /* dito */ }
+
+      for (const layerId of entry.layers) {
+        const fields = await fieldsOfLayer(layerId);
+        if (!fields) continue;
+        checked += 1;
+        for (const f of read) {
+          if (fields.has(f)) continue;
+          gapsSeen.add(`${entry.id}.${f}`);
+          if (!known[entry.id]?.[f]) problems.push(`Popup "${entry.id}" liest "${f}" — fehlt in Layer "${layerId}"`);
+        }
+      }
+    }
+    // Verfallskontrolle: Ausnahme eingetragen, aber das Feld fehlt nirgends mehr
+    for (const [id, fields] of Object.entries(known)) {
+      for (const f of Object.keys(fields)) {
+        if (!gapsSeen.has(`${id}.${f}`)) problems.push(`Ausnahme überflüssig: "${id}.${f}" ist inzwischen in den Tiles — aus KNOWN_POPUP_GAPS entfernen`);
+      }
+    }
+    return { problems, checked };
+  }, KNOWN_POPUP_GAPS);
+
+  expect(report.checked, "zu wenige Popup-Layer geprüft").toBeGreaterThan(30);
+  expect(report.problems, `Popups lesen Attribute, die es in den Tiles nicht gibt:\n${report.problems.join("\n")}`).toEqual([]);
+});

@@ -5512,7 +5512,7 @@
     "zoomHints": [
      "bikelanes-legend"
     ],
-    "permalink": ","
+    "permalink": ",f"
    },
    "toggle-crossings": {
     "layersOn": [
@@ -5772,7 +5772,7 @@
     "zoomHints": [
      "telraam-legend"
     ],
-    "permalink": ","
+    "permalink": ",z"
    },
    "toggle-uspeed": {
     "layersOn": [
@@ -5811,7 +5811,7 @@
      "bikelanes-legend"
     ],
     "zoomHints": [],
-    "permalink": ","
+    "permalink": ",f"
    },
    "toggle-crossings": {
     "layersOn": [
@@ -6049,7 +6049,7 @@
      "telraam-legend"
     ],
     "zoomHints": [],
-    "permalink": ","
+    "permalink": ",z"
    },
    "toggle-uspeed": {
     "layersOn": [
@@ -6086,7 +6086,7 @@
      "bikelanes-legend"
     ],
     "zoomHints": [],
-    "permalink": ","
+    "permalink": ",f"
    },
    "toggle-crossings": {
     "layersOn": [
@@ -6320,7 +6320,7 @@
      "telraam-legend"
     ],
     "zoomHints": [],
-    "permalink": ","
+    "permalink": ",z"
    },
    "toggle-uspeed": {
     "layersOn": [

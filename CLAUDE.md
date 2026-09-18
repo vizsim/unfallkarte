@@ -30,6 +30,12 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
 - **Tools:** `uv run unfallkarte <cmd>`. Lint: `uvx ruff check` (aus `pipeline/`). Tests:
   `uv run pytest`. Frontend: `npm run serve` (Range-fähig; `python -m http.server` kann
   keine Range-Requests → lokale PMTiles scheitern), `npm run test:web`.
+- **Layer-Registry** (`js/layers/registry.js`, im Aufbau — Stand siehe `docs/TODO.md` Roadmap 2):
+  ein Eintrag je Legenden-Zeile liefert Quelle, Toggle-Layer, Permalink-Zeichen, Zoom-Hinweis
+  und Popups. Neue Layer dort eintragen, nicht mehr in die Einzellisten. DOM-IDs
+  (`#toggle-<id>`, `#<id>-legend`) und Permalink-Zeichen sind Vertrag — nie umbenennen/neu
+  vergeben. Nach Umbauten: `npx playwright test golden` muss unverändert grün sein; gewollte
+  Änderungen mit `--update-snapshots` aufnehmen und den Snapshot-Diff im Commit prüfen.
 - **Popups:** ein Hover-Popup für alle Layer (`js/ui/hoverPopup.js`). Neuer Layer mit
   Popup = neuer Eintrag in der Registry `js/ui/popupHandlers.js` — keine eigenen
   `map.on("mousemove", layerId)`-Handler (sonst wieder überlappende Popups).

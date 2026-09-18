@@ -1,18 +1,25 @@
 // legendHandlers.js
 
+import { LAYER_REGISTRY } from "../layers/registry.js";
 
-
+// Legenden-Blöcke, die noch nicht über die Layer-Registry laufen (js/layers/registry.js).
 const LEGEND_KEYS = [
   "cluster-legend-section",
-  "movebis-legend",
   "svz-legend",
   "mapillary-legend",
   "maxspeed-legend",
-  "obs-legend",
-  "laerm1-legend",
-  "laerm2-legend",
   "uspeed-legend"
 ];
+
+// Registry-Einträge: Legende #<id>-legend folgt dem Toggle #toggle-<id> (der Toggle schaltet
+// die Layer, also sind "Toggle an" und "Layer sichtbar" dasselbe).
+function syncRegistryLegends() {
+  for (const { id } of LAYER_REGISTRY) {
+    const toggle = document.getElementById(`toggle-${id}`);
+    const legend = document.getElementById(`${id}-legend`);
+    if (toggle && legend) legend.style.display = toggle.checked ? "block" : "none";
+  }
+}
 
 function getLegendElements() {
   const elements = Object.fromEntries(
@@ -28,9 +35,11 @@ function isSpecialLegendElement(el, legends) {
 }
 
 export function applyLegendVisibility() {
+  syncRegistryLegends();
+
+  // noch nicht in der Registry:
   const keys = [
-    "schools", "health", "playgrounds", "crossings",
-    "svz", "mapillary", "movebis", "maxspeed", "maxspeed_minor", "obs", "laerm1", "laerm2", "uspeed", "telraam",
+    "svz", "mapillary", "maxspeed", "maxspeed_minor", "uspeed", "telraam",
     "bikelanes",
     "scenario1", "scenario2", "scenario3", "scenario6"
   ];
@@ -55,13 +64,9 @@ export function updateLegendVisibilityByZoom(map) {
   const legends = getLegendElements();
   const {
     ["cluster-legend-section"]: clusterLegendEl,
-    ["movebis-legend"]: movebisLegend,
     ["svz-legend"]: svzLegend,
     ["mapillary-legend"]: mapillaryLegend,
     ["maxspeed-legend"]: maxspeedLegend,
-    ["obs-legend"]: obsLegend,
-    ["laerm1-legend"]: laerm1Legend,
-    ["laerm2-legend"]: laerm2Legend,
     ["uspeed-legend"]: uspeedLegend
   } = legends;
 
@@ -73,7 +78,7 @@ export function updateLegendVisibilityByZoom(map) {
   if (clusterLegendEl) clusterLegendEl.style.display = zoom < 11 ? "block" : "none";
   // Kontext-Legenden folgen nur noch der Layer-/Toggle-Sichtbarkeit (kein zoom≥11-Gate mehr),
   // damit die Kontext-Layer auch unter z11 in der Legende sichtbar bleiben.
-  if (movebisLegend) movebisLegend.style.display = visibilityCheck("movebis") ? "block" : "none";
+  syncRegistryLegends();
   if (svzLegend) {
     // svz-Legende hängt am Master (#toggle-svz), nicht an einem einzelnen Layer —
     // so bleibt sie auch bei „nur BASt" (Länder aus) sichtbar.
@@ -88,9 +93,6 @@ export function updateLegendVisibilityByZoom(map) {
     const visible = visibilityCheck("mapillary-images-layer") || visibilityCheck("mapillary-images-halo");
     mapillaryLegend.style.display = (visible && zoom >= 14) ? "block" : "none";
   }
-  if (obsLegend) obsLegend.style.display = visibilityCheck("obs") ? "block" : "none";
-  if (laerm1Legend) laerm1Legend.style.display = visibilityCheck("laerm1") ? "block" : "none";
-  if (laerm2Legend) laerm2Legend.style.display = visibilityCheck("laerm2") ? "block" : "none";
 
   if (uspeedLegend) {
     const isVisible =
@@ -129,23 +131,15 @@ export function updateLegendVisibilityByZoom(map) {
     // Schwung 1: statt hartem Zoom-Lock ein Zoom-Hinweis (Tiles reichen bis z5–z9,
     // per-Layer minzoom:9 in addLayers). svz-Eintrag deckt Länder/BASt/UBA(hvs) ab.
     { toggleId: "toggle-svz", legendId: "svz-legend", dataMinZoom: 9 },
-    { toggleId: "toggle-obs", legendId: "obs-legend", dataMinZoom: 9 },
     { toggleId: "toggle-telraam", legendId: "telraam-legend", dataMinZoom: 9 },
-    { toggleId: "toggle-laerm1", legendId: "laerm1-legend", dataMinZoom: 9 },
-    { toggleId: "toggle-laerm2", legendId: "laerm2-legend", dataMinZoom: 9 },
     // Mapillary bleibt technisch bei z14 (externe Live-Tiles) — nur Hinweis, kein Lock.
     { toggleId: "toggle-mapillary", legendId: "mapillary-zoomhint", dataMinZoom: 14 },
     { toggleId: "toggle-mapillary_ts", legendId: "mapillary-ts-zoomhint", dataMinZoom: 14 },
-    // Schwung 2: Orte & Einrichtungen ab z9 (PMTiles neu getilt, minzoom 9).
-    { toggleId: "toggle-schools", legendId: "schools-legend", dataMinZoom: 9 },
-    { toggleId: "toggle-health", legendId: "health-legend", dataMinZoom: 9 },
-    { toggleId: "toggle-playgrounds", legendId: "playgrounds-legend", dataMinZoom: 9 },
-    // Schwung 3a: Querungen ab z9 (osm_features neu getilt, minzoom 9).
-    { toggleId: "toggle-crossings", legendId: "crossings-legend", dataMinZoom: 9 },
-    // Schwung 3c: movebis in Pipeline migriert, ab z9 (gestufter visits-Filter im Tiling).
-    { toggleId: "toggle-movebis", legendId: "movebis-legend", dataMinZoom: 9 },
     // Schwung 3b: uspeed (Legacy-Tiles ab z11) — kein Lock mehr, nur Hinweis.
     { toggleId: "toggle-uspeed", legendId: "uspeed-legend", dataMinZoom: 11 },
+    // Einträge der Layer-Registry (Orte & Einrichtungen, Querungen, Lärm, OBS, movebis: ab z9)
+    ...LAYER_REGISTRY.filter((e) => e.dataMinZoom != null)
+      .map((e) => ({ toggleId: `toggle-${e.id}`, legendId: `${e.id}-legend`, dataMinZoom: e.dataMinZoom })),
   ];
   // Die Kontext-Sektion bleibt unter z11 komplett sichtbar (siehe General-Loop oben) — die
   // Kontext-Layer reichen jetzt teils bis z9 herunter. Hier nur noch die Zoom-Hinweise je

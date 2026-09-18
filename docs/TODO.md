@@ -18,14 +18,39 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
        setData-Bug schlägt der Cluster-Test an. CI: `.github/workflows/ci.yml`
        (ruff + pytest + Smoke-Tests). Ausbaubar: Permalink-Roundtrip, Filter/Feature-Counter,
        Legenden-Zoom-Hinweise.
-2. [ ] **Layer-Registry als Single Source of Truth** — ein Layer existiert heute an ~7
-       Stellen parallel: `sources.yaml`, `addSources.js`, `addLayers.js` (1677 Z.),
-       `setupLayerToggles.js`, `legendHandlers.js` (vier parallele Listen), `permalink.js`
-       (Kontext-Keys), `popupHandlers.js` (Registry), `index.html` (1336 Z. handgeschriebene
-       Legende). Ziel: `{id, source, layers, toggle, legend, minzoom, popup}` → Toggles,
-       Legende, Zoom-Hinweise, Permalink und Popups werden daraus generiert. Die
-       Popup-Registry (`hoverPopup.js`, 2026-09) ist der erste Baustein; deckt „Legende aus
-       Config generieren" und REFACTORING_PLAN §13 Punkt 9/10 mit ab.
+2. [ ] **Layer-Registry als Single Source of Truth** — ein Layer stand an ~8 Stellen parallel
+       (`sources.yaml`, `addSources.js`, `addLayers.js` 1677 Z., `setupLayerToggles.js`, drei
+       Listen in `legendHandlers.js`, `permalink.js`, `popupHandlers.js`, `index.html`). Jetzt:
+       `js/layers/registry.js` + ein Eintrag je Legenden-Zeile (`{id, kind, source, layers,
+       permalink, dataMinZoom, popups}`), Dateien nach Gruppe (`context-osm.js`,
+       `context-noise.js`, `context-cycling.js`). Abgesichert durch `tests/web/golden.spec.js`
+       (Snapshot: Quellen, alle Layer-Definitionen, Toggle→Layer/Legende/Zoom-Hinweis/Permalink).
+       - [x] Schritt 0 (2026-09-18): Golden-Reference aufgenommen.
+       - [x] Schritt 1 (2026-09-18): 8 einfache Kontext-Layer (Schulen, Gesundheit, Spielplätze,
+             Übergänge, Lärm 1/2, OBS, Stadtradeln) → Quellen, Toggles, Legenden-Sichtbarkeit,
+             Zoom-Hinweise, Permalink-Zeichen und Popups kommen aus der Registry. Golden-Diff =
+             nur der gewollte Permalink-Fix (Telraam `z` + Radinfra `f` fehlten in `kontextKeys`).
+       - [ ] Schritt 2: Layer-DEFINITIONEN (Paint/Filter) dieser 8 aus `addLayers.js` in die
+             Einträge ziehen (`layers: [ids]` → volle Definitionen; Registry-Reihenfolge =
+             Zeichenreihenfolge, Golden prüft sie).
+       - [ ] Schritt 3: Szenarien über eine Fabrik `scenario({n, slider, …})` (6 fast identische
+             Blöcke; behebt die sc6-`fill-opacity`-Drift).
+       - [ ] Schritt 4: Layer mit Hook statt reinem Sichtbarkeits-Toggle — Tempolimit (12 Layer,
+             Fabrik), SVZ/HVS (Master + Unter-Haken + DTV/SV-Modus), Uber (Stunden-Slider),
+             Telraam (Auto/Rad-Modus) → `onToggle`/`controls`.
+       - [ ] (später, separat entscheiden) Schritt 5: Legenden-HTML aus der Registry generieren
+             (`index.html` −~600 Z.; höchstes visuelles Risiko, Spezial-Widgets brauchen Ausweg).
+2b. [ ] **Permalink neu aufsetzen** (nach Registry-Schritt 4) — heute fragil: positionsbasiertes
+       `?p=a,b,c,…` ohne Version; Wiederherstellen per simulierten Klicks (Reihenfolge-/Timing-
+       abhängig, zwei rAF + `isInitializingRef`-Flag — Ursache des CI-Rennens); ohne `?p=` wird
+       ein hartkodierter Default-Link geschrieben und wieder eingelesen (Default-Ansicht doppelt:
+       `main.js` + `permalink.js`); Kontext-/Szenario-Toggles schreiben die URL erst bei der
+       nächsten Kartenbewegung; Slider/Modi (Sc-Schwellen, Uber-Stunde, SVZ-/Telraam-Modus)
+       fehlen ganz; totes `typeof applyLegendVisibility`-Überbleibsel. Ziel: EIN Zustandsobjekt
+       als Wahrheit, reine Funktionen `serialize(state)`/`parse(url)` (ohne Browser testbar),
+       `applyState(state)` setzt DOM + Karte deklarativ; Format benannt + versioniert
+       (`?v=2&c=…&l=…`), alter `p=`-Parser bleibt für bestehende Links. Roundtrip-Test
+       existiert (`tests/web/permalink.spec.js`).
 3. [ ] **Vite** — ~20 einzeln geladene ES-Module bündeln (Initial-Load), Dev-Server mit
        HMR, `import.meta.env` statt `config.js`/`config.public.js`-Umschaltung.
        Haken: GitHub Pages served heute das Repo-Root direkt → braucht eine Action, die
@@ -55,8 +80,9 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Fand auf Anhieb zwei alte Bugs: `healthcare:speciality` vs. Tile-Feld
       `healthcare_speciality` (Psychiatrie-Farbe/-Icon + Popup-Zeilen tot) und `biped_counts`
       vs. `biped_count` (Sc2-Slider blendete alles aus) — beide im Frontend gefixt.
-      Nicht abgedeckt: Attribute, die nur Popups lesen (`p.name` …) → mit der Layer-Registry
-      (Roadmap 2) könnten Einträge ihre Felder deklarieren.
+      Popup-Attribute deckt ein zweiter Test ab: `render()` läuft mit einem aufzeichnenden
+      Proxy → gelesene Properties werden automatisch gegen die Tile-Felder geprüft; bekannte
+      Lücken stehen begründet in `KNOWN_POPUP_GAPS` (mit Verfallskontrolle).
 - [x] **Popup-Härtung** (2026-09-18) — (a) `hoverPopup.js` reicht `render()` eine
       ESCAPED-Sicht der Properties (Proxy: jeder String HTML-escaped) → Escaping per Default,
       kein Eintrag kann es vergessen; Link-hrefs nur http(s) + Attribut escaped. (b) Jeder
@@ -99,6 +125,12 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Buffer (Schulgelände + Kita-Node) im Popup identisch aus; Popup zeigt jetzt Länge +
       OSM-Objekt als Notlösung. Kleine Pipeline-Änderung, große Popup-Verbesserung — dabei
       auch prüfen, welche Attribute Sc1/Sc3/Sc9 mitgeben.
+- [ ] **Tote Popup-Zeilen: OSM-Tags fehlen in den Tiles** — `osmconf_health.ini` exportiert
+      `operator` nicht, `osmconf_playgrounds.ini` weder `operator` noch `playground` → die
+      Popup-Zeilen „Träger"/„Ausstattung" erscheinen nie. Config-Fix (`attributes=`), braucht
+      aber OSM-Rebuild + B2-Deploy. Gefunden vom Vertragstest; dort als begründete Ausnahme
+      in `KNOWN_POPUP_GAPS` (tests/web/contract.spec.js) — der Test meldet, sobald die Tiles
+      das Feld liefern und die Ausnahme weg kann. (Doppelpunkt-Tags heißen im Tile mit `_`.)
 - [ ] **Lazy-Sources** (REFACTORING_PLAN §13 Punkt 7) — größter offener Perf-Posten:
       alle ~18 Quellen werden beim Start angelegt (Metadaten-Fetch + HEAD-Probe je Quelle).
       Nur accidents/cluster eager, Rest beim ersten Einschalten (`ensureSource(id)`).

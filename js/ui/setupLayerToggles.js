@@ -9,6 +9,7 @@ import { applyZoomLock } from "../utils/zoomLock.js";
 import { updateLegendVisibilityByZoom } from "./legendHandlers.js";
 import { telraamColorExpr, applyUspeedHour } from "../mapdata/addLayers.js";
 import { svzColorExpr, svzWidthExpr, svzRadiusExpr } from "../mapdata/addLayers.js";
+import { LAYER_REGISTRY } from "../layers/registry.js";
 
 
 
@@ -37,13 +38,8 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
   const zoomLock = () => applyZoomLock(map, originalMinZoom, setCurrentZoomLock);
 
 
-  // Einfachere Handhabung der Layer
-  setupToggle(map, "toggle-movebis", ["movebis"], zoomLock, applyLegendVisibility);
   // Verkehrsmengen: 1 Master-Toggle + 3 Quellen-Unterhaken (Länder/BASt/UBA) + DTV/SV.
   setupVerkehrsmengen(map, zoomLock, applyLegendVisibility);
-  setupToggle(map, "toggle-obs", ["obs"], zoomLock, applyLegendVisibility);
-  setupToggle(map, "toggle-laerm1", ["laerm1"], zoomLock, applyLegendVisibility);
-  setupToggle(map, "toggle-laerm2", ["laerm2"], zoomLock, applyLegendVisibility);
   setupToggle(map, "toggle-telraam", ["telraam"], zoomLock, applyLegendVisibility);
   setupTelraamMode(map);
 
@@ -74,11 +70,10 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
     applyLegendVisibility();
   });
 
-  // Weitere Layer-Toggles nach ähnlichem Muster
-  setupToggle(map, "toggle-schools", ["schools-points", "schools-polygons"], zoomLock, applyLegendVisibility);
-  setupToggle(map, "toggle-health", ["health-points", "health-polygons"], zoomLock, applyLegendVisibility);
-  setupToggle(map, "toggle-playgrounds", ["playgrounds-points", "playgrounds-polygons"], zoomLock, applyLegendVisibility);
-  setupToggle(map, "toggle-crossings", ["crossings-points", "crossings-lines"], zoomLock, applyLegendVisibility);
+  // Alle Einträge der Layer-Registry: Toggle #toggle-<id> schaltet die Layer des Eintrags.
+  for (const entry of LAYER_REGISTRY) {
+    setupToggle(map, `toggle-${entry.id}`, entry.layers, zoomLock, applyLegendVisibility);
+  }
 }
 
 

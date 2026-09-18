@@ -11,6 +11,8 @@
 
 import { formatDateDE } from "../utils/formatDate.js";
 import { setupHoverPopup } from "./hoverPopup.js";
+import { row, osmLink } from "./popupHelpers.js";
+import { registryPopupEntries } from "../layers/registry.js";
 
 // chart.js (vendored, ~200 KB) erst beim ersten Uspeed-Chart-Popup nachladen —
 // einziger Nutzer ist showUspeedChartPopup, darum raus aus dem kritischen
@@ -64,8 +66,6 @@ const translations = {
 const weekdayNames = ["?", "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 const monthNames = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
-const osmLink = (type) => (p) => (p.osm_id ? { href: `https://www.openstreetmap.org/${type}/${p.osm_id}`, label: "OpenStreetMap" } : null);
-const row = (label, value) => (value !== undefined && value !== null && value !== "" ? `<tr><td>${label}</td><td>${value}</td></tr>` : "");
 
 
 // ---------------------------------------------------------------------------
@@ -151,7 +151,7 @@ function accidentEntries(map) {
 
 
 // ---------------------------------------------------------------------------
-// Verkehr: Stadtradeln, OBS, SVZ/HVS, Tempolimit, Uber-Speed, Telraam
+// Verkehr: SVZ/HVS, Tempolimit, Uber-Speed, Telraam (OBS + Stadtradeln: js/layers/context-cycling.js)
 // ---------------------------------------------------------------------------
 
 function trafficEntries() {
@@ -202,8 +202,6 @@ function trafficEntries() {
 
     const kmh = (v) => (v && /^\d+$/.test(String(v).trim())) ? `${v} km/h` : v;
 
-    const zoneMap = { urban: ["innerorts", 1.5], innerorts: ["innerorts", 1.5], rural: ["außerorts", 2.0], "außerorts": ["außerorts", 2.0] };
-
     const fmtInt = (v) => (v === undefined || v === null || v === "") ? "—" : Math.round(Number(v)).toLocaleString("de-DE");
 
     return [
@@ -215,22 +213,6 @@ function trafficEntries() {
                 <div class="pop-meta">${fmtInt(p.car_per_day)} Ø Auto/Tag · Ø letzte 2 Wochen</div>`,
             link: (p) => (p.oidn != null ? { href: `https://telraam.net/en/location/${p.oidn}`, label: "Telraam" } : null),
             openOnClick: true
-        },
-        {
-            id: "obs", kind: "context", eyebrow: "OpenBikeSensor", layers: ["obs"],
-            render: (p) => {
-                const speed = p.speed != null ? (p.speed * 3.6).toFixed(1) + " km/h" : null;
-                const [zoneLabel, minDist] = zoneMap[String(p.zone).toLowerCase()] || [p.zone, null];
-                const dist = p.distance_overtaker != null ? Number(p.distance_overtaker) : null;
-                const heroVal = dist != null ? `${dist.toFixed(2).replace(".", ",")} m` : "—";
-                const under = (dist != null && minDist != null && dist < minDist) ? ` <span class="pop-note">unter Mindestabstand</span>` : "";
-                const zoneMeta = zoneLabel ? `${zoneLabel}${minDist ? ` · Mindestabstand ${String(minDist).replace(".", ",")} m` : ""}` : null;
-                const metaBits = [speed, zoneMeta].filter(Boolean).join(" · ");
-                return `
-                    <div class="pop-title">Überholabstand</div>
-                    <div class="pop-hero">${heroVal}${under}</div>
-                    ${metaBits ? `<div class="pop-meta">${metaBits}</div>` : ""}`;
-            }
         },
         {
             id: "svz", kind: "context", eyebrow: "Verkehrsmengen (SVZ)", layers: ["svz-points", "bast-points", "svz-lines"],
@@ -275,15 +257,6 @@ function trafficEntries() {
                 return `<div class="pop-title">Tempolimit</div><table class="pop-table">${rows}</table>`;
             },
             link: osmLink("way"), openOnClick: true
-        },
-        {
-            id: "movebis", kind: "context", eyebrow: "Stadtradeln", layers: ["movebis"],
-            render: (p) => `
-                <div class="pop-title">Stadtradeln 2020</div>
-                <table class="pop-table">
-                    <tr><td>Anzahl</td><td>${p.visits ?? "-"}</td></tr>
-                    <tr><td>Ø Geschwindigkeit</td><td>${p.avg_speed_kmh != null ? parseFloat(p.avg_speed_kmh).toFixed(1) + " km/h" : "-"}</td></tr>
-                </table>`
         }
     ];
 }
@@ -375,83 +348,12 @@ function showUspeedChartPopup(p, lngLat) {
 
 
 // ---------------------------------------------------------------------------
-// OSM-Kontext: Schulen, Übergänge, Gesundheit, Spielplätze, Verkehrszeichen, Lärm
+// Kontext-Layer, die noch NICHT in der Layer-Registry stehen (js/layers/registry.js).
+// Schulen, Gesundheit, Spielplätze, Übergänge, Lärm, OBS, Stadtradeln kommen von dort.
 // ---------------------------------------------------------------------------
 
 function contextEntries() {
-    const crossingLabels = {
-        traffic_signals: "Ampel (Lichtzeichen)",
-        marked: "Markiert (Zebra/Markierung)",
-        uncontrolled: "Markiert (Zebra/Markierung)",
-        zebra: "Zebrastreifen",
-        unmarked: "Unmarkiert",
-    };
-    const renderCrossing = (p) => `
-        <div class="pop-title">Übergang</div>
-        <table class="pop-table">
-            <tr><td>Typ</td><td>${crossingLabels[p.crossing] || p.crossing || "unbekannt"}</td></tr>
-            ${row("Markierung", p.crossing_markings)}
-            ${row("Blindenleitsystem", p.tactile_paving)}
-            ${row("Bordstein", p.kerb)}
-        </table>`;
-
-    const ldenLabels = {
-        Lden5559: "55 – 59 dB(A)",
-        Lden6064: "60 – 64 dB(A)",
-        Lden6569: "65 – 69 dB(A)",
-        Lden7074: "70 – 74 dB(A)",
-        LdenGreaterThan75: "> 75 dB(A)"
-    };
-    const lnightLabels = {
-        Lnight5054: "50 – 54 dB(A)",
-        Lnight5559: "55 – 59 dB(A)",
-        Lnight6064: "60 – 64 dB(A)",
-        Lnight6569: "65 – 69 dB(A)",
-        LnightGreaterThan70: "> 70 dB(A)"
-    };
-
-    const schoolTitle = { school: "Schule", kindergarten: "Kindergarten" };
-
     return [
-        {
-            id: "schools", kind: "context", eyebrow: "OSM", layers: ["schools-points", "schools-polygons"],
-            render: (p) => `
-                <div class="pop-title">${schoolTitle[p.amenity] || "Schule / Kindergarten"}</div>
-                <table class="pop-table">
-                    ${row("Name", p.name)}
-                    ${row("Art", p.amenity)}
-                    ${row("Bildungsstufe", p.isced_level ? `ISCED ${p.isced_level}` : null)}
-                </table>`
-        },
-        // Übergänge: Node (Punkt) bzw. Way (Linie) -> getrennte OSM-Objektseiten
-        { id: "crossings-points", kind: "context", eyebrow: "OSM", layers: ["crossings-points"], render: renderCrossing, link: osmLink("node"), openOnClick: true },
-        { id: "crossings-lines", kind: "context", eyebrow: "OSM", layers: ["crossings-lines"], render: renderCrossing, link: osmLink("way"), openOnClick: true },
-        {
-            id: "health", kind: "context", eyebrow: "OSM", layers: ["health-points", "health-polygons"],
-            render: (p) => `
-                <div class="pop-title">Gesundheitseinrichtung</div>
-                <table class="pop-table">
-                    ${row("Name", p.name)}
-                    ${row("Art", p.amenity)}
-                    ${row("Versorgung", p.healthcare)}
-                    ${row("Fachgebiet", p.healthcare_speciality)}
-                    ${row("Einrichtung", p.social_facility)}
-                    ${row("Zielgruppe", p.social_facility_for)}
-                    ${row("Träger", p.operator)}
-                </table>`
-        },
-        {
-            id: "playgrounds", kind: "context", eyebrow: "OSM", layers: ["playgrounds-points", "playgrounds-polygons"],
-            render: (p) => `
-                <div class="pop-title">Spielplatz</div>
-                <table class="pop-table">
-                    ${row("Name", p.name)}
-                    ${row("Art", p.leisure)}
-                    ${row("Ausstattung", p.playground)}
-                    ${row("Kategorie", p.amenity)}
-                    ${row("Träger", p.operator)}
-                </table>`
-        },
         {
             id: "mapillary-ts", kind: "context", eyebrow: "Mapillary", layers: ["mapillary-ts"],
             render: (p) => `
@@ -461,20 +363,6 @@ function contextEntries() {
                     ${row("Zuerst gesehen", p.first_seen_at ? formatDateDE(new Date(+p.first_seen_at).toISOString().slice(0, 10)) : null)}
                     ${row("Zuletzt gesehen", p.last_seen_at ? formatDateDE(new Date(+p.last_seen_at).toISOString().slice(0, 10)) : null)}
                 </table>`
-        },
-        {
-            id: "laerm1", kind: "context", eyebrow: "UBA", layers: ["laerm1"],
-            render: (p) => `
-                <div class="pop-title">Lärm · Tag-Abend-Nacht</div>
-                <div class="pop-hero">${ldenLabels[p.Lärmpegelklasse] || p.Lärmpegelklasse || "—"}</div>
-                <div class="pop-meta">L<sub>DEN</sub> · Hauptlärmquelle · © UBA</div>`
-        },
-        {
-            id: "laerm2", kind: "context", eyebrow: "UBA", layers: ["laerm2"],
-            render: (p) => `
-                <div class="pop-title">Lärm · Nacht</div>
-                <div class="pop-hero">${lnightLabels[p.Lärmpegelklasse] || p.Lärmpegelklasse || "—"}</div>
-                <div class="pop-meta">L<sub>night</sub> · Hauptlärmquelle · © UBA</div>`
         }
     ];
 }
@@ -588,11 +476,16 @@ function scenarioEntries() {
 
 // Alle Karten-Einträge an die gemeinsame Hover-Engine hängen. Die Reihenfolge hier
 // ist egal — gestapelt wird in Render-Reihenfolge der getroffenen Layer.
-export function setupPopups(map) {
-    setupHoverPopup(map, [
+export function allPopupEntries(map) {
+    return [
         ...accidentEntries(map),
         ...trafficEntries(),
         ...contextEntries(),
+        ...registryPopupEntries(),
         ...scenarioEntries()
-    ]);
+    ];
+}
+
+export function setupPopups(map) {
+    setupHoverPopup(map, allPopupEntries(map));
 }

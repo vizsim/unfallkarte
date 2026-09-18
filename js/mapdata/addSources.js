@@ -1,16 +1,13 @@
 import { resolveSources } from "./resolveSources.js";
 import { showErrorBanner } from "../ui/errorBanner.js";
+import { registrySources } from "../layers/registry.js";
 
-// Layer aus der neuen Python-Pipeline: Frontend-Source-ID -> Manifest-ID.
-// URL kommt aus resolveSources() (Local-first ./data/, Fallback B2 unfallkarte-data-v2).
-// Interne Layer-Namen bleiben gleich -> addLayers.js unverändert.
+// Frontend-Source-ID -> Manifest-ID. URL kommt aus resolveSources() (Local-first ./data/,
+// Fallback B2 unfallkarte-data-v2). Einträge der Layer-Registry (js/layers/registry.js)
+// kommen von dort; hier stehen nur noch die, die noch nicht umgezogen sind.
 const MIGRATED = {
   accidents_single: "accidents_single",
   "accidents-cluster": "accidents_cluster",
-  schools: "osm_schools",
-  health: "osm_health",
-  playgrounds: "osm_playgrounds",
-  crossings: "osm_crossings",
   maxspeed: "maxspeed_major",
   maxspeed_minor: "maxspeed_minor",
   scenario1: "scenario1",
@@ -23,11 +20,8 @@ const MIGRATED = {
   hvs: "hvs",
   svz: "svz",
   svz_bast: "svz_bast",
-  laerm1: "laerm_den",
-  laerm2: "laerm_night",
-  obs: "obs",
-  movebis: "movebis",
   uspeed: "uber_speed",
+  ...registrySources(),
 };
 
 // Alle Layer sind in die Pipeline migriert — das alte Bucket `unfallkarte-data`
