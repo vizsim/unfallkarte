@@ -44,8 +44,7 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
              `filter`-Schlüssel in den alten Layer-Objekten (letzter gewann still; durch die
              Fabrik weg), tote Legenden-Keys `scenario1…6` (entfernt). Nachgezogen: tote
              auskommentierte Sc3/Sc6-Slider-Blöcke aus `index.html` entfernt, Sc8-Slider
-             `value="50"` lag unter `min="60"` (Browser klemmte still auf 60) → `value="60"`. sc6 `fill-opacity` 0.4 ist jetzt ein benannter
-             Parameter (bewusst halbtransparent wegen der roten Tempo-50-Abschnitte darüber?).
+             `value="50"` lag unter `min="60"` (Browser klemmte still auf 60) → `value="60"`. sc6 `fill-opacity` 0.4 ist KEIN Bug: benannter Parameter `fillOpacity` — halbtransparent, damit Straßen + rote Tempo-50-Abschnitte darüber lesbar bleiben.
        - [x] Schritt 4 (2026-09-18): Layer mit Hook statt reinem Sichtbarkeits-Toggle —
              `js/layers/traffic-speed.js` (Tempolimit: 12 Layer aus EINER Fabrik = 2 Netze ×
              Richtung × bedingt, eine Farb-Expression; Uber mit Stunden-Regler über

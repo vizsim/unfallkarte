@@ -580,7 +580,9 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
 ### 🟠 Größere Refactors (optional)
 
 9. **`addLayers.js` (~1345 Z.)** ist eine Copy-Paste-Fabrik → config-getriebene Erzeugung
-   (Szenarien/Maxspeed), verhindert Drift (z. B. sc6 `fill-opacity` 0.4 vs 0.8).
+   (Szenarien/Maxspeed), verhindert Drift. *(Das frühere Beispiel „sc6 `fill-opacity` 0.4 vs 0.8" war keine Drift:
+   Sc6 ist bewusst halbtransparent wegen der roten Tempo-50-Linien darüber — jetzt benannter
+   Parameter in `js/layers/scenarios.js`.)*
    *(Popups erledigt: die 14 `setup*Popups` sind eine Karten-Registry in
    `popupHandlers.js` + eine Engine `hoverPopup.js` — ein Popup, gestapelte Karten,
    Issues #30/#31.)*
