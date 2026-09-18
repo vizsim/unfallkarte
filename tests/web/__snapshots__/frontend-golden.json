@@ -1778,7 +1778,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -1929,7 +1928,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -2090,7 +2088,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -2231,7 +2228,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -2366,7 +2362,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -2518,7 +2513,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -2673,7 +2667,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -2792,7 +2785,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -2921,7 +2913,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -3046,7 +3037,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -3165,7 +3155,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [
@@ -3285,7 +3274,6 @@
    "layout": {
     "visibility": "none"
    },
-   "maxzoom": 24,
    "minzoom": 11,
    "paint": {
     "line-color": [

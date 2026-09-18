@@ -6,11 +6,12 @@
 // leiten diese Module ihre Listen hier ab. Umbau in Schritten (docs/TODO.md, Roadmap 2);
 // abgesichert durch tests/web/golden.spec.js.
 //
-// Stand Schritt 3: die 8 einfachen Kontext-Layer + die 6 Szenarien, jeweils inkl. ihrer Layer-
-// Definitionen. addLayers.js hängt sie per addEntryLayers() an ihrer Stelle der Zeichenreihenfolge ein.
+// Stand Schritt 4: alle Kontext-Layer + Szenarien inkl. ihrer Layer-Definitionen. addLayers.js
+// hängt sie per addEntryLayers() an ihrer Stelle der Zeichenreihenfolge ein; dort bleiben nur
+// Unfälle/Cluster und Mapillary.
 //
 // Layer-Definitionen sind normale MapLibre-Layer OHNE das, was der Eintrag schon sagt:
-//   source            = entry.source.id
+//   source            = erste Quelle des Eintrags (Layer aus einer weiteren Quelle nennen sie selbst)
 //   minzoom           = entry.dataMinZoom   (Daten-Zoomgrenze = Zoom-Hinweis in der Legende)
 //   layout.visibility = "none"              (alle Layer starten aus; der Toggle schaltet sie)
 // Ein Layer darf jeden dieser Werte selbst setzen und gewinnt dann.
@@ -31,7 +32,12 @@
  * @typedef {Object} LayerEntry
  * @property {string} id                     => #toggle-<id>, #<id>-legend
  * @property {"context"|"scenario"|"accidents"} kind
- * @property {{id: string, manifest: string}} source   Frontend-Source-ID -> Manifest-ID (sources.yaml)
+ * @property {{id: string, manifest: string}} [source]    Frontend-Source-ID -> Manifest-ID (sources.yaml)
+ * @property {{id: string, manifest: string}[]} [sources] statt `source`, wenn der Eintrag mehrere Quellen hat
+ * @property {"custom"} [toggle]             "custom": kein generischer Sichtbarkeits-Toggle — setup() (oder der
+ *                                           setup() eines anderen Eintrags) schaltet die Layer selbst
+ * @property {(map: Object, ctx: Object) => void} [setup]  zusätzliche Verdrahtung (Modus-Umschalter, Unter-Haken …);
+ *                                           ctx = { zoomLock, applyLegendVisibility, updateLegendVisibilityByZoom }
  * @property {Object[]} layers               MapLibre-Layer (siehe Defaults oben); der Toggle schaltet alle
  * @property {string[]} layerIds             abgeleitet: IDs von `layers`
  * @property {string} [permalink]            EIN Zeichen im Kontext-Teil von ?p= (nie neu vergeben!);
@@ -45,19 +51,24 @@ import contextOsm from "./context-osm.js";
 import contextNoise from "./context-noise.js";
 import contextCycling from "./context-cycling.js";
 import scenarios from "./scenarios.js";
+import trafficSpeed from "./traffic-speed.js";
+import trafficVolumes from "./traffic-volumes.js";
 
 const withDefaults = (entry) => {
+    const sources = entry.sources ?? [entry.source];
     const layers = entry.layers.map((l) => ({
-        source: entry.source.id,
+        source: sources[0].id,
         ...(entry.dataMinZoom != null && { minzoom: entry.dataMinZoom }),
         ...l,
         layout: { visibility: "none", ...l.layout },
     }));
-    return { ...entry, layers, layerIds: layers.map((l) => l.id) };
+    return { ...entry, sources, layers, layerIds: layers.map((l) => l.id) };
 };
 
 /** @type {LayerEntry[]} */
-export const LAYER_REGISTRY = [...contextOsm, ...contextNoise, ...contextCycling, ...scenarios].map(withDefaults);
+export const LAYER_REGISTRY = [
+    ...contextOsm, ...contextNoise, ...contextCycling, ...trafficSpeed, ...trafficVolumes, ...scenarios,
+].map(withDefaults);
 
 // Beim Laden prüfen statt später rätseln: doppelte IDs/Permalink-Zeichen wären stille Bugs.
 {
@@ -81,7 +92,8 @@ export function addEntryLayers(map, entryId) {
 }
 
 /** Frontend-Source-ID -> Manifest-ID (für addSources.js). */
-export const registrySources = () => Object.fromEntries(LAYER_REGISTRY.map((e) => [e.source.id, e.source.manifest]));
+export const registrySources = () =>
+    Object.fromEntries(LAYER_REGISTRY.flatMap((e) => e.sources.map((src) => [src.id, src.manifest])));
 
 /** Toggle-ID -> Permalink-Zeichen (für permalink.js). */
 export const registryPermalinkKeys = () =>

@@ -26,14 +26,10 @@ export const yearMap = {
 // würden sonst einen anderen Layer einschalten. Reserviert (früher terrain/hillshade): t, i.
 // Einträge der Layer-Registry bringen ihr Zeichen selbst mit (js/layers/registry.js).
 export const kontextKeys = {
+    // noch nicht in der Registry (eigene Module): Mapillary, Radinfrastruktur
     mapillary: "m",
     mapillary_ts: "y",
-    maxspeed: "s",
-    hvs: "h",
-    svz: "v",
-    uspeed: "u",
-    telraam: "z",    // fehlte bis 2026-09: Telraam ging beim Teilen des Links verloren
-    bikelanes: "f",  // dito Radinfrastruktur
+    bikelanes: "f",  // fehlte bis 2026-09 (wie Telraam "z"): ging beim Teilen des Links verloren
     ...registryPermalinkKeys(),
 };
 

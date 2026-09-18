@@ -46,9 +46,22 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
              auskommentierte Sc3/Sc6-Slider-Blöcke aus `index.html` entfernt, Sc8-Slider
              `value="50"` lag unter `min="60"` (Browser klemmte still auf 60) → `value="60"`. sc6 `fill-opacity` 0.4 ist jetzt ein benannter
              Parameter (bewusst halbtransparent wegen der roten Tempo-50-Abschnitte darüber?).
-       - [ ] Schritt 4: Layer mit Hook statt reinem Sichtbarkeits-Toggle — Tempolimit (12 Layer,
-             Fabrik), SVZ/HVS (Master + Unter-Haken + DTV/SV-Modus), Uber (Stunden-Slider),
-             Telraam (Auto/Rad-Modus) → `onToggle`/`controls`.
+       - [x] Schritt 4 (2026-09-18): Layer mit Hook statt reinem Sichtbarkeits-Toggle —
+             `js/layers/traffic-speed.js` (Tempolimit: 12 Layer aus EINER Fabrik = 2 Netze ×
+             Richtung × bedingt, eine Farb-Expression; Uber mit Stunden-Regler über
+             `controls.apply` + `debounceMs`) und `js/layers/traffic-volumes.js` (hvs + svz mit
+             `toggle: "custom"` + `setup()` für Master/Unter-Haken/DTV|SV-Modus; Telraam mit
+             `setup()` für Auto/Rad). Registry kann jetzt mehrere Quellen je Eintrag (`sources`).
+             Chart-Popup → `js/ui/uspeedChart.js` (bekommt `map` aus dem Event statt `window.map`).
+             `addLayers.js` 1677 → 401 Z. (nur noch Unfälle, Cluster, Mapillary),
+             `setupLayerToggles.js` → 40 Z., `setupScenarioControls.js` gelöscht, der
+             `setLayerZoomRange`-Nachbrenner in `main.js` entfällt (Tempolimit-`minzoom` kommt aus
+             `dataMinZoom: 11`). Golden-Diff: nur 12× `maxzoom: 24` weg (= MapLibre-Maximum,
+             Überbleibsel von `setLayerZoomRange`). Neu: `tests/web/traffic.spec.js`.
+       - [ ] Rest außerhalb der Registry (bewusst): Unfälle/Cluster (Kern-App, eigene Filter-UI),
+             Mapillary (eigenes Modul mit Token + dynamischen Layern), Radinfrastruktur
+             (`js/map/bikeLanesLayers.js`, externe TILDA-Tiles). Radinfra wäre der einfachste
+             Nachzügler.
        - [ ] (später, separat entscheiden) Schritt 5: Legenden-HTML aus der Registry generieren
              (`index.html` −~600 Z.; höchstes visuelles Risiko, Spezial-Widgets brauchen Ausweg).
 2b. [ ] **Permalink neu aufsetzen** (nach Registry-Schritt 4) — heute fragil: positionsbasiertes

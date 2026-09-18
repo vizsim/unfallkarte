@@ -5,10 +5,7 @@ import { LAYER_REGISTRY } from "../layers/registry.js";
 // Legenden-Blöcke, die noch nicht über die Layer-Registry laufen (js/layers/registry.js).
 const LEGEND_KEYS = [
   "cluster-legend-section",
-  "svz-legend",
-  "mapillary-legend",
-  "maxspeed-legend",
-  "uspeed-legend"
+  "mapillary-legend"
 ];
 
 // Registry-Einträge: Legende #<id>-legend folgt dem Toggle #toggle-<id> (der Toggle schaltet
@@ -38,10 +35,7 @@ export function applyLegendVisibility() {
   syncRegistryLegends();
 
   // noch nicht in der Registry:
-  const keys = [
-    "svz", "mapillary", "maxspeed", "maxspeed_minor", "uspeed", "telraam",
-    "bikelanes"
-  ];
+  const keys = ["mapillary", "bikelanes"];
 
   keys.forEach(key => {
     const toggle = document.getElementById(`toggle-${key}`);
@@ -63,10 +57,7 @@ export function updateLegendVisibilityByZoom(map) {
   const legends = getLegendElements();
   const {
     ["cluster-legend-section"]: clusterLegendEl,
-    ["svz-legend"]: svzLegend,
-    ["mapillary-legend"]: mapillaryLegend,
-    ["maxspeed-legend"]: maxspeedLegend,
-    ["uspeed-legend"]: uspeedLegend
+    ["mapillary-legend"]: mapillaryLegend
   } = legends;
 
   // Defensiv: fehlt der Layer (noch nicht geladen / Add fehlgeschlagen), nicht werfen —
@@ -78,27 +69,10 @@ export function updateLegendVisibilityByZoom(map) {
   // Kontext-Legenden folgen nur noch der Layer-/Toggle-Sichtbarkeit (kein zoom≥11-Gate mehr),
   // damit die Kontext-Layer auch unter z11 in der Legende sichtbar bleiben.
   syncRegistryLegends();
-  if (svzLegend) {
-    // svz-Legende hängt am Master (#toggle-svz), nicht an einem einzelnen Layer —
-    // so bleibt sie auch bei „nur BASt" (Länder aus) sichtbar.
-    const svzMaster = document.getElementById("toggle-svz");
-    svzLegend.style.display = (svzMaster && svzMaster.checked) ? "block" : "none";
-  }
-  if (maxspeedLegend) {
-    const visible = visibilityCheck("maxspeed") || visibilityCheck("maxspeed_minor");
-    maxspeedLegend.style.display = visible ? "block" : "none";
-  }
   if (mapillaryLegend) {
     const visible = visibilityCheck("mapillary-images-layer") || visibilityCheck("mapillary-images-halo");
     mapillaryLegend.style.display = (visible && zoom >= 14) ? "block" : "none";
   }
-
-  if (uspeedLegend) {
-    const isVisible =
-      visibilityCheck("uspeed-forward") || visibilityCheck("uspeed-reverse");
-    uspeedLegend.style.display = isVisible ? "block" : "none";
-  }
-
 
 
   const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
@@ -125,18 +99,12 @@ export function updateLegendVisibilityByZoom(map) {
   // bleibt aus), und je einen Zoom-Hinweis nur unter dataMinZoom zeigen (= Daten noch nicht da,
   // ersetzt den früheren Zoom-Lock).
   const EARLY_CONTEXT = [
+    // noch nicht in der Layer-Registry (eigene Module):
     { toggleId: "toggle-bikelanes", legendId: "bikelanes-legend", dataMinZoom: 9 },
-    { toggleId: "toggle-maxspeed", legendId: "maxspeed-legend", dataMinZoom: 11 },
-    // Schwung 1: statt hartem Zoom-Lock ein Zoom-Hinweis (Tiles reichen bis z5–z9,
-    // per-Layer minzoom:9 in addLayers). svz-Eintrag deckt Länder/BASt/UBA(hvs) ab.
-    { toggleId: "toggle-svz", legendId: "svz-legend", dataMinZoom: 9 },
-    { toggleId: "toggle-telraam", legendId: "telraam-legend", dataMinZoom: 9 },
     // Mapillary bleibt technisch bei z14 (externe Live-Tiles) — nur Hinweis, kein Lock.
     { toggleId: "toggle-mapillary", legendId: "mapillary-zoomhint", dataMinZoom: 14 },
     { toggleId: "toggle-mapillary_ts", legendId: "mapillary-ts-zoomhint", dataMinZoom: 14 },
-    // Schwung 3b: uspeed (Legacy-Tiles ab z11) — kein Lock mehr, nur Hinweis.
-    { toggleId: "toggle-uspeed", legendId: "uspeed-legend", dataMinZoom: 11 },
-    // Einträge der Layer-Registry (Orte & Einrichtungen, Querungen, Lärm, OBS, movebis: ab z9)
+    // alle Registry-Einträge mit Daten-Zoomgrenze (Kontext ab z9, Tempolimit/Uber ab z11)
     ...LAYER_REGISTRY.filter((e) => e.dataMinZoom != null)
       .map((e) => ({ toggleId: `toggle-${e.id}`, legendId: `${e.id}-legend`, dataMinZoom: e.dataMinZoom })),
   ];

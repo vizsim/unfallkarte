@@ -15,7 +15,6 @@ import { applyDataVintages } from './js/utils/applyDataVintages.js';
 // 📦 UI & Interaktion
 import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
-import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 import { setupTooltips } from './js/ui/tooltip.js';
 
@@ -128,7 +127,6 @@ async function initMap() {
     // addSources ist async (Local-first-Auflösung) -> erst Module/Layer, dann UI.
     await ensureModules();
     setupUI(map);
-    setupScenarioControls(map);
     setupLegend(map);
     setupTooltips();
     setupMapillary(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
@@ -388,19 +386,6 @@ async function initializeMapModules(map, sourcesPromise) {
   const sources = await addSources(map, { MAPILLARY_TOKEN, sourcesPromise });
 
   addLayers(map);
-
-  // Tempolimit: kein Zoom-Lock mehr (siehe zoomLock.js) — dafür rendern die Layer
-  // erst ab Zoom 11 (vorher Z6-Daten, die nur der Lock verdeckte). Darunter greift
-  // der Zoom-Hinweis in der Legende (analog Radinfra).
-  const MAXSPEED_LAYERS = [
-    "maxspeed", "maxspeed-conditional", "maxspeed-forward", "maxspeed-backward",
-    "maxspeed-conditional-forward", "maxspeed-conditional-backward",
-    "maxspeed_minor", "maxspeed_minor-conditional", "maxspeed_minor-forward",
-    "maxspeed_minor-backward", "maxspeed_minor-conditional-forward", "maxspeed_minor-conditional-backward",
-  ];
-  for (const id of MAXSPEED_LAYERS) {
-    if (map.getLayer(id)) map.setLayerZoomRange(id, 11, 24);
-  }
 
   // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude,
   // nach addSources/addLayers, damit Host-Layer & Symbol-Reihenfolge stehen.

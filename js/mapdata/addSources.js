@@ -4,17 +4,10 @@ import { registrySources } from "../layers/registry.js";
 
 // Frontend-Source-ID -> Manifest-ID. URL kommt aus resolveSources() (Local-first ./data/,
 // Fallback B2 unfallkarte-data-v2). Einträge der Layer-Registry (js/layers/registry.js)
-// kommen von dort; hier stehen nur noch die, die noch nicht umgezogen sind.
+// kommen von dort; hier stehen nur die Unfall-Quellen (Kern der App, kein Legenden-Layer).
 const MIGRATED = {
   accidents_single: "accidents_single",
   "accidents-cluster": "accidents_cluster",
-  maxspeed: "maxspeed_major",
-  maxspeed_minor: "maxspeed_minor",
-  telraam_segments: "telraam_segments",
-  hvs: "hvs",
-  svz: "svz",
-  svz_bast: "svz_bast",
-  uspeed: "uber_speed",
   ...registrySources(),
 };
 
