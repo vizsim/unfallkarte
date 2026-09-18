@@ -739,6 +739,9 @@ body {
   line-height: 1.5;
   font-weight: 500;
   color: var(--ui-text-strong);
+  /* Fixiertes Fenster mit vielen gestapelten Karten: scrollen statt aus dem Viewport laufen */
+  max-height: 75vh;
+  overflow-y: auto;
 }
 .maplibregl-popup-close-button {
   width: 22px; height: 22px; font-size: 16px; line-height: 22px;
@@ -777,14 +780,19 @@ body {
 /* gepunktete Erklärung — nutzt den gemeinsamen data-tip-Tooltip unten */
 .pop-hint { border-bottom: 1px dotted #b9bec6; cursor: help; }
 
-/* Mehrere Szenarien an einem Punkt: Karten UNTEREINANDER stapeln (ein Popup).
-   Eyebrow benennt das Szenario, damit gleiche Ortstitel unterscheidbar bleiben. */
+/* Ein Hover-Popup für alles (js/ui/hoverPopup.js): mehrere Objekte an einem Punkt werden
+   als Karten UNTEREINANDER gestapelt. Die Eyebrow nennt Gruppe + Quelle/Szenario
+   („Kontext · OSM", „Szenario · Schulumfeld …"), damit gleiche Ortstitel unterscheidbar
+   bleiben. Szenario-Karten (Analyse-Ergebnisse) bekommen zusätzlich einen Akzentbalken,
+   damit sie sich im Stapel von reinen Kontext-Infos abheben. */
 .pop-card + .pop-card { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--ui-divider); }
 .pop-eyebrow {
   font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
   color: var(--ui-text-muted); margin-bottom: 4px;
 }
-/* Kopfzeile, wenn mehrere Szenarien an einem Punkt gestapelt sind */
+.pop-card--scenario { border-left: 3px solid var(--ui-accent); padding-left: 10px; }
+.pop-card--scenario .pop-eyebrow { color: var(--ui-accent); }
+/* Kopfzeile, wenn mehrere Objekte an einem Punkt gestapelt sind */
 .pop-multi {
   font-size: 11px; font-weight: 700; color: var(--ui-text-strong);
   margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--ui-divider);

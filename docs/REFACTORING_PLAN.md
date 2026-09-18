@@ -579,9 +579,11 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
 
 ### 🟠 Größere Refactors (optional)
 
-9. **`addLayers.js` (~1345 Z.) + die 11 `setup*Popups`** sind Copy-Paste-Fabriken →
-   config-getriebene Erzeugung (Szenarien/Maxspeed/Popups), spart ~600 Z. + verhindert
-   Drift (z. B. sc6 `fill-opacity` 0.4 vs 0.8).
+9. **`addLayers.js` (~1345 Z.)** ist eine Copy-Paste-Fabrik → config-getriebene Erzeugung
+   (Szenarien/Maxspeed), verhindert Drift (z. B. sc6 `fill-opacity` 0.4 vs 0.8).
+   *(Popups erledigt: die 14 `setup*Popups` sind eine Karten-Registry in
+   `popupHandlers.js` + eine Engine `hoverPopup.js` — ein Popup, gestapelte Karten,
+   Issues #30/#31.)*
 10. **`updateLegendVisibilityByZoom`** stützt sich auf vier parallele Layer-Listen
     (`LEGEND_KEYS`, Destructure, `applyLegendVisibility`-Keys, `EARLY_CONTEXT`) → eine
     deklarative Tabelle `[{key, layerIds, minZoom, dataMinZoom}]` als Single Source of Truth.

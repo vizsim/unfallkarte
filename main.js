@@ -19,26 +19,8 @@ import { setupScenarioControls } from './js/ui/setupScenarioControls.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 import { setupTooltips } from './js/ui/tooltip.js';
 
-// 📦 Popups
-import {
-  setupAccidentPopups,
-  setupAccClusterPopups,
-  setupMovebisPopups,
-  setupHVSPopups,
-  setupSvzPopups,
-  setupMaxspeedPopups,
-  setupUspeedPopups,
-  setupOBSPopups,
-  setupLaerm1Popups,
-  setupLaerm2Popups,
-  setupSchoolsPopups,
-  setupHealthPopups,
-  setupPlaygroundsPopups,
-  setupCrossingsPopups,
-  setupMapillaryTrafficsignPopups,
-  setupTelraamInteractivity,
-  setupScenarioPopups
-} from './js/ui/popupHandlers.js';
+// 📦 Popups — EIN Hover-Popup für alle Layer (Karten-Registry in popupHandlers.js)
+import { setupPopups } from './js/ui/popupHandlers.js';
 
 // 📦 Legende
 import {
@@ -285,26 +267,6 @@ function addNavigationControl(map) {
       });
     }
   }, 100);
-}
-
-function setupPopups(map) {
-  setupAccidentPopups(map);
-  setupAccClusterPopups(map);
-  setupMovebisPopups(map);
-  setupSvzPopups(map);   // deckt SVZ (Länder/BASt) UND UBA-Hauptverkehrsstraßen (hvs) ab
-  setupMaxspeedPopups(map);
-  setupUspeedPopups(map);
-  setupOBSPopups(map);
-  setupLaerm1Popups(map);
-  setupLaerm2Popups(map);
-
-  setupSchoolsPopups(map);
-  setupHealthPopups(map);
-  setupPlaygroundsPopups(map);
-  setupCrossingsPopups(map);
-  setupMapillaryTrafficsignPopups(map);
-  setupTelraamInteractivity(map);
-  setupScenarioPopups(map);
 }
 
 function setupLegend(map) {
