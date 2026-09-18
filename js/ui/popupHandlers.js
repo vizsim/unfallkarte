@@ -156,9 +156,20 @@ export function setupAccClusterPopups(map) {
           </table>
         `;
 
+                // Popup am Cluster-Zentrum verankern (nicht an der Mausposition), mit
+                // Abstand = Radius des vergrößerten Hover-Pies (icon-size 1; Bildgröße
+                // wie in generatePieIcon: 32/48/64 px) -> sitzt mittig über dem Pie.
+                const pieSize = total > 100 ? 64 : total > 10 ? 48 : 32;
                 map.getCanvas().style.cursor = "pointer";
-                popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-                map.getSource("hover-point").setData({ type: "FeatureCollection", features: [f] });
+                popup.setLngLat(f.geometry.coordinates).setOffset(pieSize / 2 + 4).setHTML(html).addTo(map);
+                // Nur ein PLAIN GeoJSON-Feature übergeben: seit MapLibre 5.24 geht setData
+                // per Structured-Clone an den Worker; das MapGeoJSONFeature aus
+                // queryRenderedFeatures (mit _vectorTileFeature etc.) ist nicht klonbar
+                // ("can't serialize object of unregistered class") -> Hover-Pie blieb leer.
+                map.getSource("hover-point").setData({
+                    type: "FeatureCollection",
+                    features: [{ type: "Feature", geometry: f.geometry, properties: f.properties }]
+                });
             }
         } else {
             if (hoveredFeatureId !== null) {
@@ -956,14 +967,21 @@ export function setupScenarioPopups(map) {
         return header + cards.join("");
     };
 
+    // Cursor nur zurücksetzen, wenn WIR ihn gesetzt haben — sonst überschreibt dieser
+    // map-weite Handler bei jedem mousemove den "pointer" anderer Hover (z. B. Cluster).
+    let hovering = false;
     map.on("mousemove", (e) => {
         if (pinPopup) return; // fixiertes Fenster hat Vorrang, keine Hover-Vorschau
         const html = collectHTML(e.point);
         if (!html) {
-            hoverPopup.remove();
-            map.getCanvas().style.cursor = "";
+            if (hovering) {
+                hovering = false;
+                hoverPopup.remove();
+                map.getCanvas().style.cursor = "";
+            }
             return;
         }
+        hovering = true;
         map.getCanvas().style.cursor = "pointer";
         hoverPopup.setLngLat(e.lngLat)
             .setHTML(html + `<div class="pop-pinhint">→ Klick fixiert das Fenster</div>`)
