@@ -434,9 +434,9 @@ function contextEntries() {
                     ${row("Name", p.name)}
                     ${row("Art", p.amenity)}
                     ${row("Versorgung", p.healthcare)}
-                    ${row("Fachgebiet", p["healthcare:speciality"])}
+                    ${row("Fachgebiet", p.healthcare_speciality)}
                     ${row("Einrichtung", p.social_facility)}
-                    ${row("Zielgruppe", p["social_facility:for"])}
+                    ${row("Zielgruppe", p.social_facility_for)}
                     ${row("Träger", p.operator)}
                 </table>`
         },

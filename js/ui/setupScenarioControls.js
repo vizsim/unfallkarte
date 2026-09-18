@@ -12,7 +12,7 @@ function applyClusterSizeFilter(minSize) {
 
 function applyScenario2ClusterSizeFilter(minSize) {
   const value = parseInt(minSize, 10);
-  const filter = [">=", ["to-number", ["get", "biped_counts"]], value];
+  const filter = [">=", ["to-number", ["get", "biped_count"]], value];
 
   if (map.getLayer("scenario2-points")) map.setFilter("scenario2-points", filter);
   if (map.getLayer("scenario2-polys")) map.setFilter("scenario2-polys", filter);

@@ -830,7 +830,7 @@ export function addLayers(map) {
             ["==", ["get", "amenity"], "hospital"],
             ["==", ["get", "amenity"], "clinic"],
             ["==", ["get", "healthcare"], "rehabilitation"],
-            ["==", ["get", "healthcare:speciality"], "psychiatry"]
+            ["==", ["get", "healthcare_speciality"], "psychiatry"]
           ], "home_red",
 
           // Gruppe 3: Pflege / Senioren → 🟦 türkis
@@ -884,7 +884,7 @@ export function addLayers(map) {
           ["==", ["get", "amenity"], "hospital"], "#D62728",
           ["==", ["get", "amenity"], "clinic"], "#D62728",
           ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
-          ["==", ["get", "healthcare:speciality"], "psychiatry"], "#D62728",
+          ["==", ["get", "healthcare_speciality"], "psychiatry"], "#D62728",
 
           // Gruppe 3: Pflege / Senioren
           ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
@@ -1102,7 +1102,7 @@ export function addLayers(map) {
       "source-layer": "scenario2-polys",
       // filter: ["==", ["geometry-type"], "Polygon"],
       filter: ["all",
-        ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
+        ["!", ["in", ["get", "biped_count"], ["literal", ["0", "1", "2"]]]],
         ["==", ["geometry-type"], "Polygon"]
       ],
       minzoom: 14,
@@ -1123,7 +1123,7 @@ export function addLayers(map) {
       source: "scenario2",
       "source-layer": "scenario2-points",
       filter: ["all",
-        ["!", ["in", ["get", "biped_counts"], ["literal", ["0", "1", "2"]]]],
+        ["!", ["in", ["get", "biped_count"], ["literal", ["0", "1", "2"]]]],
         ["==", ["geometry-type"], "Point"]
       ],
       minzoom: 6,
