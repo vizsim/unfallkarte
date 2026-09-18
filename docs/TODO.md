@@ -148,12 +148,13 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Buffer (Schulgelände + Kita-Node) im Popup identisch aus; Popup zeigt jetzt Länge +
       OSM-Objekt als Notlösung. Kleine Pipeline-Änderung, große Popup-Verbesserung — dabei
       auch prüfen, welche Attribute Sc1/Sc3/Sc9 mitgeben.
-- [ ] **Tote Popup-Zeilen: OSM-Tags fehlen in den Tiles** — `osmconf_health.ini` exportiert
-      `operator` nicht, `osmconf_playgrounds.ini` weder `operator` noch `playground` → die
-      Popup-Zeilen „Träger"/„Ausstattung" erscheinen nie. Config-Fix (`attributes=`), braucht
-      aber OSM-Rebuild + B2-Deploy. Gefunden vom Vertragstest; dort als begründete Ausnahme
-      in `KNOWN_POPUP_GAPS` (tests/web/contract.spec.js) — der Test meldet, sobald die Tiles
-      das Feld liefern und die Ausnahme weg kann. (Doppelpunkt-Tags heißen im Tile mit `_`.)
+- [ ] **Tote Popup-Zeilen: OSM-Tags fehlen in den Tiles** — Popup-Zeilen „Träger"/„Ausstattung"
+      erscheinen nie, weil `operator` (Gesundheit, Spielplätze) und `playground` nicht in den
+      Tiles stehen. Config ist gefixt (2026-09-18: `attributes=` in `osmconf_health.ini` /
+      `osmconf_playgrounds.ini`; die Pipeline reicht alle Spalten durch). **Offen: OSM-Rebuild +
+      B2-Deploy** (`unfallkarte osm-build` für health/playgrounds → tiles → deploy). Danach meldet
+      der Vertragstest „Ausnahme überflüssig" → Einträge aus `KNOWN_POPUP_GAPS`
+      (tests/web/contract.spec.js) löschen. (Doppelpunkt-Tags heißen im Tile mit `_`.)
 - [x] **Lazy-Sources** (2026-09-18, REFACTORING_PLAN §13 Punkt 7) — beim Start werden nur die
       Unfall-Quellen registriert; Quellen + Layer eines Registry-Eintrags entstehen beim ersten
       Einschalten (`ensureEntry` in `js/layers/registry.js`). `addLayers.js` legt nur noch die
