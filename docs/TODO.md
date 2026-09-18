@@ -41,9 +41,10 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
              966 Z., `setupScenarioControls.js` 180 → 32 Z. (nur noch Uber-Regler). Golden
              unverändert. Einzige Verhaltensänderung: beim Wiedereinschalten gilt der ANGEZEIGTE
              Reglerwert (Sc1/2/8 sprangen still auf „>= 0" zurück). Aufgefallen: doppelte
-             `filter`-Schlüssel in den alten Layer-Objekten (letzter gewann still), doppelte
-             `id="scenario3-slider"` + Sc8-Slider `value="50"` unter `min="60"` in `index.html`,
-             tote Legenden-Keys `scenario1…6`. sc6 `fill-opacity` 0.4 ist jetzt ein benannter
+             `filter`-Schlüssel in den alten Layer-Objekten (letzter gewann still; durch die
+             Fabrik weg), tote Legenden-Keys `scenario1…6` (entfernt). Nachgezogen: tote
+             auskommentierte Sc3/Sc6-Slider-Blöcke aus `index.html` entfernt, Sc8-Slider
+             `value="50"` lag unter `min="60"` (Browser klemmte still auf 60) → `value="60"`. sc6 `fill-opacity` 0.4 ist jetzt ein benannter
              Parameter (bewusst halbtransparent wegen der roten Tempo-50-Abschnitte darüber?).
        - [ ] Schritt 4: Layer mit Hook statt reinem Sichtbarkeits-Toggle — Tempolimit (12 Layer,
              Fabrik), SVZ/HVS (Master + Unter-Haken + DTV/SV-Modus), Uber (Stunden-Slider),
