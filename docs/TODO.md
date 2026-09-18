@@ -30,9 +30,11 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
              Übergänge, Lärm 1/2, OBS, Stadtradeln) → Quellen, Toggles, Legenden-Sichtbarkeit,
              Zoom-Hinweise, Permalink-Zeichen und Popups kommen aus der Registry. Golden-Diff =
              nur der gewollte Permalink-Fix (Telraam `z` + Radinfra `f` fehlten in `kontextKeys`).
-       - [ ] Schritt 2: Layer-DEFINITIONEN (Paint/Filter) dieser 8 aus `addLayers.js` in die
-             Einträge ziehen (`layers: [ids]` → volle Definitionen; Registry-Reihenfolge =
-             Zeichenreihenfolge, Golden prüft sie).
+       - [x] Schritt 2 (2026-09-18): Layer-DEFINITIONEN (Paint/Filter) dieser 8 per Skript
+             wortgleich aus `addLayers.js` in die Einträge gezogen (1677 → 1266 Z.). Einträge
+             lassen weg, was sie schon sagen (`source`, `minzoom` = `dataMinZoom`,
+             `visibility: none` → Defaults in `registry.js`). Zeichenreihenfolge = Reihenfolge der
+             `addEntryLayers()`-Aufrufe in `addLayers.js`; Golden unverändert grün.
        - [ ] Schritt 3: Szenarien über eine Fabrik `scenario({n, slider, …})` (6 fast identische
              Blöcke; behebt die sc6-`fill-opacity`-Drift).
        - [ ] Schritt 4: Layer mit Hook statt reinem Sichtbarkeits-Toggle — Tempolimit (12 Layer,

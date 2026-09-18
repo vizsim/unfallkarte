@@ -1,4 +1,6 @@
 
+import { addEntryLayers } from "../layers/registry.js";
+
 export function addLayers(map) {
 
   // LAYERS – ggf. aufräumen/splitten später (siehe vorherige Ideen)
@@ -172,85 +174,8 @@ export function addLayers(map) {
 
 
 
-  // add Movebis layer
-  function addMovebisLayer(map) {
-    map.addLayer({
-      id: "movebis",
-      minzoom: 9,
-      type: "line",
-      source: "movebis",
-      "source-layer": "links",
-      layout: { visibility: "none" },
-      paint: {
-        "line-color": [
-          "interpolate",
-          ["linear"],
-          ["get", "avg_speed_kmh"],
-          12, "#e31a1c",
-          18, "#fdcc8a",
-          24, "#31a354"
-        ],
-        // Breite = visits-basiert, zusätzlich bei niedrigem Zoom global schmaler
-        // (z9 ~35 % → z14 volle Breite). Zoom MUSS die äußerste Interpolate sein
-        // (MapLibre erlaubt ["zoom"] nur top-level) → visits-Rampe je Zoom-Stop skaliert.
-        "line-width": [
-          "interpolate", ["linear"], ["zoom"],
-          9, ["interpolate", ["linear"], ["get", "visits"], 0, 0.13, 10, 0.5, 50, 1.0, 100, 2.0, 1000, 3.0],
-          11, ["interpolate", ["linear"], ["get", "visits"], 0, 0.2, 10, 0.8, 50, 1.6, 100, 3.2, 1000, 4.8],
-          14, ["interpolate", ["linear"], ["get", "visits"], 0, 0.5, 10, 2, 50, 4, 100, 8, 1000, 12]
-        ]
-      }
-    });
-  }
 
 
-  // add OBS layer
-  function addOBSLayer(map) {
-    map.addLayer({
-      id: "obs",
-      minzoom: 9,
-      type: "circle",
-      source: "obs",
-      "source-layer": "obs_data-points",
-      layout: { visibility: "none" },
-      filter: [">=", ["to-number", ["get", "distance_overtaker"]], 0.2],
-      paint: {
-        "circle-color": [
-          "case",
-
-          // --- Urban color ramp ---
-          ["==", ["get", "zone"], "urban"],
-          [
-            "interpolate",
-            ["linear"],
-            ["to-number", ["get", "distance_overtaker"]],
-            1.1, "#67000d",   // very dark red
-            1.3, "#ef3b2c",   // red
-            1.5, "#fdbf6f",   // yellow
-            1.7, "#a1d99b",   // light green
-            1.9, "#31a354"    // green
-          ],
-
-          // --- Rural color ramp ---
-          ["==", ["get", "zone"], "rural"],
-          [
-            "interpolate",
-            ["linear"],
-            ["to-number", ["get", "distance_overtaker"]],
-            1.6, "#67000d",   // very dark red
-            1.8, "#ef3b2c",   // red
-            2.0, "#fdbf6f",   // yellow
-            2.2, "#a1d99b",   // light green
-            2.4, "#31a354"    // green
-          ],
-
-          // --- Fallback color ---
-          "#cccccc"
-        ],
-        "circle-radius": 4
-      }
-    });
-  }
 
 
 
@@ -689,356 +614,17 @@ export function addLayers(map) {
 
 
 
-  // add Schools layer
-  function addSchoolsLayer(map) {
-    // Schulen POINTS
-
-
-    map.addLayer({
-      id: "schools-points",
-      minzoom: 9,
-      type: "symbol",
-      source: "schools",
-      "source-layer": "germany_osm_schools",
-      filter: ["==", ["geometry-type"], "Point"],
-      layout: {
-        visibility: "none",
-
-        // 👇 switch icon based on amenity value
-        "icon-image": [
-          "match",
-          ["get", "amenity"],
-          "school", "home_blue",         // matches to `home_blue.png`
-          "kindergarten", "home_green",  // matches to `home_green.png`
-          "home"                    // default fallback icon
-        ],
-
-        "icon-size": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          9, 0.3,
-          10, 0.5,
-          14, 1,
-          16, 1.8
-        ],
-        "icon-allow-overlap": true
-      },
-      paint: {
-        "icon-opacity": 0.5,
-      }
-    });
 
 
 
 
-    // Schulen POLYGONS
-    map.addLayer({
-      id: "schools-polygons",
-      minzoom: 9,
-      type: "fill",
-      source: "schools",
-      "source-layer": "germany_osm_schools",
-      filter: ["==", ["geometry-type"], "Polygon"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": [
-          "match",
-          ["get", "amenity"],
-          "school", "#0074D9",
-          "kindergarten", "#2ECC40",
-          "#aaaaaa"
-        ],
-        "fill-opacity": 0.5,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
-  }
-
-
-  // add Crossings layer (OSM highway=crossing-Nodes + footway/cycleway/path=crossing-Ways)
-  function addCrossingsLayer(map) {
-    // Einfärbung nach crossing-Wert: Ampel (grün) / markiert (amber) / unmarkiert (rot)
-    // / sonstige (grau). Erweiterbar: weitere crossing=*-Werte hier ergänzen.
-    const crossingColor = [
-      "match",
-      ["get", "crossing"],
-      "traffic_signals", "#2ECC40",
-      ["marked", "uncontrolled", "zebra"], "#FF851B",
-      "unmarked", "#FF4136",
-      /* default */ "#9aa0a6"
-    ];
-
-    // Querungs-LINIEN (footway/cycleway/path=crossing) — zuerst, damit Punkte oben liegen
-    map.addLayer({
-      id: "crossings-lines",
-      minzoom: 9,
-      type: "line",
-      source: "crossings",
-      "source-layer": "germany_osm_crossings",
-      filter: ["==", ["geometry-type"], "LineString"],
-      layout: { visibility: "none", "line-cap": "round" },
-      paint: {
-        "line-color": crossingColor,
-        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.5, 12, 2, 16, 5],
-        "line-opacity": 0.85
-      }
-    });
-
-    // Querungs-PUNKTE (highway=crossing-Nodes)
-    map.addLayer({
-      id: "crossings-points",
-      minzoom: 9,
-      type: "circle",
-      source: "crossings",
-      "source-layer": "germany_osm_crossings",
-      filter: ["==", ["geometry-type"], "Point"],
-      layout: { visibility: "none" },
-      paint: {
-        "circle-color": crossingColor,
-        // Bei niedrigem Zoom klein und randlos (sonst wirken die Punkte wie ein Teppich);
-        // Rand blendet erst ab z12 ein, wenn die Punkte groß genug dafür sind.
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 0.7, 11, 2, 14, 5, 16, 8],
-        "circle-stroke-color": "#1B4D3E",
-        "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 11.5, 0, 12.5, 1],
-        "circle-opacity": 0.85
-      }
-    });
-  }
-
-
-  // add health layer
-  function addHealthLayer(map) {
-    // health POINTS
-
-    map.addLayer({
-      id: "health-points",
-      minzoom: 9,
-      type: "symbol",
-      source: "health",
-      "source-layer": "germany_osm_health", // must match tippecanoe `-l` name
-      filter: ["==", ["geometry-type"], "Point"],
-      layout: {
-        visibility: "none",
-        "icon-image": [
-          "case",
-
-          // Gruppe 1: Medizinisch → 🔴 red
-          ["any",
-            ["==", ["get", "amenity"], "hospital"],
-            ["==", ["get", "amenity"], "clinic"],
-            ["==", ["get", "healthcare"], "rehabilitation"],
-            ["==", ["get", "healthcare_speciality"], "psychiatry"]
-          ], "home_red",
-
-          // Gruppe 3: Pflege / Senioren → 🟦 türkis
-          ["any",
-            ["==", ["get", "social_facility"], "nursing_home"],
-            ["==", ["get", "social_facility"], "assisted_living"],
-            ["==", ["get", "social_facility_for"], "senior"]
-          ], "home_turkis",
-
-          // Gruppe 4: Behindertenhilfe → 🟨 yellow
-          ["==", ["get", "social_facility_for"], "disabled"], "home_yellow",
-
-          // Fallback
-          // "home"
-          "__none__" // default fallback icon
-        ],
-        "icon-size": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          9, 0.35,
-          10, 0.6,
-          14, 1,
-          16, 1.7
-        ],
-        "icon-allow-overlap": true //,
-        // "icon-ignore-placement": true,
-        // "icon-optional": true
-      },
-      paint: {
-        "icon-opacity": 0.5
-      }
-    });
-
-
-    // health POLYGONS
-    map.addLayer({
-      id: "health-polygons",
-      minzoom: 9,
-      type: "fill",
-      source: "health",
-      "source-layer": "germany_osm_health",
-      filter: ["==", ["geometry-type"], "Polygon"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": [
-          "case",
-          // Gruppe 1: Medizinisch
-          ["==", ["get", "amenity"], "hospital"], "#D62728",
-          ["==", ["get", "amenity"], "clinic"], "#D62728",
-          ["==", ["get", "healthcare"], "rehabilitation"], "#D62728",
-          ["==", ["get", "healthcare_speciality"], "psychiatry"], "#D62728",
-
-          // Gruppe 3: Pflege / Senioren
-          ["==", ["get", "social_facility"], "nursing_home"], "#17BECF",
-          ["==", ["get", "social_facility"], "assisted_living"], "#17BECF",  // NEU
-          ["==", ["get", "social_facility_for"], "senior"], "#17BECF",
-
-          // Gruppe 4: Behindertenhilfe
-          ["==", ["get", "social_facility_for"], "disabled"], "#BCBD22",
-
-          "#aaaaaa"
-        ],
-        "fill-opacity": 0.5,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
-  }
 
 
 
-  // add playgrounds layer
-  function addPlaygroundsLayer(map) {
-    // playgrounds POINTS
-
-    map.addLayer({
-      id: "playgrounds-points",
-      minzoom: 9,
-      type: "symbol",
-      source: "playgrounds",
-      "source-layer": "germany_osm_playgrounds", // must match tippecanoe `-l` name
-      filter: ["==", ["geometry-type"], "Point"],
-      layout: {
-        visibility: "none",
-        // "icon-image": "playground_darkgreen",  // Maki-Icon
-
-        "icon-image": [
-          "case",
-
-          ["any",
-            ["==", ["get", "amenity"], "playground"],
-            ["==", ["get", "leisure"], "playground"],
-
-          ], "playground_darkgreen",
-
-          // Fallback
-          "__none__" // default fallback icon
-        ],
-
-
-        "icon-size": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          9, 0.35,
-          10, 0.6,
-          14, 1,
-          16, 1.7
-        ],
-        "icon-allow-overlap": true //,
-        // "icon-ignore-placement": true,
-        // "icon-optional": true
-      },
-      paint: {
-        "icon-opacity": 0.5
-      }
-    });
-
-
-
-
-    // playgrounds POLYGONS
-    map.addLayer({
-      id: "playgrounds-polygons",
-      minzoom: 9,
-      type: "fill",
-      source: "playgrounds",
-      "source-layer": "germany_osm_playgrounds",
-      filter: ["==", ["geometry-type"], "Polygon"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": [
-          "case",
-          // playgrounds
-          ["==", ["get", "amenity"], "playground"], "#008000",
-          ["==", ["get", "leisure"], "playground"], "#008000",
-          "#aaaaaa"
-        ],
-        "fill-opacity": 0.5,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
-  }
 
 
   /// LAERM
 
-  // add playgrounds layer
-  function addLaermLayer(map) {
-
-    // laerm1 POLYGONS
-    map.addLayer({
-      id: "laerm1",
-      minzoom: 9,
-      type: "fill",
-      source: "laerm1",
-      "source-layer": "laerm_hlq_den-polys",
-      filter: ["==", ["geometry-type"], "Polygon"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": [
-          "match",
-          ["get", "Lärmpegelklasse"],
-          "Lden5559", "#A6AD88",
-          "Lden6064", "#B89C63",
-          "Lden6569", "#994848",
-          "Lden7074", "#4B244A",
-          "LdenGreaterThan75", "#2F0037",
-        /* default */ "#999999"
-        ],
-        "fill-opacity": 0.6,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
-
-    // laerm2 POLYGONS
-    map.addLayer({
-      id: "laerm2",
-      minzoom: 9,
-      type: "fill",
-      source: "laerm2",
-      "source-layer": "laerm_4120_hlq_night-polys",
-      filter: ["==", ["geometry-type"], "Polygon"],
-      layout: {
-        visibility: "none"
-      },
-      paint: {
-        "fill-color": [
-          "match",
-          ["get", "Lärmpegelklasse"],
-          "Lnight5054", "#A6AD88",
-          "Lnight5559", "#B89C63",
-          "Lnight6064", "#994848",
-          "Lnight6569", "#4B244A",
-          "LnightGreaterThan70", "#2F0037",
-        /* default */ "#999999"
-        ],
-        "fill-opacity": 0.6,
-        "fill-outline-color": "#1B4D3E"
-      }
-    });
-  }
 
 
 
@@ -1513,13 +1099,15 @@ export function addLayers(map) {
 
 
 
-  // change the map order
+  // Zeichenreihenfolge = Reihenfolge dieser Aufrufe (unten zuerst). Layer aus der
+  // Layer-Registry (js/layers/) hängen per addEntryLayers an ihrer bisherigen Stelle;
+  // tests/web/golden.spec.js hält die Reihenfolge fest.
 
 
-  addSchoolsLayer(map);
-  addHealthLayer(map);
-  addPlaygroundsLayer(map);
-  addCrossingsLayer(map);
+  addEntryLayers(map, "schools");
+  addEntryLayers(map, "health");
+  addEntryLayers(map, "playgrounds");
+  addEntryLayers(map, "crossings");
 
 
   addAccidentLayersToMap(map);
@@ -1534,11 +1122,12 @@ export function addLayers(map) {
 
   addMaxspeedLayers(map);
   addMaxspeedMinorLayers(map);
-  addMovebisLayer(map);
-  addOBSLayer(map);
+  addEntryLayers(map, "movebis");
+  addEntryLayers(map, "obs");
   addHvsLayer(map);
   addSvzLayers(map);   // SVZ-Verkehrsmengen ÜBER dem groben hvs-Fallback
-  addLaermLayer(map);
+  addEntryLayers(map, "laerm1");
+  addEntryLayers(map, "laerm2");
   addUspeedLayer(map);
   addTelraamLayer(map);
 

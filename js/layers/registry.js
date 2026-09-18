@@ -6,8 +6,14 @@
 // leiten diese Module ihre Listen hier ab. Umbau in Schritten (docs/TODO.md, Roadmap 2);
 // abgesichert durch tests/web/golden.spec.js.
 //
-// Stand Schritt 1: die 8 einfachen Kontext-Layer. Die Layer-DEFINITIONEN (Paint/Filter)
-// leben noch in addLayers.js — `layers` nennt vorerst nur deren IDs (Schritt 2 zieht sie um).
+// Stand Schritt 2: die 8 einfachen Kontext-Layer inkl. ihrer Layer-Definitionen. addLayers.js
+// hängt sie per addEntryLayers() an ihrer Stelle der Zeichenreihenfolge ein.
+//
+// Layer-Definitionen sind normale MapLibre-Layer OHNE das, was der Eintrag schon sagt:
+//   source            = entry.source.id
+//   minzoom           = entry.dataMinZoom   (Daten-Zoomgrenze = Zoom-Hinweis in der Legende)
+//   layout.visibility = "none"              (alle Layer starten aus; der Toggle schaltet sie)
+// Ein Layer darf jeden dieser Werte selbst setzen und gewinnt dann.
 //
 // DOM-Vertrag je Eintrag (IDs in index.html, nicht umbenennen — auch Permalinks hängen dran):
 //   #toggle-<id>   Checkbox          #<id>-legend   Legenden-Block (mit optionalem .zoom-hint)
@@ -25,7 +31,8 @@
  * @property {string} id                     => #toggle-<id>, #<id>-legend
  * @property {"context"|"scenario"|"accidents"} kind
  * @property {{id: string, manifest: string}} source   Frontend-Source-ID -> Manifest-ID (sources.yaml)
- * @property {string[]} layers               Style-Layer-IDs, die der Toggle schaltet
+ * @property {Object[]} layers               MapLibre-Layer (siehe Defaults oben); der Toggle schaltet alle
+ * @property {string[]} layerIds             abgeleitet: IDs von `layers`
  * @property {string} permalink              EIN Zeichen im Kontext-Teil von ?p= (nie neu vergeben!)
  * @property {number} [dataMinZoom]          darunter: Zoom-Hinweis in der Legende statt Daten
  * @property {PopupSpec[]} popups
@@ -35,8 +42,18 @@ import contextOsm from "./context-osm.js";
 import contextNoise from "./context-noise.js";
 import contextCycling from "./context-cycling.js";
 
+const withDefaults = (entry) => {
+    const layers = entry.layers.map((l) => ({
+        source: entry.source.id,
+        ...(entry.dataMinZoom != null && { minzoom: entry.dataMinZoom }),
+        ...l,
+        layout: { visibility: "none", ...l.layout },
+    }));
+    return { ...entry, layers, layerIds: layers.map((l) => l.id) };
+};
+
 /** @type {LayerEntry[]} */
-export const LAYER_REGISTRY = [...contextOsm, ...contextNoise, ...contextCycling];
+export const LAYER_REGISTRY = [...contextOsm, ...contextNoise, ...contextCycling].map(withDefaults);
 
 // Beim Laden prüfen statt später rätseln: doppelte IDs/Permalink-Zeichen wären stille Bugs.
 {
@@ -48,8 +65,15 @@ export const LAYER_REGISTRY = [...contextOsm, ...contextNoise, ...contextCycling
     for (const e of LAYER_REGISTRY) {
         once("id", e.id, e.id);
         once("permalink", e.permalink, e.id);
-        e.layers.forEach((l) => once("layer", l, e.id));
+        e.layerIds.forEach((l) => once("layer", l, e.id));
     }
+}
+
+/** Layer eines Eintrags in den Style hängen — Aufrufreihenfolge in addLayers.js = Zeichenreihenfolge. */
+export function addEntryLayers(map, entryId) {
+    const entry = LAYER_REGISTRY.find((e) => e.id === entryId);
+    if (!entry) throw new Error(`Layer-Registry: kein Eintrag "${entryId}"`);
+    for (const layer of entry.layers) map.addLayer(layer);
 }
 
 /** Frontend-Source-ID -> Manifest-ID (für addSources.js). */
@@ -60,4 +84,4 @@ export const registryPermalinkKeys = () => Object.fromEntries(LAYER_REGISTRY.map
 
 /** Einträge fürs gemeinsame Hover-Popup (für popupHandlers.js). */
 export const registryPopupEntries = () => LAYER_REGISTRY.flatMap((e) =>
-    e.popups.map((p) => ({ id: e.id, kind: e.kind, layers: e.layers, ...p })));
+    e.popups.map((p) => ({ id: e.id, kind: e.kind, layers: e.layerIds, ...p })));

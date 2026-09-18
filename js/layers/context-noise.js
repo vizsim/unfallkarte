@@ -20,7 +20,28 @@ export default [
     {
         id: "laerm1", kind: "context",
         source: { id: "laerm1", manifest: "laerm_den" },
-        layers: ["laerm1"],
+        layers: [
+            {
+              id: "laerm1",
+              type: "fill",
+              "source-layer": "laerm_hlq_den-polys",
+              filter: ["==", ["geometry-type"], "Polygon"],
+              paint: {
+                "fill-color": [
+                  "match",
+                  ["get", "Lärmpegelklasse"],
+                  "Lden5559", "#A6AD88",
+                  "Lden6064", "#B89C63",
+                  "Lden6569", "#994848",
+                  "Lden7074", "#4B244A",
+                  "LdenGreaterThan75", "#2F0037",
+                /* default */ "#999999"
+                ],
+                "fill-opacity": 0.6,
+                "fill-outline-color": "#1B4D3E"
+              }
+            }
+        ],
         permalink: "l", dataMinZoom: 9,
         popups: [{
             eyebrow: "UBA",
@@ -33,7 +54,28 @@ export default [
     {
         id: "laerm2", kind: "context",
         source: { id: "laerm2", manifest: "laerm_night" },
-        layers: ["laerm2"],
+        layers: [
+            {
+              id: "laerm2",
+              type: "fill",
+              "source-layer": "laerm_4120_hlq_night-polys",
+              filter: ["==", ["geometry-type"], "Polygon"],
+              paint: {
+                "fill-color": [
+                  "match",
+                  ["get", "Lärmpegelklasse"],
+                  "Lnight5054", "#A6AD88",
+                  "Lnight5559", "#B89C63",
+                  "Lnight6064", "#994848",
+                  "Lnight6569", "#4B244A",
+                  "LnightGreaterThan70", "#2F0037",
+                /* default */ "#999999"
+                ],
+                "fill-opacity": 0.6,
+                "fill-outline-color": "#1B4D3E"
+              }
+            }
+        ],
         permalink: "r", dataMinZoom: 9,
         popups: [{
             eyebrow: "UBA",

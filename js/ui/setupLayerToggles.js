@@ -72,7 +72,7 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
 
   // Alle Einträge der Layer-Registry: Toggle #toggle-<id> schaltet die Layer des Eintrags.
   for (const entry of LAYER_REGISTRY) {
-    setupToggle(map, `toggle-${entry.id}`, entry.layers, zoomLock, applyLegendVisibility);
+    setupToggle(map, `toggle-${entry.id}`, entry.layerIds, zoomLock, applyLegendVisibility);
   }
 }
 
