@@ -22,6 +22,9 @@ config.js
 #also exclude JSON files in the icons folder
 !/icons/*.json
 
+# Golden-Reference der Frontend-Tests (muss versioniert sein, sonst fehlt sie der CI)
+!/tests/web/__snapshots__/*.json
+
 # Ignore virtual environment
 unfallkarte_env/
 accident_data/

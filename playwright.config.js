@@ -13,6 +13,9 @@ const BASE_URL = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
   testDir: "tests/web",
+  // Text-Snapshots (golden.spec.js) plattformunabhängig ablegen — sonst hängt Playwright
+  // "-linux"/"-darwin" an und die CI findet die lokal erzeugte Referenz nicht.
+  snapshotPathTemplate: "{testDir}/__snapshots__/{arg}{ext}",
   timeout: 120_000,          // Tiles kommen in der CI aus B2 -> großzügig
   expect: { timeout: 30_000 },
   fullyParallel: false,      // ein Browser, eine Karte: WebGL + Tile-Last nicht vervielfachen
