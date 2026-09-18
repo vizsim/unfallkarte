@@ -68,8 +68,8 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
        abhängig, zwei rAF + `isInitializingRef`-Flag — Ursache des CI-Rennens); ohne `?p=` wird
        ein hartkodierter Default-Link geschrieben und wieder eingelesen (Default-Ansicht doppelt:
        `main.js` + `permalink.js`); Kontext-/Szenario-Toggles schreiben die URL erst bei der
-       nächsten Kartenbewegung; Slider/Modi (Sc-Schwellen, Uber-Stunde, SVZ-/Telraam-Modus)
-       fehlen ganz; totes `typeof applyLegendVisibility`-Überbleibsel. Ziel: EIN Zustandsobjekt
+       nächsten Kartenbewegung *(gefixt 2026-09-18: Toggles schreiben sofort)*; Slider/Modi
+       (Sc-Schwellen, Uber-Stunde, SVZ-/Telraam-Modus) fehlen ganz. Ziel: EIN Zustandsobjekt
        als Wahrheit, reine Funktionen `serialize(state)`/`parse(url)` (ohne Browser testbar),
        `applyState(state)` setzt DOM + Karte deklarativ; Format benannt + versioniert
        (`?v=2&c=…&l=…`), alter `p=`-Parser bleibt für bestehende Links. Roundtrip-Test

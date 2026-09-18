@@ -146,12 +146,6 @@ export function applyPermalink(map, paintStyles, updateLayerFilter, updateVisibl
     });
 
 
-
-    // Force immediate layer visibility update (fixes delay)
-    if (typeof applyLegendVisibility === 'function') {
-        applyLegendVisibility();
-    }
-
     updateLayerFilter(false, true);
     updateVisibleFeatureCount();
     setTimeout(() => isInitializingRef.value = false, 0);

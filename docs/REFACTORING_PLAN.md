@@ -570,7 +570,8 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
 
 ### 🟡 Performance
 
-7. **Alle ~18 Quellen eager beim Start** (`addSources.js`) → pro Quelle ein
+7. ✅ *(erledigt 2026-09-18: Lazy-Sources über `ensureEntry` in `js/layers/registry.js`;
+   Start-Requests 28 → 7)* **Alle ~18 Quellen eager beim Start** (`addSources.js`) → pro Quelle ein
    PMTiles/TileJSON-Metadaten-Fetch + HEAD-Probe, auch für nie genutzte Layer. Quellen
    lazy beim ersten Einschalten anlegen (`ensureSource(id)`), nur accidents/cluster eager.
 8. **`updateVisibleFeatureCount` + `queryRenderedFeatures` bei jedem moveend/zoomend**
@@ -579,14 +580,17 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
 
 ### 🟠 Größere Refactors (optional)
 
-9. **`addLayers.js` (~1345 Z.)** ist eine Copy-Paste-Fabrik → config-getriebene Erzeugung
+9. ✅ *(erledigt 2026-09-18: Layer-Registry `js/layers/`, `addLayers.js` 1677 → ~400 Z.)*
+   **`addLayers.js` (~1345 Z.)** war eine Copy-Paste-Fabrik → config-getriebene Erzeugung
    (Szenarien/Maxspeed), verhindert Drift. *(Das frühere Beispiel „sc6 `fill-opacity` 0.4 vs 0.8" war keine Drift:
    Sc6 ist bewusst halbtransparent wegen der roten Tempo-50-Linien darüber — jetzt benannter
    Parameter in `js/layers/scenarios.js`.)*
    *(Popups erledigt: die 14 `setup*Popups` sind eine Karten-Registry in
    `popupHandlers.js` + eine Engine `hoverPopup.js` — ein Popup, gestapelte Karten,
    Issues #30/#31.)*
-10. **`updateLegendVisibilityByZoom`** stützt sich auf vier parallele Layer-Listen
+10. ✅ *(weitgehend erledigt 2026-09-18: Listen werden aus der Layer-Registry abgeleitet; übrig
+    sind nur Cluster/Mapillary/Radinfra)* **`updateLegendVisibilityByZoom`** stützte sich auf
+    vier parallele Layer-Listen
     (`LEGEND_KEYS`, Destructure, `applyLegendVisibility`-Keys, `EARLY_CONTEXT`) → eine
     deklarative Tabelle `[{key, layerIds, minZoom, dataMinZoom}]` als Single Source of Truth.
 11. **`main.js`** mischt Bootstrap + Filter/Color/Legend + mutable Globals →
