@@ -136,3 +136,19 @@ export async function replaceLayerWithPoint(page, layerId, lngLat, properties) {
     m.addLayer({ id: layerId, type: "circle", source: src, paint: { "circle-radius": 14, "circle-color": "#d0f" } });
   }, [layerId, lngLat, properties]);
 }
+
+/**
+ * Alle Einträge der Layer-Registry anlegen (Quellen + Layer), OHNE sie einzuschalten. Die App
+ * legt sie lazy beim ersten Einschalten an; Tests, die den kompletten Style brauchen (Golden,
+ * Vertrag), holen das hiermit nach — über dasselbe Modul wie die App (gleiche Instanz).
+ */
+export async function ensureAllLayers(page) {
+  await page.evaluate(async () => {
+    const { LAYER_REGISTRY, ensureEntry } = await import("/js/layers/registry.js");
+    for (const entry of LAYER_REGISTRY) ensureEntry(window.map, entry.id);
+  });
+}
+
+/** Sichtbarkeit je Layer: "absent" (noch nicht angelegt) | "none" | "visible". */
+export const layerVisibility = (page, ids) => page.evaluate((ids) =>
+  ids.map((id) => (window.map.getLayer(id) ? window.map.getLayoutProperty(id, "visibility") ?? "visible" : "absent")), ids);

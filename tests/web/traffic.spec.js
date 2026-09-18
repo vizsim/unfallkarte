@@ -1,9 +1,9 @@
 // Verkehrs-Layer mit Hook statt reinem Sichtbarkeits-Toggle (js/layers/traffic-*.js):
 // Uber-Stunden-Regler + Chart-Klick, SVZ Master/Unter-Haken/Modus, Telraam-Modus.
 import { test, expect } from "@playwright/test";
-import { openMap, jumpTo, hoverAt, popups, expectNoErrors } from "./helpers.js";
+import { openMap, jumpTo, hoverAt, popups, layerVisibility, expectNoErrors } from "./helpers.js";
 
-const vis = (page, ids) => page.evaluate((ids) => ids.map((id) => window.map.getLayoutProperty(id, "visibility")), ids);
+const vis = layerVisibility;
 const shown = (page, id) => page.evaluate((id) => document.getElementById(id).offsetParent !== null, id);
 
 test("Uber: Stunden-Regler setzt Filter + Farbe beider Richtungen", async ({ page }) => {
@@ -56,7 +56,7 @@ test("Uber: Klick auf ein Segment öffnet das Tagesverlauf-Chart", async ({ page
 test("SVZ: Master + Unter-Haken schalten ihre Layer; SV-Modus schreibt Größen um und sperrt UBA", async ({ page }) => {
   const errors = await openMap(page);
   const LAYERS = ["svz-lines", "svz-points", "bast-points", "hvs"];
-  expect(await vis(page, LAYERS)).toEqual(["none", "none", "none", "none"]);
+  expect(await vis(page, LAYERS)).toEqual(["absent", "absent", "absent", "absent"]); // lazy
 
   await page.click("#toggle-svz", { force: true });
   expect(await shown(page, "svz-children")).toBe(true);

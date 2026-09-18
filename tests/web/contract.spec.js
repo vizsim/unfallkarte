@@ -7,10 +7,11 @@
 // Deploy; CI: Stand auf B2) und gleicht sie mit dem ab, was der Style tatsächlich benutzt.
 // Erwartung wird automatisch aus dem Style abgeleitet -> keine zweite Liste, die driftet.
 import { test, expect } from "@playwright/test";
-import { openMap, jumpTo, toggleOn, expectNoErrors } from "./helpers.js";
+import { openMap, jumpTo, toggleOn, ensureAllLayers, expectNoErrors } from "./helpers.js";
 
 test("Frontend-Vertrag: source-layer + benutzte Attribute existieren in den PMTiles", async ({ page }) => {
   await openMap(page);
+  await ensureAllLayers(page); // Layer entstehen sonst erst beim Einschalten
 
   // Dynamische Filter in den Style holen: jeder Slider setzt per setFilter/setPaintProperty
   // Ausdrücke mit eigenen Attributnamen (Sc1/2/3/8/9-Schwellen, Uber-Stunde). Einmal
@@ -115,6 +116,7 @@ const KNOWN_POPUP_GAPS = {
 
 test("Frontend-Vertrag: Attribute, die die Popups lesen, existieren in den PMTiles", async ({ page }) => {
   await openMap(page);
+  await ensureAllLayers(page);
 
   const report = await page.evaluate(async (known) => {
     const { allPopupEntries } = await import("/js/ui/popupHandlers.js");

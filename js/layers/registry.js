@@ -84,16 +84,46 @@ export const LAYER_REGISTRY = [
     }
 }
 
-/** Layer eines Eintrags in den Style hängen — Aufrufreihenfolge in addLayers.js = Zeichenreihenfolge. */
-export function addEntryLayers(map, entryId) {
+// ---------------------------------------------------------------------------------------------
+// Lazy: Quellen + Layer eines Eintrags entstehen erst beim ERSTEN Einschalten (ensureEntry).
+// Beim Start werden nur die Unfall-Quellen registriert: jede registrierte PMTiles-Quelle kostet
+// sonst sofort einen Header-Request, auch wenn der Layer nie angeht. Gemessen 2026-09 gegen B2
+// (ohne lokale Daten), Zeit bis zum ersten Unfallpunkt: Start-Requests 28 -> 7, 415 -> 79 KB;
+// schnelle Leitung ~0,1–0,4 s schneller (Streuung groß, aber Ausreißer 3,0 -> 2,2 s), gedrosselt
+// auf Mobilfunk-Niveau (1,6 Mbit/s, 150 ms RTT) stabil 14,4 -> 12,6 s.
+//
+// Die Zeichenreihenfolge bleibt dieselbe wie beim sofortigen Anlegen: addLayers.js meldet die
+// Reihenfolge aller Slots (setDrawOrder); ein nachträglich angelegter Layer wird VOR den
+// ersten schon existierenden Layer eines späteren Slots gehängt (beforeId).
+// ---------------------------------------------------------------------------------------------
+let resolveUrl = null; // (manifestId) => "pmtiles://…" — von addSources.js gesetzt
+let drawOrder = [];    // [{ entryId?, layerIds }] in Zeichenreihenfolge (unten zuerst)
+
+export function setSourceResolver(fn) { resolveUrl = fn; }
+export function setDrawOrder(slots) { drawOrder = slots; }
+
+const entryById = (entryId) => {
     const entry = LAYER_REGISTRY.find((e) => e.id === entryId);
     if (!entry) throw new Error(`Layer-Registry: kein Eintrag "${entryId}"`);
-    for (const layer of entry.layers) map.addLayer(layer);
-}
+    return entry;
+};
+export const entryLayerIds = (entryId) => entryById(entryId).layerIds;
 
-/** Frontend-Source-ID -> Manifest-ID (für addSources.js). */
-export const registrySources = () =>
-    Object.fromEntries(LAYER_REGISTRY.flatMap((e) => e.sources.map((src) => [src.id, src.manifest])));
+/** Quellen + Layer des Eintrags anlegen, falls noch nicht geschehen. Idempotent. */
+export function ensureEntry(map, entryId) {
+    const entry = entryById(entryId);
+    if (entry.layerIds.every((id) => map.getLayer(id))) return;
+
+    for (const src of entry.sources) {
+        if (!map.getSource(src.id)) map.addSource(src.id, { type: "vector", url: resolveUrl(src.manifest) });
+    }
+    const slot = drawOrder.findIndex((s) => s.entryId === entryId);
+    if (slot < 0) throw new Error(`Layer-Registry: "${entryId}" fehlt in der Zeichenreihenfolge (addLayers.js)`);
+    const beforeId = drawOrder.slice(slot + 1).flatMap((s) => s.layerIds).find((id) => map.getLayer(id));
+    for (const layer of entry.layers) {
+        if (!map.getLayer(layer.id)) map.addLayer(layer, beforeId);
+    }
+}
 
 /** Toggle-ID -> Permalink-Zeichen (für permalink.js). */
 export const registryPermalinkKeys = () =>

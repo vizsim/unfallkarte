@@ -1,5 +1,5 @@
 
-import { addEntryLayers } from "../layers/registry.js";
+import { setDrawOrder, entryLayerIds } from "../layers/registry.js";
 
 export function addLayers(map) {
 
@@ -364,38 +364,24 @@ export function addLayers(map) {
 
 
 
-  // Zeichenreihenfolge = Reihenfolge dieser Aufrufe (unten zuerst). Layer aus der
-  // Layer-Registry (js/layers/) hängen per addEntryLayers an ihrer bisherigen Stelle;
-  // tests/web/golden.spec.js hält die Reihenfolge fest.
-
-
-  addEntryLayers(map, "schools");
-  addEntryLayers(map, "health");
-  addEntryLayers(map, "playgrounds");
-  addEntryLayers(map, "crossings");
-
-
-  addAccidentLayersToMap(map);
-  addAccidentClusterLayers(map);
-
-  addEntryLayers(map, "scenario1");
-  addEntryLayers(map, "scenario2");
-  addEntryLayers(map, "scenario3");
-  addEntryLayers(map, "scenario6");
-  addEntryLayers(map, "scenario8");
-  addEntryLayers(map, "scenario9");
-
-  addEntryLayers(map, "maxspeed");
-  addEntryLayers(map, "movebis");
-  addEntryLayers(map, "obs");
-  addEntryLayers(map, "hvs");
-  addEntryLayers(map, "svz");   // SVZ-Verkehrsmengen ÜBER dem groben hvs-Fallback
-  addEntryLayers(map, "laerm1");
-  addEntryLayers(map, "laerm2");
-  addEntryLayers(map, "uspeed");
-  addEntryLayers(map, "telraam");
-
-
-  addMapillaryLayer(map);
-  addMapillaryTSLayer(map);
+  // Zeichenreihenfolge (unten zuerst). Strings = Einträge der Layer-Registry (js/layers/):
+  // sie werden hier NICHT angelegt, sondern lazy beim ersten Einschalten (ensureEntry) — ihr
+  // Platz in der Reihenfolge steht aber fest. Funktionen = sofort angelegte Layer (Unfälle,
+  // Cluster, Mapillary); ihre Layer-IDs dienen den Lazy-Layern als beforeId-Anker.
+  // tests/web/golden.spec.js hält die resultierende Reihenfolge fest.
+  const DRAW_ORDER = [
+    "schools", "health", "playgrounds", "crossings",
+    addAccidentLayersToMap, addAccidentClusterLayers,
+    "scenario1", "scenario2", "scenario3", "scenario6", "scenario8", "scenario9",
+    "maxspeed", "movebis", "obs",
+    "hvs", "svz", // SVZ-Verkehrsmengen ÜBER dem groben hvs-Fallback
+    "laerm1", "laerm2", "uspeed", "telraam",
+    addMapillaryLayer, addMapillaryTSLayer,
+  ];
+  setDrawOrder(DRAW_ORDER.map((step) => {
+    if (typeof step === "string") return { entryId: step, layerIds: entryLayerIds(step) };
+    const before = new Set(map.getLayersOrder());
+    step(map);
+    return { layerIds: map.getLayersOrder().filter((id) => !before.has(id)) };
+  }));
 }

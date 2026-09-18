@@ -1,7 +1,7 @@
 // Szenario-Regler (js/ui/setupEntryControls.js): Schwellen-Slider + Sc9-Kriterium setzen den
 // Filter auf Flächen UND Punkte; beim Wiedereinschalten gilt der angezeigte Wert weiter.
 import { test, expect } from "@playwright/test";
-import { openMap, expectNoErrors } from "./helpers.js";
+import { openMap, layerVisibility, expectNoErrors } from "./helpers.js";
 
 const filters = (page, n) => page.evaluate((n) =>
   [`scenario${n}-polys`, `scenario${n}-points`].map((id) => window.map.getFilter(id)), n);
@@ -59,9 +59,8 @@ test("Sc9: Regler + Kriterium ergeben einen kombinierten Filter", async ({ page 
 
 test("Sc6: Toggle schaltet auch die rot umrandeten Tempo-50-Abschnitte (scenario6-polys2)", async ({ page }) => {
   const errors = await openMap(page);
-  const vis = () => page.evaluate(() => ["scenario6-polys", "scenario6-points", "scenario6-polys2"]
-    .map((id) => window.map.getLayoutProperty(id, "visibility")));
-  expect(await vis()).toEqual(["none", "none", "none"]);
+  const vis = () => layerVisibility(page, ["scenario6-polys", "scenario6-points", "scenario6-polys2"]);
+  expect(await vis()).toEqual(["absent", "absent", "absent"]); // lazy: entsteht erst beim Einschalten
   await page.click("#toggle-scenario6", { force: true });
   expect(await vis()).toEqual(["visible", "visible", "visible"]);
   expectNoErrors(errors);

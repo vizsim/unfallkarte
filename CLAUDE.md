@@ -33,8 +33,10 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
 - **Layer-Registry** (`js/layers/`): ein Eintrag je Legenden-Zeile liefert Quelle(n), Layer-
   Definitionen, Toggle, Zoom-Hinweis, Permalink-Zeichen, Regler (`controls`), Sonderlogik
   (`setup`) und Popups — alle Kontext-Layer + Szenarien laufen darüber. Neue Layer dort
-  eintragen (nicht in `addLayers.js`/Einzellisten) und in `addLayers.js` per
-  `addEntryLayers(map, id)` an der gewünschten Stelle der Zeichenreihenfolge einhängen.
+  eintragen (nicht in `addLayers.js`/Einzellisten) und die ID in `DRAW_ORDER` (`addLayers.js`)
+  an der gewünschten Stelle der Zeichenreihenfolge einreihen. Quellen + Layer entstehen LAZY
+  beim ersten Einschalten (`ensureEntry`) — Code darf nicht voraussetzen, dass ein Registry-
+  Layer schon existiert (`map.getLayer(id)` prüfen; Tests: `ensureAllLayers`).
   DOM-IDs (`#toggle-<id>`, `#<id>-legend`) und Permalink-Zeichen sind Vertrag — nie
   umbenennen/neu vergeben. Nach Umbauten: `npx playwright test golden` muss unverändert grün
   sein; gewollte Änderungen mit `--update-snapshots` aufnehmen und den Snapshot-Diff prüfen.

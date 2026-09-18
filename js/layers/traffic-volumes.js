@@ -173,7 +173,7 @@ const fmtInt = (v) => (v === undefined || v === null || v === "") ? "—" : Math
 // ---------------------------------------------------------------------------------------------
 
 // Verkehrsmengen: 1 Master-Toggle + 3 Quellen-Unterhaken (Länder/BASt/UBA) + DTV/SV-Modus.
-function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegendVisibilityByZoom }) {
+function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegendVisibilityByZoom, ensure }) {
   const master = document.getElementById("toggle-svz");
   if (!master) return;
   const kids = document.getElementById("svz-children");
@@ -185,8 +185,28 @@ function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegen
   ];
   let mode = "dtv";
 
+  // Farbe + Größe aller SVZ-Layer nach dem aktuellen Modus (nur Layer, die schon existieren)
+  const paintMode = () => {
+    if (map.getLayer("svz-lines")) {
+      map.setPaintProperty("svz-lines", "line-color", svzColorExpr(mode));
+      map.setPaintProperty("svz-lines", "line-width", svzWidthExpr(mode));
+    }
+    for (const id of ["svz-points", "bast-points"]) {
+      if (!map.getLayer(id)) continue;
+      map.setPaintProperty(id, "circle-color", svzColorExpr(mode));
+      map.setPaintProperty(id, "circle-radius", svzRadiusExpr(mode));
+    }
+  };
+
   const applyLayers = () => {
     const on = master.checked;
+    if (on && !map.getLayer("svz-lines")) {
+      // Lazy: beim ersten Einschalten anlegen (hvs gehört als Unter-Haken dazu) — die Layer
+      // entstehen im DTV-Default, darum direkt auf den gewählten Modus bringen.
+      ensure("hvs");
+      ensure("svz");
+      paintMode();
+    }
     for (const g of groups) {
       const modeOk = !g.dtvOnly || mode === "dtv";
       const vis = (on && g.cb && g.cb.checked && modeOk) ? "visible" : "none";
@@ -212,15 +232,7 @@ function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegen
 
   const applyMode = (m) => {
     mode = m;
-    if (map.getLayer("svz-lines")) {
-      map.setPaintProperty("svz-lines", "line-color", svzColorExpr(mode));
-      map.setPaintProperty("svz-lines", "line-width", svzWidthExpr(mode));
-    }
-    for (const id of ["svz-points", "bast-points"]) {
-      if (!map.getLayer(id)) continue;
-      map.setPaintProperty(id, "circle-color", svzColorExpr(mode));
-      map.setPaintProperty(id, "circle-radius", svzRadiusExpr(mode));
-    }
+    paintMode();
     document.querySelectorAll(".svz-ramp").forEach(el => {
       el.style.display = el.dataset.mode === mode ? "block" : "none";
     });
@@ -255,10 +267,13 @@ function setupTelraamMode(map) {
     });
   };
 
-  radios.forEach(r => r.addEventListener("change", () => {
-    const sel = document.querySelector('input[name="telraam-mode"]:checked');
-    apply(sel ? sel.value : "bike");
-  }));
+  const current = () => document.querySelector('input[name="telraam-mode"]:checked')?.value ?? "bike";
+  radios.forEach(r => r.addEventListener("change", () => apply(current())));
+  // Lazy: der Layer entsteht erst beim Einschalten (im Rad-Default) -> gewählten Modus nachziehen.
+  // (Dieser Listener läuft NACH dem generischen Toggle, der den Layer anlegt.)
+  document.getElementById("toggle-telraam")?.addEventListener("change", (e) => {
+    if (e.target.checked) apply(current());
+  });
 
   const init = document.querySelector('input[name="telraam-mode"]:checked');
   apply(init ? init.value : "bike");

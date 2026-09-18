@@ -1,14 +1,13 @@
 import { resolveSources } from "./resolveSources.js";
 import { showErrorBanner } from "../ui/errorBanner.js";
-import { registrySources } from "../layers/registry.js";
+import { setSourceResolver } from "../layers/registry.js";
 
-// Frontend-Source-ID -> Manifest-ID. URL kommt aus resolveSources() (Local-first ./data/,
-// Fallback B2 unfallkarte-data-v2). Einträge der Layer-Registry (js/layers/registry.js)
-// kommen von dort; hier stehen nur die Unfall-Quellen (Kern der App, kein Legenden-Layer).
+// Beim Start registrierte Quellen: nur die Unfälle (Frontend-Source-ID -> Manifest-ID). Alle
+// anderen legt die Layer-Registry lazy beim ersten Einschalten an (ensureEntry) — sie bekommt
+// dafür unten den URL-Resolver (Local-first ./data/, Fallback B2 unfallkarte-data-v2).
 const MIGRATED = {
   accidents_single: "accidents_single",
   "accidents-cluster": "accidents_cluster",
-  ...registrySources(),
 };
 
 // Alle Layer sind in die Pipeline migriert — das alte Bucket `unfallkarte-data`
@@ -29,6 +28,7 @@ export async function addSources(map, { MAPILLARY_TOKEN, sourcesPromise }) {
       "vom Datenserver ladbar) — Unfall- und Kontextlayer bleiben leer."
     );
   }
+  setSourceResolver((manifestId) => sources.url(manifestId));
   for (const [id, manifestId] of Object.entries(MIGRATED)) {
     addVector(id, sources.url(manifestId));
   }

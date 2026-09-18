@@ -154,9 +154,17 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       aber OSM-Rebuild + B2-Deploy. Gefunden vom Vertragstest; dort als begründete Ausnahme
       in `KNOWN_POPUP_GAPS` (tests/web/contract.spec.js) — der Test meldet, sobald die Tiles
       das Feld liefern und die Ausnahme weg kann. (Doppelpunkt-Tags heißen im Tile mit `_`.)
-- [ ] **Lazy-Sources** (REFACTORING_PLAN §13 Punkt 7) — größter offener Perf-Posten:
-      alle ~18 Quellen werden beim Start angelegt (Metadaten-Fetch + HEAD-Probe je Quelle).
-      Nur accidents/cluster eager, Rest beim ersten Einschalten (`ensureSource(id)`).
+- [x] **Lazy-Sources** (2026-09-18, REFACTORING_PLAN §13 Punkt 7) — beim Start werden nur die
+      Unfall-Quellen registriert; Quellen + Layer eines Registry-Eintrags entstehen beim ersten
+      Einschalten (`ensureEntry` in `js/layers/registry.js`). `addLayers.js` legt nur noch die
+      Zeichenreihenfolge fest (`DRAW_ORDER`); nachträglich angelegte Layer hängen per `beforeId`
+      vor dem nächsten existierenden Layer eines späteren Slots → Reihenfolge identisch zum
+      früheren Sofort-Anlegen (Golden unverändert; `tests/web/lazy.spec.js` prüft zusätzlich
+      verschränkte/umgekehrte Einschalt-Reihenfolgen). Gemessen gegen B2: Start-Requests
+      28 → 7, 415 → 79 KB; erster Unfallpunkt auf schneller Leitung ~0,1–0,4 s früher (große
+      Streuung, Ausreißer 3,0 → 2,2 s), auf Mobilfunk-Profil (1,6 Mbit/s, 150 ms RTT) stabil
+      14,4 → 12,6 s. Die 12 s dort zeigen: der nächste große Hebel ist die Nutzlast selbst
+      (maplibre-gl ~1 MB + ~20 Einzel-Module → Vite/Bundling, Roadmap 3; Unfall-Tiles).
 
 ## Sichtbarkeit / Auffindbarkeit
 

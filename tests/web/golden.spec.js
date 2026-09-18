@@ -12,13 +12,22 @@
 //   toggles  je Legenden-Toggle × Zoom 8/12/15: welche Layer werden sichtbar, welche
 //            Legenden/Zoom-Hinweise erscheinen, was landet im Permalink
 import { test, expect } from "@playwright/test";
-import { openMap, expectNoErrors } from "./helpers.js";
+import { openMap, ensureAllLayers, expectNoErrors } from "./helpers.js";
 
 const ZOOMS = [8, 12, 15];
 
 test("Golden: Quellen, Layer-Definitionen und Toggle-Verhalten", async ({ page }) => {
   test.setTimeout(240_000);
   const errors = await openMap(page);
+
+  // Beim Start existieren nur die Unfall-Layer; alles andere entsteht lazy beim ersten
+  // Einschalten (ensureEntry). Hier VOR der Aufnahme alle anlegen — in Registry-Reihenfolge,
+  // die NICHT die Zeichenreihenfolge ist: der Snapshot beweist damit, dass nachträglich
+  // eingefügte Layer exakt an ihrer Stelle landen (beforeId-Logik).
+  const startLayers = await page.evaluate(() => window.map.getLayersOrder().length);
+  await ensureAllLayers(page);
+  expect(await page.evaluate(() => window.map.getLayersOrder().length), "Lazy greift nicht: Layer waren schon beim Start da")
+    .toBeGreaterThan(startLayers + 40);
 
   const golden = await page.evaluate(async (ZOOMS) => {
     const m = window.map;
