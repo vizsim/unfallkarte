@@ -1,0 +1,52 @@
+# CI: Pipeline (ruff + pytest) und Frontend-Smoke-Tests (Playwright).
+# Beide Jobs brauchen keine lokalen Daten: die pytest laufen im Dry-Run, das Frontend
+# holt seine PMTiles per B2-Fallback aus dem public Bucket (kein Secret nötig).
+name: CI
+
+on:
+  push:
+    branches: [main, unfallkarte-2026]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    name: Pipeline (ruff + pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: pipeline/uv.lock
+      - run: uv sync --locked
+      - run: uvx ruff check
+      - run: uv run pytest
+
+  web:
+    name: Frontend (Playwright-Smoke-Tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:web
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && failure() }}
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

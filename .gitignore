@@ -35,3 +35,8 @@ accident_data/
 
 # Lokaler Local-first-Symlink auf pipeline/data (nicht committen)
 /data
+
+# Node-Dev-Tooling (Frontend-Smoke-Tests, siehe package.json / playwright.config.js)
+node_modules/
+test-results/
+playwright-report/

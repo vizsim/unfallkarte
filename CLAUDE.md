@@ -28,7 +28,11 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
 - **Packaging: uv.** Nie `pip install`. Deps via `uv --directory pipeline add`, Ausführung
   via `uv --directory pipeline run`.
 - **Tools:** `uv run unfallkarte <cmd>`. Lint: `uvx ruff check` (aus `pipeline/`). Tests:
-  `uv run pytest`.
+  `uv run pytest`. Frontend: `npm run serve` (Range-fähig; `python -m http.server` kann
+  keine Range-Requests → lokale PMTiles scheitern), `npm run test:web`.
+- **Popups:** ein Hover-Popup für alle Layer (`js/ui/hoverPopup.js`). Neuer Layer mit
+  Popup = neuer Eintrag in der Registry `js/ui/popupHandlers.js` — keine eigenen
+  `map.on("mousemove", layerId)`-Handler (sonst wieder überlappende Popups).
 - Code: kurz, getippt, ruff-konform. Keine Notebooks in der Pipeline.
 - Config-getrieben: Jahres-Quirks/Filter/Tile-Profile in `pipeline/config/*.yaml`, nicht im Code.
 - Tippecanoe legt FGB-Integer-Attribute als **String** im PMTiles ab → im Frontend immer
@@ -62,8 +66,10 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
 ## Verifizieren (Sicherheitsnetz)
 - **Golden-Reference** (`pipeline/tests/golden/`): Feature-Counts/Spalten/Jahre des Accident-
   Parquets müssen stabil bleiben (`golden.py compare`). `uv run pytest` + `uvx ruff check` grün.
-- Frontend-Änderungen: Browser-Verify (headless Playwright/Chromium) — keine JS-Fehler,
-  Layer laden local-first/B2.
+- Frontend-Änderungen: `npm run test:web` (Playwright-Smoke-Tests in `tests/web/`, headless
+  Chromium) — keine JS-Fehler, Layer laden local-first/B2, Hover/Popup/Klick funktionieren.
+  Neues Verhalten = neuer Test dort. Pflicht vor jedem Upgrade der Libs in `vendor/`.
+- CI (`.github/workflows/ci.yml`): ruff + pytest + Smoke-Tests bei Push/PR.
 
 ## Vorgehen
 - Refactor abgeschlossen: accidents (2017–2024), OSM-Layer und alle Szenarien (1/2/3/6/8/9)

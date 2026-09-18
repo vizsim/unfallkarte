@@ -62,16 +62,35 @@ nutzt einen Mapillary-**Client-Token** (`js/config/config.public.js`). Pipeline-
 
 ## 🖥️ Frontend lokal starten
 
-Statische Seite über HTTP servieren (ES-Module + `fetch` brauchen HTTP, kein `file://`):
+Statische Seite über HTTP servieren (ES-Module + `fetch` brauchen HTTP, kein `file://`).
+Der Server muss **Range-Requests** können, sonst lassen sich lokale PMTiles nicht lesen —
+`python3 -m http.server` kann das **nicht** (Fehler „no content-length header …"):
 
 ```bash
-python3 -m http.server 8000          # im Repo-Root
-# -> http://localhost:8000
+npm install                          # einmalig (Dev-Tooling: http-server + Playwright)
+npm run serve                        # im Repo-Root -> http://localhost:4173
+#   localhost  -> nutzt deine lokale js/config/config.js (gitignored)
+#   127.0.0.1  -> nutzt js/config/config.public.js (so laufen auch die Tests/CI)
 ```
 
 **Local-first**: liegt ein `data/`-Verzeichnis lokal vor (z. B. Symlink auf `pipeline/data/`),
 werden die PMTiles von dort geladen; sonst fällt das Frontend automatisch auf B2 zurück
 (Manifest wird local-first, sonst aus dem Bucket gelesen).
+
+## ✅ Tests
+
+```bash
+npm run test:web                                   # Frontend-Smoke-Tests (Playwright, headless Chromium)
+uv --directory pipeline run pytest                 # Pipeline-Tests (Dry-Run, keine Daten nötig)
+(cd pipeline && uvx ruff check)                    # Lint
+```
+
+Die Smoke-Tests (`tests/web/`) fahren die echte Seite im Browser: lädt die Karte ohne
+JS-Fehler, liefert der Cluster-Hover das vergrößerte Pie, erscheint bei überlappenden
+Objekten genau **ein** gestapeltes Popup, fixiert/schließt der Klick, überlebt ein Sweep
+über alle Kontext-Layer. Sie starten ihren Server selbst, nutzen Local-first/B2 wie im
+Betrieb (brauchen also keine lokalen Daten) und laufen zusammen mit ruff + pytest in der
+CI (`.github/workflows/ci.yml`). **Vor jedem Upgrade der Libs in `vendor/` laufen lassen.**
 
 ## ⚙️ Daten aufbauen (Pipeline)
 

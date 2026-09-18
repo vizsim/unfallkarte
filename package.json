@@ -1,0 +1,16 @@
+{
+  "name": "unfallkarte-web",
+  "private": true,
+  "description": "Dev-Tooling für das statische Frontend der Unfallkarte (Smoke-Tests). Das Frontend selbst hat keinen Build-Step.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "scripts": {
+    "serve": "http-server . -a 127.0.0.1 -p 4173 -c-1 --silent",
+    "test:web": "playwright test",
+    "test:web:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "http-server": "^14.1.1"
+  }
+}
