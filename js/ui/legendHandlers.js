@@ -40,8 +40,7 @@ export function applyLegendVisibility() {
   // noch nicht in der Registry:
   const keys = [
     "svz", "mapillary", "maxspeed", "maxspeed_minor", "uspeed", "telraam",
-    "bikelanes",
-    "scenario1", "scenario2", "scenario3", "scenario6"
+    "bikelanes"
   ];
 
   keys.forEach(key => {

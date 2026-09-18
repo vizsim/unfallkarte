@@ -12,6 +12,7 @@
 import { formatDateDE } from "../utils/formatDate.js";
 import { setupHoverPopup } from "./hoverPopup.js";
 import { row, osmLink } from "./popupHelpers.js";
+import { translations } from "./accidentLabels.js";
 import { registryPopupEntries } from "../layers/registry.js";
 
 // chart.js (vendored, ~200 KB) erst beim ersten Uspeed-Chart-Popup nachladen —
@@ -33,35 +34,6 @@ function loadChartJs() {
     return chartJsReady;
 }
 
-
-const translations = {
-    UKATEGORIE: {
-        1: "Getötete",
-        2: "Schwerverletzte",
-        3: "Leichtverletzte"
-    },
-    UART: {
-        1: "Anfahrend/ruhend",
-        2: "Vorausfahrend/wartend",
-        3: "Seitlich gleiche Richtung",
-        4: "Entgegenkommend",
-        5: "Einbiegend/kreuzend",
-        6: "Fußgänger",
-        7: "Fahrbahnhindernis",
-        8: "Abkommen rechts",
-        9: "Abkommen links",
-        0: "Sonstiger Unfall"
-    },
-    UTYP1: {
-        1: "Fahrunfall",
-        2: "Abbiegeunfall",
-        3: "Einbiegen/Kreuzen",
-        4: "Fußgänger (Überschreiten)",
-        5: "Ruhender Verkehr",
-        6: "Längsverkehr",
-        7: "Sonstiger Unfall"
-    }
-};
 
 const weekdayNames = ["?", "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 const monthNames = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
@@ -349,7 +321,8 @@ function showUspeedChartPopup(p, lngLat) {
 
 // ---------------------------------------------------------------------------
 // Kontext-Layer, die noch NICHT in der Layer-Registry stehen (js/layers/registry.js).
-// Schulen, Gesundheit, Spielplätze, Übergänge, Lärm, OBS, Stadtradeln kommen von dort.
+// Schulen, Gesundheit, Spielplätze, Übergänge, Lärm, OBS, Stadtradeln und die Szenarien
+// kommen von dort.
 // ---------------------------------------------------------------------------
 
 function contextEntries() {
@@ -368,112 +341,6 @@ function contextEntries() {
 }
 
 
-// ---------------------------------------------------------------------------
-// Szenarien (1/2/3/6/8/9) — Eyebrow benennt das Szenario, damit gleiche Ortstitel
-// (z. B. dieselbe Schule in Sc2 und Sc6) unterscheidbar bleiben. multi: überlappende
-// Analyse-Flächen desselben Szenarios (z. B. drei Unfallhäufungen) werden alle gezeigt (#31).
-// ---------------------------------------------------------------------------
-
-function scenarioEntries() {
-    const ruleCriteria = {
-        up5_3y: "≥ 5 Unfälle mit Personenschaden in 3 Jahren (M-Uko-3-Jahres-Kriterium).",
-        usp3_3y: "≥ 3 Unfälle mit schwerem Personenschaden in 3 Jahren (M-Uko-3-Jahres-Kriterium).",
-        utyp5_3y: "≥ 5 gleichartige Unfälle (gleicher Unfalltyp) in 3 Jahren (angelehnt an die M-Uko-Typenkarte)."
-    };
-
-    const laermText = (v) => {
-        const n = Number(v);
-        if (n === 55) return "55–59 dB(A)";
-        if (n === 60) return "60–64 dB(A)";
-        if (n === 65) return "65–69 dB(A)";
-        if (n === 70) return "70–74 dB(A)";
-        if (n === 75) return "> 75 dB(A)";
-        return "–";
-    };
-
-    const severityRows = (p) => `
-        ${row("Getötete", p.UKATEGORIE__1)}
-        ${row("Schwerverletzte", p.UKATEGORIE__2)}
-        ${row("Leichtverletzte", p.UKATEGORIE__3)}`;
-
-    return [
-        {
-            id: "scenario1", kind: "scenario", multi: true, layers: ["scenario1-polys", "scenario1-points"], eyebrow: "Unfall-Häufung · Tempo 100",
-            render: (p) => `
-                <table class="pop-table">
-                    ${row("Unfälle im Cluster", p.cluster_size)}
-                    ${severityRows(p)}
-                </table>`
-        },
-        {
-            id: "scenario2", kind: "scenario", multi: true, layers: ["scenario2-polys", "scenario2-points"], eyebrow: "Schulumfeld · Unfälle",
-            render: (p) => `
-                <div class="pop-title">${p.name ?? "Schule / Kindergarten"} <span class="info-icon" data-tip="Gezählt: Unfälle ab 2020 (seit 2020 bundesweit einheitlich erfasst, inkl. 2025) im 50-m-Umfeld. Die Karte zeigt dagegen alle Jahre 2017–2025 — ältere Unfälle erscheinen als Punkte, ohne mitgezählt zu werden.">i</span></div>
-                <table class="pop-table">
-                    ${row("Art", p.amenity)}
-                    ${row("Unfälle gesamt", p.total_count)}
-                    ${row("… mit Radbeteiligung", p.bike_count)}
-                    ${row("… mit Fußgängerbeteiligung", p.ped_count)}
-                </table>
-                <div class="pop-meta" style="margin-top:8px;">Im 50-m-Umfeld der Einrichtung. Ausgewählt: Schulen mit mehr als 2 Unfällen mit Rad-/Fußbeteiligung.</div>`
-        },
-        {
-            id: "scenario3", kind: "scenario", multi: true, layers: ["scenario3-polys", "scenario3-points"], eyebrow: "Kurzes Tempo-50-Segment",
-            render: (p) => `
-                <table class="pop-table">
-                    <tr><td>Tempolimit</td><td>${p.maxspeed ? `${p.maxspeed} km/h` : "–"}</td></tr>
-                    <tr><td>Straße</td><td>${p.name ?? "–"}</td></tr>
-                    <tr><td>Länge</td><td>${p.length_m !== undefined ? `${Number(p.length_m).toFixed(0)} m` : "–"}</td></tr>
-                </table>`
-        },
-        {
-            id: "scenario6", kind: "scenario", multi: true, layers: ["scenario6-polys", "scenario6-points"], eyebrow: "Schule · Tempo 50 nah",
-            // Tiles tragen nur oid + Tempo-50-Länge (kein Name) -> beides zeigen, sonst sind
-            // überlappende Buffer (Schulgelände + Kita-Node) im Stapel nicht unterscheidbar.
-            render: (p) => `
-                <div class="pop-title">${p.name ?? "Schule / Kindergarten"}</div>
-                <table class="pop-table">
-                    ${row("Art", p.amenity)}
-                    ${row("Tempo 50 im Umfeld", p.total_tempo50_highway_length_m != null ? `${Math.round(Number(p.total_tempo50_highway_length_m))} m Straße` : null)}
-                    ${row("OSM-Objekt", p.oid)}
-                </table>
-                <div class="pop-meta" style="margin-top:6px;">Im direkten Umfeld (30-m-Buffer) gibt es Straßenabschnitte, auf denen noch Tempo 50 gilt — rot umrandet auf der Karte.</div>`,
-            link: (p) => (p.oid ? { href: `https://www.openstreetmap.org/${p.oid}`, label: "OpenStreetMap" } : null)
-        },
-        {
-            id: "scenario8", kind: "scenario", multi: true, layers: ["scenario8-polys", "scenario8-points"], eyebrow: "Schule · Lärm",
-            render: (p) => `
-                <div class="pop-title">${p.name ?? "Unbenannte Schule"}</div>
-                <div class="pop-hero pop-hero--sm">bis ${laermText(p.max_laerm_num)}</div>
-                <div class="pop-meta">Lärm am Gebäude · Orientierungswert ~57 dB(A)</div>`,
-            link: () => ({ href: "https://www.umweltbundesamt.de/themen/laerm/verkehrslaerm/strassenverkehrslaerm", label: "Umweltbundesamt · Straßenverkehrslärm" })
-        },
-        {
-            id: "scenario9", kind: "scenario", multi: true, layers: ["scenario9-polys", "scenario9-points"], eyebrow: "Unfall-Häufung · M-Uko",
-            render: (p) => {
-                const utyp = Number(p.utyp);
-                const utypText = utyp > 0 ? `${translations.UTYP1[utyp] ?? "-"} (${utyp})` : null;
-                const crit = ruleCriteria[p.rule];
-                return `
-                    <div><span class="pop-flag">Auffällig</span></div>
-                    ${crit ? `<div class="pop-meta" style="margin-top:0;">${crit}</div>` : ""}
-                    <table class="pop-table" style="margin-top:7px;">
-                        ${row("Unfalltyp", utypText)}
-                        ${row("Unfälle (max.)", p.n_max)}
-                        ${row("Zeitfenster", p.window_best)}
-                        ${row("auffällige Fenster", p.n_windows)}
-                        ${severityRows(p)}
-                    </table>
-                    <div class="pop-meta" style="margin-top:8px;">
-                        Vereinfachte Analyse auf Unfallatlas-Basis (nur Unfälle mit Personenschaden) —
-                        keine amtliche Feststellung einer Unfallhäufungsstelle durch die Unfallkommission.
-                    </div>`;
-            }
-        }
-    ];
-}
-
-
 // Alle Karten-Einträge an die gemeinsame Hover-Engine hängen. Die Reihenfolge hier
 // ist egal — gestapelt wird in Render-Reihenfolge der getroffenen Layer.
 export function allPopupEntries(map) {
@@ -482,7 +349,6 @@ export function allPopupEntries(map) {
         ...trafficEntries(),
         ...contextEntries(),
         ...registryPopupEntries(),
-        ...scenarioEntries()
     ];
 }
 

@@ -10,6 +10,7 @@ import { updateLegendVisibilityByZoom } from "./legendHandlers.js";
 import { telraamColorExpr, applyUspeedHour } from "../mapdata/addLayers.js";
 import { svzColorExpr, svzWidthExpr, svzRadiusExpr } from "../mapdata/addLayers.js";
 import { LAYER_REGISTRY } from "../layers/registry.js";
+import { setupEntryControls } from "./setupEntryControls.js";
 
 
 
@@ -73,6 +74,7 @@ export function setupLayerToggles(map, originalMinZoom, setCurrentZoomLock, appl
   // Alle Einträge der Layer-Registry: Toggle #toggle-<id> schaltet die Layer des Eintrags.
   for (const entry of LAYER_REGISTRY) {
     setupToggle(map, `toggle-${entry.id}`, entry.layerIds, zoomLock, applyLegendVisibility);
+    setupEntryControls(map, entry); // Schwellen-Regler (Szenarien), falls der Eintrag welche hat
   }
 }
 

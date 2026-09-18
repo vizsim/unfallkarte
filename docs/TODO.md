@@ -35,8 +35,16 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
              lassen weg, was sie schon sagen (`source`, `minzoom` = `dataMinZoom`,
              `visibility: none` → Defaults in `registry.js`). Zeichenreihenfolge = Reihenfolge der
              `addEntryLayers()`-Aufrufe in `addLayers.js`; Golden unverändert grün.
-       - [ ] Schritt 3: Szenarien über eine Fabrik `scenario({n, slider, …})` (6 fast identische
-             Blöcke; behebt die sc6-`fill-opacity`-Drift).
+       - [x] Schritt 3 (2026-09-18): Szenarien über die Fabrik `scenario({n, color, fillOpacity,
+             polysFilter, pointsFilter, extraLayers, controls, popup})` in `js/layers/scenarios.js`;
+             Schwellen-Regler generisch in `js/ui/setupEntryControls.js`. `addLayers.js` 1266 →
+             966 Z., `setupScenarioControls.js` 180 → 32 Z. (nur noch Uber-Regler). Golden
+             unverändert. Einzige Verhaltensänderung: beim Wiedereinschalten gilt der ANGEZEIGTE
+             Reglerwert (Sc1/2/8 sprangen still auf „>= 0" zurück). Aufgefallen: doppelte
+             `filter`-Schlüssel in den alten Layer-Objekten (letzter gewann still), doppelte
+             `id="scenario3-slider"` + Sc8-Slider `value="50"` unter `min="60"` in `index.html`,
+             tote Legenden-Keys `scenario1…6`. sc6 `fill-opacity` 0.4 ist jetzt ein benannter
+             Parameter (bewusst halbtransparent wegen der roten Tempo-50-Abschnitte darüber?).
        - [ ] Schritt 4: Layer mit Hook statt reinem Sichtbarkeits-Toggle — Tempolimit (12 Layer,
              Fabrik), SVZ/HVS (Master + Unter-Haken + DTV/SV-Modus), Uber (Stunden-Slider),
              Telraam (Auto/Rad-Modus) → `onToggle`/`controls`.
