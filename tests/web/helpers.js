@@ -5,29 +5,59 @@ import { expect } from "@playwright/test";
 // der Browser loggt jeden 404 als console.error. Alles andere ist ein echter Fehler.
 const IGNORED_ERRORS = [/Failed to load resource/i];
 
-/** Seite öffnen, auf die geladene Karte warten. Liefert die gesammelten JS-Fehler (live). */
+/**
+ * Seite öffnen und warten, bis die APP bereit ist. Liefert die gesammelten JS-Fehler (live).
+ *
+ * Bereit = <html data-app-ready> (gesetzt in permalink.js), NICHT map.loaded(): ohne ?p=
+ * wendet die App zwei Frames nach dem load-Handler den Default-Permalink an und setzt dabei
+ * Center/Zoom + alle Checkboxen zurück. Auf langsamen CI-Runnern lief ein Test davor los —
+ * sein toggleOn/jumpTo wurde danach wieder kassiert (erster CI-Lauf, Tempolimit-Test).
+ *
+ * PW_CPU_THROTTLE=6 npm run test:web  -> bremst die CPU (CDP), um solche Rennen lokal
+ * nachzustellen; unser Entwicklungsrechner ist sonst zu schnell dafür.
+ */
 export async function openMap(page) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
   page.on("console", (m) => {
     if (m.type() === "error" && !IGNORED_ERRORS.some((re) => re.test(m.text()))) errors.push(m.text());
   });
+  const throttle = Number(process.env.PW_CPU_THROTTLE);
+  if (throttle > 1) {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: throttle });
+  }
   await page.goto("/index.html");
-  await page.waitForFunction(() => window.map?.loaded?.(), null, { timeout: 90_000 });
+  await page.waitForFunction(
+    () => document.documentElement.dataset.appReady === "true" && window.map?.loaded?.(),
+    null, { timeout: 90_000 },
+  );
   return errors;
 }
 
-/** Warten, bis die Karte ruht UND alle Tiles da sind (statt fester Timeouts). */
+/**
+ * Warten, bis die Karte ruht und die Tiles da sind. Bewusst billig — das heißt NICHT, dass
+ * schon alles gezeichnet ist: die Cluster-Pies z. B. entstehen erst per styleimagemissing ->
+ * addImage -> Re-Layout, da sind loaded()/areTilesLoaded() längst wahr (fiel unter
+ * PW_CPU_THROTTLE auf). MapLibres "idle" wäre dafür korrekt, wartet aber auf ALLES (Basemap,
+ * Terrain …) und verdreifacht die Laufzeit. Darum: Tests pollen gezielt auf IHRE Bedingung
+ * (waitForBusiestPoint / expect.poll) statt auf globale Ruhe.
+ */
 export async function settle(page) {
-  const idle = () => window.map.loaded() && window.map.areTilesLoaded() && !window.map.isMoving();
-  await page.waitForFunction(idle, null, { timeout: 90_000 });
-  await page.waitForTimeout(400); // Symbol-Placement läuft nach dem letzten Tile noch einen Frame nach
-  await page.waitForFunction(idle, null, { timeout: 90_000 });
+  const calm = () => window.map.loaded() && window.map.areTilesLoaded() && !window.map.isMoving();
+  await page.waitForFunction(calm, null, { timeout: 90_000 });
+  await page.waitForTimeout(300);
+  await page.waitForFunction(calm, null, { timeout: 90_000 });
 }
 
 export async function jumpTo(page, center, zoom) {
   await page.evaluate(([c, z]) => window.map.jumpTo({ center: c, zoom: z }), [center, zoom]);
   await settle(page);
+  // Steht die Karte wirklich dort? Fängt alles ab, was die Ansicht nachträglich verstellt
+  // (z. B. ein verspätetes applyPermalink) — mit klarer Meldung statt Folgefehlern.
+  const view = await page.evaluate(() => ({ c: window.map.getCenter().toArray(), z: window.map.getZoom() }));
+  expect(view.z, `Zoom nach jumpTo verstellt: ${JSON.stringify(view)}`).toBeCloseTo(zoom, 1);
+  expect(Math.hypot(view.c[0] - center[0], view.c[1] - center[1]), `Center nach jumpTo verstellt: ${JSON.stringify(view)}`).toBeLessThan(1e-3);
 }
 
 /** Layer-/Szenario-Checkboxen einschalten (über echte Klicks -> gleiche Pfade wie im UI). */
@@ -62,6 +92,21 @@ export async function findBusiestPoint(page, layers, { distinct = false, step = 
     }
     return best;
   }, [layers, distinct, step]);
+}
+
+/**
+ * findBusiestPoint wiederholen, bis mindestens `min` Treffer übereinanderliegen — wartet damit
+ * genau auf das, was der Test braucht (Layer wirklich gerendert), egal wie langsam der Runner ist.
+ */
+export async function waitForBusiestPoint(page, layers, { min = 1, distinct = false, step = 10, message } = {}) {
+  let best = null;
+  await expect
+    .poll(async () => {
+      best = await findBusiestPoint(page, layers, { distinct, step });
+      return best?.n ?? 0;
+    }, { message: message ?? `keine Stelle mit >= ${min} Treffern in ${layers.join(", ")}`, timeout: 60_000, intervals: [500, 1000, 2000] })
+    .toBeGreaterThanOrEqual(min);
+  return best;
 }
 
 /** Maus von außerhalb auf den Punkt führen (löst echte mousemove-Events auf der Karte aus). */

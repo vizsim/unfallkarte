@@ -8,7 +8,7 @@
 // Datentolerant: Tests suchen sich ihre Stellen selbst (kein festes Pixel, keine feste
 // Feature-ID), weil Szenarien/OSM-Stände sich mit jedem Pipeline-Lauf ändern.
 import { test, expect } from "@playwright/test";
-import { openMap, settle, jumpTo, toggleOn, findBusiestPoint, hoverAt, popups, expectNoErrors } from "./helpers.js";
+import { openMap, settle, jumpTo, toggleOn, waitForBusiestPoint, hoverAt, popups, expectNoErrors } from "./helpers.js";
 
 const CLUSTER_LAYERS = ["pie-clusters-coarse-layer", "pie-clusters-fine-layer"];
 const BERLIN = [13.405, 52.52];
@@ -34,8 +34,7 @@ test("Cluster-Hover: vergrößertes Pie + genau ein Popup, Aufräumen beim Verla
   const errors = await openMap(page);
   await jumpTo(page, BERLIN, 8);
 
-  const pt = await findBusiestPoint(page, CLUSTER_LAYERS, { step: 8 });
-  expect(pt?.n, "kein Cluster im Viewport gerendert").toBeGreaterThan(0);
+  const pt = await waitForBusiestPoint(page, CLUSTER_LAYERS, { step: 8, message: "kein Cluster im Viewport gerendert" });
 
   await hoverAt(page, pt);
   await expect(popups(page)).toHaveCount(1);
@@ -61,8 +60,7 @@ test("#30: überlappende Objekte -> EIN gestapeltes Popup; Klick fixiert, Klick 
   await jumpTo(page, ADLERSHOF, 17);
 
   const layers = ["scenario2-polys", "scenario6-polys", "schools-polygons", "playgrounds-polygons"];
-  const pt = await findBusiestPoint(page, layers);
-  expect(pt?.n, "keine Stelle mit >= 2 überlappenden Layern gefunden").toBeGreaterThanOrEqual(2);
+  const pt = await waitForBusiestPoint(page, layers, { min: 2, message: "keine Stelle mit >= 2 überlappenden Layern gefunden" });
 
   await hoverAt(page, pt);
   await expect(popups(page)).toHaveCount(1); // der Kern von #30: nie mehrere Popups
@@ -101,8 +99,9 @@ test("#31: überlappende Flächen DESSELBEN Szenarios werden alle gezeigt", asyn
   await toggleOn(page, ["toggle-scenario9"]);
   await jumpTo(page, RUDOWER_CHAUSSEE, 15.5);
 
-  const pt = await findBusiestPoint(page, ["scenario9-polys"], { distinct: true });
-  expect(pt?.n, "keine überlappenden Sc9-Flächen gefunden (Datenstand geändert?)").toBeGreaterThanOrEqual(2);
+  const pt = await waitForBusiestPoint(page, ["scenario9-polys"], {
+    min: 2, distinct: true, message: "keine überlappenden Sc9-Flächen gefunden (Datenstand geändert?)",
+  });
 
   await hoverAt(page, pt);
   await expect(popups(page)).toHaveCount(1);
@@ -120,6 +119,7 @@ test("Sweep: alle Kontext-Layer + Szenarien an, Raster abfahren -> Popups, keine
     "toggle-scenario6", "toggle-scenario8", "toggle-scenario9",
   ]);
   await jumpTo(page, BERLIN, 15);
+  await waitForBusiestPoint(page, ["accident-points"], { step: 20, message: "keine Unfallpunkte gerendert" });
 
   const eyebrows = new Set();
   let seen = 0;
@@ -148,7 +148,7 @@ test("openOnClick: Klick auf ein Tempolimit-Segment öffnet OpenStreetMap statt 
   await toggleOn(page, ["toggle-maxspeed"]);
   await jumpTo(page, BERLIN, 15);
 
-  const pt = await page.evaluate(() => {
+  const findMaxspeed = () => page.evaluate(() => {
     const m = window.map;
     const rect = m.getContainer().getBoundingClientRect();
     for (let x = 60; x < rect.width - 60; x += 6) for (let y = 60; y < rect.height - 60; y += 6) {
@@ -160,7 +160,10 @@ test("openOnClick: Klick auf ein Tempolimit-Segment öffnet OpenStreetMap statt 
     }
     return null;
   });
-  expect(pt, "kein Tempolimit-Segment gefunden").not.toBeNull();
+  let pt = null;
+  await expect
+    .poll(async () => (pt = await findMaxspeed()), { message: "kein Tempolimit-Segment gefunden", timeout: 60_000, intervals: [500, 1000, 2000] })
+    .not.toBeNull();
 
   await hoverAt(page, pt);
   await expect(popups(page).first().locator(".pop-pinhint")).toContainText("Klick öffnet OpenStreetMap");

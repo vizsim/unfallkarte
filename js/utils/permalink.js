@@ -272,5 +272,10 @@ export function setupPermalinkHandling(map, {
         map.on("moveend", () => updatePermalink(map, isInitializingRef));
         map.on("zoomend", () => updatePermalink(map, isInitializingRef));
         isInitializingRef.value = false;
+        // Bereit-Signal (<html data-app-ready>): erst JETZT sind Ansicht + Checkboxen aus dem
+        // Permalink angewandt. map.loaded() reicht dafür nicht — es kann schon vorher wahr
+        // sein, und applyPermalink setzt danach Center/Zoom und alle Haken zurück. Die
+        // Smoke-Tests (tests/web/helpers.js) warten hierauf, bevor sie togglen/springen.
+        document.documentElement.dataset.appReady = "true";
     });
 }

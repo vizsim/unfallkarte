@@ -41,8 +41,12 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
 
 - [x] **CI einrichten** (2026-09-18) — `.github/workflows/ci.yml`: Job `pipeline`
       (uv sync --locked → ruff → pytest) + Job `web` (Playwright-Smoke-Tests gegen den
-      public B2-Bucket, Report als Artefakt bei Fehlschlag). Erster echter Lauf nach dem Push
-      prüfen (WebGL im Runner = Software-Rendering, Timeouts sind großzügig gesetzt).
+      public B2-Bucket, Report als Artefakt bei Fehlschlag). Erster Lauf: pipeline grün,
+      web 5/6 — der Tempolimit-Test lief auf dem Runner los, BEVOR die App den
+      Default-Permalink angewandt hatte (setzt Center/Zoom + alle Haken zurück). Fix:
+      Bereit-Signal `<html data-app-ready>` (permalink.js), Tests pollen auf ihre Bedingung
+      statt auf `map.loaded()`; `PW_CPU_THROTTLE=4 npm run test:web` simuliert langsame Runner.
+      Artefakte öffentlicher Repos ohne Login: `nightly.link/vizsim/unfallkarte/actions/runs/<id>/playwright-report.zip`.
 - [ ] **Frontend-Vertrag testen statt nur dokumentieren** — PMTiles-Dateinamen + Layer-Namen
       sind der Vertrag mit dem Frontend (CLAUDE.md), durchgesetzt nur per Disziplin. Ein
       pytest kann die `vector_layers` aus den gebauten PMTiles (bzw. `sources.yaml`) gegen die
