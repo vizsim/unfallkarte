@@ -73,6 +73,11 @@ npm run serve                        # im Repo-Root -> http://localhost:4173
 #   127.0.0.1  -> nutzt js/config/config.public.js (so laufen auch die Tests/CI)
 ```
 
+Gleichwertige Alternative ohne `npm install`: ein global installiertes
+[`serve`](https://github.com/vercel/serve) (`npm i -g serve`) — einfach `serve` im Repo-Root
+→ `http://localhost:3000`. Kann Range-Requests und folgt dem `data/`-Symlink (getestet mit
+14.2.6: `206` auf `data/accidents/*.pmtiles`).
+
 **Local-first**: liegt ein `data/`-Verzeichnis lokal vor (z. B. Symlink auf `pipeline/data/`),
 werden die PMTiles von dort geladen; sonst fällt das Frontend automatisch auf B2 zurück
 (Manifest wird local-first, sonst aus dem Bucket gelesen).
