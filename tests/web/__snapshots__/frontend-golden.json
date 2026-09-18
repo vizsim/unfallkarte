@@ -1,119 +1,4 @@
 {
- "sources": {
-  "accidents-cluster": {
-   "type": "vector",
-   "file": "accidents/combined_cluster.pmtiles"
-  },
-  "accidents_single": {
-   "type": "vector",
-   "file": "accidents/accidents_single.pmtiles"
-  },
-  "bike-lanes": {
-   "type": "vector"
-  },
-  "crossings": {
-   "type": "vector",
-   "file": "osm/crossings.pmtiles"
-  },
-  "esri-imagery-src": {
-   "type": "raster"
-  },
-  "health": {
-   "type": "vector",
-   "file": "osm/health.pmtiles"
-  },
-  "hover-point": {
-   "type": "geojson"
-  },
-  "hvs": {
-   "type": "vector",
-   "file": "uba/hvs_verkehrsmengen.pmtiles"
-  },
-  "laerm1": {
-   "type": "vector",
-   "file": "noise/laerm_den.pmtiles"
-  },
-  "laerm2": {
-   "type": "vector",
-   "file": "noise/laerm_night.pmtiles"
-  },
-  "mapillary-images": {
-   "type": "vector"
-  },
-  "mapillary-traffic_signs": {
-   "type": "vector"
-  },
-  "maxspeed": {
-   "type": "vector",
-   "file": "osm/maxspeed_major.pmtiles"
-  },
-  "maxspeed_minor": {
-   "type": "vector",
-   "file": "osm/maxspeed_minor.pmtiles"
-  },
-  "movebis": {
-   "type": "vector",
-   "file": "movebis/movebis.pmtiles"
-  },
-  "obs": {
-   "type": "vector",
-   "file": "obs/obs_data.pmtiles"
-  },
-  "openmaptiles": {
-   "type": "vector"
-  },
-  "osm-carto-src": {
-   "type": "raster"
-  },
-  "playgrounds": {
-   "type": "vector",
-   "file": "osm/playgrounds.pmtiles"
-  },
-  "scenario1": {
-   "type": "vector",
-   "file": "scenarios/scenario1_cluster_accidents_ms100.pmtiles"
-  },
-  "scenario2": {
-   "type": "vector",
-   "file": "scenarios/scenario2_accidents_close2schools.pmtiles"
-  },
-  "scenario3": {
-   "type": "vector",
-   "file": "scenarios/scenario3_tempo30_conti.pmtiles"
-  },
-  "scenario6": {
-   "type": "vector",
-   "file": "scenarios/scenario6_tempo50_30mbuffer_schulen.pmtiles"
-  },
-  "scenario8": {
-   "type": "vector",
-   "file": "scenarios/scenario8_laerm_schulen.pmtiles"
-  },
-  "scenario9": {
-   "type": "vector",
-   "file": "scenarios/scenario9_hotspots.pmtiles"
-  },
-  "schools": {
-   "type": "vector",
-   "file": "osm/schools.pmtiles"
-  },
-  "svz": {
-   "type": "vector",
-   "file": "svz/svz_de.pmtiles"
-  },
-  "svz_bast": {
-   "type": "vector",
-   "file": "svz/svz_bast.pmtiles"
-  },
-  "telraam_segments": {
-   "type": "vector",
-   "file": "telraam/telraam_segments.pmtiles"
-  },
-  "uspeed": {
-   "type": "vector",
-   "file": "traffic/uber_speed.pmtiles"
-  }
- },
  "layers": [
   "background",
   "park",
@@ -125,19 +10,19 @@
   "waterway",
   {
    "id": "osm-carto-layer",
-   "type": "raster",
-   "source": "osm-carto-src",
    "layout": {
     "visibility": "none"
-   }
+   },
+   "source": "osm-carto-src",
+   "type": "raster"
   },
   {
    "id": "esri-imagery-layer",
-   "type": "raster",
-   "source": "esri-imagery-src",
    "layout": {
     "visibility": "none"
-   }
+   },
+   "source": "esri-imagery-src",
+   "type": "raster"
   },
   "water_name",
   "building",
@@ -182,11 +67,6 @@
   "place_country_minor",
   "place_country_major",
   {
-   "id": "schools-points",
-   "type": "symbol",
-   "source": "schools",
-   "sourceLayer": "germany_osm_schools",
-   "minzoom": 9,
    "filter": [
     "==",
     [
@@ -194,10 +74,9 @@
     ],
     "Point"
    ],
-   "paint": {
-    "icon-opacity": 0.5
-   },
+   "id": "schools-points",
    "layout": {
+    "icon-allow-overlap": true,
     "icon-image": [
      "match",
      [
@@ -227,16 +106,17 @@
      16,
      1.8
     ],
-    "icon-allow-overlap": true,
     "visibility": "none"
-   }
-  },
-  {
-   "id": "schools-polygons",
-   "type": "fill",
+   },
+   "minzoom": 9,
+   "paint": {
+    "icon-opacity": 0.5
+   },
    "source": "schools",
    "sourceLayer": "germany_osm_schools",
-   "minzoom": 9,
+   "type": "symbol"
+  },
+  {
    "filter": [
     "==",
     [
@@ -244,6 +124,11 @@
     ],
     "Polygon"
    ],
+   "id": "schools-polygons",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "fill-color": [
      "match",
@@ -260,16 +145,11 @@
     "fill-opacity": 0.5,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "schools",
+   "sourceLayer": "germany_osm_schools",
+   "type": "fill"
   },
   {
-   "id": "health-points",
-   "type": "symbol",
-   "source": "health",
-   "sourceLayer": "germany_osm_health",
-   "minzoom": 9,
    "filter": [
     "==",
     [
@@ -277,10 +157,9 @@
     ],
     "Point"
    ],
-   "paint": {
-    "icon-opacity": 0.5
-   },
+   "id": "health-points",
    "layout": {
+    "icon-allow-overlap": true,
     "icon-image": [
      "case",
      [
@@ -375,16 +254,17 @@
      16,
      1.7
     ],
-    "icon-allow-overlap": true,
     "visibility": "none"
-   }
-  },
-  {
-   "id": "health-polygons",
-   "type": "fill",
+   },
+   "minzoom": 9,
+   "paint": {
+    "icon-opacity": 0.5
+   },
    "source": "health",
    "sourceLayer": "germany_osm_health",
-   "minzoom": 9,
+   "type": "symbol"
+  },
+  {
    "filter": [
     "==",
     [
@@ -392,6 +272,11 @@
     ],
     "Polygon"
    ],
+   "id": "health-polygons",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "fill-color": [
      "case",
@@ -472,16 +357,11 @@
     "fill-opacity": 0.5,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "health",
+   "sourceLayer": "germany_osm_health",
+   "type": "fill"
   },
   {
-   "id": "playgrounds-points",
-   "type": "symbol",
-   "source": "playgrounds",
-   "sourceLayer": "germany_osm_playgrounds",
-   "minzoom": 9,
    "filter": [
     "==",
     [
@@ -489,10 +369,9 @@
     ],
     "Point"
    ],
-   "paint": {
-    "icon-opacity": 0.5
-   },
+   "id": "playgrounds-points",
    "layout": {
+    "icon-allow-overlap": true,
     "icon-image": [
      "case",
      [
@@ -534,16 +413,17 @@
      16,
      1.7
     ],
-    "icon-allow-overlap": true,
     "visibility": "none"
-   }
-  },
-  {
-   "id": "playgrounds-polygons",
-   "type": "fill",
+   },
+   "minzoom": 9,
+   "paint": {
+    "icon-opacity": 0.5
+   },
    "source": "playgrounds",
    "sourceLayer": "germany_osm_playgrounds",
-   "minzoom": 9,
+   "type": "symbol"
+  },
+  {
    "filter": [
     "==",
     [
@@ -551,6 +431,11 @@
     ],
     "Polygon"
    ],
+   "id": "playgrounds-polygons",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "fill-color": [
      "case",
@@ -577,16 +462,11 @@
     "fill-opacity": 0.5,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "playgrounds",
+   "sourceLayer": "germany_osm_playgrounds",
+   "type": "fill"
   },
   {
-   "id": "crossings-lines",
-   "type": "line",
-   "source": "crossings",
-   "sourceLayer": "germany_osm_crossings",
-   "minzoom": 9,
    "filter": [
     "==",
     [
@@ -594,6 +474,12 @@
     ],
     "LineString"
    ],
+   "id": "crossings-lines",
+   "layout": {
+    "line-cap": "round",
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "line-color": [
      "match",
@@ -613,6 +499,7 @@
      "#FF4136",
      "#9aa0a6"
     ],
+    "line-opacity": 0.85,
     "line-width": [
      "interpolate",
      [
@@ -627,20 +514,13 @@
      2,
      16,
      5
-    ],
-    "line-opacity": 0.85
+    ]
    },
-   "layout": {
-    "line-cap": "round",
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "crossings-points",
-   "type": "circle",
    "source": "crossings",
    "sourceLayer": "germany_osm_crossings",
-   "minzoom": 9,
+   "type": "line"
+  },
+  {
    "filter": [
     "==",
     [
@@ -648,6 +528,11 @@
     ],
     "Point"
    ],
+   "id": "crossings-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "circle-color": [
      "match",
@@ -667,6 +552,7 @@
      "#FF4136",
      "#9aa0a6"
     ],
+    "circle-opacity": 0.85,
     "circle-radius": [
      "interpolate",
      [
@@ -697,20 +583,13 @@
      0,
      12.5,
      1
-    ],
-    "circle-opacity": 0.85
+    ]
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "crossings",
+   "sourceLayer": "germany_osm_crossings",
+   "type": "circle"
   },
   {
-   "id": "accident-points",
-   "type": "circle",
-   "source": "accidents_single",
-   "sourceLayer": "accidents",
-   "minzoom": 11,
-   "maxzoom": 20.1,
    "filter": [
     "all",
     [
@@ -792,7 +671,28 @@
      ]
     ]
    ],
+   "id": "accident-points",
+   "layout": {
+    "visibility": "visible"
+   },
+   "maxzoom": 20.1,
+   "minzoom": 11,
    "paint": {
+    "circle-color": [
+     "match",
+     [
+      "get",
+      "UKATEGORIE"
+     ],
+     1,
+     "#e41a1c",
+     2,
+     "#377eb8",
+     3,
+     "#4daf4a",
+     "#aaaaaa"
+    ],
+    "circle-opacity": 0.6,
     "circle-radius": [
      "interpolate",
      [
@@ -814,35 +714,14 @@
      19,
      30
     ],
-    "circle-color": [
-     "match",
-     [
-      "get",
-      "UKATEGORIE"
-     ],
-     1,
-     "#e41a1c",
-     2,
-     "#377eb8",
-     3,
-     "#4daf4a",
-     "#aaaaaa"
-    ],
-    "circle-opacity": 0.6,
     "circle-stroke-color": "#000",
     "circle-stroke-width": 0.1
    },
-   "layout": {
-    "visibility": "visible"
-   }
-  },
-  {
-   "id": "beteiligung-symbols",
-   "type": "symbol",
    "source": "accidents_single",
    "sourceLayer": "accidents",
-   "minzoom": 11,
-   "maxzoom": 20.1,
+   "type": "circle"
+  },
+  {
    "filter": [
     "all",
     [
@@ -924,10 +803,10 @@
      ]
     ]
    ],
-   "paint": {
-    "text-color": "#000"
-   },
+   "id": "beteiligung-symbols",
    "layout": {
+    "text-allow-overlap": true,
+    "text-anchor": "top",
     "text-field": [
      "concat",
      [
@@ -1236,25 +1115,27 @@
     "text-font": [
      "Noto Sans Regular"
     ],
-    "text-size": 14,
+    "text-ignore-placement": true,
     "text-offset": [
      0,
      0
     ],
-    "text-anchor": "top",
-    "text-allow-overlap": true,
-    "text-ignore-placement": true,
+    "text-size": 14,
     "visibility": "none"
-   }
+   },
+   "maxzoom": 20.1,
+   "minzoom": 11,
+   "paint": {
+    "text-color": "#000"
+   },
+   "source": "accidents_single",
+   "sourceLayer": "accidents",
+   "type": "symbol"
   },
   {
    "id": "pie-clusters-fine-layer",
-   "type": "symbol",
-   "source": "accidents-cluster",
-   "sourceLayer": "clusters_9_11",
-   "minzoom": 9,
-   "maxzoom": 11,
    "layout": {
+    "icon-allow-overlap": true,
     "icon-image": [
      "concat",
      "pie-",
@@ -1325,7 +1206,6 @@
      40000,
      0.9
     ],
-    "icon-allow-overlap": true,
     "symbol-sort-key": [
      "-",
      [
@@ -1352,16 +1232,17 @@
      ]
     ],
     "visibility": "visible"
-   }
+   },
+   "maxzoom": 11,
+   "minzoom": 9,
+   "source": "accidents-cluster",
+   "sourceLayer": "clusters_9_11",
+   "type": "symbol"
   },
   {
    "id": "pie-clusters-coarse-layer",
-   "type": "symbol",
-   "source": "accidents-cluster",
-   "sourceLayer": "clusters_6_8",
-   "minzoom": 6,
-   "maxzoom": 9,
    "layout": {
+    "icon-allow-overlap": true,
     "icon-image": [
      "concat",
      "pie-",
@@ -1432,7 +1313,6 @@
      40000,
      0.9
     ],
-    "icon-allow-overlap": true,
     "symbol-sort-key": [
      "-",
      [
@@ -1459,13 +1339,17 @@
      ]
     ],
     "visibility": "visible"
-   }
+   },
+   "maxzoom": 9,
+   "minzoom": 6,
+   "source": "accidents-cluster",
+   "sourceLayer": "clusters_6_8",
+   "type": "symbol"
   },
   {
    "id": "hover-pie",
-   "type": "symbol",
-   "source": "hover-point",
    "layout": {
+    "icon-allow-overlap": true,
     "icon-image": [
      "concat",
      "pie-",
@@ -1493,16 +1377,12 @@
       ]
      ]
     ],
-    "icon-size": 1,
-    "icon-allow-overlap": true
-   }
+    "icon-size": 1
+   },
+   "source": "hover-point",
+   "type": "symbol"
   },
   {
-   "id": "scenario1-polys",
-   "type": "fill",
-   "source": "scenario1",
-   "sourceLayer": "scenario1-polys",
-   "minzoom": 14,
    "filter": [
     "==",
     [
@@ -1510,27 +1390,33 @@
     ],
     "Polygon"
    ],
+   "id": "scenario1-polys",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 14,
    "paint": {
     "fill-color": "orange",
     "fill-opacity": 0.8,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario1",
+   "sourceLayer": "scenario1-polys",
+   "type": "fill"
   },
   {
-   "id": "scenario1-points",
-   "type": "circle",
-   "source": "scenario1",
-   "sourceLayer": "scenario1-points",
-   "minzoom": 6,
-   "maxzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario1-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 14,
+   "minzoom": 6,
    "paint": {
     "circle-color": "orange",
+    "circle-opacity": 0.8,
     "circle-radius": [
      "interpolate",
      [
@@ -1544,20 +1430,14 @@
      10,
      8
     ],
-    "circle-opacity": 0.8,
     "circle-stroke-color": "#1B4D3E",
     "circle-stroke-width": 1
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario1",
+   "sourceLayer": "scenario1-points",
+   "type": "circle"
   },
   {
-   "id": "scenario2-polys",
-   "type": "fill",
-   "source": "scenario2",
-   "sourceLayer": "scenario2-polys",
-   "minzoom": 14,
    "filter": [
     "all",
     [
@@ -1586,22 +1466,21 @@
      "Polygon"
     ]
    ],
+   "id": "scenario2-polys",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 14,
    "paint": {
     "fill-color": "orange",
     "fill-opacity": 0.8,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario2",
+   "sourceLayer": "scenario2-polys",
+   "type": "fill"
   },
   {
-   "id": "scenario2-points",
-   "type": "circle",
-   "source": "scenario2",
-   "sourceLayer": "scenario2-points",
-   "minzoom": 6,
-   "maxzoom": 14,
    "filter": [
     "all",
     [
@@ -1630,8 +1509,15 @@
      "Point"
     ]
    ],
+   "id": "scenario2-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 14,
+   "minzoom": 6,
    "paint": {
     "circle-color": "orange",
+    "circle-opacity": 0.8,
     "circle-radius": [
      "interpolate",
      [
@@ -1645,44 +1531,44 @@
      10,
      8
     ],
-    "circle-opacity": 0.8,
     "circle-stroke-color": "#1B4D3E",
     "circle-stroke-width": 1
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario2",
+   "sourceLayer": "scenario2-points",
+   "type": "circle"
   },
   {
-   "id": "scenario3-polys",
-   "type": "fill",
-   "source": "scenario3",
-   "sourceLayer": "scenario3-polys",
-   "minzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario3-polys",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 14,
    "paint": {
     "fill-color": "orange",
     "fill-opacity": 0.8,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario3",
+   "sourceLayer": "scenario3-polys",
+   "type": "fill"
   },
   {
-   "id": "scenario3-points",
-   "type": "circle",
-   "source": "scenario3",
-   "sourceLayer": "scenario3-points",
-   "minzoom": 6,
-   "maxzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario3-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 14,
+   "minzoom": 6,
    "paint": {
     "circle-color": "orange",
+    "circle-opacity": 0.8,
     "circle-radius": [
      "interpolate",
      [
@@ -1696,44 +1582,44 @@
      10,
      8
     ],
-    "circle-opacity": 0.8,
     "circle-stroke-color": "#1B4D3E",
     "circle-stroke-width": 1
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario3",
+   "sourceLayer": "scenario3-points",
+   "type": "circle"
   },
   {
-   "id": "scenario6-polys",
-   "type": "fill",
-   "source": "scenario6",
-   "sourceLayer": "scenario6-polys",
-   "minzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario6-polys",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 14,
    "paint": {
     "fill-color": "orange",
     "fill-opacity": 0.4,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario6",
+   "sourceLayer": "scenario6-polys",
+   "type": "fill"
   },
   {
-   "id": "scenario6-points",
-   "type": "circle",
-   "source": "scenario6",
-   "sourceLayer": "scenario6-points",
-   "minzoom": 6,
-   "maxzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario6-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 14,
+   "minzoom": 6,
    "paint": {
     "circle-color": "orange",
+    "circle-opacity": 0.8,
     "circle-radius": [
      "interpolate",
      [
@@ -1747,61 +1633,61 @@
      10,
      8
     ],
-    "circle-opacity": 0.8,
     "circle-stroke-color": "#1B4D3E",
     "circle-stroke-width": 1
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario6",
+   "sourceLayer": "scenario6-points",
+   "type": "circle"
   },
   {
-   "id": "scenario6-polys2",
-   "type": "line",
-   "source": "scenario6",
-   "sourceLayer": "scenario6-polys2",
-   "minzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario6-polys2",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 14,
    "paint": {
     "line-color": "red",
     "line-width": 2
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario6",
+   "sourceLayer": "scenario6-polys2",
+   "type": "line"
   },
   {
-   "id": "scenario8-polys",
-   "type": "fill",
-   "source": "scenario8",
-   "sourceLayer": "scenario8-polys",
-   "minzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario8-polys",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 14,
    "paint": {
     "fill-color": "orange",
     "fill-opacity": 0.8,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario8",
+   "sourceLayer": "scenario8-polys",
+   "type": "fill"
   },
   {
-   "id": "scenario8-points",
-   "type": "circle",
-   "source": "scenario8",
-   "sourceLayer": "scenario8-points",
-   "minzoom": 6,
-   "maxzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario8-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 14,
+   "minzoom": 6,
    "paint": {
     "circle-color": "orange",
+    "circle-opacity": 0.8,
     "circle-radius": [
      "interpolate",
      [
@@ -1815,44 +1701,44 @@
      10,
      8
     ],
-    "circle-opacity": 0.8,
     "circle-stroke-color": "#1B4D3E",
     "circle-stroke-width": 1
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario8",
+   "sourceLayer": "scenario8-points",
+   "type": "circle"
   },
   {
-   "id": "scenario9-polys",
-   "type": "fill",
-   "source": "scenario9",
-   "sourceLayer": "scenario9-polys",
-   "minzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario9-polys",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 14,
    "paint": {
     "fill-color": "#c0392b",
     "fill-opacity": 0.8,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario9",
+   "sourceLayer": "scenario9-polys",
+   "type": "fill"
   },
   {
-   "id": "scenario9-points",
-   "type": "circle",
-   "source": "scenario9",
-   "sourceLayer": "scenario9-points",
-   "minzoom": 6,
-   "maxzoom": 14,
    "filter": [
     "all"
    ],
+   "id": "scenario9-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 14,
+   "minzoom": 6,
    "paint": {
     "circle-color": "#c0392b",
+    "circle-opacity": 0.8,
     "circle-radius": [
      "interpolate",
      [
@@ -1866,53 +1752,35 @@
      10,
      8
     ],
-    "circle-opacity": 0.8,
     "circle-stroke-color": "#1B4D3E",
     "circle-stroke-width": 1
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "scenario9",
+   "sourceLayer": "scenario9-points",
+   "type": "circle"
   },
   {
+   "filter": [
+    "all",
+    [
+     "has",
+     "maxspeed_forward"
+    ],
+    [
+     "!",
+     [
+      "has",
+      "maxspeed_conditional"
+     ]
+    ]
+   ],
    "id": "maxspeed-forward",
-   "type": "line",
-   "source": "maxspeed",
-   "sourceLayer": "highways",
-   "minzoom": 11,
+   "layout": {
+    "visibility": "none"
+   },
    "maxzoom": 24,
-   "filter": [
-    "all",
-    [
-     "has",
-     "maxspeed_forward"
-    ],
-    [
-     "!",
-     [
-      "has",
-      "maxspeed_conditional"
-     ]
-    ]
-   ],
+   "minzoom": 11,
    "paint": {
-    "line-width": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     10,
-     2.5,
-     17,
-     3,
-     18,
-     6,
-     20,
-     10
-    ],
     "line-color": [
      "case",
      [
@@ -2019,51 +1887,51 @@
      5,
      20,
      8
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     10,
+     2.5,
+     17,
+     3,
+     18,
+     6,
+     20,
+     10
     ]
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "maxspeed",
+   "sourceLayer": "highways",
+   "type": "line"
   },
   {
+   "filter": [
+    "all",
+    [
+     "has",
+     "maxspeed_backward"
+    ],
+    [
+     "!",
+     [
+      "has",
+      "maxspeed_conditional"
+     ]
+    ]
+   ],
    "id": "maxspeed-backward",
-   "type": "line",
-   "source": "maxspeed",
-   "sourceLayer": "highways",
-   "minzoom": 11,
+   "layout": {
+    "visibility": "none"
+   },
    "maxzoom": 24,
-   "filter": [
-    "all",
-    [
-     "has",
-     "maxspeed_backward"
-    ],
-    [
-     "!",
-     [
-      "has",
-      "maxspeed_conditional"
-     ]
-    ]
-   ],
+   "minzoom": 11,
    "paint": {
-    "line-width": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     10,
-     2.5,
-     17,
-     3,
-     18,
-     6,
-     20,
-     10
-    ],
     "line-color": [
      "case",
      [
@@ -2170,19 +2038,30 @@
      -5,
      20,
      -8
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     10,
+     2.5,
+     17,
+     3,
+     18,
+     6,
+     20,
+     10
     ]
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed",
-   "type": "line",
    "source": "maxspeed",
    "sourceLayer": "highways",
-   "minzoom": 11,
-   "maxzoom": 24,
+   "type": "line"
+  },
+  {
    "filter": [
     "all",
     [
@@ -2207,24 +2086,13 @@
      ]
     ]
    ],
+   "id": "maxspeed",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
    "paint": {
-    "line-width": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     10,
-     2.5,
-     17,
-     3,
-     18,
-     6,
-     20,
-     10
-    ],
     "line-color": [
      "case",
      [
@@ -2314,19 +2182,30 @@
       140,
       "#8B0000"
      ]
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     10,
+     2.5,
+     17,
+     3,
+     18,
+     6,
+     20,
+     10
     ]
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed-conditional",
-   "type": "line",
    "source": "maxspeed",
    "sourceLayer": "highways",
-   "minzoom": 11,
-   "maxzoom": 24,
+   "type": "line"
+  },
+  {
    "filter": [
     "all",
     [
@@ -2348,24 +2227,13 @@
      "maxspeed_conditional"
     ]
    ],
+   "id": "maxspeed-conditional",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
    "paint": {
-    "line-width": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     10,
-     2.5,
-     17,
-     3,
-     18,
-     6,
-     20,
-     10
-    ],
     "line-color": [
      "case",
      [
@@ -2459,31 +2327,7 @@
     "line-dasharray": [
      2,
      2
-    ]
-   },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed-conditional-forward",
-   "type": "line",
-   "source": "maxspeed",
-   "sourceLayer": "highways",
-   "minzoom": 11,
-   "maxzoom": 24,
-   "filter": [
-    "all",
-    [
-     "has",
-     "maxspeed_forward"
     ],
-    [
-     "has",
-     "maxspeed_conditional"
-    ]
-   ],
-   "paint": {
     "line-width": [
      "interpolate",
      [
@@ -2500,7 +2344,31 @@
      6,
      20,
      10
+    ]
+   },
+   "source": "maxspeed",
+   "sourceLayer": "highways",
+   "type": "line"
+  },
+  {
+   "filter": [
+    "all",
+    [
+     "has",
+     "maxspeed_forward"
     ],
+    [
+     "has",
+     "maxspeed_conditional"
+    ]
+   ],
+   "id": "maxspeed-conditional-forward",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
+   "paint": {
     "line-color": [
      "case",
      [
@@ -2611,31 +2479,7 @@
      5,
      20,
      8
-    ]
-   },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed-conditional-backward",
-   "type": "line",
-   "source": "maxspeed",
-   "sourceLayer": "highways",
-   "minzoom": 11,
-   "maxzoom": 24,
-   "filter": [
-    "all",
-    [
-     "has",
-     "maxspeed_backward"
     ],
-    [
-     "has",
-     "maxspeed_conditional"
-    ]
-   ],
-   "paint": {
     "line-width": [
      "interpolate",
      [
@@ -2652,7 +2496,31 @@
      6,
      20,
      10
+    ]
+   },
+   "source": "maxspeed",
+   "sourceLayer": "highways",
+   "type": "line"
+  },
+  {
+   "filter": [
+    "all",
+    [
+     "has",
+     "maxspeed_backward"
     ],
+    [
+     "has",
+     "maxspeed_conditional"
+    ]
+   ],
+   "id": "maxspeed-conditional-backward",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
+   "paint": {
     "line-color": [
      "case",
      [
@@ -2763,35 +2631,51 @@
      -5,
      20,
      -8
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     10,
+     2.5,
+     17,
+     3,
+     18,
+     6,
+     20,
+     10
     ]
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "maxspeed",
+   "sourceLayer": "highways",
+   "type": "line"
   },
   {
+   "filter": [
+    "all",
+    [
+     "has",
+     "maxspeed_forward"
+    ],
+    [
+     "!",
+     [
+      "has",
+      "maxspeed_conditional"
+     ]
+    ]
+   ],
    "id": "maxspeed_minor-forward",
-   "type": "line",
-   "source": "maxspeed_minor",
-   "sourceLayer": "highways_minor",
-   "minzoom": 11,
+   "layout": {
+    "visibility": "none"
+   },
    "maxzoom": 24,
-   "filter": [
-    "all",
-    [
-     "has",
-     "maxspeed_forward"
-    ],
-    [
-     "!",
-     [
-      "has",
-      "maxspeed_conditional"
-     ]
-    ]
-   ],
+   "minzoom": 11,
    "paint": {
-    "line-width": 1.8,
     "line-color": [
      "case",
      [
@@ -2882,35 +2766,35 @@
       "#8B0000"
      ]
     ],
-    "line-offset": 2.5
+    "line-offset": 2.5,
+    "line-width": 1.8
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "maxspeed_minor",
+   "sourceLayer": "highways_minor",
+   "type": "line"
   },
   {
+   "filter": [
+    "all",
+    [
+     "has",
+     "maxspeed_backward"
+    ],
+    [
+     "!",
+     [
+      "has",
+      "maxspeed_conditional"
+     ]
+    ]
+   ],
    "id": "maxspeed_minor-backward",
-   "type": "line",
-   "source": "maxspeed_minor",
-   "sourceLayer": "highways_minor",
-   "minzoom": 11,
+   "layout": {
+    "visibility": "none"
+   },
    "maxzoom": 24,
-   "filter": [
-    "all",
-    [
-     "has",
-     "maxspeed_backward"
-    ],
-    [
-     "!",
-     [
-      "has",
-      "maxspeed_conditional"
-     ]
-    ]
-   ],
+   "minzoom": 11,
    "paint": {
-    "line-width": 1.8,
     "line-color": [
      "case",
      [
@@ -3001,19 +2885,14 @@
       "#8B0000"
      ]
     ],
-    "line-offset": -2.5
+    "line-offset": -2.5,
+    "line-width": 1.8
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed_minor",
-   "type": "line",
    "source": "maxspeed_minor",
    "sourceLayer": "highways_minor",
-   "minzoom": 11,
-   "maxzoom": 24,
+   "type": "line"
+  },
+  {
    "filter": [
     "all",
     [
@@ -3038,8 +2917,13 @@
      ]
     ]
    ],
+   "id": "maxspeed_minor",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
    "paint": {
-    "line-width": 1.8,
     "line-color": [
      "case",
      [
@@ -3129,19 +3013,14 @@
       140,
       "#8B0000"
      ]
-    ]
+    ],
+    "line-width": 1.8
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed_minor-conditional",
-   "type": "line",
    "source": "maxspeed_minor",
    "sourceLayer": "highways_minor",
-   "minzoom": 11,
-   "maxzoom": 24,
+   "type": "line"
+  },
+  {
    "filter": [
     "all",
     [
@@ -3163,8 +3042,13 @@
      "maxspeed_conditional"
     ]
    ],
+   "id": "maxspeed_minor-conditional",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
    "paint": {
-    "line-width": 1.8,
     "line-color": [
      "case",
      [
@@ -3258,19 +3142,14 @@
     "line-dasharray": [
      2,
      2
-    ]
+    ],
+    "line-width": 1.8
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed_minor-conditional-forward",
-   "type": "line",
    "source": "maxspeed_minor",
    "sourceLayer": "highways_minor",
-   "minzoom": 11,
-   "maxzoom": 24,
+   "type": "line"
+  },
+  {
    "filter": [
     "all",
     [
@@ -3282,8 +3161,13 @@
      "maxspeed_conditional"
     ]
    ],
+   "id": "maxspeed_minor-conditional-forward",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
    "paint": {
-    "line-width": 1.8,
     "line-color": [
      "case",
      [
@@ -3378,19 +3262,14 @@
      2,
      2
     ],
-    "line-offset": 2.5
+    "line-offset": 2.5,
+    "line-width": 1.8
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "maxspeed_minor-conditional-backward",
-   "type": "line",
    "source": "maxspeed_minor",
    "sourceLayer": "highways_minor",
-   "minzoom": 11,
-   "maxzoom": 24,
+   "type": "line"
+  },
+  {
    "filter": [
     "all",
     [
@@ -3402,8 +3281,13 @@
      "maxspeed_conditional"
     ]
    ],
+   "id": "maxspeed_minor-conditional-backward",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 24,
+   "minzoom": 11,
    "paint": {
-    "line-width": 1.8,
     "line-color": [
      "case",
      [
@@ -3498,17 +3382,18 @@
      2,
      2
     ],
-    "line-offset": -2.5
+    "line-offset": -2.5,
+    "line-width": 1.8
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "maxspeed_minor",
+   "sourceLayer": "highways_minor",
+   "type": "line"
   },
   {
    "id": "movebis",
-   "type": "line",
-   "source": "movebis",
-   "sourceLayer": "links",
+   "layout": {
+    "visibility": "none"
+   },
    "minzoom": 9,
    "paint": {
     "line-color": [
@@ -3600,16 +3485,11 @@
      ]
     ]
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "movebis",
+   "sourceLayer": "links",
+   "type": "line"
   },
   {
-   "id": "obs",
-   "type": "circle",
-   "source": "obs",
-   "sourceLayer": "obs_data-points",
-   "minzoom": 9,
    "filter": [
     ">=",
     [
@@ -3621,6 +3501,11 @@
     ],
     0.2
    ],
+   "id": "obs",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "circle-color": [
      "case",
@@ -3690,16 +3575,11 @@
     ],
     "circle-radius": 4
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "obs",
+   "sourceLayer": "obs_data-points",
+   "type": "circle"
   },
   {
-   "id": "hvs",
-   "type": "line",
-   "source": "hvs",
-   "sourceLayer": "lines",
-   "minzoom": 6,
    "filter": [
     "any",
     [
@@ -3750,6 +3630,13 @@
      15000
     ]
    ],
+   "id": "hvs",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "minzoom": 6,
    "paint": {
     "line-color": [
      "case",
@@ -3951,18 +3838,11 @@
      ]
     ]
    },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
+   "source": "hvs",
+   "sourceLayer": "lines",
+   "type": "line"
   },
   {
-   "id": "svz-lines",
-   "type": "line",
-   "source": "svz",
-   "sourceLayer": "svz",
-   "minzoom": 6,
    "filter": [
     "any",
     [
@@ -4005,6 +3885,13 @@
      15000
     ]
    ],
+   "id": "svz-lines",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "minzoom": 6,
    "paint": {
     "line-color": [
      "case",
@@ -4186,18 +4073,246 @@
      ]
     ]
    },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
+   "source": "svz",
+   "sourceLayer": "svz",
+   "type": "line"
   },
   {
+   "filter": [
+    "any",
+    [
+     ">=",
+     [
+      "zoom"
+     ],
+     9
+    ],
+    [
+     "all",
+     [
+      ">=",
+      [
+       "zoom"
+      ],
+      8
+     ],
+     [
+      ">=",
+      [
+       "to-number",
+       [
+        "get",
+        "dtv_kfz"
+       ]
+      ],
+      5000
+     ]
+    ],
+    [
+     ">=",
+     [
+      "to-number",
+      [
+       "get",
+       "dtv_kfz"
+      ]
+     ],
+     15000
+    ]
+   ],
    "id": "svz-points",
-   "type": "circle",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 6,
+   "paint": {
+    "circle-color": [
+     "case",
+     [
+      "has",
+      "dtv_kfz"
+     ],
+     "#222",
+     "#b4b4b4"
+    ],
+    "circle-opacity": 0.9,
+    "circle-radius": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     6,
+     [
+      "case",
+      [
+       "has",
+       "dtv_kfz"
+      ],
+      [
+       "interpolate",
+       [
+        "linear"
+       ],
+       [
+        "to-number",
+        [
+         "get",
+         "dtv_kfz"
+        ]
+       ],
+       0,
+       1.38,
+       5000,
+       1.93,
+       15000,
+       2.75,
+       30000,
+       3.85,
+       50000,
+       5.5
+      ],
+      1.38
+     ],
+     11,
+     [
+      "case",
+      [
+       "has",
+       "dtv_kfz"
+      ],
+      [
+       "interpolate",
+       [
+        "linear"
+       ],
+       [
+        "to-number",
+        [
+         "get",
+         "dtv_kfz"
+        ]
+       ],
+       0,
+       2,
+       5000,
+       2.8,
+       15000,
+       4,
+       30000,
+       5.6,
+       50000,
+       8
+      ],
+      2
+     ],
+     14,
+     [
+      "case",
+      [
+       "has",
+       "dtv_kfz"
+      ],
+      [
+       "interpolate",
+       [
+        "linear"
+       ],
+       [
+        "to-number",
+        [
+         "get",
+         "dtv_kfz"
+        ]
+       ],
+       0,
+       2.5,
+       5000,
+       3.5,
+       15000,
+       5,
+       30000,
+       7,
+       50000,
+       10
+      ],
+      2.5
+     ],
+     16,
+     [
+      "case",
+      [
+       "has",
+       "dtv_kfz"
+      ],
+      [
+       "interpolate",
+       [
+        "linear"
+       ],
+       [
+        "to-number",
+        [
+         "get",
+         "dtv_kfz"
+        ]
+       ],
+       0,
+       3.5,
+       5000,
+       4.9,
+       15000,
+       7,
+       30000,
+       9.8,
+       50000,
+       14
+      ],
+      3.5
+     ],
+     18,
+     [
+      "case",
+      [
+       "has",
+       "dtv_kfz"
+      ],
+      [
+       "interpolate",
+       [
+        "linear"
+       ],
+       [
+        "to-number",
+        [
+         "get",
+         "dtv_kfz"
+        ]
+       ],
+       0,
+       4.5,
+       5000,
+       6.3,
+       15000,
+       9,
+       30000,
+       12.6,
+       50000,
+       18
+      ],
+      4.5
+     ]
+    ],
+    "circle-stroke-color": "#ffffff",
+    "circle-stroke-width": 0.7
+   },
    "source": "svz",
    "sourceLayer": "svz_points",
-   "minzoom": 6,
+   "type": "circle"
+  },
+  {
    "filter": [
     "any",
     [
@@ -4240,6 +4355,11 @@
      15000
     ]
    ],
+   "id": "bast-points",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 6,
    "paint": {
     "circle-color": [
      "case",
@@ -4251,8 +4371,6 @@
      "#b4b4b4"
     ],
     "circle-opacity": 0.9,
-    "circle-stroke-color": "#ffffff",
-    "circle-stroke-width": 0.7,
     "circle-radius": [
      "interpolate",
      [
@@ -4421,253 +4539,15 @@
       ],
       4.5
      ]
-    ]
+    ],
+    "circle-stroke-color": "#ffffff",
+    "circle-stroke-width": 0.7
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "bast-points",
-   "type": "circle",
    "source": "svz_bast",
    "sourceLayer": "bast",
-   "minzoom": 6,
-   "filter": [
-    "any",
-    [
-     ">=",
-     [
-      "zoom"
-     ],
-     9
-    ],
-    [
-     "all",
-     [
-      ">=",
-      [
-       "zoom"
-      ],
-      8
-     ],
-     [
-      ">=",
-      [
-       "to-number",
-       [
-        "get",
-        "dtv_kfz"
-       ]
-      ],
-      5000
-     ]
-    ],
-    [
-     ">=",
-     [
-      "to-number",
-      [
-       "get",
-       "dtv_kfz"
-      ]
-     ],
-     15000
-    ]
-   ],
-   "paint": {
-    "circle-color": [
-     "case",
-     [
-      "has",
-      "dtv_kfz"
-     ],
-     "#222",
-     "#b4b4b4"
-    ],
-    "circle-opacity": 0.9,
-    "circle-stroke-color": "#ffffff",
-    "circle-stroke-width": 0.7,
-    "circle-radius": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     6,
-     [
-      "case",
-      [
-       "has",
-       "dtv_kfz"
-      ],
-      [
-       "interpolate",
-       [
-        "linear"
-       ],
-       [
-        "to-number",
-        [
-         "get",
-         "dtv_kfz"
-        ]
-       ],
-       0,
-       1.38,
-       5000,
-       1.93,
-       15000,
-       2.75,
-       30000,
-       3.85,
-       50000,
-       5.5
-      ],
-      1.38
-     ],
-     11,
-     [
-      "case",
-      [
-       "has",
-       "dtv_kfz"
-      ],
-      [
-       "interpolate",
-       [
-        "linear"
-       ],
-       [
-        "to-number",
-        [
-         "get",
-         "dtv_kfz"
-        ]
-       ],
-       0,
-       2,
-       5000,
-       2.8,
-       15000,
-       4,
-       30000,
-       5.6,
-       50000,
-       8
-      ],
-      2
-     ],
-     14,
-     [
-      "case",
-      [
-       "has",
-       "dtv_kfz"
-      ],
-      [
-       "interpolate",
-       [
-        "linear"
-       ],
-       [
-        "to-number",
-        [
-         "get",
-         "dtv_kfz"
-        ]
-       ],
-       0,
-       2.5,
-       5000,
-       3.5,
-       15000,
-       5,
-       30000,
-       7,
-       50000,
-       10
-      ],
-      2.5
-     ],
-     16,
-     [
-      "case",
-      [
-       "has",
-       "dtv_kfz"
-      ],
-      [
-       "interpolate",
-       [
-        "linear"
-       ],
-       [
-        "to-number",
-        [
-         "get",
-         "dtv_kfz"
-        ]
-       ],
-       0,
-       3.5,
-       5000,
-       4.9,
-       15000,
-       7,
-       30000,
-       9.8,
-       50000,
-       14
-      ],
-      3.5
-     ],
-     18,
-     [
-      "case",
-      [
-       "has",
-       "dtv_kfz"
-      ],
-      [
-       "interpolate",
-       [
-        "linear"
-       ],
-       [
-        "to-number",
-        [
-         "get",
-         "dtv_kfz"
-        ]
-       ],
-       0,
-       4.5,
-       5000,
-       6.3,
-       15000,
-       9,
-       30000,
-       12.6,
-       50000,
-       18
-      ],
-      4.5
-     ]
-    ]
-   },
-   "layout": {
-    "visibility": "none"
-   }
+   "type": "circle"
   },
   {
-   "id": "laerm1",
-   "type": "fill",
-   "source": "laerm1",
-   "sourceLayer": "laerm_hlq_den-polys",
-   "minzoom": 9,
    "filter": [
     "==",
     [
@@ -4675,6 +4555,11 @@
     ],
     "Polygon"
    ],
+   "id": "laerm1",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "fill-color": [
      "match",
@@ -4697,16 +4582,11 @@
     "fill-opacity": 0.6,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "laerm1",
+   "sourceLayer": "laerm_hlq_den-polys",
+   "type": "fill"
   },
   {
-   "id": "laerm2",
-   "type": "fill",
-   "source": "laerm2",
-   "sourceLayer": "laerm_4120_hlq_night-polys",
-   "minzoom": 9,
    "filter": [
     "==",
     [
@@ -4714,6 +4594,11 @@
     ],
     "Polygon"
    ],
+   "id": "laerm2",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 9,
    "paint": {
     "fill-color": [
      "match",
@@ -4736,16 +4621,11 @@
     "fill-opacity": 0.6,
     "fill-outline-color": "#1B4D3E"
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "laerm2",
+   "sourceLayer": "laerm_4120_hlq_night-polys",
+   "type": "fill"
   },
   {
-   "id": "uspeed-forward",
-   "type": "line",
-   "source": "uspeed",
-   "sourceLayer": "uber_movement_osm",
-   "minzoom": 11,
    "filter": [
     "all",
     [
@@ -4761,6 +4641,11 @@
      "forward"
     ]
    ],
+   "id": "uspeed-forward",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 11,
    "paint": {
     "line-color": [
      "interpolate",
@@ -4783,6 +4668,7 @@
      100,
      "#e31a1c"
     ],
+    "line-offset": 0,
     "line-width": [
      "interpolate",
      [
@@ -4801,19 +4687,13 @@
      3.5,
      20,
      5
-    ],
-    "line-offset": 0
+    ]
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "uspeed-reverse",
-   "type": "line",
    "source": "uspeed",
    "sourceLayer": "uber_movement_osm",
-   "minzoom": 11,
+   "type": "line"
+  },
+  {
    "filter": [
     "all",
     [
@@ -4829,6 +4709,11 @@
      "reverse"
     ]
    ],
+   "id": "uspeed-reverse",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 11,
    "paint": {
     "line-color": [
      "interpolate",
@@ -4850,25 +4735,6 @@
      "#fdcc8a",
      100,
      "#e31a1c"
-    ],
-    "line-width": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     10,
-     0.5,
-     12,
-     1.5,
-     13,
-     2.5,
-     16,
-     3.5,
-     20,
-     5
     ],
     "line-offset": [
      "interpolate",
@@ -4886,17 +4752,38 @@
      8,
      20,
      12
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     10,
+     0.5,
+     12,
+     1.5,
+     13,
+     2.5,
+     16,
+     3.5,
+     20,
+     5
     ]
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "uspeed",
+   "sourceLayer": "uber_movement_osm",
+   "type": "line"
   },
   {
    "id": "telraam",
-   "type": "line",
-   "source": "telraam_segments",
-   "sourceLayer": "telraam_segments",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
    "minzoom": 9,
    "paint": {
     "line-color": [
@@ -4947,19 +4834,11 @@
      7
     ]
    },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
+   "source": "telraam_segments",
+   "sourceLayer": "telraam_segments",
+   "type": "line"
   },
   {
-   "id": "mapillary-images-halo",
-   "type": "circle",
-   "source": "mapillary-images",
-   "sourceLayer": "image",
-   "minzoom": 14,
-   "maxzoom": 21,
    "filter": [
     "all",
     false,
@@ -4975,8 +4854,15 @@
      1704067200000
     ]
    ],
+   "id": "mapillary-images-halo",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 21,
+   "minzoom": 14,
    "paint": {
     "circle-color": "#0077ff",
+    "circle-opacity": 0.3,
     "circle-radius": [
      "interpolate",
      [
@@ -4991,20 +4877,13 @@
      8,
      17,
      10
-    ],
-    "circle-opacity": 0.3
+    ]
    },
-   "layout": {
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "mapillary-images-layer",
-   "type": "circle",
    "source": "mapillary-images",
    "sourceLayer": "image",
-   "minzoom": 14,
-   "maxzoom": 21,
+   "type": "circle"
+  },
+  {
    "filter": [
     "all",
     false,
@@ -5020,6 +4899,12 @@
      1704067200000
     ]
    ],
+   "id": "mapillary-images-layer",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 21,
+   "minzoom": 14,
    "paint": {
     "circle-color": [
      "match",
@@ -5052,23 +4937,19 @@
      5
     ]
    },
-   "layout": {
-    "visibility": "none"
-   }
+   "source": "mapillary-images",
+   "sourceLayer": "image",
+   "type": "circle"
   },
   {
-   "id": "mapillary-ts",
-   "type": "symbol",
-   "source": "mapillary-traffic_signs",
-   "sourceLayer": "traffic_sign",
-   "minzoom": 14,
-   "maxzoom": 21,
    "filter": [
     "==",
     "value",
     "__never__"
    ],
+   "id": "mapillary-ts",
    "layout": {
+    "icon-allow-overlap": true,
     "icon-image": [
      "match",
      [
@@ -5110,17 +4991,15 @@
      16,
      1.5
     ],
-    "icon-allow-overlap": true,
     "visibility": "none"
-   }
+   },
+   "maxzoom": 21,
+   "minzoom": 14,
+   "source": "mapillary-traffic_signs",
+   "sourceLayer": "traffic_sign",
+   "type": "symbol"
   },
   {
-   "id": "bike-lanes-needsClarification",
-   "type": "line",
-   "source": "bike-lanes",
-   "sourceLayer": "bikelanes",
-   "minzoom": 9,
-   "maxzoom": 22,
    "filter": [
     "match",
     [
@@ -5133,7 +5012,20 @@
     true,
     false
    ],
+   "id": "bike-lanes-needsClarification",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "maxzoom": 22,
+   "minzoom": 9,
    "paint": {
+    "line-color": "#a97bea",
+    "line-dasharray": [
+     2.5,
+     0.5
+    ],
     "line-width": [
      "interpolate",
      [
@@ -5150,26 +5042,13 @@
      2,
      16,
      3
-    ],
-    "line-color": "#a97bea",
-    "line-dasharray": [
-     2.5,
-     0.5
     ]
    },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "bike-lanes-gehweg",
-   "type": "line",
    "source": "bike-lanes",
    "sourceLayer": "bikelanes",
-   "minzoom": 9,
-   "maxzoom": 22,
+   "type": "line"
+  },
+  {
    "filter": [
     "match",
     [
@@ -5185,24 +5064,15 @@
     true,
     false
    ],
+   "id": "bike-lanes-gehweg",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "maxzoom": 22,
+   "minzoom": 9,
    "paint": {
-    "line-width": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     8,
-     1.5,
-     10,
-     1.5,
-     14,
-     2,
-     16,
-     3
-    ],
     "line-color": "#9fb9f9",
     "line-dasharray": [
      2,
@@ -5220,37 +5090,7 @@
      0,
      15,
      -1
-    ]
-   },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "bike-lanes-kfz",
-   "type": "line",
-   "source": "bike-lanes",
-   "sourceLayer": "bikelanes",
-   "minzoom": 9,
-   "maxzoom": 22,
-   "filter": [
-    "match",
-    [
-     "get",
-     "category"
     ],
-    [
-     "sharedMotorVehicleLane",
-     "bicycleRoad_vehicleDestination",
-     "sharedBusLaneBusWithBike",
-     "sharedBusLaneBikeWithBus"
-    ],
-    true,
-    false
-   ],
-   "paint": {
     "line-width": [
      "interpolate",
      [
@@ -5267,7 +5107,37 @@
      2,
      16,
      3
+    ]
+   },
+   "source": "bike-lanes",
+   "sourceLayer": "bikelanes",
+   "type": "line"
+  },
+  {
+   "filter": [
+    "match",
+    [
+     "get",
+     "category"
     ],
+    [
+     "sharedMotorVehicleLane",
+     "bicycleRoad_vehicleDestination",
+     "sharedBusLaneBusWithBike",
+     "sharedBusLaneBikeWithBus"
+    ],
+    true,
+    false
+   ],
+   "id": "bike-lanes-kfz",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "maxzoom": 22,
+   "minzoom": 9,
+   "paint": {
     "line-color": "#0098f0",
     "line-dasharray": [
      3,
@@ -5285,36 +5155,7 @@
      0,
      15,
      -1
-    ]
-   },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "bike-lanes-fussverkehr",
-   "type": "line",
-   "source": "bike-lanes",
-   "sourceLayer": "bikelanes",
-   "minzoom": 9,
-   "maxzoom": 22,
-   "filter": [
-    "match",
-    [
-     "get",
-     "category"
     ],
-    [
-     "footAndCyclewayShared_isolated",
-     "footAndCyclewayShared_adjoining",
-     "footAndCyclewayShared_adjoiningOrIsolated"
-    ],
-    true,
-    false
-   ],
-   "paint": {
     "line-width": [
      "interpolate",
      [
@@ -5331,7 +5172,36 @@
      2,
      16,
      3
+    ]
+   },
+   "source": "bike-lanes",
+   "sourceLayer": "bikelanes",
+   "type": "line"
+  },
+  {
+   "filter": [
+    "match",
+    [
+     "get",
+     "category"
     ],
+    [
+     "footAndCyclewayShared_isolated",
+     "footAndCyclewayShared_adjoining",
+     "footAndCyclewayShared_adjoiningOrIsolated"
+    ],
+    true,
+    false
+   ],
+   "id": "bike-lanes-fussverkehr",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "maxzoom": 22,
+   "minzoom": 9,
+   "paint": {
     "line-color": "#174ed9",
     "line-dasharray": [
      3,
@@ -5349,21 +5219,30 @@
      0,
      15,
      -1
+    ],
+    "line-width": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     8,
+     1.5,
+     10,
+     1.5,
+     14,
+     2,
+     16,
+     3
     ]
    },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "bike-lanes-eigenstaendig",
-   "type": "line",
    "source": "bike-lanes",
    "sourceLayer": "bikelanes",
-   "minzoom": 9,
-   "maxzoom": 22,
+   "type": "line"
+  },
+  {
    "filter": [
     "match",
     [
@@ -5381,7 +5260,29 @@
     true,
     false
    ],
+   "id": "bike-lanes-eigenstaendig",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "maxzoom": 22,
+   "minzoom": 9,
    "paint": {
+    "line-color": "#0098f0",
+    "line-offset": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     12,
+     0,
+     15,
+     -1
+    ],
     "line-width": [
      "interpolate",
      [
@@ -5398,35 +5299,13 @@
      2,
      16,
      3
-    ],
-    "line-color": "#0098f0",
-    "line-offset": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     12,
-     0,
-     15,
-     -1
     ]
    },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
-  },
-  {
-   "id": "bike-lanes-baulich",
-   "type": "line",
    "source": "bike-lanes",
    "sourceLayer": "bikelanes",
-   "minzoom": 9,
-   "maxzoom": 22,
+   "type": "line"
+  },
+  {
    "filter": [
     "match",
     [
@@ -5446,7 +5325,29 @@
     true,
     false
    ],
+   "id": "bike-lanes-baulich",
+   "layout": {
+    "line-cap": "round",
+    "line-join": "round",
+    "visibility": "none"
+   },
+   "maxzoom": 22,
+   "minzoom": 9,
    "paint": {
+    "line-color": "#174ed9",
+    "line-offset": [
+     "interpolate",
+     [
+      "linear"
+     ],
+     [
+      "zoom"
+     ],
+     12,
+     0,
+     15,
+     -1
+    ],
     "line-width": [
      "interpolate",
      [
@@ -5463,332 +5364,129 @@
      2,
      16,
      3
-    ],
-    "line-color": "#174ed9",
-    "line-offset": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     12,
-     0,
-     15,
-     -1
     ]
    },
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round",
-    "visibility": "none"
-   }
+   "source": "bike-lanes",
+   "sourceLayer": "bikelanes",
+   "type": "line"
   }
  ],
- "toggles": {
-  "z8": {
-   "_baseline": {
-    "legends": [
-     "cluster-legend-section",
-     "mapillary-ts-zoomhint",
-     "mapillary-zoomhint"
-    ],
-    "zoomHints": []
-   },
-   "toggle-bikelanes": {
-    "layersOn": [
-     "bike-lanes-baulich",
-     "bike-lanes-eigenstaendig",
-     "bike-lanes-fussverkehr",
-     "bike-lanes-gehweg",
-     "bike-lanes-kfz",
-     "bike-lanes-needsClarification"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "bikelanes-legend"
-    ],
-    "zoomHints": [
-     "bikelanes-legend"
-    ],
-    "permalink": ",f"
-   },
-   "toggle-crossings": {
-    "layersOn": [
-     "crossings-lines",
-     "crossings-points"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "crossings-legend"
-    ],
-    "zoomHints": [
-     "crossings-legend"
-    ],
-    "permalink": ",c"
-   },
-   "toggle-details": {
-    "layersOn": [
-     "beteiligung-symbols"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ","
-   },
-   "toggle-health": {
-    "layersOn": [
-     "health-points",
-     "health-polygons"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "health-legend"
-    ],
-    "zoomHints": [
-     "health-legend"
-    ],
-    "permalink": ",e"
-   },
-   "toggle-hvs": {
-    "layersOn": [],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ",h"
-   },
-   "toggle-laerm1": {
-    "layersOn": [
-     "laerm1"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "laerm1-legend"
-    ],
-    "zoomHints": [
-     "laerm1-legend"
-    ],
-    "permalink": ",l"
-   },
-   "toggle-laerm2": {
-    "layersOn": [
-     "laerm2"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "laerm2-legend"
-    ],
-    "zoomHints": [
-     "laerm2-legend"
-    ],
-    "permalink": ",r"
-   },
-   "toggle-mapillary": {
-    "layersOn": [
-     "mapillary-images-halo",
-     "mapillary-images-layer"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [
-     "mapillary-zoomhint"
-    ],
-    "permalink": ",m"
-   },
-   "toggle-mapillary_ts": {
-    "layersOn": [
-     "mapillary-ts"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [
-     "mapillary-ts-zoomhint"
-    ],
-    "permalink": ",y"
-   },
-   "toggle-maxspeed": {
-    "layersOn": [
-     "maxspeed",
-     "maxspeed-backward",
-     "maxspeed-conditional",
-     "maxspeed-conditional-backward",
-     "maxspeed-conditional-forward",
-     "maxspeed-forward",
-     "maxspeed_minor",
-     "maxspeed_minor-backward",
-     "maxspeed_minor-conditional",
-     "maxspeed_minor-conditional-backward",
-     "maxspeed_minor-conditional-forward",
-     "maxspeed_minor-forward"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "maxspeed-legend"
-    ],
-    "zoomHints": [
-     "maxspeed-legend"
-    ],
-    "permalink": ",s"
-   },
-   "toggle-movebis": {
-    "layersOn": [
-     "movebis"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "movebis-legend"
-    ],
-    "zoomHints": [
-     "movebis-legend"
-    ],
-    "permalink": ",b"
-   },
-   "toggle-obs": {
-    "layersOn": [
-     "obs"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "obs-legend"
-    ],
-    "zoomHints": [
-     "obs-legend"
-    ],
-    "permalink": ",o"
-   },
-   "toggle-playgrounds": {
-    "layersOn": [
-     "playgrounds-points",
-     "playgrounds-polygons"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "playgrounds-legend"
-    ],
-    "zoomHints": [
-     "playgrounds-legend"
-    ],
-    "permalink": ",p"
-   },
-   "toggle-scenario1": {
-    "layersOn": [
-     "scenario1-points",
-     "scenario1-polys"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc1,"
-   },
-   "toggle-scenario2": {
-    "layersOn": [
-     "scenario2-points",
-     "scenario2-polys"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc2,"
-   },
-   "toggle-scenario3": {
-    "layersOn": [
-     "scenario3-points",
-     "scenario3-polys"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc3,"
-   },
-   "toggle-scenario6": {
-    "layersOn": [
-     "scenario6-points",
-     "scenario6-polys",
-     "scenario6-polys2"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc6,"
-   },
-   "toggle-scenario8": {
-    "layersOn": [
-     "scenario8-points",
-     "scenario8-polys"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc8,"
-   },
-   "toggle-scenario9": {
-    "layersOn": [
-     "scenario9-points",
-     "scenario9-polys"
-    ],
-    "layersOff": [],
-    "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc9,"
-   },
-   "toggle-schools": {
-    "layersOn": [
-     "schools-points",
-     "schools-polygons"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "schools-legend"
-    ],
-    "zoomHints": [
-     "schools-legend"
-    ],
-    "permalink": ",k"
-   },
-   "toggle-svz": {
-    "layersOn": [
-     "bast-points",
-     "svz-lines",
-     "svz-points"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "svz-legend"
-    ],
-    "zoomHints": [
-     "svz-legend"
-    ],
-    "permalink": ",v"
-   },
-   "toggle-telraam": {
-    "layersOn": [
-     "telraam"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "telraam-legend"
-    ],
-    "zoomHints": [
-     "telraam-legend"
-    ],
-    "permalink": ",z"
-   },
-   "toggle-uspeed": {
-    "layersOn": [
-     "uspeed-forward",
-     "uspeed-reverse"
-    ],
-    "layersOff": [],
-    "legendsOn": [
-     "uspeed-legend"
-    ],
-    "zoomHints": [
-     "uspeed-legend"
-    ],
-    "permalink": ",u"
-   }
+ "sources": {
+  "accidents-cluster": {
+   "file": "accidents/combined_cluster.pmtiles",
+   "type": "vector"
   },
+  "accidents_single": {
+   "file": "accidents/accidents_single.pmtiles",
+   "type": "vector"
+  },
+  "bike-lanes": {
+   "type": "vector"
+  },
+  "crossings": {
+   "file": "osm/crossings.pmtiles",
+   "type": "vector"
+  },
+  "esri-imagery-src": {
+   "type": "raster"
+  },
+  "health": {
+   "file": "osm/health.pmtiles",
+   "type": "vector"
+  },
+  "hover-point": {
+   "type": "geojson"
+  },
+  "hvs": {
+   "file": "uba/hvs_verkehrsmengen.pmtiles",
+   "type": "vector"
+  },
+  "laerm1": {
+   "file": "noise/laerm_den.pmtiles",
+   "type": "vector"
+  },
+  "laerm2": {
+   "file": "noise/laerm_night.pmtiles",
+   "type": "vector"
+  },
+  "mapillary-images": {
+   "type": "vector"
+  },
+  "mapillary-traffic_signs": {
+   "type": "vector"
+  },
+  "maxspeed": {
+   "file": "osm/maxspeed_major.pmtiles",
+   "type": "vector"
+  },
+  "maxspeed_minor": {
+   "file": "osm/maxspeed_minor.pmtiles",
+   "type": "vector"
+  },
+  "movebis": {
+   "file": "movebis/movebis.pmtiles",
+   "type": "vector"
+  },
+  "obs": {
+   "file": "obs/obs_data.pmtiles",
+   "type": "vector"
+  },
+  "openmaptiles": {
+   "type": "vector"
+  },
+  "osm-carto-src": {
+   "type": "raster"
+  },
+  "playgrounds": {
+   "file": "osm/playgrounds.pmtiles",
+   "type": "vector"
+  },
+  "scenario1": {
+   "file": "scenarios/scenario1_cluster_accidents_ms100.pmtiles",
+   "type": "vector"
+  },
+  "scenario2": {
+   "file": "scenarios/scenario2_accidents_close2schools.pmtiles",
+   "type": "vector"
+  },
+  "scenario3": {
+   "file": "scenarios/scenario3_tempo30_conti.pmtiles",
+   "type": "vector"
+  },
+  "scenario6": {
+   "file": "scenarios/scenario6_tempo50_30mbuffer_schulen.pmtiles",
+   "type": "vector"
+  },
+  "scenario8": {
+   "file": "scenarios/scenario8_laerm_schulen.pmtiles",
+   "type": "vector"
+  },
+  "scenario9": {
+   "file": "scenarios/scenario9_hotspots.pmtiles",
+   "type": "vector"
+  },
+  "schools": {
+   "file": "osm/schools.pmtiles",
+   "type": "vector"
+  },
+  "svz": {
+   "file": "svz/svz_de.pmtiles",
+   "type": "vector"
+  },
+  "svz_bast": {
+   "file": "svz/svz_bast.pmtiles",
+   "type": "vector"
+  },
+  "telraam_segments": {
+   "file": "telraam/telraam_segments.pmtiles",
+   "type": "vector"
+  },
+  "uspeed": {
+   "file": "traffic/uber_speed.pmtiles",
+   "type": "vector"
+  }
+ },
+ "toggles": {
   "z12": {
    "_baseline": {
     "legends": [
@@ -5798,6 +5496,7 @@
     "zoomHints": []
    },
    "toggle-bikelanes": {
+    "layersOff": [],
     "layersOn": [
      "bike-lanes-baulich",
      "bike-lanes-eigenstaendig",
@@ -5806,99 +5505,99 @@
      "bike-lanes-kfz",
      "bike-lanes-needsClarification"
     ],
-    "layersOff": [],
     "legendsOn": [
      "bikelanes-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",f"
+    "permalink": ",f",
+    "zoomHints": []
    },
    "toggle-crossings": {
+    "layersOff": [],
     "layersOn": [
      "crossings-lines",
      "crossings-points"
     ],
-    "layersOff": [],
     "legendsOn": [
      "crossings-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",c"
+    "permalink": ",c",
+    "zoomHints": []
    },
    "toggle-details": {
+    "layersOff": [],
     "layersOn": [
      "beteiligung-symbols"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ","
+    "permalink": ",",
+    "zoomHints": []
    },
    "toggle-health": {
+    "layersOff": [],
     "layersOn": [
      "health-points",
      "health-polygons"
     ],
-    "layersOff": [],
     "legendsOn": [
      "health-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",e"
+    "permalink": ",e",
+    "zoomHints": []
    },
    "toggle-hvs": {
-    "layersOn": [],
     "layersOff": [],
+    "layersOn": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ",h"
+    "permalink": ",h",
+    "zoomHints": []
    },
    "toggle-laerm1": {
+    "layersOff": [],
     "layersOn": [
      "laerm1"
     ],
-    "layersOff": [],
     "legendsOn": [
      "laerm1-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",l"
+    "permalink": ",l",
+    "zoomHints": []
    },
    "toggle-laerm2": {
+    "layersOff": [],
     "layersOn": [
      "laerm2"
     ],
-    "layersOff": [],
     "legendsOn": [
      "laerm2-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",r"
+    "permalink": ",r",
+    "zoomHints": []
    },
    "toggle-mapillary": {
+    "layersOff": [],
     "layersOn": [
      "mapillary-images-halo",
      "mapillary-images-layer"
     ],
-    "layersOff": [],
     "legendsOn": [],
+    "permalink": ",m",
     "zoomHints": [
      "mapillary-zoomhint"
-    ],
-    "permalink": ",m"
+    ]
    },
    "toggle-mapillary_ts": {
+    "layersOff": [],
     "layersOn": [
      "mapillary-ts"
     ],
-    "layersOff": [],
     "legendsOn": [],
+    "permalink": ",y",
     "zoomHints": [
      "mapillary-ts-zoomhint"
-    ],
-    "permalink": ",y"
+    ]
    },
    "toggle-maxspeed": {
+    "layersOff": [],
     "layersOn": [
      "maxspeed",
      "maxspeed-backward",
@@ -5913,155 +5612,154 @@
      "maxspeed_minor-conditional-forward",
      "maxspeed_minor-forward"
     ],
-    "layersOff": [],
     "legendsOn": [
      "maxspeed-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",s"
+    "permalink": ",s",
+    "zoomHints": []
    },
    "toggle-movebis": {
+    "layersOff": [],
     "layersOn": [
      "movebis"
     ],
-    "layersOff": [],
     "legendsOn": [
      "movebis-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",b"
+    "permalink": ",b",
+    "zoomHints": []
    },
    "toggle-obs": {
+    "layersOff": [],
     "layersOn": [
      "obs"
     ],
-    "layersOff": [],
     "legendsOn": [
      "obs-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",o"
+    "permalink": ",o",
+    "zoomHints": []
    },
    "toggle-playgrounds": {
+    "layersOff": [],
     "layersOn": [
      "playgrounds-points",
      "playgrounds-polygons"
     ],
-    "layersOff": [],
     "legendsOn": [
      "playgrounds-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",p"
+    "permalink": ",p",
+    "zoomHints": []
    },
    "toggle-scenario1": {
+    "layersOff": [],
     "layersOn": [
      "scenario1-points",
      "scenario1-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc1,"
+    "permalink": "sc1,",
+    "zoomHints": []
    },
    "toggle-scenario2": {
+    "layersOff": [],
     "layersOn": [
      "scenario2-points",
      "scenario2-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc2,"
+    "permalink": "sc2,",
+    "zoomHints": []
    },
    "toggle-scenario3": {
+    "layersOff": [],
     "layersOn": [
      "scenario3-points",
      "scenario3-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc3,"
+    "permalink": "sc3,",
+    "zoomHints": []
    },
    "toggle-scenario6": {
+    "layersOff": [],
     "layersOn": [
      "scenario6-points",
      "scenario6-polys",
      "scenario6-polys2"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc6,"
+    "permalink": "sc6,",
+    "zoomHints": []
    },
    "toggle-scenario8": {
+    "layersOff": [],
     "layersOn": [
      "scenario8-points",
      "scenario8-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc8,"
+    "permalink": "sc8,",
+    "zoomHints": []
    },
    "toggle-scenario9": {
+    "layersOff": [],
     "layersOn": [
      "scenario9-points",
      "scenario9-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc9,"
+    "permalink": "sc9,",
+    "zoomHints": []
    },
    "toggle-schools": {
+    "layersOff": [],
     "layersOn": [
      "schools-points",
      "schools-polygons"
     ],
-    "layersOff": [],
     "legendsOn": [
      "schools-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",k"
+    "permalink": ",k",
+    "zoomHints": []
    },
    "toggle-svz": {
+    "layersOff": [],
     "layersOn": [
      "bast-points",
      "svz-lines",
      "svz-points"
     ],
-    "layersOff": [],
     "legendsOn": [
      "svz-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",v"
+    "permalink": ",v",
+    "zoomHints": []
    },
    "toggle-telraam": {
+    "layersOff": [],
     "layersOn": [
      "telraam"
     ],
-    "layersOff": [],
     "legendsOn": [
      "telraam-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",z"
+    "permalink": ",z",
+    "zoomHints": []
    },
    "toggle-uspeed": {
+    "layersOff": [],
     "layersOn": [
      "uspeed-forward",
      "uspeed-reverse"
     ],
-    "layersOff": [],
     "legendsOn": [
      "uspeed-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",u"
+    "permalink": ",u",
+    "zoomHints": []
    }
   },
   "z15": {
@@ -6073,6 +5771,7 @@
     "zoomHints": []
    },
    "toggle-bikelanes": {
+    "layersOff": [],
     "layersOn": [
      "bike-lanes-baulich",
      "bike-lanes-eigenstaendig",
@@ -6081,95 +5780,95 @@
      "bike-lanes-kfz",
      "bike-lanes-needsClarification"
     ],
-    "layersOff": [],
     "legendsOn": [
      "bikelanes-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",f"
+    "permalink": ",f",
+    "zoomHints": []
    },
    "toggle-crossings": {
+    "layersOff": [],
     "layersOn": [
      "crossings-lines",
      "crossings-points"
     ],
-    "layersOff": [],
     "legendsOn": [
      "crossings-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",c"
+    "permalink": ",c",
+    "zoomHints": []
    },
    "toggle-details": {
+    "layersOff": [],
     "layersOn": [
      "beteiligung-symbols"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ","
+    "permalink": ",",
+    "zoomHints": []
    },
    "toggle-health": {
+    "layersOff": [],
     "layersOn": [
      "health-points",
      "health-polygons"
     ],
-    "layersOff": [],
     "legendsOn": [
      "health-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",e"
+    "permalink": ",e",
+    "zoomHints": []
    },
    "toggle-hvs": {
-    "layersOn": [],
     "layersOff": [],
+    "layersOn": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ",h"
+    "permalink": ",h",
+    "zoomHints": []
    },
    "toggle-laerm1": {
+    "layersOff": [],
     "layersOn": [
      "laerm1"
     ],
-    "layersOff": [],
     "legendsOn": [
      "laerm1-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",l"
+    "permalink": ",l",
+    "zoomHints": []
    },
    "toggle-laerm2": {
+    "layersOff": [],
     "layersOn": [
      "laerm2"
     ],
-    "layersOff": [],
     "legendsOn": [
      "laerm2-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",r"
+    "permalink": ",r",
+    "zoomHints": []
    },
    "toggle-mapillary": {
+    "layersOff": [],
     "layersOn": [
      "mapillary-images-halo",
      "mapillary-images-layer"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ",m"
+    "permalink": ",m",
+    "zoomHints": []
    },
    "toggle-mapillary_ts": {
+    "layersOff": [],
     "layersOn": [
      "mapillary-ts"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": ",y"
+    "permalink": ",y",
+    "zoomHints": []
    },
    "toggle-maxspeed": {
+    "layersOff": [],
     "layersOn": [
      "maxspeed",
      "maxspeed-backward",
@@ -6184,155 +5883,456 @@
      "maxspeed_minor-conditional-forward",
      "maxspeed_minor-forward"
     ],
-    "layersOff": [],
     "legendsOn": [
      "maxspeed-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",s"
+    "permalink": ",s",
+    "zoomHints": []
    },
    "toggle-movebis": {
+    "layersOff": [],
     "layersOn": [
      "movebis"
     ],
-    "layersOff": [],
     "legendsOn": [
      "movebis-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",b"
+    "permalink": ",b",
+    "zoomHints": []
    },
    "toggle-obs": {
+    "layersOff": [],
     "layersOn": [
      "obs"
     ],
-    "layersOff": [],
     "legendsOn": [
      "obs-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",o"
+    "permalink": ",o",
+    "zoomHints": []
    },
    "toggle-playgrounds": {
+    "layersOff": [],
     "layersOn": [
      "playgrounds-points",
      "playgrounds-polygons"
     ],
-    "layersOff": [],
     "legendsOn": [
      "playgrounds-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",p"
+    "permalink": ",p",
+    "zoomHints": []
    },
    "toggle-scenario1": {
+    "layersOff": [],
     "layersOn": [
      "scenario1-points",
      "scenario1-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc1,"
+    "permalink": "sc1,",
+    "zoomHints": []
    },
    "toggle-scenario2": {
+    "layersOff": [],
     "layersOn": [
      "scenario2-points",
      "scenario2-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc2,"
+    "permalink": "sc2,",
+    "zoomHints": []
    },
    "toggle-scenario3": {
+    "layersOff": [],
     "layersOn": [
      "scenario3-points",
      "scenario3-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc3,"
+    "permalink": "sc3,",
+    "zoomHints": []
    },
    "toggle-scenario6": {
+    "layersOff": [],
     "layersOn": [
      "scenario6-points",
      "scenario6-polys",
      "scenario6-polys2"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc6,"
+    "permalink": "sc6,",
+    "zoomHints": []
    },
    "toggle-scenario8": {
+    "layersOff": [],
     "layersOn": [
      "scenario8-points",
      "scenario8-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc8,"
+    "permalink": "sc8,",
+    "zoomHints": []
    },
    "toggle-scenario9": {
+    "layersOff": [],
     "layersOn": [
      "scenario9-points",
      "scenario9-polys"
     ],
-    "layersOff": [],
     "legendsOn": [],
-    "zoomHints": [],
-    "permalink": "sc9,"
+    "permalink": "sc9,",
+    "zoomHints": []
    },
    "toggle-schools": {
+    "layersOff": [],
     "layersOn": [
      "schools-points",
      "schools-polygons"
     ],
-    "layersOff": [],
     "legendsOn": [
      "schools-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",k"
+    "permalink": ",k",
+    "zoomHints": []
    },
    "toggle-svz": {
+    "layersOff": [],
     "layersOn": [
      "bast-points",
      "svz-lines",
      "svz-points"
     ],
-    "layersOff": [],
     "legendsOn": [
      "svz-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",v"
+    "permalink": ",v",
+    "zoomHints": []
    },
    "toggle-telraam": {
+    "layersOff": [],
     "layersOn": [
      "telraam"
     ],
-    "layersOff": [],
     "legendsOn": [
      "telraam-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",z"
+    "permalink": ",z",
+    "zoomHints": []
    },
    "toggle-uspeed": {
+    "layersOff": [],
     "layersOn": [
      "uspeed-forward",
      "uspeed-reverse"
     ],
-    "layersOff": [],
     "legendsOn": [
      "uspeed-legend"
     ],
-    "zoomHints": [],
-    "permalink": ",u"
+    "permalink": ",u",
+    "zoomHints": []
+   }
+  },
+  "z8": {
+   "_baseline": {
+    "legends": [
+     "cluster-legend-section",
+     "mapillary-ts-zoomhint",
+     "mapillary-zoomhint"
+    ],
+    "zoomHints": []
+   },
+   "toggle-bikelanes": {
+    "layersOff": [],
+    "layersOn": [
+     "bike-lanes-baulich",
+     "bike-lanes-eigenstaendig",
+     "bike-lanes-fussverkehr",
+     "bike-lanes-gehweg",
+     "bike-lanes-kfz",
+     "bike-lanes-needsClarification"
+    ],
+    "legendsOn": [
+     "bikelanes-legend"
+    ],
+    "permalink": ",f",
+    "zoomHints": [
+     "bikelanes-legend"
+    ]
+   },
+   "toggle-crossings": {
+    "layersOff": [],
+    "layersOn": [
+     "crossings-lines",
+     "crossings-points"
+    ],
+    "legendsOn": [
+     "crossings-legend"
+    ],
+    "permalink": ",c",
+    "zoomHints": [
+     "crossings-legend"
+    ]
+   },
+   "toggle-details": {
+    "layersOff": [],
+    "layersOn": [
+     "beteiligung-symbols"
+    ],
+    "legendsOn": [],
+    "permalink": ",",
+    "zoomHints": []
+   },
+   "toggle-health": {
+    "layersOff": [],
+    "layersOn": [
+     "health-points",
+     "health-polygons"
+    ],
+    "legendsOn": [
+     "health-legend"
+    ],
+    "permalink": ",e",
+    "zoomHints": [
+     "health-legend"
+    ]
+   },
+   "toggle-hvs": {
+    "layersOff": [],
+    "layersOn": [],
+    "legendsOn": [],
+    "permalink": ",h",
+    "zoomHints": []
+   },
+   "toggle-laerm1": {
+    "layersOff": [],
+    "layersOn": [
+     "laerm1"
+    ],
+    "legendsOn": [
+     "laerm1-legend"
+    ],
+    "permalink": ",l",
+    "zoomHints": [
+     "laerm1-legend"
+    ]
+   },
+   "toggle-laerm2": {
+    "layersOff": [],
+    "layersOn": [
+     "laerm2"
+    ],
+    "legendsOn": [
+     "laerm2-legend"
+    ],
+    "permalink": ",r",
+    "zoomHints": [
+     "laerm2-legend"
+    ]
+   },
+   "toggle-mapillary": {
+    "layersOff": [],
+    "layersOn": [
+     "mapillary-images-halo",
+     "mapillary-images-layer"
+    ],
+    "legendsOn": [],
+    "permalink": ",m",
+    "zoomHints": [
+     "mapillary-zoomhint"
+    ]
+   },
+   "toggle-mapillary_ts": {
+    "layersOff": [],
+    "layersOn": [
+     "mapillary-ts"
+    ],
+    "legendsOn": [],
+    "permalink": ",y",
+    "zoomHints": [
+     "mapillary-ts-zoomhint"
+    ]
+   },
+   "toggle-maxspeed": {
+    "layersOff": [],
+    "layersOn": [
+     "maxspeed",
+     "maxspeed-backward",
+     "maxspeed-conditional",
+     "maxspeed-conditional-backward",
+     "maxspeed-conditional-forward",
+     "maxspeed-forward",
+     "maxspeed_minor",
+     "maxspeed_minor-backward",
+     "maxspeed_minor-conditional",
+     "maxspeed_minor-conditional-backward",
+     "maxspeed_minor-conditional-forward",
+     "maxspeed_minor-forward"
+    ],
+    "legendsOn": [
+     "maxspeed-legend"
+    ],
+    "permalink": ",s",
+    "zoomHints": [
+     "maxspeed-legend"
+    ]
+   },
+   "toggle-movebis": {
+    "layersOff": [],
+    "layersOn": [
+     "movebis"
+    ],
+    "legendsOn": [
+     "movebis-legend"
+    ],
+    "permalink": ",b",
+    "zoomHints": [
+     "movebis-legend"
+    ]
+   },
+   "toggle-obs": {
+    "layersOff": [],
+    "layersOn": [
+     "obs"
+    ],
+    "legendsOn": [
+     "obs-legend"
+    ],
+    "permalink": ",o",
+    "zoomHints": [
+     "obs-legend"
+    ]
+   },
+   "toggle-playgrounds": {
+    "layersOff": [],
+    "layersOn": [
+     "playgrounds-points",
+     "playgrounds-polygons"
+    ],
+    "legendsOn": [
+     "playgrounds-legend"
+    ],
+    "permalink": ",p",
+    "zoomHints": [
+     "playgrounds-legend"
+    ]
+   },
+   "toggle-scenario1": {
+    "layersOff": [],
+    "layersOn": [
+     "scenario1-points",
+     "scenario1-polys"
+    ],
+    "legendsOn": [],
+    "permalink": "sc1,",
+    "zoomHints": []
+   },
+   "toggle-scenario2": {
+    "layersOff": [],
+    "layersOn": [
+     "scenario2-points",
+     "scenario2-polys"
+    ],
+    "legendsOn": [],
+    "permalink": "sc2,",
+    "zoomHints": []
+   },
+   "toggle-scenario3": {
+    "layersOff": [],
+    "layersOn": [
+     "scenario3-points",
+     "scenario3-polys"
+    ],
+    "legendsOn": [],
+    "permalink": "sc3,",
+    "zoomHints": []
+   },
+   "toggle-scenario6": {
+    "layersOff": [],
+    "layersOn": [
+     "scenario6-points",
+     "scenario6-polys",
+     "scenario6-polys2"
+    ],
+    "legendsOn": [],
+    "permalink": "sc6,",
+    "zoomHints": []
+   },
+   "toggle-scenario8": {
+    "layersOff": [],
+    "layersOn": [
+     "scenario8-points",
+     "scenario8-polys"
+    ],
+    "legendsOn": [],
+    "permalink": "sc8,",
+    "zoomHints": []
+   },
+   "toggle-scenario9": {
+    "layersOff": [],
+    "layersOn": [
+     "scenario9-points",
+     "scenario9-polys"
+    ],
+    "legendsOn": [],
+    "permalink": "sc9,",
+    "zoomHints": []
+   },
+   "toggle-schools": {
+    "layersOff": [],
+    "layersOn": [
+     "schools-points",
+     "schools-polygons"
+    ],
+    "legendsOn": [
+     "schools-legend"
+    ],
+    "permalink": ",k",
+    "zoomHints": [
+     "schools-legend"
+    ]
+   },
+   "toggle-svz": {
+    "layersOff": [],
+    "layersOn": [
+     "bast-points",
+     "svz-lines",
+     "svz-points"
+    ],
+    "legendsOn": [
+     "svz-legend"
+    ],
+    "permalink": ",v",
+    "zoomHints": [
+     "svz-legend"
+    ]
+   },
+   "toggle-telraam": {
+    "layersOff": [],
+    "layersOn": [
+     "telraam"
+    ],
+    "legendsOn": [
+     "telraam-legend"
+    ],
+    "permalink": ",z",
+    "zoomHints": [
+     "telraam-legend"
+    ]
+   },
+   "toggle-uspeed": {
+    "layersOff": [],
+    "layersOn": [
+     "uspeed-forward",
+     "uspeed-reverse"
+    ],
+    "legendsOn": [
+     "uspeed-legend"
+    ],
+    "permalink": ",u",
+    "zoomHints": [
+     "uspeed-legend"
+    ]
    }
   }
  }

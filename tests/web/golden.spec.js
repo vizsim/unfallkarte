@@ -90,6 +90,12 @@ test("Golden: Quellen, Layer-Definitionen und Toggle-Verhalten", async ({ page }
     return { sources, layers, toggles };
   }, ZOOMS);
 
-  expect(JSON.stringify(golden, null, 1) + "\n").toMatchSnapshot("frontend-golden.json");
+  // Kanonisch serialisieren: Objekt-Schlüssel sortiert (Reihenfolge ist in Paint/Layout ohne
+  // Bedeutung und hängt nur davon ab, wie ein Layer zusammengebaut wurde); Arrays bleiben, wie
+  // sie sind — dort IST die Reihenfolge Inhalt (Expressions, Zeichenreihenfolge der Layer).
+  const canonical = (v) => (Array.isArray(v) ? v.map(canonical)
+    : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canonical(v[k])]))
+    : v);
+  expect(JSON.stringify(canonical(golden), null, 1) + "\n").toMatchSnapshot("frontend-golden.json");
   expectNoErrors(errors);
 });
