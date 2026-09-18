@@ -95,6 +95,10 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Bereit-Signal `<html data-app-ready>` (permalink.js), Tests pollen auf ihre Bedingung
       statt auf `map.loaded()`; `PW_CPU_THROTTLE=4 npm run test:web` simuliert langsame Runner.
       Artefakte öffentlicher Repos ohne Login: `nightly.link/vizsim/unfallkarte/actions/runs/<id>/playwright-report.zip`.
+- [ ] **CI: `ubuntu-latest` wird ab 2026-10-19 Ubuntu 26** (GitHub-Hinweis im Run). Kann den
+      Playwright-Job treffen (`npx playwright install --with-deps` braucht eine Playwright-Version,
+      die das neue Ubuntu kennt). Wenn der `web`-Job danach rot wird: `@playwright/test` anheben
+      oder den Runner vorübergehend auf `ubuntu-24.04` pinnen.
 - [x] **Frontend-Vertrag testen** (2026-09-18) — `tests/web/contract.spec.js` liest die
       Metadaten der echten PMTiles (lokal = frisch gebaut VOR dem Deploy, CI = Stand auf B2)
       und prüft jeden `source-layer` + jedes im Style benutzte Attribut (automatisch aus
