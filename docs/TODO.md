@@ -1,13 +1,57 @@
 # TODO — Offene Punkte
 
-Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
-(dessen Punkte sind alle erledigt). Historie des Notebook→Pipeline-Refactors:
-[`REFACTORING_PLAN.md`](REFACTORING_PLAN.md).
+Stand: 2026-09-18 (Review 2026-07-11, ergänzt um Ideen aus der Popup-/Cleanup-Session).
+Ersetzt das frühere `WRAPUP.md` (dessen Punkte sind alle erledigt). Historie des
+Notebook→Pipeline-Refactors: [`REFACTORING_PLAN.md`](REFACTORING_PLAN.md).
+
+## Roadmap Web-Teil (Reihenfolge bewusst: jede Stufe nutzt die vorige)
+
+Auslöser: das MapLibre-Upgrade 5.6→5.24 (f58bd27) hat den Cluster-Hover zwei Monate
+lang stumm gebrochen (`setData` klont per Structured-Clone, rohe `MapGeoJSONFeature`
+sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test schon.
+
+1. [x] **Playwright-Smoke-Tests + CI** (2026-09-18) — `tests/web/smoke.spec.js` (6 Tests:
+       Laden ohne JS-Fehler, Cluster-Hover mit Hover-Pie, #30 gestapeltes Popup + Pin/Unpin,
+       #31 überlappende Sc9-Flächen, Sweep über alle Layer, openOnClick→OSM), `npm run
+       test:web`; datentolerant (Tests suchen ihre Stellen selbst), läuft ohne Build und ohne
+       lokale Daten (B2-Fallback, verifiziert). Gegenprobe: mit wieder eingebautem
+       setData-Bug schlägt der Cluster-Test an. CI: `.github/workflows/ci.yml`
+       (ruff + pytest + Smoke-Tests). Ausbaubar: Permalink-Roundtrip, Filter/Feature-Counter,
+       Legenden-Zoom-Hinweise.
+2. [ ] **Layer-Registry als Single Source of Truth** — ein Layer existiert heute an ~7
+       Stellen parallel: `sources.yaml`, `addSources.js`, `addLayers.js` (1677 Z.),
+       `setupLayerToggles.js`, `legendHandlers.js` (vier parallele Listen), `permalink.js`
+       (Kontext-Keys), `popupHandlers.js` (Registry), `index.html` (1336 Z. handgeschriebene
+       Legende). Ziel: `{id, source, layers, toggle, legend, minzoom, popup}` → Toggles,
+       Legende, Zoom-Hinweise, Permalink und Popups werden daraus generiert. Die
+       Popup-Registry (`hoverPopup.js`, 2026-09) ist der erste Baustein; deckt „Legende aus
+       Config generieren" und REFACTORING_PLAN §13 Punkt 9/10 mit ab.
+3. [ ] **Vite** — ~20 einzeln geladene ES-Module bündeln (Initial-Load), Dev-Server mit
+       HMR, `import.meta.env` statt `config.js`/`config.public.js`-Umschaltung.
+       Haken: GitHub Pages served heute das Repo-Root direkt → braucht eine Action, die
+       `dist/` baut und deployt (Prozesswechsel). Vendor-Libs dann via `package.json`
+       gepinnt statt Handkopie in `vendor/` (Upgrades laufen durch die Smoke-Tests).
+4. [ ] **TypeScript** — lohnt an den Stellen mit impliziten Objektformen: Popup-Entry,
+       Layer-Registry, Manifest, Permalink-Format. Günstiger Zwischenschritt ohne Build:
+       `tsconfig.json` mit `checkJs` + JSDoc-Typen (IDE meldet heute schon z. B.
+       `window.map`-Zugriffe und ungenutzte Variablen). Konkreter Fund: `showUspeedChartPopup`
+       nutzt das globale `window.map` statt ein `map` übergeben zu bekommen.
 
 ## Stabilität
 
-- [ ] **CI einrichten** — es gibt kein `.github/workflows/`; pytest + ruff laufen nur
-      manuell. Minimal: uv sync → `uv run pytest` + `uvx ruff check` bei jedem Push.
+- [x] **CI einrichten** (2026-09-18) — `.github/workflows/ci.yml`: Job `pipeline`
+      (uv sync --locked → ruff → pytest) + Job `web` (Playwright-Smoke-Tests gegen den
+      public B2-Bucket, Report als Artefakt bei Fehlschlag). Erster echter Lauf nach dem Push
+      prüfen (WebGL im Runner = Software-Rendering, Timeouts sind großzügig gesetzt).
+- [ ] **Frontend-Vertrag testen statt nur dokumentieren** — PMTiles-Dateinamen + Layer-Namen
+      sind der Vertrag mit dem Frontend (CLAUDE.md), durchgesetzt nur per Disziplin. Ein
+      pytest kann die `vector_layers` aus den gebauten PMTiles (bzw. `sources.yaml`) gegen die
+      `source-layer`-Strings in `addLayers.js` abgleichen → fängt Drift beim nächsten
+      Pipeline-Umbau.
+- [ ] **Popup-Härtung (klein)** — (a) OSM-Attribute (`name`, `operator` …) landen ungeescaped
+      in `innerHTML`; OSM ist nutzergeneriert → `esc()`-Helper in der Registry. (b) Wirft ein
+      einzelnes `render()` (z. B. `getElementById("uspeed-slider").value` bei fehlendem
+      Element), stirbt der gesamte Hover → `hoverPopup.js` sollte pro Karte try/catch machen.
 - [x] JS-Libs vendoren statt unpkg (erledigt 2026-07, siehe `vendor/README.md`).
 
 ## Frontend / UX
@@ -30,7 +74,22 @@ Stand: 2026-07-11 (aus einem Projekt-Review). Ersetzt das frühere `WRAPUP.md`
       und Einzelfälle (~149 Reste).
 - [ ] **Legende aus Config generieren** (langfristig) — die repetitiven
       Legenden-Blöcke in `index.html` sind Hauptquelle für Drift zwischen Layern
-      und Legende.
+      und Legende. → Teil von Roadmap 2 (Layer-Registry).
+- [ ] **Touch/Mobile-Durchgang** — Hover-Popups gibt es auf Touch nicht; Tap = Klick = Pin
+      funktioniert, aber `openOnClick`-Layer (Tempolimit, Übergänge, Telraam) springen auf
+      Touch sofort zu OSM/Telraam ohne Vorschau. Zusammen mit dem Mobile-Breakpoint angehen
+      (z. B. auf Touch immer erst pinnen, Link nur im Pin).
+
+## Daten / Pipeline
+
+- [ ] **Sc6-Tiles ohne Namen** — `scenario6-polys` tragen nur `oid` +
+      `total_tempo50_highway_length_m`, kein `name`/`amenity`. Deshalb sahen überlappende
+      Buffer (Schulgelände + Kita-Node) im Popup identisch aus; Popup zeigt jetzt Länge +
+      OSM-Objekt als Notlösung. Kleine Pipeline-Änderung, große Popup-Verbesserung — dabei
+      auch prüfen, welche Attribute Sc1/Sc3/Sc9 mitgeben.
+- [ ] **Lazy-Sources** (REFACTORING_PLAN §13 Punkt 7) — größter offener Perf-Posten:
+      alle ~18 Quellen werden beim Start angelegt (Metadaten-Fetch + HEAD-Probe je Quelle).
+      Nur accidents/cluster eager, Rest beim ersten Einschalten (`ensureSource(id)`).
 
 ## Sichtbarkeit / Auffindbarkeit
 
