@@ -75,8 +75,8 @@ test("Golden: Quellen, Layer-Definitionen und Toggle-Verhalten", async ({ page }
         const cb = document.getElementById(id);
         if (cb.checked) continue; // Default-an (z. B. keine) — nicht anfassen
         cb.click();
-        // Toggles schreiben die URL nicht selbst — erst die nächste Kartenbewegung tut es
-        // (Stand heute). Wie ein Nutzer-Pan anstoßen, damit der Permalink-Inhalt erfasst wird.
+        // (Historisch: Toggles schrieben die URL erst bei der nächsten Kartenbewegung. Seit
+        // 2026-09 sofort — der Pan bleibt als Gürtel zum Hosenträger drin.)
         m.jumpTo({ center: m.getCenter() });
         await tick();
         const now = visibleLayers();

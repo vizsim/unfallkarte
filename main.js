@@ -284,7 +284,10 @@ function setupUI(map) {
     map,
     originalMinZoom,
     z => currentZoomLock = z,
-    applyLegendVisibility
+    applyLegendVisibility,
+    // Toggle -> URL sofort aktualisieren (nicht erst bei der nächsten Kartenbewegung);
+    // während des Permalink-Restores ist das ein No-op (isInitializingRef).
+    () => updatePermalink(map, isInitializingRef)
   );
 
   // Radinfrastruktur (TILDA) — Kontext-Layer im rechten Panel unter "Infrastruktur".
@@ -295,6 +298,7 @@ function setupUI(map) {
       setBikeLanesVisible(map, e.target.checked);
       applyLegendVisibility();
       updateLegendVisibilityByZoom(map);  // Radinfra-Legende/Hinweis sofort an Zoom anpassen
+      updatePermalink(map, isInitializingRef);
     });
   }
 

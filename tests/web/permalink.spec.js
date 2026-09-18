@@ -41,3 +41,23 @@ test("Permalink-Roundtrip: alle Kontext-Layer + Szenarien überleben Kopieren un
   expect(after.visibleLayers).toEqual(before.visibleLayers);
   expectNoErrors(errors);
 });
+
+test("Toggle schreibt die URL sofort — nicht erst bei der nächsten Kartenbewegung", async ({ page }) => {
+  const errors = await openMap(page);
+  const tail = () => page.evaluate(() => (new URLSearchParams(location.search).get("p") ?? "").split(",").slice(5).join(","));
+  expect(await tail()).toBe(",");
+
+  await page.click("#toggle-telraam", { force: true });    // Registry-Eintrag
+  expect(await tail()).toBe(",z");
+  await page.click("#toggle-scenario9", { force: true });  // Szenario (eigener ?p=-Teil)
+  expect(await tail()).toBe("sc9,z");
+  await page.click("#toggle-svz", { force: true });        // Custom-Toggle (Master)
+  await page.click("#toggle-hvs", { force: true });        // … und Unter-Haken
+  expect((await tail()).split(",")[1].split("").sort().join("")).toBe("hvz");
+  await page.click("#toggle-bikelanes", { force: true });  // außerhalb der Registry
+  expect((await tail()).split(",")[1]).toContain("f");
+
+  await page.click("#toggle-telraam", { force: true });    // aus -> wieder raus
+  expect((await tail()).split(",")[1]).not.toContain("z");
+  expectNoErrors(errors);
+});

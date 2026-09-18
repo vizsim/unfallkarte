@@ -173,7 +173,7 @@ const fmtInt = (v) => (v === undefined || v === null || v === "") ? "—" : Math
 // ---------------------------------------------------------------------------------------------
 
 // Verkehrsmengen: 1 Master-Toggle + 3 Quellen-Unterhaken (Länder/BASt/UBA) + DTV/SV-Modus.
-function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegendVisibilityByZoom, ensure }) {
+function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegendVisibilityByZoom, ensure, onChange }) {
   const master = document.getElementById("toggle-svz");
   if (!master) return;
   const kids = document.getElementById("svz-children");
@@ -228,6 +228,7 @@ function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegen
     zoomLock();
     applyLegendVisibility();
     updateLegendVisibilityByZoom(map);
+    onChange?.(); // Permalink sofort nachziehen
   };
 
   const applyMode = (m) => {
