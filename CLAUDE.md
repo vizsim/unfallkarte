@@ -33,6 +33,8 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
 - **Popups:** ein Hover-Popup für alle Layer (`js/ui/hoverPopup.js`). Neuer Layer mit
   Popup = neuer Eintrag in der Registry `js/ui/popupHandlers.js` — keine eigenen
   `map.on("mousemove", layerId)`-Handler (sonst wieder überlappende Popups).
+  `render(props, feature)`: `props` ist bereits HTML-escaped (OSM-Attribute sind
+  nutzergeneriert); Rohwerte nur über `feature.properties` und nie ungeescaped ins HTML.
 - Code: kurz, getippt, ruff-konform. Keine Notebooks in der Pipeline.
 - Config-getrieben: Jahres-Quirks/Filter/Tile-Profile in `pipeline/config/*.yaml`, nicht im Code.
 - Tippecanoe legt FGB-Integer-Attribute als **String** im PMTiles ab → im Frontend immer

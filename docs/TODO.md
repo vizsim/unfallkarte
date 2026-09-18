@@ -52,10 +52,13 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       pytest kann die `vector_layers` aus den gebauten PMTiles (bzw. `sources.yaml`) gegen die
       `source-layer`-Strings in `addLayers.js` abgleichen → fängt Drift beim nächsten
       Pipeline-Umbau.
-- [ ] **Popup-Härtung (klein)** — (a) OSM-Attribute (`name`, `operator` …) landen ungeescaped
-      in `innerHTML`; OSM ist nutzergeneriert → `esc()`-Helper in der Registry. (b) Wirft ein
-      einzelnes `render()` (z. B. `getElementById("uspeed-slider").value` bei fehlendem
-      Element), stirbt der gesamte Hover → `hoverPopup.js` sollte pro Karte try/catch machen.
+- [x] **Popup-Härtung** (2026-09-18) — (a) `hoverPopup.js` reicht `render()` eine
+      ESCAPED-Sicht der Properties (Proxy: jeder String HTML-escaped) → Escaping per Default,
+      kein Eintrag kann es vergessen; Link-hrefs nur http(s) + Attribut escaped. (b) Jeder
+      Eintrags-Callback (render/link/anchor/onEnter/onLeave/onClick) läuft abgesichert: wirft
+      ein `render()`, fehlt nur diese Karte („Details nicht darstellbar" + einmaliges
+      console.error). Tests: `tests/web/popup-hardening.spec.js` (präparierte Features ersetzen
+      einen registrierten Layer; Gegenprobe ohne Escaping schlägt an).
 - [x] JS-Libs vendoren statt unpkg (erledigt 2026-07, siehe `vendor/README.md`).
 
 ## Frontend / UX

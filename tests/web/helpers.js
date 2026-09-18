@@ -120,3 +120,19 @@ export const popups = (page) => page.locator(".maplibregl-popup");
 export function expectNoErrors(errors) {
   expect(errors, `JS-Fehler im Browser:\n${errors.join("\n")}`).toEqual([]);
 }
+
+/**
+ * Registrierten Layer durch einen Testpunkt mit frei wählbaren Properties ersetzen. Die
+ * Popup-Registry hängt an der Layer-ID — so lassen sich präparierte Features (z. B. HTML im
+ * Namen) durch den ECHTEN Hover-Pfad schicken, ohne dass die Tiles so etwas enthalten müssen.
+ */
+export async function replaceLayerWithPoint(page, layerId, lngLat, properties) {
+  await page.evaluate(([layerId, lngLat, properties]) => {
+    const m = window.map;
+    const src = `test-src-${layerId}`;
+    if (m.getLayer(layerId)) m.removeLayer(layerId);
+    if (m.getSource(src)) m.removeSource(src);
+    m.addSource(src, { type: "geojson", data: { type: "Feature", geometry: { type: "Point", coordinates: lngLat }, properties } });
+    m.addLayer({ id: layerId, type: "circle", source: src, paint: { "circle-radius": 14, "circle-color": "#d0f" } });
+  }, [layerId, lngLat, properties]);
+}
