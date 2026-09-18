@@ -47,11 +47,16 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Bereit-Signal `<html data-app-ready>` (permalink.js), Tests pollen auf ihre Bedingung
       statt auf `map.loaded()`; `PW_CPU_THROTTLE=4 npm run test:web` simuliert langsame Runner.
       Artefakte öffentlicher Repos ohne Login: `nightly.link/vizsim/unfallkarte/actions/runs/<id>/playwright-report.zip`.
-- [ ] **Frontend-Vertrag testen statt nur dokumentieren** — PMTiles-Dateinamen + Layer-Namen
-      sind der Vertrag mit dem Frontend (CLAUDE.md), durchgesetzt nur per Disziplin. Ein
-      pytest kann die `vector_layers` aus den gebauten PMTiles (bzw. `sources.yaml`) gegen die
-      `source-layer`-Strings in `addLayers.js` abgleichen → fängt Drift beim nächsten
-      Pipeline-Umbau.
+- [x] **Frontend-Vertrag testen** (2026-09-18) — `tests/web/contract.spec.js` liest die
+      Metadaten der echten PMTiles (lokal = frisch gebaut VOR dem Deploy, CI = Stand auf B2)
+      und prüft jeden `source-layer` + jedes im Style benutzte Attribut (automatisch aus
+      Filter/Paint/Layout abgeleitet; Slider werden vorher ausgelöst → dynamische Filter
+      zählen mit). Nötig, weil MapLibre bei PMTiles NICHT validiert (`vectorLayerIds = null`).
+      Fand auf Anhieb zwei alte Bugs: `healthcare:speciality` vs. Tile-Feld
+      `healthcare_speciality` (Psychiatrie-Farbe/-Icon + Popup-Zeilen tot) und `biped_counts`
+      vs. `biped_count` (Sc2-Slider blendete alles aus) — beide im Frontend gefixt.
+      Nicht abgedeckt: Attribute, die nur Popups lesen (`p.name` …) → mit der Layer-Registry
+      (Roadmap 2) könnten Einträge ihre Felder deklarieren.
 - [x] **Popup-Härtung** (2026-09-18) — (a) `hoverPopup.js` reicht `render()` eine
       ESCAPED-Sicht der Properties (Proxy: jeder String HTML-escaped) → Escaping per Default,
       kein Eintrag kann es vergessen; Link-hrefs nur http(s) + Attribut escaped. (b) Jeder
