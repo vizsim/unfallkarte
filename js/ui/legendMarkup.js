@@ -21,13 +21,18 @@ import { LAYER_REGISTRY } from "../layers/registry.js";
  * @typedef {Object} LegendSpec  Feld `legend` eines Registry-Eintrags
  * @property {string} label                    Text neben der Checkbox
  * @property {string} [tip]                    Quellen-/Lizenz-Hinweis am ⓘ-Icon
- * @property {string} [vintage]                Manifest-ID für den Datenstand (data-osm-vintage);
- *                                             js/utils/applyDataVintages.js ersetzt damit `tip`
- * @property {{color: string, text: string, shape?: string}[]} [swatches]
+ * @property {string} [vintage]                Manifest-ID für den Datenstand -> data-osm-vintage="<id>"
+ * @property {string} [vintageAttr]            stattdessen ein wertloser Haken, z. B. "laerm-vintage"
+ *                                             -> data-laerm-vintage. Beides füllt
+ *                                             js/utils/applyDataVintages.js zur Laufzeit in `tip`.
+ * @property {{color: string, text: string, shape?: string}[]} [swatches]  einfache Farbfleck-Liste
+ * @property {string} [heading]                fette Zwischenüberschrift über der Stufen-Skala
+ * @property {string} [note]                   Zeile darunter (z. B. der Index-Kurzname "LDEN")
+ * @property {{color: string, text: string}[]} [stops]  Stufen-Skala (Rechtecke, untereinander)
  */
 
 function buildToggleRow(entry) {
-  const { label, tip, vintage } = entry.legend;
+  const { label, tip, vintage, vintageAttr } = entry.legend;
 
   const row = document.createElement("div");
   row.className = "mt-6";
@@ -39,10 +44,11 @@ function buildToggleRow(entry) {
   checkbox.id = `toggle-${entry.id}`;
   labelEl.append(checkbox, ` ${label} `);
 
-  if (tip || vintage) {
+  if (tip || vintage || vintageAttr) {
     const icon = document.createElement("span");
     icon.className = "info-icon";
     if (vintage) icon.dataset.osmVintage = vintage;
+    if (vintageAttr) icon.setAttribute(`data-${vintageAttr}`, "");
     if (tip) icon.dataset.tip = tip;
     icon.textContent = "i";
     labelEl.append(icon);
@@ -69,6 +75,35 @@ function buildLegendBlock(entry) {
     link.textContent = `Zoomstufe ${entry.dataMinZoom}+`;
     hint.append("ℹ️ Daten sind ab ", link, " sichtbar.");
     box.append(hint);
+  }
+
+  const { heading, note, stops } = entry.legend;
+  if (heading) {
+    const h = document.createElement("div");
+    h.append(Object.assign(document.createElement("strong"), { textContent: heading }));
+    box.append(h);
+  }
+  if (note) {
+    const n = document.createElement("div");
+    n.className = "mt-4";
+    n.textContent = note;
+    box.append(n);
+  }
+  if (stops?.length) {
+    const ramp = document.createElement("div");
+    ramp.className = "legend-ramp";
+    for (const { color, text } of stops) {
+      const row = document.createElement("div");
+      row.className = "row";
+      const rect = document.createElement("div");
+      rect.className = "swatch-rect";
+      rect.style.background = color;
+      const span = document.createElement("span");
+      span.textContent = text;
+      row.append(rect, span);
+      ramp.append(row);
+    }
+    box.append(ramp);
   }
 
   const swatches = entry.legend.swatches ?? [];

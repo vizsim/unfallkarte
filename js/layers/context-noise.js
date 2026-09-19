@@ -20,6 +20,20 @@ export default [
     {
         id: "laerm1", kind: "context",
         source: { id: "laerm1", manifest: "laerm_den" },
+        legend: {
+            label: "Lärm (Tag-Abend-Nacht) anzeigen",
+            tip: "Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0",
+            vintageAttr: "laerm-vintage",
+            heading: "Tag-Abend-Nacht-Lärmindex",
+            note: "LDEN",
+            stops: [
+                { color: "#A6AD88", text: "55 – 59 dB(A)" },
+                { color: "#B89C63", text: "60 – 64 dB(A)" },
+                { color: "#994848", text: "65 – 69 dB(A)" },
+                { color: "#4B244A", text: "70 – 74 dB(A)" },
+                { color: "#2F0037", text: "> 75 dB(A)" },
+            ],
+        },
         layers: [
             {
               id: "laerm1",
@@ -54,6 +68,20 @@ export default [
     {
         id: "laerm2", kind: "context",
         source: { id: "laerm2", manifest: "laerm_night" },
+        legend: {
+            label: "Lärm (Nacht) anzeigen",
+            tip: "Quelle: Umweltbundesamt-DE – Lizenz: dl-by-de/2.0",
+            vintageAttr: "laerm-vintage",
+            heading: "Nacht-Lärmindex",
+            note: "LNIGHT",
+            stops: [
+                { color: "#A6AD88", text: "50 – 54 dB(A)" },
+                { color: "#B89C63", text: "55 – 59 dB(A)" },
+                { color: "#994848", text: "60 – 64 dB(A)" },
+                { color: "#4B244A", text: "65 – 69 dB(A)" },
+                { color: "#2F0037", text: "> 70 dB(A)" },
+            ],
+        },
         layers: [
             {
               id: "laerm2",

@@ -1057,3 +1057,12 @@ body {
     outline-offset: 2px;
   }
 }
+
+/* Stufen-Skala einer Legende (Lärm-Indizes): Rechtecke untereinander. Ersetzt den
+   gleichlautenden inline-Style, seit js/ui/legendMarkup.js diese Blöcke erzeugt. */
+.legend-ramp {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
