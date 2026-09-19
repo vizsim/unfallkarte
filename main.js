@@ -17,6 +17,7 @@ import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 import { setupTooltips } from './js/ui/tooltip.js';
+import { setupMobileLayout } from './js/ui/mobileLayout.js';
 
 // 📦 Popups — EIN Hover-Popup für alle Layer (Karten-Registry in popupHandlers.js)
 import { setupPopups } from './js/ui/popupHandlers.js';
@@ -134,6 +135,10 @@ async function initMap() {
     setupMapillaryTS(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
 
     setupPopups(map);
+
+    // Handy-Layout: Legende als Bottom-Sheet, beim Start zugeklappt. Vor
+    // updateLegendVisibilityByZoom, das bei zugeklappter Legende früh aussteigt.
+    setupMobileLayout();
 
     // WICHTIG: mit `map` aufrufen — ohne Argument returnt die Funktion sofort, dann
     // wird die Cluster-Legende erst spät (per zoomend/idle) korrigiert -> Flackern.

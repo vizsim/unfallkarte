@@ -51,7 +51,9 @@ body {
   max-height: calc(100dvh - 160px);  /* 60 top + 80 bottom */
   background: var(--ui-surface);
   color: var(--ui-text);
-  padding: 16px 16px 14px;
+  /* Oben KEIN Innenabstand: den trägt die klebende Titelzeile selbst, sonst bliebe über
+     ihr ein Spalt, durch den der Inhalt sichtbar wegscrollt. */
+  padding: 0 16px 14px;
   font-size: 12px;
   border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius);
@@ -88,6 +90,20 @@ body {
   cursor: help;
   color: var(--ui-text-muted, #6b7280);
   user-select: none;
+}
+
+/* Titelzeile bleibt beim Scrollen stehen — die Legende scrollt (max-height + overflow-y),
+   vorher lief der Titel einfach oben raus. Getrennt wird mit einem weichen Schatten statt
+   einer Linie: 12px darunter steht ohnehin schon der erste Trenner, zwei Kanten so dicht
+   beieinander lesen sich als Doppellinie. */
+.legend .legend-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 -16px;
+  padding: 16px 16px 10px;
+  background: var(--ui-surface);
+  box-shadow: 0 6px 10px -8px rgba(15, 23, 42, 0.45);
 }
 
 .legend-header {
@@ -888,3 +904,116 @@ body {
   cursor: pointer;
 }
 .error-banner-close:hover { color: #7f1d1d; }
+
+
+/* ══════════════════════ Mobile: Legende als Bottom-Sheet ══════════════════════
+   Bis hierher hatte das Stylesheet keine einzige @media-Query: die 320-px-Legende
+   klebte auch auf einem 360-px-Telefon oben rechts und verdeckte fast die halbe
+   Karte. Unter 640px wandert sie deshalb an den unteren Rand und wird zum Sheet —
+   zugeklappt bleibt ein Streifen mit Titel und Unfallzähler stehen, aufgeklappt
+   deckt sie höchstens 72 % der Höhe ab. Der INHALT ändert sich nicht, nur die Lage.
+
+   Die Höhe des zugeklappten Streifens misst js/ui/mobileLayout.js und meldet sie als
+   --legend-peek; daran hängen die Bedienelemente unten links. */
+@media (max-width: 640px) {
+  .legend {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    max-width: none;
+    max-height: 72dvh;
+    /* Innenabstand oben wandert in die klebende Titelzeile (siehe unten). */
+    padding: 0 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-width: 1px 0 0;
+    border-radius: var(--ui-radius) var(--ui-radius) 0 0;
+    /* Über den Karten-Bedienelementen (z-index 6), aber unter Geocoder und Fehlerbanner. */
+    z-index: 6;
+    overscroll-behavior: contain;
+  }
+
+  /* Klebende Titelzeile + Schatten kommen aus den Grundregeln — hier nur die Maße
+     an den schmaleren Innenabstand anpassen. Im Sheet ist sie zugleich der Griff. */
+  .legend .legend-title {
+    margin: 0 -14px;
+    padding: 14px 14px 10px;
+  }
+
+  /* Der Root-Pfeil zeigt zugeklappt sonst nach LINKS (Desktop-Konvention: „klappt zur
+     Seite auf"). Im Bottom-Sheet fährt die Legende nach OBEN — also auch dorthin zeigen.
+     Der offene Zustand (.open, Spitze nach unten = „wieder runter") stimmt schon. */
+  .legend.collapsed .legend-title .toggle-arrow.toggle-root {
+    transform: rotate(180deg);
+  }
+
+  /* Anfasser-Strich als Affordanz — rein dekorativ. */
+  .legend .legend-title::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    width: 34px;
+    height: 4px;
+    margin-left: -17px;
+    border-radius: 2px;
+    background: var(--ui-divider);
+  }
+
+  /* Zugeklappt: Karten-Bedienelemente sitzen direkt ÜBER dem Streifen.
+     Geschwister-Selektor, weil .legend im Markup vor beiden steht. */
+  .legend.collapsed~.map-settings-toggle {
+    bottom: calc(var(--legend-peek, 96px) + 12px);
+  }
+
+  .legend.collapsed~#bottom-left-ui-container,
+  .legend.collapsed~.map-settings-panel {
+    bottom: calc(var(--legend-peek, 96px) + 66px);
+  }
+
+  /* Aufgeklappt deckt das Sheet die linke Seite zu — dann haben sie dort nichts zu suchen. */
+  .legend:not(.collapsed)~#bottom-left-ui-container,
+  .legend:not(.collapsed)~.map-settings-toggle,
+  .legend:not(.collapsed)~.map-settings-panel {
+    display: none;
+  }
+
+  /* Suchfeld über die volle Breite statt fester 320px … */
+  .geocoder {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+  }
+
+  /* … und zugeklappt nur ein Lupen-Knopf: die Suche wird selten gebraucht, belegte oben
+     aber ein Band über die ganze Breite. Auf-/Zuklappen steuert js/ui/mobileLayout.js. */
+  .geocoder.is-collapsed {
+    right: auto;
+    width: 44px;
+  }
+
+  .geocoder.is-collapsed .geocoder-input-wrapper {
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .geocoder.is-collapsed #search,
+  .geocoder.is-collapsed .geocoder-clear,
+  .geocoder.is-collapsed .geocoder-results {
+    display: none;
+  }
+
+  /* Im Knopf sitzt die Lupe mittig statt links im Eingabefeld. */
+  .geocoder.is-collapsed .geocoder-icon {
+    position: static;
+    left: auto;
+  }
+
+  .geocoder.is-collapsed .geocoder-input-wrapper:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}

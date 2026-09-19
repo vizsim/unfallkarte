@@ -188,9 +188,51 @@ export function setupLegendClusterCheckboxSync(map) {
   });
 }
 
-export function setupLegendToggleHandlers() {
-  const legends = getLegendElements();
+/**
+ * Legende auf Wurzel-Ebene zu-/aufklappen. Zugeklappt bleiben nur Titel und Unfallzähler
+ * stehen. Ausgelagert aus dem Klick-Handler, weil das Handy-Layout die Legende beim Start
+ * zuklappt (js/ui/mobileLayout.js) — dort ist sie ein Bottom-Sheet, und aufgeklappt läge
+ * sie über der halben Karte.
+ */
+export function setLegendCollapsed(collapsed) {
+  const legend = document.querySelector(".legend");
+  if (!legend) return;
 
+  const legends = getLegendElements();
+  legend.classList.toggle("collapsed", collapsed);
+  const zoom = window.map.getZoom();
+
+  Array.from(legend.children).forEach(el => {
+    const isTitle = el.classList.contains("legend-title");
+    const isFeatureCount = el.id === "feature-count-wrapper";
+    const isScenario = legends.scenarioSections.includes(el);
+    const isClusterLegend = el === legends.clusterLegendEl;
+    const isOtherSpecial = isSpecialLegendElement(el, legends);
+
+    if (collapsed) {
+      el.style.display = isTitle || isFeatureCount ? "" : "none";
+    } else {
+      if (zoom < 11) {
+        el.style.display = isTitle || isFeatureCount || isClusterLegend || isScenario ? "" : "none";
+      } else {
+        el.style.display = !isOtherSpecial ? "" : el.style.display;
+      }
+    }
+  });
+
+  if (!collapsed) {
+    updateLegendVisibilityByZoom(window.map);
+    updateScenarioLegendVisibility();
+  }
+
+  const arrow = legend.querySelector('.toggle-arrow[data-arrow="legend-root"]');
+  if (arrow) {
+    arrow.classList.toggle("open", !collapsed);
+    arrow.setAttribute("aria-expanded", String(!collapsed));
+  }
+}
+
+export function setupLegendToggleHandlers() {
   document.querySelectorAll(".legend-header, .legend-section-allcontent").forEach(header => {
     header.addEventListener("click", (e) => {
       if (e.target.tagName === "INPUT" || e.target.classList.contains("info-icon")) return;
@@ -199,39 +241,15 @@ export function setupLegendToggleHandlers() {
       const arrow = header.querySelector(`.toggle-arrow[data-arrow="${key}"]`);
 
       if (key === "legend-root") {
-        const legend = document.querySelector(".legend");
-        const collapsed = legend.classList.toggle("collapsed");
-        const zoom = window.map.getZoom();
-
-        Array.from(legend.children).forEach(el => {
-          const isTitle = el.classList.contains("legend-title");
-          const isFeatureCount = el.id === "feature-count-wrapper";
-          const isScenario = legends.scenarioSections.includes(el);
-          const isClusterLegend = el === legends.clusterLegendEl;
-          const isOtherSpecial = isSpecialLegendElement(el, legends);
-
-          if (collapsed) {
-            el.style.display = isTitle || isFeatureCount ? "" : "none";
-          } else {
-            if (zoom < 11) {
-              el.style.display = isTitle || isFeatureCount || isClusterLegend || isScenario ? "" : "none";
-            } else {
-              el.style.display = !isOtherSpecial ? "" : el.style.display;
-            }
-          }
-        });
-
-        if (!collapsed) {
-          updateLegendVisibilityByZoom(window.map);
-          updateScenarioLegendVisibility();
-        }
-      } else {
-        // const section = document.querySelector(`.legend-items[data-section="${key}"]`);
-        const section =
-          document.querySelector(`.legend-section-allcontent[data-section="${key}"]`) ||
-          document.querySelector(`.legend-items[data-section="${key}"]`);
-        if (section) section.classList.toggle("collapsed");
+        // Pfeil + aria setzt setLegendCollapsed selbst — darum hier raus.
+        setLegendCollapsed(!document.querySelector(".legend").classList.contains("collapsed"));
+        return;
       }
+
+      const section =
+        document.querySelector(`.legend-section-allcontent[data-section="${key}"]`) ||
+        document.querySelector(`.legend-items[data-section="${key}"]`);
+      if (section) section.classList.toggle("collapsed");
 
       if (arrow) {
         const open = arrow.classList.toggle("open");
