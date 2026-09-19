@@ -4,6 +4,12 @@
 #
 # Action-Versionen: alle auf der Node-24-Laufzeit des Runners (Node 20 ist dort abgekündigt).
 # Das ist unabhängig vom Node, mit dem UNSERE Tests laufen (setup-node: node-version 22).
+#
+# Runner bewusst auf ubuntu-24.04 gepinnt statt ubuntu-latest: ab 2026-10-19 zeigt
+# ubuntu-latest auf Ubuntu 26, und `playwright install --with-deps` braucht eine
+# Playwright-Version, die das neue Ubuntu kennt — sonst wird der web-Job rot, ohne dass
+# sich am Code etwas geändert hat. Der Pin macht den Umstieg zu einem eigenen, datierbaren
+# Schritt (dann: @playwright/test anheben, Pin lösen, CI grün gegenläufig prüfen).
 name: CI
 
 on:
@@ -18,7 +24,7 @@ concurrency:
 jobs:
   pipeline:
     name: Pipeline (ruff + pytest)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: pipeline
@@ -36,7 +42,7 @@ jobs:
 
   web:
     name: Frontend (Playwright-Smoke-Tests)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
