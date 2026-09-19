@@ -63,17 +63,33 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
              Nachzügler.
        - [ ] (später, separat entscheiden) Schritt 5: Legenden-HTML aus der Registry generieren
              (`index.html` −~600 Z.; höchstes visuelles Risiko, Spezial-Widgets brauchen Ausweg).
-2b. [ ] **Permalink neu aufsetzen** (nach Registry-Schritt 4) — heute fragil: positionsbasiertes
-       `?p=a,b,c,…` ohne Version; Wiederherstellen per simulierten Klicks (Reihenfolge-/Timing-
-       abhängig, zwei rAF + `isInitializingRef`-Flag — Ursache des CI-Rennens); ohne `?p=` wird
-       ein hartkodierter Default-Link geschrieben und wieder eingelesen (Default-Ansicht doppelt:
-       `main.js` + `permalink.js`); Kontext-/Szenario-Toggles schreiben die URL erst bei der
-       nächsten Kartenbewegung *(gefixt 2026-09-18: Toggles schreiben sofort)*; Slider/Modi
-       (Sc-Schwellen, Uber-Stunde, SVZ-/Telraam-Modus) fehlen ganz. Ziel: EIN Zustandsobjekt
-       als Wahrheit, reine Funktionen `serialize(state)`/`parse(url)` (ohne Browser testbar),
-       `applyState(state)` setzt DOM + Karte deklarativ; Format benannt + versioniert
-       (`?v=2&c=…&l=…`), alter `p=`-Parser bleibt für bestehende Links. Roundtrip-Test
-       existiert (`tests/web/permalink.spec.js`).
+2b. [x] **Permalink neu aufgesetzt** (2026-09-19) — Format **v2**:
+       `?v=2&map=<zoom>/<lat>/<lng>&uk=…&bet=…&jahr=…&typ=…&art=…&s=…&d=1&l=…&n=…&o=…`,
+       benannte Parameter statt positionsbasiertem `?p=a,b,c,…`, Ansicht in OSM-Konvention
+       (`map=z/lat/lng`), und **geschrieben wird nur, was vom Default abweicht** — die
+       Startansicht ist damit `?v=2&map=12.00/52.31500/13.63400` (112 → 32 Zeichen).
+       - Drei Module: `permalinkFormat.js` (REIN — kein DOM, kein `window`; ohne Browser
+         testbar), `permalinkState.js` (`readState`/`applyState`, die einzige DOM-Bindung),
+         `permalink.js` (nur noch Verdrahtung, 269 → 69 Z.).
+       - **Regler/Modi sind jetzt im Link** (Sc-Schwellen, Sc9-Kriterium, Uber-Stunde,
+         SVZ-DTV/SV, SVZ-Unterhaken, Telraam Auto/Rad) — fehlten in v1 komplett.
+       - `applyState` SETZT `checked`/`value` statt `.click()` zu simulieren (ein Klick
+         toggelt → hing am Vorzustand) und feuert nur bei echter Änderung → idempotent,
+         reihenfolge-unabhängig. Die URL wird nur noch geschrieben, nie zurückgelesen: der
+         rAF-Umweg samt hartkodierter Default-Ansicht in `permalink.js` entfällt (Ursache
+         des CI-Rennens).
+       - Jahre ohne Tabelle (`2017`↔`17`, Bereiche `jahr=20-25`) — v1 hatte eine Liste, die
+         bei jedem neuen Datenjahr nachgezogen werden musste; 2026 hätte still gefehlt.
+       - Alte `?p=`-Links werden weiter gelesen und beim Laden auf v2 hochgeschrieben.
+       - Tests: `tests/unit/permalinkFormat.test.js` (17 Stück, `npm run test:unit`, node
+         --test, läuft in ~0,2 s ohne Browser) + `tests/web/permalink.spec.js` (Roundtrip
+         inkl. Regler, Kurz-Link, v1→v2-Aufstieg). Golden-Diff = nur die Szenario-Kodierung
+         (`sc9` → `9`). Dabei gefunden und gefixt: ohne Link lief `updateLayerFilter` nicht
+         mehr → Unfall-Layer ohne Filter/unsichtbar (vom Golden-Snapshot gefangen).
+       - *Bewusst NICHT „verhasht":* Kontext/Szenarien stehen schon bei einem Zeichen je
+         Layer; eine Bitmaske über die Unfall-Filter spart gegenüber „Defaults weglassen" im
+         schlechtesten Fall ein Zeichen, kostet aber Lesbarkeit und macht die Bit-Reihenfolge
+         zum harten Vertrag (ein neues Unfalljahr verschöbe alle alten Links).
 3. [ ] **Vite** — ~20 einzeln geladene ES-Module bündeln (Initial-Load), Dev-Server mit
        HMR, `import.meta.env` statt `config.js`/`config.public.js`-Umschaltung.
        Haken: GitHub Pages served heute das Repo-Root direkt → braucht eine Action, die
@@ -95,10 +111,10 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Bereit-Signal `<html data-app-ready>` (permalink.js), Tests pollen auf ihre Bedingung
       statt auf `map.loaded()`; `PW_CPU_THROTTLE=4 npm run test:web` simuliert langsame Runner.
       Artefakte öffentlicher Repos ohne Login: `nightly.link/vizsim/unfallkarte/actions/runs/<id>/playwright-report.zip`.
-- [ ] **CI: `ubuntu-latest` wird ab 2026-10-19 Ubuntu 26** (GitHub-Hinweis im Run). Kann den
-      Playwright-Job treffen (`npx playwright install --with-deps` braucht eine Playwright-Version,
-      die das neue Ubuntu kennt). Wenn der `web`-Job danach rot wird: `@playwright/test` anheben
-      oder den Runner vorübergehend auf `ubuntu-24.04` pinnen.
+- [x] **CI: `ubuntu-latest` wird ab 2026-10-19 Ubuntu 26** (2026-09-19) — beide Jobs auf
+      `ubuntu-24.04` gepinnt, damit der Umstieg ein eigener, datierbarer Schritt bleibt und der
+      `web`-Job nicht unvermittelt an `npx playwright install --with-deps` scheitert. Zum Lösen
+      des Pins: `@playwright/test` anheben, Pin entfernen, CI gegenprüfen.
 - [x] **Frontend-Vertrag testen** (2026-09-18) — `tests/web/contract.spec.js` liest die
       Metadaten der echten PMTiles (lokal = frisch gebaut VOR dem Deploy, CI = Stand auf B2)
       und prüft jeden `source-layer` + jedes im Style benutzte Attribut (automatisch aus

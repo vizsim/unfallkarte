@@ -8,10 +8,13 @@ const IGNORED_ERRORS = [/Failed to load resource/i];
 /**
  * Seite öffnen und warten, bis die APP bereit ist. Liefert die gesammelten JS-Fehler (live).
  *
- * Bereit = <html data-app-ready> (gesetzt in permalink.js), NICHT map.loaded(): ohne ?p=
- * wendet die App zwei Frames nach dem load-Handler den Default-Permalink an und setzt dabei
- * Center/Zoom + alle Checkboxen zurück. Auf langsamen CI-Runnern lief ein Test davor los —
- * sein toggleOn/jumpTo wurde danach wieder kassiert (erster CI-Lauf, Tempolimit-Test).
+ * Bereit = <html data-app-ready> (gesetzt in permalink.js), NICHT map.loaded(): map.loaded()
+ * kann schon wahr sein, bevor der Zustand aus dem Link auf Karte und Haken angewandt ist.
+ * Historie: v1 schrieb ohne ?p= erst einen Default-Permalink und las ihn zwei Frames später
+ * wieder ein — das setzte Center/Zoom + alle Checkboxen zurück, und auf langsamen CI-Runnern
+ * lief ein Test davor los (erster CI-Lauf, Tempolimit-Test). Seit Permalink v2 entfällt dieser
+ * Umweg (die URL wird nur noch GESCHRIEBEN, nie zurückgelesen); das Bereit-Signal bleibt
+ * trotzdem die richtige Bedingung.
  *
  * PW_CPU_THROTTLE=6 npm run test:web  -> bremst die CPU (CDP), um solche Rennen lokal
  * nachzustellen; unser Entwicklungsrechner ist sonst zu schnell dafür.

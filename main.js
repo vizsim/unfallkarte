@@ -35,7 +35,7 @@ import {
 
 // 📦 Permalink
 import {
-  Permalink,
+  parsePermalink,
   updatePermalink,
   cleanupLegacyPermalink,
   setupPermalinkHandling
@@ -86,9 +86,9 @@ async function initMap() {
   const protocol = new pmtiles.Protocol();
   maplibregl.addProtocol("pmtiles", protocol.tile);
 
-  const { lat, lng, zoom } = Permalink.parse();
-
-  const hasPermalink = !isNaN(lat) && !isNaN(lng) && !isNaN(zoom);
+  // Ansicht aus dem Link schon HIER lesen, damit die Karte direkt an der richtigen Stelle
+  // startet (sonst lädt sie erst Tiles der Default-Ansicht und springt danach weg).
+  const view = parsePermalink(window.location.search)?.view;
 
   // Manifest + PMTiles-Auflösung sofort anstoßen — parallel zu Style-Fetch und
   // Basemap-Tiles, statt erst im "load"-Handler (spart ~1-2 s bis zu den Unfalldaten).
@@ -106,8 +106,8 @@ async function initMap() {
   window.map = new maplibregl.Map({
     container: "map",
     style, // lokaler Positron-Style (keyless); Tiles von OpenFreeMap (gehostet)
-    center: hasPermalink ? [lng, lat] : [13.634, 52.315],
-    zoom: hasPermalink ? zoom : 12,
+    center: view ? [view.lng, view.lat] : [13.634, 52.315],
+    zoom: view ? view.zoom : 12,
     minZoom: 6,
     maxZoom: 20
   });
@@ -140,7 +140,6 @@ async function initMap() {
     updateLegendVisibilityByZoom(map);
 
     setupPermalinkHandling(map, {
-      paintStyles,
       updateLayerFilter,
       updateVisibleFeatureCount: () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles),
       isInitializingRef

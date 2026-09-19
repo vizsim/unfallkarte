@@ -61,7 +61,12 @@ test("Golden: Quellen, Layer-Definitionen und Toggle-Verhalten", async ({ page }
       zoomHints: [...document.querySelectorAll(".legend .zoom-hint")]
         .filter(shown).map((el) => el.closest("[id]")?.id).sort(),
     });
-    const permalinkTail = () => (new URLSearchParams(location.search).get("p") ?? "").split(",").slice(5).join(",");
+    // Permalink v2: Szenarien (?n=) + Kontext-Layer (?l=). Bleibt bewusst "<Szenarien>,<Layer>"
+    // wie zu ?p=-Zeiten, damit der Snapshot vergleichbar bleibt.
+    const permalinkTail = () => {
+      const params = new URLSearchParams(location.search);
+      return [params.get("n") ?? "", params.get("l") ?? ""].join(",");
+    };
 
     const toggleIds = [...document.querySelectorAll('.legend input[type="checkbox"][id^="toggle-"]')].map((el) => el.id).sort();
     const toggles = {};

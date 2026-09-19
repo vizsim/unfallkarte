@@ -51,6 +51,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Zuerst die browserlosen Tests (Permalink-Format): laufen in Sekunden und melden
+      # Formatfehler, bevor Playwright überhaupt einen Browser installiert.
+      - run: npm run test:unit
       - run: npx playwright install --with-deps chromium
       - run: npm run test:web
       - uses: actions/upload-artifact@v7

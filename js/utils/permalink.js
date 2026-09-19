@@ -1,268 +1,71 @@
-// permalink.js
-import { registryPermalinkKeys } from "../layers/registry.js";
+// permalink.js — Verdrahtung: URL lesen, Zustand anwenden, URL schreiben.
+// Das Format liegt in permalinkFormat.js (rein, testbar), die DOM-Bindung in permalinkState.js.
 
-export const beteiligungMap = {
-    IstRad: "1",
-    IstPKW: "2",
-    IstFuss: "3",
-    IstKrad: "4",
-    IstGkfz: "5",
-    IstSonstig: "6"
+import { mergeState, parse, serialize } from "./permalinkFormat.js";
+import { applyState, readState } from "./permalinkState.js";
+
+export { parse as parsePermalink } from "./permalinkFormat.js";
+
+// Der Zustand, mit dem die App startet (HTML-Defaults + Start-Ansicht). Wird EINMAL beim
+// Hochfahren festgehalten und dient danach zwei Zwecken:
+//   1. Auffüllen: ein Link nennt nur, was vom Default abweicht — der Rest kommt von hier.
+//   2. Kürzen: serialize() lässt alles weg, was dem Default entspricht.
+let defaultState = null;
+
+const writeUrl = (map) => {
+    const query = serialize(readState(map), defaultState ?? {});
+    history.replaceState(null, "", `?${query}`);
 };
-
-export const yearMap = {
-    2017: "17",
-    2018: "18",
-    2019: "19",
-    2020: "20",
-    2021: "21",
-    2022: "22",
-    2023: "23",
-    2024: "24",
-    2025: "25"
-};
-
-// Toggle-ID -> EIN Zeichen im Kontext-Teil von ?p=. Zeichen nie neu vergeben — alte Links
-// würden sonst einen anderen Layer einschalten. Reserviert (früher terrain/hillshade): t, i.
-// Einträge der Layer-Registry bringen ihr Zeichen selbst mit (js/layers/registry.js).
-export const kontextKeys = {
-    // noch nicht in der Registry (eigene Module): Mapillary, Radinfrastruktur
-    mapillary: "m",
-    mapillary_ts: "y",
-    bikelanes: "f",  // fehlte bis 2026-09 (wie Telraam "z"): ging beim Teilen des Links verloren
-    ...registryPermalinkKeys(),
-};
-
-const reverse = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]));
-const reverseBeteiligungMap = reverse(beteiligungMap);
-const reverseYearMap = reverse(yearMap);
-const reverseKontextKeys = reverse(kontextKeys);
-
-const styleShortMap = {
-    UKATEGORIE: "U",
-    BETEILIGUNG: "B",
-    UJAHR: "J",
-    UTYP1: "T",
-    UART: "A"
-};
-const reverseStyleMap = reverse(styleShortMap);
-
-export const encodeList = (list, map) => list.map(item => map[item] || item).join("_");
-const decodeList = (str, reverseMap) => (str || "").split("_").map(code => reverseMap[code]).filter(Boolean).join("_");
-
-export const Permalink = {
-    parse() {
-        const params = new URLSearchParams(window.location.search);
-        const p = params.get("p");
-
-        if (!p) {
-            return {
-                lat: undefined,
-                lng: undefined,
-                zoom: undefined,
-                style: undefined,
-                filters: [],
-                scenarios: [],
-                kontext: []
-            };
-        }
-
-        const [latStr, lngStr, zoomStr, styleShort, filtersRaw, scenariosRaw = "", kontextRaw = ""] = p.split(",");
-        const [ukat, beteiligungRaw, ujahrRaw, utyp, uart] = filtersRaw?.split("|") || [];
-
-        return {
-            lat: parseFloat(latStr),
-            lng: parseFloat(lngStr),
-            zoom: parseFloat(zoomStr),
-            style: reverseStyleMap[styleShort] || "UKATEGORIE",
-            filters: [
-                ukat,
-                decodeList(beteiligungRaw, reverseBeteiligungMap),
-                decodeList(ujahrRaw, reverseYearMap),
-                utyp,
-                uart
-            ],
-            scenarios: scenariosRaw.split("_").filter(Boolean),
-            kontext: kontextRaw.split("").map(k => reverseKontextKeys[k]).filter(Boolean)
-        };
-    },
-
-    stringify({ lat, lng, zoom, style, filters, scenarios, kontext = [] }) {
-        const styleShort = styleShortMap[style] || "U";
-        const filterParam = filters.join("|");
-        const scenarioParam = scenarios.join("_") || "";
-        const kontextParam = kontext.map(k => kontextKeys[k]).join("") || "";
-
-        const query = [
-            Number(lat || 0).toFixed(5),
-            Number(lng || 0).toFixed(5),
-            Number(zoom || 0).toFixed(2),
-            styleShort,
-            filterParam,
-            scenarioParam,
-            kontextParam
-        ].join(",");
-
-        history.replaceState(null, "", `?p=${query}`);
-    }
-};
-
-export function applyPermalink(map, paintStyles, updateLayerFilter, updateVisibleFeatureCount, isInitializingRef) {
-    const { lat, lng, zoom, style, filters, scenarios, kontext } = Permalink.parse();
-
-    isInitializingRef.value = true;
-    const [ukat, beteiligung, ujahr, utyp, uart] = filters;
-
-    if (!isNaN(lat) && !isNaN(lng)) map.setCenter([lng, lat]);
-    if (!isNaN(zoom)) map.setZoom(zoom);
-    if (style) document.querySelector(`input[name="color-style"][value="${style}"]`)?.click();
-
-    // SVZ-Quellen-Unterhaken (.svz-src) NICHT zurücksetzen — ihre HTML-Defaults
-    // (Länder/BASt an, UBA aus) sollen den Permalink-Reset überleben; nur der
-    // Master (#toggle-svz) wird wie andere Kontext-Layer aus der URL wiederhergestellt.
-    document.querySelectorAll('.legend input[type=checkbox]:not(.svz-src), .legend input[data-field]').forEach(cb => cb.checked = false);
-
-    const checkInputs = (group, values) => values?.split("_").forEach(val => {
-        document.querySelector(`input[data-group="${group}"][value="${val}"]`)?.click();
-    });
-
-    checkInputs("UKATEGORIE", ukat);
-    checkInputs("UJAHR", ujahr);
-    checkInputs("UART", uart);
-    checkInputs("UTYP1", utyp);
-    beteiligung?.split("_").forEach(field => {
-        document.querySelector(`input[data-field="${field}"]`)?.click();
-    });
-
-    document.querySelectorAll('input[name="scenario"]').forEach(cb => cb.checked = false);
-    scenarios.forEach(s => document.querySelector(`input[name="scenario"][value="${s}"]`)?.click());
-
-    kontext.forEach(id => {
-        const cb = document.getElementById(`toggle-${id}`);
-        if (cb) {
-            cb.checked = true;
-            cb.dispatchEvent(new Event("change"));
-        }
-    });
-
-
-    updateLayerFilter(false, true);
-    updateVisibleFeatureCount();
-    setTimeout(() => isInitializingRef.value = false, 0);
-}
 
 export function updatePermalink(map, isInitializingRef) {
     if (isInitializingRef.value) return;
-
-    const getCheckedValues = selector => Array.from(document.querySelectorAll(selector))
-        .filter(cb => cb.checked).map(cb => cb.value);
-
-    const center = map.getCenter();
-    const zoom = map.getZoom();
-    const style = document.querySelector('input[name="color-style"]:checked')?.value;
-
-    const filters = [
-        encodeList(getCheckedValues('input[data-group="UKATEGORIE"]'), {}),
-        encodeList(
-            Array.from(document.querySelectorAll('input[data-field]'))
-                .filter(cb => cb.checked)
-                .map(cb => cb.dataset.field),
-            beteiligungMap
-        ),
-        encodeList(getCheckedValues('input[data-group="UJAHR"]'), yearMap),
-        encodeList(getCheckedValues('input[data-group="UTYP1"]'), {}),
-        encodeList(getCheckedValues('input[data-group="UART"]'), {})
-    ];
-
-    const scenarios = getCheckedValues('input[name="scenario"]');
-    const kontext = Object.keys(kontextKeys).filter(k => document.getElementById(`toggle-${k}`)?.checked);
-
-    Permalink.stringify({
-        lat: center.lat,
-        lng: center.lng,
-        zoom,
-        style,
-        filters,
-        scenarios,
-        kontext
-    });
+    writeUrl(map);
 }
 
-
+/**
+ * Sehr alte Links trugen die Ansicht in Einzelparametern (?lat=&lng=&zoom=&…). Die sind seit
+ * v1 tot — wenn kein kompakter Parameter danebensteht, aus der URL räumen.
+ */
 export function cleanupLegacyPermalink() {
     const url = new URL(window.location.href);
-    const params = url.searchParams;
+    const legacy = ["lat", "lng", "zoom", "style", "filters", "scenarios"];
 
-    const legacyParams = ["lat", "lng", "zoom", "style", "filters", "scenarios"];
-    const hasLegacy = legacyParams.some(param => params.has(param));
-    const hasCompact = params.has("p");
+    if (url.searchParams.has("p") || url.searchParams.has("v") || url.searchParams.has("map")) return;
+    if (!legacy.some((param) => url.searchParams.has(param))) return;
 
-    if (!hasCompact && hasLegacy) {
-        legacyParams.forEach(param => params.delete(param));
-        url.search = params.toString();
-        history.replaceState(null, "", url.toString());
-    }
+    legacy.forEach((param) => url.searchParams.delete(param));
+    url.search = url.searchParams.toString();
+    history.replaceState(null, "", url.toString());
 }
 
+export function setupPermalinkHandling(map, { updateLayerFilter, updateVisibleFeatureCount, isInitializingRef }) {
+    // Defaults JETZT festhalten — vor dem ersten Anwenden, solange DOM und Karte noch
+    // unberührt im Auslieferungszustand sind.
+    defaultState = readState(map);
 
+    const fromUrl = parse(window.location.search);
+    if (fromUrl) applyState(map, mergeState(defaultState, fromUrl));
 
-export function setupPermalinkHandling(map, {
-    paintStyles,
-    updateLayerFilter,
-    updateVisibleFeatureCount,
-    isInitializingRef
-}) {
-    const hasPermalink = new URLSearchParams(window.location.search).has("p");
+    // IMMER, auch ohne Link: die Unfall-Layer starten ohne Filter und unsichtbar (addLayers)
+    // und werden erst hier an die Auswahl gebracht. Hängt das am Link, bleiben sie bei einem
+    // Aufruf ohne Parameter blind — sie poppten dann erst auf, wenn irgendein anderer Toggle
+    // updateLayerFilter nachzog (vom Golden-Snapshot als "accident-points leakedAfterOff"
+    // gefangen). force: läuft absichtlich, während isInitializing noch gesetzt ist.
+    updateLayerFilter(false, true);
+    updateVisibleFeatureCount();
 
-    if (!hasPermalink) {
-        // Default permalink generation
-        Permalink.stringify({
-            lat: 52.315,
-            lng: 13.634,
-            zoom: 12.00,
-            style: "UKATEGORIE",
-            filters: [
-                encodeList(Object.keys(paintStyles.UKATEGORIE.colors), {}),
-                encodeList(Object.keys(paintStyles.BETEILIGUNG.colors), beteiligungMap),
-                encodeList(Object.keys(paintStyles.UJAHR.colors), yearMap),
-                encodeList(Object.keys(paintStyles.UTYP1.colors), {}),
-                encodeList(Object.keys(paintStyles.UART.colors), {})
-            ],
-            scenarios: [],
-            kontext: []
-        });
+    // URL immer neu schreiben: ohne Parameter entsteht so der Link auf die Startansicht, ein
+    // alter ?p=-Link wird dabei auf v2 hochgeschrieben. Quelle ist IMMER der gelesene Zustand.
+    // (v1 hatte die Startansicht zusätzlich als Literal hier stehen — sie wich von main.js ab,
+    // wurde geschrieben, per rAF wieder eingelesen und setzte dabei Karte + Haken zurück. Genau
+    // das war das Rennen, das die Smoke-Tests auf langsamen CI-Runnern gerissen hat.)
+    writeUrl(map);
 
-        // Wait for URL change to apply
-        requestAnimationFrame(() => setupPermalinkHandling(map, {
-            paintStyles,
-            updateLayerFilter,
-            updateVisibleFeatureCount,
-            isInitializingRef
-        }));
-        return;
-    }
+    map.on("moveend", () => updatePermalink(map, isInitializingRef));
+    map.on("zoomend", () => updatePermalink(map, isInitializingRef));
+    isInitializingRef.value = false;
 
-    // Sofort anwenden statt auf das erste "idle" zu warten: idle feuert erst, wenn
-    // Basemap + alle Quellen fertig gerendert sind — bis dahin blieben die
-    // Unfall-Layer unsichtbar (visibility: none) und ihre Tiles wurden gar nicht
-    // erst angefragt. Layer/Toggles stehen hier bereits (Aufruf aus dem
-    // load-Handler nach setupUI/setupLegend), das rAF entkoppelt nur vom
-    // laufenden Event-Handler.
-    requestAnimationFrame(() => {
-        applyPermalink(
-            map,
-            paintStyles,
-            updateLayerFilter,
-            updateVisibleFeatureCount,
-            isInitializingRef
-        );
-        map.on("moveend", () => updatePermalink(map, isInitializingRef));
-        map.on("zoomend", () => updatePermalink(map, isInitializingRef));
-        isInitializingRef.value = false;
-        // Bereit-Signal (<html data-app-ready>): erst JETZT sind Ansicht + Checkboxen aus dem
-        // Permalink angewandt. map.loaded() reicht dafür nicht — es kann schon vorher wahr
-        // sein, und applyPermalink setzt danach Center/Zoom und alle Haken zurück. Die
-        // Smoke-Tests (tests/web/helpers.js) warten hierauf, bevor sie togglen/springen.
-        document.documentElement.dataset.appReady = "true";
-    });
+    // Bereit-Signal für die Smoke-Tests (tests/web/helpers.js): ab hier steht der Zustand aus
+    // dem Link. map.loaded() allein reicht nicht — das kann schon vorher wahr sein.
+    document.documentElement.dataset.appReady = "true";
 }

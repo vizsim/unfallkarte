@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "serve": "http-server . -a 127.0.0.1 -p 4173 -c-1 --silent",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
     "test:web": "playwright test",
     "test:web:ui": "playwright test --ui"
   },

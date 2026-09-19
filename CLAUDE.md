@@ -29,7 +29,12 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
   via `uv --directory pipeline run`.
 - **Tools:** `uv run unfallkarte <cmd>`. Lint: `uvx ruff check` (aus `pipeline/`). Tests:
   `uv run pytest`. Frontend: `npm run serve` (Range-fähig; `python -m http.server` kann
-  keine Range-Requests → lokale PMTiles scheitern), `npm run test:web`.
+  keine Range-Requests → lokale PMTiles scheitern), `npm run test:unit` (browserlos,
+  node --test, Sekunden), `npm run test:web` (Playwright).
+- **Permalink:** Format v2 in `js/utils/permalinkFormat.js` — REIN halten (kein DOM, kein
+  `window`), sonst fällt die browserlose Testbarkeit weg. DOM-Bindung nur in
+  `permalinkState.js`. Kürzel (Layer-Zeichen, Regler-Keys, Stil-Codes) sind Vertrag mit
+  geteilten Links: nie neu vergeben, nur ergänzen. Neuer Regler = Eintrag in `CONTROLS`.
 - **Layer-Registry** (`js/layers/`): ein Eintrag je Legenden-Zeile liefert Quelle(n), Layer-
   Definitionen, Toggle, Zoom-Hinweis, Permalink-Zeichen, Regler (`controls`), Sonderlogik
   (`setup`) und Popups — alle Kontext-Layer + Szenarien laufen darüber. Neue Layer dort
