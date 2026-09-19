@@ -127,8 +127,28 @@ export function setupHoverPopup(map, entries) {
             + `</div>`;
     };
 
+    // --- Eingabeart --------------------------------------------------------------------
+    // Auf Touch gibt es kein Hover: der Browser schiebt zwar ein synthetisches mousemove
+    // vor den Klick, aber der Finger sieht nie eine Vorschau. Ein `openOnClick`-Layer
+    // (Tempolimit, Übergänge, Telraam) riss den Nutzer damit ungefragt nach OSM/Telraam —
+    // Antippen heißt dort "was ist das?", nicht "bring mich weg".
+    //
+    // Bewusst am EVENT abgelesen statt am Gerät (kein `hover: none`-Medienquery): Laptops
+    // mit Touchscreen nutzen beides, und dann soll die Maus weiter direkt öffnen.
+    // pointerdown kommt vor den synthetischen Maus-Events, der Wert steht also rechtzeitig.
+    let pointerType = "mouse";
+    const notePointer = (e) => { pointerType = e.pointerType || "mouse"; };
+    for (const type of ["pointerdown", "pointermove"]) {
+        // pointermove muss mit: sonst bliebe ein Hybrid-Gerät nach einer Berührung auf
+        // "Touch" stehen, bis wieder geklickt wird — die Maus bekäme kein Hover mehr.
+        map.getCanvas().addEventListener(type, notePointer, { passive: true });
+    }
+    const isTouch = () => pointerType === "touch";
+
     // Klick auf den obersten Treffer: Link direkt öffnen? (sonst eigene Aktion / Pin)
-    const directLink = (hit) => (hit.entry.openOnClick ? linkOf(hit) : null);
+    // Auf Touch nie — dort landet der Link stattdessen in der Fußzeile des fixierten
+    // Fensters, wo er bewusst angetippt werden kann.
+    const directLink = (hit) => (hit.entry.openOnClick && !isTouch() ? linkOf(hit) : null);
 
     // Hinweiszeile unter der Hover-Vorschau: was passiert bei Klick?
     const hoverHint = (hits, hidden, html) => {
@@ -175,6 +195,12 @@ export function setupHoverPopup(map, entries) {
     };
 
     map.on("mousemove", (e) => {
+        // Auf Touch schiebt der Browser vor dem Klick ein synthetisches mousemove nach.
+        // Daraus eine Vorschau zu bauen, die der Tap im nächsten Moment durch das fixierte
+        // Fenster ersetzt, wäre nur ein Aufblitzen — und der Hinweis „Klick fixiert …"
+        // ergibt ohne Zeigegerät keinen Sinn.
+        if (isTouch()) return;
+
         let hits = collect(e.point);
         const anyHit = hits.length > 0;
         // Bei fixiertem Fenster zeigt die Vorschau nur, was NICHT schon darin steht —

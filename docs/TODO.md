@@ -198,10 +198,18 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       und Einzelfälle (~149 Reste).
 - [~] **Legende aus Config generieren** — läuft, siehe Roadmap 2 Schritt 5b (6 von 13
       Kontext-Einträgen kommen aus der Registry).
-- [ ] **Touch/Mobile-Durchgang** — Hover-Popups gibt es auf Touch nicht; Tap = Klick = Pin
-      funktioniert, aber `openOnClick`-Layer (Tempolimit, Übergänge, Telraam) springen auf
-      Touch sofort zu OSM/Telraam ohne Vorschau. Zusammen mit dem Mobile-Breakpoint angehen
-      (z. B. auf Touch immer erst pinnen, Link nur im Pin).
+- [x] **Touch/Mobile-Durchgang** (2026-09-19) — auf Touch fixiert ein Tap jetzt IMMER das
+      Fenster; der Link steht darin in der Fußzeile und wird bewusst angetippt. Vorher rissen
+      `openOnClick`-Layer (Tempolimit, Übergänge, Telraam) den Nutzer ungefragt nach
+      OSM/Telraam — ohne die Vorschau, die das auf dem Desktop ankündigt.
+      Die Eingabeart wird am EVENT abgelesen (`pointerdown`/`pointermove` → `pointerType`),
+      nicht am Gerät: auf Hybridgeräten (Laptop mit Touchscreen) öffnet die Maus weiter
+      direkt, und `pointermove` muss mit, sonst bliebe das Gerät nach einer Berührung auf
+      „Touch" stehen. Zusätzlich unterdrückt: die Hover-Vorschau aus dem synthetischen
+      mousemove, das Browser vor dem Klick nachschieben — sie blitzte nur auf und trug einen
+      Hinweis („Klick fixiert …"), der ohne Zeigegerät sinnlos ist.
+      `tests/web/touch.spec.js` (3 Tests, echte Touch-Events); beide Zusicherungen per
+      Gegenprobe verifiziert. Der Desktop-Test in `smoke.spec.js` bleibt unverändert grün.
 
 ## Daten / Pipeline
 
