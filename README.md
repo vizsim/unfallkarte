@@ -3,15 +3,24 @@
 
 # 🚧 Unfallkarte (Deutschland)
 
-**Interaktive Webkarte** für Verkehrsunfälle in Deutschland. Die Unfalldaten stammen
-aus dem [Unfallatlas der Statistischen Ämter](https://unfallatlas.statistikportal.de/)
-(dl-de/by-2-0). Rohe Unfall- und OpenStreetMap-Daten werden zu **PMTiles** verarbeitet
-und in einer MapLibre-Karte dargestellt — komplett auf offenen, frei gehosteten
-Diensten (keine kommerzielle Karten-API).
+**Interaktive Webkarte für Verkehrsunfälle in Deutschland.** Über 2,2 Millionen polizeilich
+erfasste Unfälle mit Personenschaden aus den Jahren **2017–2025** — filterbar nach Schwere,
+Unfallart, Unfalltyp, Jahr und Beteiligung, und kombinierbar mit Kontextdaten: Schulen,
+Tempolimits, Verkehrsmengen, Lärm, Radinfrastruktur.
+
+Darüber hinaus rechnet die Pipeline **Szenarien**: Fragen an die Daten, die man auf der
+Karte sonst nur ahnen kann — wo häufen sich Unfälle im Schulumfeld, wo unterbricht ein
+kurzes Tempo-50-Stück eine sonst durchgängige 30er-Zone, wo liegen Unfallhäufungen nach
+den Kriterien der Unfallkommissionen.
+
+Quelle der Unfalldaten ist der [Unfallatlas der Statistischen Ämter](https://unfallatlas.statistikportal.de/)
+(dl-de/by-2-0). Rohdaten und OpenStreetMap werden zu **PMTiles** verarbeitet und in einer
+MapLibre-Karte gezeigt — ausschließlich über offene, frei gehostete Dienste, ohne
+kommerzielle Karten-API und ohne API-Key.
 
 ## 🚀 Online ansehen
 
-👉 [Unfallkarte auf GitHub Pages](https://vizsim.github.io/unfallkarte/)
+👉 **[vizsim.de/unfallkarte](https://vizsim.de/unfallkarte/)**
 
 ![Screenshot der Unfallkarte: Unfallpunkte auf der Karte, rechts die Legende mit Filtern](docs/screenshot.png)
 
@@ -19,123 +28,164 @@ Diensten (keine kommerzielle Karten-API).
 
 Zwei Teile in einem Repo:
 
-- **`pipeline/`** — Python-Pipeline (uv): lädt Unfalldaten (2017–2024) + OSM, baut
-  PMTiles, rechnet die Szenarien und deployt nach Backblaze B2.
-  Details + CLI: [`pipeline/README.md`](pipeline/README.md).
-- **Frontend (Repo-Root)** — statische MapLibre-Karte (`index.html` + `js/`, `style.json`).
-  Lädt die PMTiles **local-first** (`data/`) mit **B2-Fallback** über ein generiertes
-  `manifest.json`.
+- **`pipeline/`** — Python-Pipeline (uv): lädt Unfalldaten (2017–2025) und OSM, baut
+  PMTiles, rechnet die Szenarien, deployt nach Backblaze B2.
+  Details und CLI: [`pipeline/README.md`](pipeline/README.md).
+- **Frontend (Repo-Root)** — statische MapLibre-Karte (`index.html`, `js/`, `style.json`),
+  ohne Build-Step. Die PMTiles kommen **local-first** aus `data/`, sonst per **B2-Fallback**;
+  gesteuert über ein generiertes `manifest.json`.
+
+Jede Zeile der Legende entspricht genau einem Eintrag in der **Layer-Registry**
+(`js/layers/`): Quelle, Layer-Definitionen, Popup, Permalink-Zeichen und Legendentext
+stehen dort an einer Stelle statt über acht Dateien verteilt.
 
 ## 🗂️ Daten & Ebenen
 
-- **Unfälle 2017–2024** (Unfallatlas) — Einzelpunkte (hoher Zoom) + Cluster (niedriger
-  Zoom mit Tortendiagrammen), filterbar nach Schwere, Art, Typ, Jahr und Beteiligung.
-- **OSM-Kontext** (ODbL): Schulen & Kindergärten, Gesundheitseinrichtungen, Spielplätze,
-  Querungen/Übergänge, Tempolimit-Straßennetz (Haupt- und Nebenstraßen).
-- **Szenarien** (Unfälle/OSM × Kontext):
-  - **sc1** — Unfall-Cluster auf Tempo-100-Straßen (DBSCAN)
-  - **sc2** — Unfälle nahe Schulen (50 m, ab 2020)
-  - **sc3** — Tempo-30 durchgängig: kurze 50er-Lücken zwischen 30er-Zonen
-  - **sc6** — Tempo-50-Straßen vor Schulen (30 m, ≥60 m)
-  - **sc8** — Lärm vor Schulen (UBA-Lärmkartierung, >56 dB)
-  - **sc9** — Unfallhäufungen (Kriterien nach M Uko, vereinfacht: 3-Jahres-Fenster + DBSCAN)
-- **Verkehr & Umwelt** (aus der Pipeline): Verkehrsmengen (SVZ der Länder,
-  BASt-Bundesfernstraßen, UBA-Hauptverkehrsstraßen), Rad-Geschwindigkeiten (movebis),
-  Überholabstände ([OpenBikeSensor](https://www.openbikesensor.org/)), Umgebungslärm
-  (UBA, Tag/Nacht), Telraam-Zählstellen — dazu Pkw-Geschwindigkeiten Berlin
+- **Unfälle 2017–2025** (Unfallatlas) — Einzelpunkte ab Zoom 11, darunter Cluster mit
+  Tortendiagrammen nach Schweregrad.
+- **OSM-Kontext** (ODbL) — Schulen und Kindergärten, Gesundheitseinrichtungen,
+  Spielplätze, Querungen und Übergänge, Tempolimit-Straßennetz.
+- **Verkehr & Umwelt** — Verkehrsmengen (SVZ der Länder, BASt-Bundesfernstraßen,
+  UBA-Hauptverkehrsstraßen), Rad-Geschwindigkeiten (movebis/Stadtradeln), Überholabstände
+  ([OpenBikeSensor](https://www.openbikesensor.org/)), Umgebungslärm (UBA, Tag und Nacht),
+  [Telraam](https://telraam.net/)-Zählstellen, Pkw-Geschwindigkeiten Berlin
   (Uber Movement 2019, statisch).
-- **Live-Layer**: Radinfrastruktur ([radinfra.de/TILDA](https://radinfra.de/)),
-  Mapillary-Tiles (Street-View-Sprung).
+- **Live-Layer** (direkt von fremden Servern, nicht aus der Pipeline) — Radinfrastruktur
+  ([radinfra.de/TILDA](https://radinfra.de/)) und Mapillary für den Street-View-Sprung.
 
-## 🌐 Offene Dienste — ohne Registrierung/API-Key
+### Szenarien
 
-Basemap, Terrain und Suche laufen auf frei gehosteten Diensten:
+Jedes Szenario verschneidet die Unfall- oder OSM-Daten mit einer Kontextebene. Die
+Schwellenwerte lassen sich in der Legende per Regler verändern.
 
-- **Basemap**: [OpenFreeMap](https://openfreemap.org/) Positron (gehostete OpenFreeMap-Tiles
-  inkl. Fonts), dazu OSM Carto und Esri Imagery (im Karten-Panel umschaltbar).
-- **Relief / 3D-Terrain + Hillshade**: [Mapterhorn](https://mapterhorn.com/) (raster-dem, terrarium).
-- **3D-Gebäude**: OpenFreeMap-Planet. **Adress-Suche**: [Photon](https://photon.komoot.io/) (Komoot).
+| | Was es zeigt |
+|---|---|
+| **sc1** | Unfall-Cluster auf Tempo-100-Straßen (DBSCAN, eps 50 m, min. 3 Unfälle) |
+| **sc2** | Unfälle im Schulumfeld (50 m Umkreis, Rad- und Fußunfälle ab 2020) |
+| **sc3** | Lücken in Tempo 30: kurze 50er-Abschnitte (< 400 m) zwischen 30er-Zonen |
+| **sc6** | Tempo 50 direkt vor Schulen (30 m Umkreis, ab 60 m Länge) |
+| **sc8** | Straßenlärm an Schulen (UBA-Lärmkartierung, L<sub>den</sub> > 56 dB) |
+| **sc9** | Unfallhäufungen nach M-Uko-Kriterien (vereinfacht: 3-Jahres-Fenster + DBSCAN) |
 
-Einzige Ausnahme: der optionale Mapillary-Layer (Street-View-Sprung, Verkehrszeichen)
-nutzt einen Mapillary-**Client-Token** (`js/config/config.public.js`). Pipeline-Secrets
-(B2-Keys) liegen nur in `pipeline/.env` (gitignored).
+> **Hinweis:** sc9 bildet die Kriterien der Unfallkommissionen nach, ersetzt aber keine
+> amtliche Feststellung — ob eine Stelle ein Unfallschwerpunkt ist, entscheidet die
+> zuständige Unfallkommission.
+
+## 🌐 Offene Dienste — ohne Registrierung, ohne API-Key
+
+- **Basemap** — [OpenFreeMap](https://openfreemap.org/) Positron (inkl. Fonts), dazu
+  OSM Carto und Esri Imagery, umschaltbar im Karten-Panel unten links.
+- **Relief, Hillshade und 3D-Gelände** — [Mapterhorn](https://mapterhorn.com/)
+  (raster-dem, terrarium). **3D-Gebäude** — OpenFreeMap-Planet.
+- **Adress-Suche** — [Photon](https://photon.komoot.io/) (Komoot).
+
+Einzige Ausnahme: der optionale Mapillary-Layer braucht einen Mapillary-**Client-Token**
+(`js/config/config.public.js`, öffentlich by design). Pipeline-Secrets wie die B2-Keys
+liegen ausschließlich in `pipeline/.env` (gitignored).
 
 ## 🖥️ Frontend lokal starten
 
-Statische Seite über HTTP servieren (ES-Module + `fetch` brauchen HTTP, kein `file://`).
-Der Server muss **Range-Requests** können, sonst lassen sich lokale PMTiles nicht lesen —
-`python3 -m http.server` kann das **nicht** (Fehler „no content-length header …"):
+Die Seite braucht HTTP — ES-Module und `fetch` funktionieren nicht über `file://`. Wichtig:
+der Server muss **Range-Requests** beherrschen, sonst lassen sich lokale PMTiles nicht
+lesen. `python3 -m http.server` kann das **nicht** (Fehler „no content-length header …").
 
 ```bash
-npm install                          # einmalig (Dev-Tooling: http-server + Playwright)
-npm run serve                        # im Repo-Root -> http://localhost:4173
-#   localhost  -> nutzt deine lokale js/config/config.js (gitignored)
-#   127.0.0.1  -> nutzt js/config/config.public.js (so laufen auch die Tests/CI)
+npm install          # einmalig: Dev-Tooling (http-server + Playwright)
+npm run serve        # -> http://localhost:4173
 ```
 
-Gleichwertige Alternative ohne `npm install`: ein global installiertes
-[`serve`](https://github.com/vercel/serve) (`npm i -g serve`) — einfach `serve` im Repo-Root
-→ `http://localhost:3000`. Kann Range-Requests und folgt dem `data/`-Symlink (getestet mit
+Der Hostname entscheidet über die Konfiguration: `localhost` nimmt deine lokale
+`js/config/config.js` (gitignored), `127.0.0.1` nimmt `js/config/config.public.js` — so
+laufen auch Tests und CI.
+
+Alternative ohne `npm install`: ein global installiertes
+[`serve`](https://github.com/vercel/serve) im Repo-Root (`npm i -g serve` →
+`http://localhost:3000`). Es kann Range-Requests und folgt dem `data/`-Symlink (geprüft mit
 14.2.6: `206` auf `data/accidents/*.pmtiles`).
 
-**Local-first**: liegt ein `data/`-Verzeichnis lokal vor (z. B. Symlink auf `pipeline/data/`),
-werden die PMTiles von dort geladen; sonst fällt das Frontend automatisch auf B2 zurück
-(Manifest wird local-first, sonst aus dem Bucket gelesen).
+**Local-first:** liegt ein `data/`-Verzeichnis vor (typischerweise ein Symlink auf
+`pipeline/data/`), kommen die PMTiles von dort — sonst automatisch aus dem B2-Bucket. Du
+brauchst also keine lokalen Daten, um am Frontend zu arbeiten.
 
 ## ✅ Tests
 
 ```bash
-npm run test:web                                   # Frontend-Smoke-Tests (Playwright, headless Chromium)
-uv --directory pipeline run pytest                 # Pipeline-Tests (Dry-Run, keine Daten nötig)
-(cd pipeline && uvx ruff check)                    # Lint
+npm run test:unit                      # browserlos (node --test), Sekunden
+npm run test:web                       # Frontend im Browser (Playwright, headless Chromium)
+uv --directory pipeline run pytest     # Pipeline (Dry-Run, keine Daten nötig)
+(cd pipeline && uvx ruff check)        # Lint
 ```
 
-Die Smoke-Tests (`tests/web/`) fahren die echte Seite im Browser: lädt die Karte ohne
-JS-Fehler, liefert der Cluster-Hover das vergrößerte Pie, erscheint bei überlappenden
-Objekten genau **ein** gestapeltes Popup, fixiert/schließt der Klick, überlebt ein Sweep
-über alle Kontext-Layer. Sie starten ihren Server selbst, nutzen Local-first/B2 wie im
-Betrieb (brauchen also keine lokalen Daten) und laufen zusammen mit ruff + pytest in der
-CI (`.github/workflows/ci.yml`). **Vor jedem Upgrade der Libs in `vendor/` laufen lassen.**
+Die Browser-Tests in `tests/web/` fahren die echte Seite: Lädt die Karte ohne JS-Fehler?
+Liefert der Cluster-Hover das vergrößerte Tortendiagramm? Erscheint bei überlappenden
+Objekten genau **ein** gestapeltes Popup? Überlebt ein Permalink das Kopieren und
+Neuladen samt Reglern? Sie starten ihren Server selbst und nutzen Local-first/B2 wie im
+Betrieb, brauchen also keine lokalen Daten.
+
+Zwei Tests sind das eigentliche Sicherheitsnetz für Umbauten:
+
+- **`golden.spec.js`** hält Quellen, alle Layer-Definitionen und das Verhalten jedes
+  Toggles über drei Zoomstufen als Snapshot fest. Nach einem Refactor muss er
+  **unverändert** grün sein; gewollte Änderungen mit `--update-snapshots` aufnehmen und den
+  Diff Zeile für Zeile prüfen.
+- **`contract.spec.js`** liest die Metadaten der echten PMTiles und prüft jeden
+  `source-layer` und jedes im Style benutzte Attribut. Nötig, weil MapLibre bei PMTiles
+  **nicht** validiert — der Test fand auf Anhieb zwei Bugs, die monatelang unbemerkt waren.
+
+Alles läuft in der CI (`.github/workflows/ci.yml`). **Vor jedem Upgrade der Libs in
+`vendor/` laufen lassen.**
 
 ## ⚙️ Daten aufbauen (Pipeline)
 
-Voll dokumentiert in [`pipeline/README.md`](pipeline/README.md). Kurzform:
+Ausführlich in [`pipeline/README.md`](pipeline/README.md). Kurzform:
 
 ```bash
 cd pipeline
 uv sync
 uv run unfallkarte accidents fetch && uv run unfallkarte accidents build
-uv run unfallkarte accidents tiles data/accidents/accidents_germany_2017-2024_oid.parquet
+uv run unfallkarte accidents tiles data/accidents/accidents_germany_2017-2025_oid.parquet
 uv run unfallkarte osm fetch && uv run unfallkarte osm build all
 uv run unfallkarte scenario run-all
 uv run unfallkarte manifest && uv run unfallkarte deploy
 ```
 
-Kontextlayer analog: `uv run unfallkarte <hvs|laerm|obs|telraam> fetch|build` bzw.
-`movebis build` (Details in [`pipeline/README.md`](pipeline/README.md)).
+Ein neues Unfalljahr ist ein YAML-Block in `pipeline/config/accidents.yaml` — kein
+Code-Edit. Kontextlayer analog: `uv run unfallkarte <hvs|laerm|obs|telraam> fetch|build`
+bzw. `movebis build`.
 
-System-Binaries (nicht via pip): `tippecanoe` + `tile-join`, `osmium-tool`; b2-CLI via
-`uv tool install b2`. (`ogr2ogr`/gdal-bin wird **nicht** gebraucht — OSM-PBF wird direkt
-via pyogrio gelesen.)
+System-Binaries (nicht über pip): `tippecanoe` und `tile-join`, `osmium-tool`; die b2-CLI
+über `uv tool install b2`. (`ogr2ogr`/gdal-bin wird **nicht** gebraucht — OSM-PBF liest
+pyogrio direkt.)
+
+## 🌿 Branches & Deploy
+
+`main` ist Arbeits- **und** Deploy-Branch: GitHub Pages liefert ihn direkt aus, ein Push
+ist damit ein Produktiv-Deploy. Größere Umbauten laufen über einen `temp/*`-Branch und
+werden erst nach grünen Tests gemergt. Der Stand vor dem Pipeline-Refactor hängt als Tag
+**`v2025`**.
+
+Die PMTiles liegen **nicht** im Git (`data/` ist gitignored), sondern lokal und im
+öffentlichen B2-Bucket. Ein Code-Deploy und ein Daten-Deploy
+(`uv run unfallkarte deploy`) sind zwei getrennte Vorgänge.
 
 ## 📚 Weitere Doku
 
 - [`docs/TODO.md`](docs/TODO.md) — offene Punkte (UX, CI, Aufräumen).
-- [`docs/REFACTORING_PLAN.md`](docs/REFACTORING_PLAN.md) — Historie & Begründung des
-  Notebook→Pipeline-Refactors (abgeschlossen).
-- [`CLAUDE.md`](CLAUDE.md) — Regeln/Konventionen für die Arbeit im Repo.
+- [`docs/REFACTORING_PLAN.md`](docs/REFACTORING_PLAN.md) — Historie und Begründung des
+  Umbaus von Notebooks zur Pipeline (abgeschlossen).
+- [`CLAUDE.md`](CLAUDE.md) — Regeln und Konventionen für die Arbeit im Repo.
 
 ## 🧰 Tech
 
-MapLibre GL JS · PMTiles · tippecanoe · osmium-tool · GeoPandas/pyogrio (Python-Pipeline, **uv**)
-· OpenFreeMap · Mapterhorn · Backblaze B2 · Photon · radinfra.de/TILDA.
+MapLibre GL JS · PMTiles · tippecanoe · osmium-tool · GeoPandas/pyogrio (Python-Pipeline
+mit **uv**) · OpenFreeMap · Mapterhorn · Backblaze B2 · Photon · radinfra.de/TILDA.
 
 ## 📄 Lizenz
 
 **AGPL-3.0-or-later** © vizsim. (Früher MIT — bereits unter MIT veröffentlichte Stände
-bleiben MIT; künftige Versionen sind AGPL.) Der Quellcode-Link im UI erfüllt die
-AGPL-§13-Pflicht (Network Use).
+bleiben MIT, künftige Versionen sind AGPL.) Der Quellcode-Link im UI erfüllt die
+AGPL-§13-Pflicht bei Netzwerknutzung.
 
-**Daten** behalten ihre eigenen Lizenzen + Attribution: Unfallatlas (dl-de/by-2-0),
-OpenStreetMap (ODbL), Umweltbundesamt (Lärm), OpenFreeMap (ODbL), Mapterhorn, Mapillary,
-radinfra.de/TILDA.
+**Daten** behalten ihre eigenen Lizenzen und Attribution: Unfallatlas (dl-de/by-2-0),
+OpenStreetMap (ODbL), Umweltbundesamt (Lärm, Verkehrsmengen), OpenFreeMap (ODbL),
+Mapterhorn, Mapillary, radinfra.de/TILDA, Telraam (CC BY-NC).
