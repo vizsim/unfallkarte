@@ -180,7 +180,10 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Verifiziert: Tile-Felder 9→10 (health) bzw. 5→7 (playgrounds); in Berlin z14 tragen 23/47
       Gesundheits-Objekte `operator`, Spielplätze 12× `operator` + 25× `playground`.
       `KNOWN_POPUP_GAPS` um health/playgrounds erleichtert, Vertragstests grün.
-      **Offen: B2-Deploy** (`unfallkarte deploy`). (Doppelpunkt-Tags heißen im Tile mit `_`.)
+      **B2-Deploy erledigt** (2026-09-19): `b2 sync` fasste genau 3 Dateien an (manifest.json +
+      die 2 Tiles); gegengeprüft über die öffentliche URL (Größen identisch, Felder 10 bzw. 7)
+      und mit den Vertragstests OHNE lokales `data/` (= der CI-Pfad, 3/3 grün).
+      (Doppelpunkt-Tags heißen im Tile mit `_`.)
 - [x] **Lazy-Sources** (2026-09-18, REFACTORING_PLAN §13 Punkt 7) — beim Start werden nur die
       Unfall-Quellen registriert; Quellen + Layer eines Registry-Eintrags entstehen beim ersten
       Einschalten (`ensureEntry` in `js/layers/registry.js`). `addLayers.js` legt nur noch die
