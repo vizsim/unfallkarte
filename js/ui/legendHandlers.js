@@ -153,6 +153,19 @@ export function setLegendCollapsed(collapsed) {
 }
 
 export function setupLegendToggleHandlers() {
+  // Abschnitts-Pfeile (Unfälle einzeln / Szenarien / Kontext …). Stand früher in main.js —
+  // also ein zweiter Klapp-Mechanismus neben dem darunter, an einer ganz anderen Stelle.
+  document.querySelectorAll(".section-arrow").forEach(arrow => {
+    arrow.addEventListener("click", () => {
+      const section = document.querySelector(`.legend-section[data-section="${arrow.dataset.arrow}"]`);
+      if (!section) return;
+      const isOpen = arrow.classList.contains("open");
+      arrow.classList.toggle("open", !isOpen);
+      arrow.setAttribute("aria-expanded", String(!isOpen));
+      section.classList.toggle("collapsed", isOpen);
+    });
+  });
+
   document.querySelectorAll(".legend-header, .legend-section-allcontent").forEach(header => {
     header.addEventListener("click", (e) => {
       if (e.target.tagName === "INPUT" || e.target.classList.contains("info-icon")) return;

@@ -1,33 +1,30 @@
-// 📦 Geocoder & Styles
-import { setupPhotonGeocoder } from './js/utils/geocoder.js';
-import { paintStyles, getCircleColorPaint } from './js/styleConfig.js';
+// main.js — Bootstrap und Verdrahtung. Hier steht, WANN was passiert; das WAS liegt in
+// den Modulen (Unfall-Layer, Legende, Permalink, Popups, Karten-Panel).
 
-// 📦 Kartenfunktionen
+// 📦 Karte: Quellen, Layer, Basemap/Terrain
 import { addSources } from "./js/mapdata/addSources.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
 import { resolveSources } from "./js/mapdata/resolveSources.js";
-
-// 📦 Basemap/Terrain (keyless, ersetzt MapTiler) + Radinfrastruktur (TILDA)
-import { addBasemapTerrain, setBasemap, setRelief, setBuildings } from './js/map/basemapTerrain.js';
+import { addBasemapTerrain } from './js/map/basemapTerrain.js';
 import { addBikeLanesSource, addBikeLanesLayers, setBikeLanesVisible } from './js/map/bikeLanesLayers.js';
-import { applyDataVintages } from './js/utils/applyDataVintages.js';
+import { LAYERS, setupAccidentLayers } from './js/map/accidentLayers.js';
 
 // 📦 UI & Interaktion
+import { setupPhotonGeocoder } from './js/utils/geocoder.js';
 import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
+import { addNavigationControl, setupMapPanel } from './js/ui/setupMapPanel.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 import { setupTooltips } from './js/ui/tooltip.js';
 import { setupMobileLayout } from './js/ui/mobileLayout.js';
 import { renderLegendEntries } from './js/ui/legendMarkup.js';
-
-// 📦 Popups — EIN Hover-Popup für alle Layer (Karten-Registry in popupHandlers.js)
-import { setupPopups } from './js/ui/popupHandlers.js';
+import { setupPopups } from './js/ui/popupHandlers.js';   // EIN Hover-Popup für alle Layer
+import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 
 // 📦 Legende
 import {
   updateLegendVisibilityByZoom,
   applyLegendVisibility,
-  updateLegendColors,
   setupLegendClusterCheckboxSync,
   setupLegendToggleHandlers,
   setupLegendSectionCheckboxes,
@@ -43,31 +40,27 @@ import {
 } from './js/utils/permalink.js';
 
 // 📦 Sonstiges
+import { paintStyles } from './js/styleConfig.js';
+import { applyDataVintages } from './js/utils/applyDataVintages.js';
 import { setupPieChartImageGeneration } from './js/utils/generatePieIcon.js';
-import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 
 let MAPILLARY_TOKEN = '';
-
 let originalMinZoom = 6;
-
 let currentZoomLock = null;
 
-const isInitializingRef = { value: true }; // für Permalink-Module etc.
-
+const isInitializingRef = { value: true }; // Permalink-Restore läuft -> nichts zurückschreiben
 const isLocalhost = location.hostname === "localhost";
 
-export const LAYERS = {
-  accidents: ["accident-points"],
-  symbols: ["beteiligung-symbols"],
-  clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"]
-};
+// Zähler + Permalink als Callbacks: die Module dahinter sollen weder den Zoom-Lock noch
+// das URL-Format kennen müssen.
+const recount = () => updateVisibleFeatureCount(window.map, currentZoomLock, LAYERS, paintStyles);
+const writePermalink = () => updatePermalink(window.map, isInitializingRef);
 
-// (Alte Basemap-Thumb-Hintergründe entfernt — Vorschau-Thumbnails kommen jetzt
-//  über das Karten-Panel/panel.css.)
+let accidents = null; // { updateLayerFilter, updateColorStyle } — steht ab setupUI()
 
 (async () => {
   try {
-    // handle the config import based on the environment  for the api keys
+    // Tokens je nach Umgebung: lokal aus der gitignorten config.js, sonst config.public.js.
     const config = await import(isLocalhost ? './js/config/config.js' : './js/config/config.public.js');
     ({ MAPILLARY_TOKEN } = config);
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
@@ -79,7 +72,6 @@ export const LAYERS = {
     renderLegendEntries();
 
     initMap();
-
   } catch (err) {
     console.error("❌ Konfig konnte nicht geladen werden:", err);
   }
@@ -99,9 +91,8 @@ async function initMap() {
   // Basemap-Tiles, statt erst im "load"-Handler (spart ~1-2 s bis zu den Unfalldaten).
   const sourcesPromise = resolveSources();
 
-  // Style laden und relative sprite-URL gegen die Seitenherkunft absolut machen.
-  // MapLibre verlangt absolute sprite-URLs; der Host variiert (localhost / vizsim.de /
-  // github.io), darum aus document.baseURI ableiten statt im style.json zu hardcoden.
+  // Style laden und die relative sprite-URL gegen die Seitenherkunft absolut machen:
+  // MapLibre verlangt absolute sprite-URLs, der Host variiert aber (localhost / vizsim.de).
   const styleUrl = new URL("./style.json", document.baseURI).href;
   const style = await fetch(styleUrl).then(r => r.json());
   if (style.sprite && !/^https?:\/\//.test(style.sprite)) {
@@ -116,176 +107,52 @@ async function initMap() {
     minZoom: 6,
     maxZoom: 20
   });
-
+  const map = window.map;
   originalMinZoom = map.getMinZoom();
 
-  // Daten-Quellen/-Layer schon bei "style.load" registrieren (feuert, sobald der
-  // Style geparst ist — VOR "load", das erst nach dem ersten vollständigen
-  // Basemap-Render kommt). So laufen die PMTiles-Metadaten-Fetches parallel zu den
-  // Basemap-Tiles. ??=-Guard: falls "style.load" je erneut feuert, nur einmal laufen.
+  // Quellen/Layer schon bei "style.load" registrieren (feuert, sobald der Style geparst ist —
+  // VOR "load", das erst nach dem ersten vollständigen Basemap-Render kommt). So laufen die
+  // PMTiles-Metadaten-Fetches parallel zu den Basemap-Tiles.
+  // ??=-Guard: falls "style.load" je erneut feuert, nur einmal laufen.
   let modulesReady = null;
   const ensureModules = () => (modulesReady ??= initializeMapModules(map, sourcesPromise));
   map.on("style.load", ensureModules);
 
   map.on("load", async () => {
+    await ensureModules();   // async (Local-first-Auflösung) -> erst Layer, dann UI
 
-    // addSources ist async (Local-first-Auflösung) -> erst Module/Layer, dann UI.
-    await ensureModules();
     setupUI(map);
     setupLegend(map);
     setupTooltips();
-    setupMapillary(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
 
-    setupMapillaryTS(map, { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility });
+    // Reihenfolge wie gehabt: Mapillary legt eigene Layer an, erst danach registriert
+    // setupPopups seine Hover-Handler.
+    const mapillaryCtx = { originalMinZoom, setCurrentZoomLock: z => currentZoomLock = z, applyLegendVisibility };
+    setupMapillary(map, mapillaryCtx);
+    setupMapillaryTS(map, mapillaryCtx);
 
     setupPopups(map);
 
-    // Handy-Layout: Legende als Bottom-Sheet, beim Start zugeklappt. Vor
-    // updateLegendVisibilityByZoom, das bei zugeklappter Legende früh aussteigt.
+    // Handy-Layout: Legende als Bottom-Sheet, beim Start zugeklappt.
     setupMobileLayout();
 
-    // WICHTIG: mit `map` aufrufen — ohne Argument returnt die Funktion sofort, dann
-    // wird die Cluster-Legende erst spät (per zoomend/idle) korrigiert -> Flackern.
+    // WICHTIG: mit `map` aufrufen — ohne Argument returnt die Funktion sofort, dann wird die
+    // Cluster-Legende erst spät (per zoomend/idle) korrigiert -> Flackern.
     updateLegendVisibilityByZoom(map);
 
     setupPermalinkHandling(map, {
-      updateLayerFilter,
-      updateVisibleFeatureCount: () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles),
+      updateLayerFilter: accidents.updateLayerFilter,
+      updateVisibleFeatureCount: recount,
       isInitializingRef
     });
 
     setupEventHandlers(map);
-
   });
-
-}
-
-// (Alte Hillshade/Terrain-Toggles entfernt — Relief/3D-Gelände läuft jetzt über das
-//  Karten-Panel via setRelief() aus js/map/basemapTerrain.js, siehe setupMapPanel.)
-
-function getSelectedCheckboxValues(group) {
-  return Array.from(document.querySelectorAll(`input[data-group="${group}"]:checked`))
-    .map(cb => parseInt(cb.value));
-}
-
-function getSelectedBeteiligungen() {
-  return Array.from(document.querySelectorAll('input[data-field]:checked'))
-    .map(cb => cb.dataset.field);
-}
-
-// Zeigt die aktuelle Auswahl überhaupt Unfälle? Der Filter verknüpft alle Dimensionen
-// mit UND — ist eine Dimension leer, matcht nichts. Dann Layer ausblenden statt nur
-// filtern (spart das Laden der accidents_single-Tiles).
-function accidentsWillShow() {
-  return getSelectedCheckboxValues("UKATEGORIE").length > 0
-    && getSelectedCheckboxValues("UART").length > 0
-    && getSelectedCheckboxValues("UTYP1").length > 0
-    && getSelectedCheckboxValues("UJAHR").length > 0
-    && getSelectedBeteiligungen().length > 0;
-}
-
-function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
-  if (isInitializingRef.value && !force) return;
-
-  const uk_vals = getSelectedCheckboxValues("UKATEGORIE");
-  const uart_vals = getSelectedCheckboxValues("UART");
-  const utyp_vals = getSelectedCheckboxValues("UTYP1");
-  const ujahr_vals = getSelectedCheckboxValues("UJAHR");
-  const beteiligungen = getSelectedBeteiligungen();
-
-  // Hauptfilterlogik
-  let filter = ["all"];
-
-  filter.push(["in", "UKATEGORIE", ...(uk_vals.length > 0 ? uk_vals : [-1])]);
-  filter.push(["in", "UART", ...(uart_vals.length > 0 ? uart_vals : [-1])]);
-  filter.push(["in", "UTYP1", ...(utyp_vals.length > 0 ? utyp_vals : [-1])]);
-  filter.push(["in", "UJAHR", ...(ujahr_vals.length > 0 ? ujahr_vals : [-1])]);
-
-  const beteiligungExpr = beteiligungen.length > 0
-    ? ["any", ...beteiligungen.map(f => ["==", f, 1])]
-    : ["==", "UKATEGORIE", -1]; // "unschädlicher" Filter
-  filter.push(beteiligungExpr);
-
-  // Filter anwenden
-  [...LAYERS.accidents, ...LAYERS.symbols].forEach(layerId => {
-    if (map.getLayer(layerId)) map.setFilter(layerId, filter);
-  });
-
-  // Perf: bei leerer Auswahl (Filter matcht nichts) die Unfall-Layer ausblenden statt nur
-  // filtern -> MapLibre lädt die accidents_single-Tiles gar nicht erst (kein unnötiger
-  // pmtiles-Download + kein Aufblitzen). Symbole zusätzlich nur, wenn Details-Toggle an.
-  const willShow = uk_vals.length > 0 && uart_vals.length > 0 && utyp_vals.length > 0
-    && ujahr_vals.length > 0 && beteiligungen.length > 0;
-  const detailsChecked = !!document.getElementById("toggle-details")?.checked;
-  LAYERS.accidents.forEach(id => {
-    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", willShow ? "visible" : "none");
-  });
-  LAYERS.symbols.forEach(id => {
-    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", (willShow && detailsChecked) ? "visible" : "none");
-  });
-
-  map.once("idle", () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles));
-
-  if (shouldUpdatePermalink && !isInitializingRef.value) {
-    updatePermalink(map, isInitializingRef);
-  }
-}
-
-function updateColorStyle() {
-  const selected = document.querySelector('input[name="color-style"]:checked').value;
-
-  const colorExpr = getCircleColorPaint(selected);
-
-  LAYERS.accidents.forEach(layerId => {
-    if (map.getLayer(layerId)) {
-      map.setPaintProperty(layerId, "circle-color", colorExpr);
-      map.setPaintProperty(layerId, "circle-opacity", 0.6);
-      // Sichtbarkeit NICHT hier setzen — die bestimmt updateLayerFilter (Auswahl-abhängig),
-      // sonst würden die accidents_single-Tiles schon vor dem Auflösen der Auswahl geladen.
-    }
-  });
-
-  // Beteiligungsbuchstaben-Layer: nur wenn Details an UND eine Auswahl Unfälle zeigt.
-  const detailsChecked = document.getElementById("toggle-details").checked;
-  LAYERS.symbols.forEach(layerId => {
-    if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, "visibility", (detailsChecked && accidentsWillShow()) ? "visible" : "none");
-    }
-  });
-
-  updateLegendColors(selected, paintStyles);
-}
-
-function addNavigationControl(map) {
-  const nav = new maplibregl.NavigationControl();
-
-  // ⚠️ Nicht über addControl platzieren:
-  const customNavContainer = document.getElementById("custom-nav-control");
-  customNavContainer.appendChild(nav.onAdd(map)); // ← MapLibre API-konform
-
-  // Kompass-Reset aktivieren:
-  setTimeout(() => {
-    const compass = customNavContainer.querySelector('.maplibregl-ctrl-compass');
-    if (compass) {
-      compass.addEventListener('click', () => {
-        map.setPitch(0);
-        map.easeTo({ bearing: 0 });
-      });
-    }
-  }, 100);
-}
-
-function setupLegend(map) {
-  setupLegendClusterCheckboxSync(map);
-  setupLegendToggleHandlers();
-  setupLegendSectionCheckboxes(updateLayerFilter);
-  setupZoomHintLinks(map);
-
-  updateColorStyle();
-  updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles);
 }
 
 function setupUI(map) {
+  accidents = setupAccidentLayers(map, { isInitializingRef, recount, writePermalink });
+
   setupBaseLayerControls(map, isInitializingRef);
   setupMapPanel(map);
   setupLayerToggles(
@@ -295,96 +162,40 @@ function setupUI(map) {
     applyLegendVisibility,
     // Toggle -> URL sofort aktualisieren (nicht erst bei der nächsten Kartenbewegung);
     // während des Permalink-Restores ist das ein No-op (isInitializingRef).
-    () => updatePermalink(map, isInitializingRef)
+    writePermalink
   );
 
-  // Radinfrastruktur (TILDA) — Kontext-Layer im rechten Panel unter "Infrastruktur".
-  // Layer-Sichtbarkeit + Legende (applyLegendVisibility schaltet #bikelanes-legend).
-  const bikelanesToggle = document.getElementById('toggle-bikelanes');
-  if (bikelanesToggle) {
-    bikelanesToggle.addEventListener('change', (e) => {
-      setBikeLanesVisible(map, e.target.checked);
-      applyLegendVisibility();
-      updateLegendVisibilityByZoom(map);  // Radinfra-Legende/Hinweis sofort an Zoom anpassen
-      updatePermalink(map, isInitializingRef);
-    });
-  }
-
-  document.querySelectorAll('input[name="color-style"]').forEach(rb => {
-    rb.addEventListener("change", updateColorStyle);
-  });
-
-  document.getElementById("toggle-details").addEventListener("change", e => {
-    const visible = (e.target.checked && accidentsWillShow()) ? "visible" : "none";
-    LAYERS.symbols.forEach(id => {
-      if (map.getLayer(id)) {
-        map.setLayoutProperty(id, "visibility", visible);
-      }
-    });
-  });
-
-  document.querySelectorAll('.section-arrow').forEach(arrow => {
-    arrow.addEventListener('click', () => {
-      const section = document.querySelector(`.legend-section[data-section="${arrow.dataset.arrow}"]`);
-      if (!section) return;
-      const content = section.querySelector('.legend-section-content');
-      const isOpen = arrow.classList.contains('open');
-      arrow.classList.toggle('open', !isOpen);
-      arrow.setAttribute('aria-expanded', String(!isOpen));
-      section.classList.toggle('collapsed', isOpen);
-    });
-  });
-
-  // Hide both pie cluster layers initially
-  const layersToHide = ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"];
-
-  layersToHide.forEach((layerId) => {
-    if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, "visibility", "none");
-    }
+  // Radinfrastruktur (TILDA) — externer Live-Layer, läuft nicht über die Layer-Registry.
+  document.getElementById('toggle-bikelanes')?.addEventListener('change', (e) => {
+    setBikeLanesVisible(map, e.target.checked);
+    applyLegendVisibility();
+    updateLegendVisibilityByZoom(map);   // Legende/Zoom-Hinweis sofort nachziehen
+    writePermalink();
   });
 }
 
-// Karten-Panel unten links: Basemaps (Positron/OSM/Esri), Relief, 3D-Gebäude, Radinfra.
-function setupMapPanel(map) {
-  const panel = document.getElementById('map-settings-panel');
-  const panelToggle = document.getElementById('map-settings-toggle');
-  if (panelToggle && panel) {
-    panelToggle.addEventListener('click', () => {
-      const collapsed = panel.classList.toggle('is-collapsed');
-      panelToggle.setAttribute('aria-expanded', String(!collapsed));
-    });
-  }
+function setupLegend(map) {
+  setupLegendClusterCheckboxSync(map);
+  setupLegendToggleHandlers();
+  setupLegendSectionCheckboxes(accidents.updateLayerFilter);
+  setupZoomHintLinks(map);
 
-  document.querySelectorAll('.basemap-btn[data-basemap]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      setBasemap(map, btn.dataset.basemap);
-      document.querySelectorAll('.basemap-btn').forEach((b) => b.classList.remove('selected'));
-      btn.classList.add('selected');
-    });
-  });
-
-  const reliefToggle = document.getElementById('toggle-relief');
-  if (reliefToggle) reliefToggle.addEventListener('change', (e) => setRelief(map, e.target.checked));
-
-  const buildingsToggle = document.getElementById('toggle-buildings');
-  if (buildingsToggle) buildingsToggle.addEventListener('change', (e) => setBuildings(map, e.target.checked));
+  accidents.updateColorStyle();
+  recount();
 }
 
 function setupEventHandlers(map) {
   map.on("zoomend", () => updateLegendVisibilityByZoom(map));
   map.on("moveend", () => updateLegendVisibilityByZoom(map));
-  // (Früher hing hier updateScenarioLegendVisibility an "zoom" — also an JEDEM Zoom-Frame,
-  //  nur um Szenario-Abschnitte beim Zuklappen auszublenden. Das macht jetzt CSS.)
 
-  // Beim Überschreiten der Zoom-11-Grenze (Cluster <-> Einzelpunkte) sind die neuen
-  // Tiles auf moveend/zoomend oft noch nicht gerendert -> queryRenderedFeatures = 0.
-  // Darum zusätzlich einmal auf das nächste "idle" nach einem Move nachzählen (nicht
-  // bei jedem idle, sonst läuft es auch bei Hover/Popup-Redraws).
+  // Beim Überschreiten der Zoom-11-Grenze (Cluster <-> Einzelpunkte) sind die neuen Tiles
+  // auf moveend/zoomend oft noch nicht gerendert -> queryRenderedFeatures = 0. Darum
+  // zusätzlich einmal auf das nächste "idle" nach einem Move nachzählen (nicht bei JEDEM
+  // idle, sonst läuft es auch bei Hover-/Popup-Redraws).
   let recountOnIdle = false;
-  const recount = () => updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles);
-  map.on("moveend", () => { recount(); recountOnIdle = true; });
-  map.on("zoomend", () => { recount(); recountOnIdle = true; });
+  const recountAndArm = () => { recount(); recountOnIdle = true; };
+  map.on("moveend", recountAndArm);
+  map.on("zoomend", recountAndArm);
   map.on("idle", () => { if (recountOnIdle) { recountOnIdle = false; recount(); } });
 
   applyLegendVisibility();
@@ -394,18 +205,18 @@ async function initializeMapModules(map, sourcesPromise) {
   setupPhotonGeocoder(map);
   setupPieChartImageGeneration(map);
   addNavigationControl(map);
-  // async: Local-first-Auflösung (manifest) — Promise wurde in initMap schon gestartet.
-  const sources = await addSources(map, { MAPILLARY_TOKEN, sourcesPromise });
 
+  // async: Local-first-Auflösung (Manifest) — die Promise läuft seit initMap.
+  const sources = await addSources(map, { MAPILLARY_TOKEN, sourcesPromise });
   addLayers(map);
 
-  // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude,
-  // nach addSources/addLayers, damit Host-Layer & Symbol-Reihenfolge stehen.
+  // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude, NACH
+  // addSources/addLayers, damit Host-Layer und Symbol-Reihenfolge stehen.
   addBasemapTerrain(map);
   addBikeLanesSource(map);
   addBikeLanesLayers(map);
 
-  // OSM-Quellen-Tooltips dynamisch mit dem Datenstand (vintage) aus dem Manifest
-  // füllen — Manifest durchreichen, sonst lädt loadManifest() es ein zweites Mal.
+  // OSM-Quellen-Tooltips mit dem Datenstand aus dem Manifest füllen — Manifest durchreichen,
+  // sonst lädt loadManifest() es ein zweites Mal.
   applyDataVintages(sources.manifest);
 }
