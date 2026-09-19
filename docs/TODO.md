@@ -162,6 +162,21 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       `modulepreload`. Zweiter, im Plan nicht vorhergesehener Bruch: `properties` mit
       Null-Prototyp → `setData` scheiterte stumm (Hover-Pie leer), gefangen vom Smoke-Test.
       Ladezeit Pages-ähnlich gemessen: 7,66 → 7,30 s. Golden unverändert.
+- [x] **pmtiles 4.4.1 → 4.5.0** (2026-09-19) — einzige Änderung: Verzeichnis-Anfragen werden
+      abgebrochen, wenn MapLibre die zugehörigen Tile-Anfragen verwirft (spart Bandbreite gegen
+      B2). API identisch, Suite + Vertragstests gegen B2 grün, schrittweise B2-Probe in 10 s durch.
+      Bleibt ein klassisches `<script>`: der ESM-Build importiert `"fflate"` als nackten
+      Bezeichner und ist ohne Bundler nicht ladbar (erledigt sich mit Vite).
+- [ ] **Beobachten: pmtiles 4.5.0 unter hektischem Zoomen gegen B2** — genau der Pfad, den
+      4.5.0 ändert, ist NICHT verifiziert: drei Proben (schnelle `jumpTo`-Folge ohne lokale
+      Daten) scheiterten an einem Playwright-/Node-Fehler (`Cannot create a string longer than
+      0x1fffffe8 characters`, Läufe von 4–5 min trotz kürzerem Limit), dessen Ursache offen
+      blieb — Artefakt des Probe-Skripts oder echtes Hängen nach abgebrochenen Anfragen.
+      Bewusste Entscheidung (User), 4.5.0 trotzdem mitzunehmen, weil der Normalbetrieb belegt
+      ist. **Wenn auf der Live-Seite nach schnellem Zoomen Tiles ausbleiben:** `vendor/pmtiles.js`
+      auf 4.4.1 zurück (`https://unpkg.com/pmtiles@4.4.1/dist/pmtiles.js`), sonst nichts nötig.
+      Sauber klären ließe es sich mit derselben Probe gegen 4.4.1 UND 4.5.0, Logs nach jedem
+      Schritt, nie zwei Playwright-Läufe parallel.
 - [ ] **`vendor/maplibre-gl.js` (5.24) löschen** — bleibt bewusst EINEN Deploy-Zyklus liegen:
       Pages cacht 10 min, eine gecachte alte `index.html` verweist noch darauf. Frühestens einen
       Tag nach dem Deploy von 6.10 entfernen (1 MB weniger im Repo-Checkout).
