@@ -185,17 +185,21 @@ function setupLegend(map) {
 }
 
 function setupEventHandlers(map) {
+  // Die Legende kennt vom Zoom nur das Band (unter/über z11) und die Zoom-Hinweise je Layer.
+  // Ein reines Pan ändert daran nichts — und eine Zoom-Geste feuert `moveend` ohnehin mit,
+  // der zusätzliche moveend-Listener ließ die Funktion also nur doppelt laufen.
   map.on("zoomend", () => updateLegendVisibilityByZoom(map));
-  map.on("moveend", () => updateLegendVisibilityByZoom(map));
 
-  // Beim Überschreiten der Zoom-11-Grenze (Cluster <-> Einzelpunkte) sind die neuen Tiles
-  // auf moveend/zoomend oft noch nicht gerendert -> queryRenderedFeatures = 0. Darum
-  // zusätzlich einmal auf das nächste "idle" nach einem Move nachzählen (nicht bei JEDEM
-  // idle, sonst läuft es auch bei Hover-/Popup-Redraws).
+  // Zählen der sichtbaren Unfälle: `moveend` feuert auch bei Zoom-Gesten und deckt damit
+  // beide Fälle ab. Der frühere zusätzliche zoomend-Listener ließ das teure
+  // queryRenderedFeatures pro Zoom DREImal statt zweimal laufen (gemessen).
+  //
+  // Der zweite Durchgang auf `idle` bleibt: beim Überschreiten der z11-Grenze
+  // (Cluster <-> Einzelpunkte) sind die neuen Tiles auf moveend oft noch nicht gerendert,
+  // queryRenderedFeatures liefert dann 0. Bewusst nicht bei JEDEM idle — sonst liefe es
+  // auch bei Hover-/Popup-Redraws.
   let recountOnIdle = false;
-  const recountAndArm = () => { recount(); recountOnIdle = true; };
-  map.on("moveend", recountAndArm);
-  map.on("zoomend", recountAndArm);
+  map.on("moveend", () => { recount(); recountOnIdle = true; });
   map.on("idle", () => { if (recountOnIdle) { recountOnIdle = false; recount(); } });
 
   applyLegendVisibility();

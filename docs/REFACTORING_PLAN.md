@@ -1,10 +1,16 @@
 # Refactoring-Plan: Unfallkarte – Notebooks → stabile Python-Pipeline
 
 > **Status (2026-06): umgesetzt.** Die Pipeline liegt in `pipeline/`, alle Phasen
-> (0–5) sind abgeschlossen — accidents (2017–**2024**), OSM-Layer und Szenarien
-> 1/2/3/6/8 sind portiert, gebaut und nach B2 deployt; Frontend keyless mit
+> (0–5) sind abgeschlossen — accidents (2017–**2025**), OSM-Layer und Szenarien
+> 1/2/3/6/8/9 sind portiert, gebaut und nach B2 deployt; Frontend keyless mit
 > Local-first/B2; alte Notebooks ausgemistet. Dieser Plan bleibt als Begründung/
 > Historie erhalten. Aktueller Überblick: `README.md`, Regeln: `CLAUDE.md`.
+>
+> **Offene Punkte stehen NICHT mehr hier**, sondern in [`TODO.md`](TODO.md) — diese Datei ist
+> reine Historie: was umgebaut wurde und **warum** (Entscheidungen zu CRS, Bucket-Struktur,
+> Local-first, keyless Basemap, AGPL). Der Review-Backlog in §13 ist abgearbeitet; die beiden
+> Punkte, die offen blieben (Deploy-Retry, Pipeline-Golden im pytest), sind nach `TODO.md`
+> gewandert.
 >
 > Ziel: Die Jupyter-Notebooks in `preprocessing/` und `scenarios/` durch einen
 > wartbaren, testbaren Python-Code ersetzen, sodass sich die Daten (v. a. die
@@ -558,13 +564,14 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
 
 ### 🟡 Robustheit
 
-4. **Kein Retry/Backoff im Deploy** (`deploy.py`) — transienter B2-500 bricht `b2 sync`
+4. ➡️ *(offen, verschoben nach [`TODO.md`](TODO.md))* **Kein Retry/Backoff im Deploy** (`deploy.py`) — transienter B2-500 bricht `b2 sync`
    mittendrin ab (Teil-Deploy). Retry-Loop (3× exp. Backoff) für B2 + `requests`-Retry
    für Geofabrik/Accidents-Fetch.
-5. **Golden-Reference läuft nie im pytest** und deckt nur 2017–2023 ab — `golden.py` wird
+5. ➡️ *(offen, verschoben nach [`TODO.md`](TODO.md))* **Golden-Reference läuft nie im pytest** und deckt nur 2017–2023 ab — `golden.py` wird
    von keinem Test importiert. pytest ergänzen, der `golden.compare` fährt + Referenz auf
    2024 neu capturen.
-6. **Manifest-Totalausfall ist stumm** (`resolveSources.js`, `loadManifest` → `{}`) —
+6. ✅ *(erledigt 2026-07: `js/ui/errorBanner.js`, verdrahtet über `resolveSources().manifestOk`
+   in `addSources.js`)* **Manifest-Totalausfall war stumm** (`resolveSources.js`, `loadManifest` → `{}`) —
    blanke Karte ohne Hinweis. Sichtbares Banner + `?.`-Guards an den ungeschützten
    `getElementById(...).addEventListener`-Stellen (main.js, setupScenarioControls.js).
 
@@ -574,9 +581,13 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
    Start-Requests 28 → 7)* **Alle ~18 Quellen eager beim Start** (`addSources.js`) → pro Quelle ein
    PMTiles/TileJSON-Metadaten-Fetch + HEAD-Probe, auch für nie genutzte Layer. Quellen
    lazy beim ersten Einschalten anlegen (`ensureSource(id)`), nur accidents/cluster eager.
-8. **`updateVisibleFeatureCount` + `queryRenderedFeatures` bei jedem moveend/zoomend**
-   (`main.js`) + Cluster-Popup pro mousemove → Ruckeln. Debouncen; redundanten
-   `moveend`-Aufruf von `updateLegendVisibilityByZoom` streichen (zoomend reicht).
+8. ✅ *(erledigt 2026-09-19)* **`updateVisibleFeatureCount` lief pro Zoom dreimal.** Eine
+   Zoom-Geste feuert `zoomend` UND `moveend`; an beiden hingen sowohl das Zählen als auch
+   `updateLegendVisibilityByZoom`. Jetzt: Zählen nur an `moveend` (deckt Pan und Zoom ab,
+   der `idle`-Nachschlag für die z11-Grenze bleibt), Legende nur an `zoomend` (ein Pan
+   ändert weder Zoom-Band noch Zoom-Hinweise). Gemessen an `queryRenderedFeatures`:
+   Zoom 3 → 2 Aufrufe, Pan unverändert 2. Ein zusätzlicher Debounce brächte nichts mehr —
+   `moveend` feuert je Geste nur einmal.
 
 ### 🟠 Größere Refactors (optional)
 

@@ -170,9 +170,10 @@ Die PMTiles liegen **nicht** im Git (`data/` ist gitignored), sondern lokal und 
 
 ## 📚 Weitere Doku
 
-- [`docs/TODO.md`](docs/TODO.md) — offene Punkte (UX, CI, Aufräumen).
-- [`docs/REFACTORING_PLAN.md`](docs/REFACTORING_PLAN.md) — Historie und Begründung des
-  Umbaus von Notebooks zur Pipeline (abgeschlossen).
+- [`docs/TODO.md`](docs/TODO.md) — **alle** offenen Punkte (UX, CI, Pipeline, Aufräumen).
+- [`docs/REFACTORING_PLAN.md`](docs/REFACTORING_PLAN.md) — reine Historie: was beim Umbau von
+  Notebooks zur Pipeline entschieden wurde und **warum** (CRS-Disziplin, Bucket-Struktur,
+  Local-first, keyless Basemap, AGPL). Keine offenen Punkte mehr.
 - [`CLAUDE.md`](CLAUDE.md) — Regeln und Konventionen für die Arbeit im Repo.
 
 ## 🧰 Tech

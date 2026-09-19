@@ -2,8 +2,10 @@
 
 Interaktive Webkarte für Verkehrsunfälle in Deutschland (Unfallatlas). Die frühere
 Notebook-Verarbeitung ist zu einer wartbaren Python-Pipeline umgebaut (Refactor
-abgeschlossen). Strategie & Historie: siehe `docs/REFACTORING_PLAN.md`. Überblick:
-`README.md`. Offene Punkte: `docs/TODO.md`.
+abgeschlossen). **Offene Punkte stehen ausschließlich in `docs/TODO.md`.**
+`docs/REFACTORING_PLAN.md` ist reine Historie — was umgebaut wurde und warum
+(CRS, Bucket-Struktur, Local-first, keyless, AGPL); dort nichts mehr als offen führen.
+Überblick: `README.md`.
 Diese Datei = die Regeln, die in JEDER Session gelten.
 
 ## Repo-Layout

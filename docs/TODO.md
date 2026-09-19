@@ -1,8 +1,10 @@
 # TODO — Offene Punkte
 
 Stand: 2026-09-18 (Review 2026-07-11, ergänzt um Ideen aus der Popup-/Cleanup-Session).
-Ersetzt das frühere `WRAPUP.md` (dessen Punkte sind alle erledigt). Historie des
-Notebook→Pipeline-Refactors: [`REFACTORING_PLAN.md`](REFACTORING_PLAN.md).
+Ersetzt das frühere `WRAPUP.md` (dessen Punkte sind alle erledigt). **Diese Datei ist die
+einzige Liste offener Punkte** — seit 2026-09-19 auch für die Pipeline; der Review-Backlog
+aus [`REFACTORING_PLAN.md`](REFACTORING_PLAN.md) §13 ist abgearbeitet bzw. hierher gewandert.
+Der Plan bleibt als Historie/Begründung erhalten.
 
 ## Roadmap Web-Teil (Reihenfolge bewusst: jede Stufe nutzt die vorige)
 
@@ -154,6 +156,16 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       console.error). Tests: `tests/web/popup-hardening.spec.js` (präparierte Features ersetzen
       einen registrierten Layer; Gegenprobe ohne Escaping schlägt an).
 - [x] JS-Libs vendoren statt unpkg (erledigt 2026-07, siehe `vendor/README.md`).
+- [ ] **Deploy ohne Retry/Backoff** (`pipeline/src/unfallkarte/deploy.py`) — ein transienter
+      B2-500 bricht `b2 sync` mittendrin ab und hinterlässt ein Teil-Deploy. Retry-Loop
+      (3× exponentieller Backoff) für B2, dazu `requests`-Retry für die Geofabrik- und
+      Accidents-Downloads. *(vorher REFACTORING_PLAN §13 Punkt 4)*
+- [ ] **Golden-Reference der Pipeline läuft in keinem Test** — `pipeline/tests/golden/golden.py`
+      wird von keiner pytest-Datei importiert, die Referenz (`accidents.json`) deckt außerdem
+      nur 2017–2023 ab, die Daten reichen inzwischen bis 2025. Nötig: ein pytest, der
+      `golden.compare` fährt, und die Referenz auf den aktuellen Stand neu aufnehmen.
+      Nicht zu verwechseln mit dem Frontend-Golden (`tests/web/golden.spec.js`), der läuft.
+      *(vorher REFACTORING_PLAN §13 Punkt 5)*
 
 ## Frontend / UX
 
