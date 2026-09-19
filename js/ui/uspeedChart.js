@@ -3,6 +3,9 @@
 // chart.js (vendored, ~200 KB) erst beim ersten Uspeed-Chart-Popup nachladen —
 // einziger Nutzer ist showUspeedChartPopup, darum raus aus dem kritischen
 // Startpfad (kein <script>-Tag mehr in index.html).
+
+import { Popup } from "../lib/maplibre.js";
+
 let chartJsReady = null;
 function loadChartJs() {
     chartJsReady ??= new Promise((resolve, reject) => {
@@ -33,7 +36,7 @@ export function showUspeedChartPopup(map, p, lngLat) {
         <div class="pop-meta" style="margin:-2px 0 6px;">OSM-Segment · Berlin, Q2 2019</div>
         <canvas id="speed-chart" width="320" height="180"></canvas>`;
 
-    new maplibregl.Popup()
+    new Popup()
         .setLngLat(lngLat)
         .setDOMContent(container)
         .addTo(map);

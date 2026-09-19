@@ -90,11 +90,18 @@ function accidentEntries(map) {
                 return { lngLat: f.geometry.coordinates, offset: pieSize / 2 + 4 };
             },
             // Vergrößertes Pie über dem gehoverten Cluster (Layer "hover-pie"). Nur ein PLAIN
-            // GeoJSON-Feature übergeben: seit MapLibre 5.24 geht setData per Structured-Clone
-            // an den Worker; das MapGeoJSONFeature aus queryRenderedFeatures ist nicht klonbar.
+            // GeoJSON-Feature übergeben — zweimal dieselbe Falle, je ein MapLibre-Upgrade:
+            //   5.24: setData geht per Structured-Clone an den Worker; das MapGeoJSONFeature
+            //         aus queryRenderedFeatures ist nicht klonbar -> Feature neu aufbauen.
+            //   6.x:  `f.properties` ist ein Objekt mit NULL-Prototyp (Object.create(null)).
+            //         MapLibres eigener Serializer liest `value.constructor._classRegistryKey`
+            //         und wirft daran; die Daten erreichen den Worker nie, das Hover-Pie bleibt
+            //         leer. Der Spread macht daraus ein gewöhnliches Objekt.
+            // Beide Male scheiterte es STUMM (nur ein console.error) — gefangen hat es jeweils
+            // der Smoke-Test „Cluster-Hover".
             onEnter: (f) => map.getSource("hover-point")?.setData({
                 type: "FeatureCollection",
-                features: [{ type: "Feature", geometry: f.geometry, properties: f.properties }]
+                features: [{ type: "Feature", geometry: f.geometry, properties: { ...f.properties } }]
             }),
             onLeave: () => map.getSource("hover-point")?.setData({ type: "FeatureCollection", features: [] })
         }

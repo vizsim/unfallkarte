@@ -63,9 +63,11 @@ export function generatePieIcon({ k1, k2, k3 }) {
 
 
 export function setupPieChartImageGeneration(map) {
-  // load piecharts
-  map.on("styleimagemissing", (e) => {
-    const id = e.id;
+  // Die Torten entstehen auf Zuruf: der Style fragt nach "pie-<k1>-<k2>-<k3>", und wir
+  // zeichnen genau dieses Bild. Seit MapLibre 6 läuft das über einen Resolver — das Event
+  // `styleimagemissing` ist dort nur noch eine Benachrichtigung NACH dem Scheitern; wer
+  // erst dann addImage ruft, kommt zu spät und die Cluster bleiben leer.
+  map.setMissingStyleImageResolver((id) => {
     if (!id.startsWith("pie-")) return;
 
     const parts = id.split("-");

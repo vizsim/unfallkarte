@@ -1,7 +1,8 @@
 // main.js — Bootstrap und Verdrahtung. Hier steht, WANN was passiert; das WAS liegt in
 // den Modulen (Unfall-Layer, Legende, Permalink, Popups, Karten-Panel).
 
-// 📦 Karte: Quellen, Layer, Basemap/Terrain
+// 📦 Karte: Bibliothek, Quellen, Layer, Basemap/Terrain
+import { Map as MapLibreMap, addProtocol } from './js/lib/maplibre.js';
 import { addSources } from "./js/mapdata/addSources.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
 import { resolveSources } from "./js/mapdata/resolveSources.js";
@@ -41,6 +42,7 @@ import {
 
 // 📦 Sonstiges
 import { paintStyles } from './js/styleConfig.js';
+import { showErrorBanner } from './js/ui/errorBanner.js';
 import { applyDataVintages } from './js/utils/applyDataVintages.js';
 import { setupPieChartImageGeneration } from './js/utils/generatePieIcon.js';
 
@@ -81,7 +83,7 @@ async function initMap() {
   // PMTiles-Protokoll registrieren. Quellen binden volle pmtiles://https://… URLs ein
   // (siehe resolveSources.js/addSources.js) -> kein Basis-URL-Mapping nötig.
   const protocol = new pmtiles.Protocol();
-  maplibregl.addProtocol("pmtiles", protocol.tile);
+  addProtocol("pmtiles", protocol.tile);
 
   // Ansicht aus dem Link schon HIER lesen, damit die Karte direkt an der richtigen Stelle
   // startet (sonst lädt sie erst Tiles der Default-Ansicht und springt danach weg).
@@ -99,15 +101,29 @@ async function initMap() {
     style.sprite = new URL(style.sprite, styleUrl).href;
   }
 
-  window.map = new maplibregl.Map({
-    container: "map",
-    style, // lokaler Positron-Style (keyless); Tiles von OpenFreeMap (gehostet)
-    center: view ? [view.lng, view.lat] : [13.634, 52.315],
-    zoom: view ? view.zoom : 12,
-    minZoom: 6,
-    maxZoom: 20
-  });
-  const map = window.map;
+  // Seit MapLibre 6 ist WebGL2 Pflicht, und der Konstruktor WIRFT, wenn es fehlt (sehr alte
+  // Geräte, Software-Rendering, per Richtlinie gesperrte GPU). Vorher scheiterte das still
+  // und hinterließ eine leere Seite — jetzt sagt ein Banner, woran es liegt.
+  let map;
+  try {
+    map = new MapLibreMap({
+      container: "map",
+      style, // lokaler Positron-Style (keyless); Tiles von OpenFreeMap (gehostet)
+      center: view ? [view.lng, view.lat] : [13.634, 52.315],
+      zoom: view ? view.zoom : 12,
+      minZoom: 6,
+      maxZoom: 20
+    });
+  } catch (err) {
+    if (err?.name === "GPUInitializationError" || /webgl/i.test(String(err?.message ?? err))) {
+      showErrorBanner(
+        "Die Karte braucht WebGL2. Bitte den Browser aktualisieren oder die Hardware-Beschleunigung einschalten.",
+        { reload: false },   // Neuladen hilft hier nicht
+      );
+    }
+    throw err;
+  }
+  window.map = map;
   originalMinZoom = map.getMinZoom();
 
   // Quellen/Layer schon bei "style.load" registrieren (feuert, sobald der Style geparst ist —

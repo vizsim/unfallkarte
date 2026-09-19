@@ -53,6 +53,11 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
   `map.on("mousemove", layerId)`-Handler (sonst wieder überlappende Popups).
   `render(props, feature)`: `props` ist bereits HTML-escaped (OSM-Attribute sind
   nutzergeneriert); Rohwerte nur über `feature.properties` und nie ungeescaped ins HTML.
+- **MapLibre (seit v6 ESM-only):** kein globales `maplibregl` mehr — immer aus
+  `js/lib/maplibre.js` importieren (`import { Popup } from "../lib/maplibre.js"`), nie direkt
+  aus `vendor/`. Feature-Objekte aus `queryRenderedFeatures` nie roh in `setData` reichen:
+  `properties` hat einen Null-Prototyp und bricht MapLibres Serializer STUMM → `{ ...f.properties }`.
+  Ladezeiten nie gegen `npm run serve` beurteilen (kein gzip, kein Cache — verfälscht um Sekunden).
 - Code: kurz, getippt, ruff-konform. Keine Notebooks in der Pipeline.
 - Config-getrieben: Jahres-Quirks/Filter/Tile-Profile in `pipeline/config/*.yaml`, nicht im Code.
 - Tippecanoe legt FGB-Integer-Attribute als **String** im PMTiles ab → im Frontend immer

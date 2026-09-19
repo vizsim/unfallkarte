@@ -4,6 +4,7 @@
 // das einklappbare Panel (Basemap, Relief, 3D-Gebäude) und die Zoom-/Kompass-Steuerung
 // darüber. Lag vorher in main.js zwischen Bootstrap und Filter-Logik.
 
+import { NavigationControl } from "../lib/maplibre.js";
 import { setBasemap, setBuildings, setRelief } from "../map/basemapTerrain.js";
 
 /** Panel unten links: Basemap-Auswahl (Positron/OSM/Esri), Relief, 3D-Gebäude. */
@@ -41,7 +42,7 @@ export function addNavigationControl(map) {
   const container = document.getElementById("custom-nav-control");
   if (!container) return;
 
-  const nav = new maplibregl.NavigationControl();
+  const nav = new NavigationControl();
   container.appendChild(nav.onAdd(map));
 
   // Klick auf den Kompass stellt zusätzlich die Neigung zurück (MapLibre setzt nur den

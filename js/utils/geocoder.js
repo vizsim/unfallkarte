@@ -1,6 +1,9 @@
 // geocoder.js — Photon-Geocoder im Stil von vizsim/hilo_profiler
 // (Such-Icon, Clear-Button, Loading-Spinner, Tastatur-Navigation, primary/secondary).
 // bbox auf Deutschland beschränkt (Unfallkarte-Kontext).
+
+import { Marker } from "../lib/maplibre.js";
+
 export function setupPhotonGeocoder(map) {
   const container = document.createElement('div');
   container.className = 'geocoder';
@@ -80,7 +83,7 @@ export function setupPhotonGeocoder(map) {
       marker.remove();
     }
 
-    marker = new maplibregl.Marker({ color: '#2563eb' }).setLngLat([lng, lat]).addTo(map);
+    marker = new Marker({ color: '#2563eb' }).setLngLat([lng, lat]).addTo(map);
     map.flyTo({ center: [lng, lat], zoom: 14, essential: true });
 
     const formatted = formatResult(feature);

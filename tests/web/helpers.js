@@ -40,7 +40,7 @@ export async function openMap(page) {
 
 /**
  * Warten, bis die Karte ruht und die Tiles da sind. Bewusst billig — das heißt NICHT, dass
- * schon alles gezeichnet ist: die Cluster-Pies z. B. entstehen erst per styleimagemissing ->
+ * schon alles gezeichnet ist: die Cluster-Pies z. B. entstehen erst per Missing-Image-Resolver ->
  * addImage -> Re-Layout, da sind loaded()/areTilesLoaded() längst wahr (fiel unter
  * PW_CPU_THROTTLE auf). MapLibres "idle" wäre dafür korrekt, wartet aber auf ALLES (Basemap,
  * Terrain …) und verdreifacht die Laufzeit. Darum: Tests pollen gezielt auf IHRE Bedingung

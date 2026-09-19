@@ -44,6 +44,8 @@
 // - Jeder Eintrags-Callback läuft abgesichert: wirft ein render(), fehlt nur DIESE Karte
 //   (Fallback-Zeile + einmaliges console.error), der Rest des Stapels bleibt stehen.
 
+import { Popup } from "../lib/maplibre.js";
+
 const MAX_HOVER_CARDS = 3;  // Hover zeigt max. so viele Karten; fixiert = alle
 const MAX_WIDTH = "340px";
 const KIND_LABEL = { accidents: "Unfallatlas", context: "Kontext", scenario: "Szenario" };
@@ -56,7 +58,7 @@ const escapedView = (props) => new Proxy(props, {
 const safeHref = (href) => (/^https?:\/\//i.test(String(href)) ? String(href) : null);
 
 export function setupHoverPopup(map, entries) {
-    const hoverPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: MAX_WIDTH });
+    const hoverPopup = new Popup({ closeButton: false, closeOnClick: false, maxWidth: MAX_WIDTH });
     let pinPopup = null;
     let pinKeys = null; // Set der fixierten Treffer-Schlüssel
     let current = null; // { key, hits }
@@ -238,7 +240,7 @@ export function setupHoverPopup(map, entries) {
         clear();
         unpin();
         pinKeys = new Set(hits.map(hitKey));
-        pinPopup = new maplibregl.Popup({ closeButton: true, closeOnClick: false, maxWidth: MAX_WIDTH })
+        pinPopup = new Popup({ closeButton: true, closeOnClick: false, maxWidth: MAX_WIDTH })
             .setHTML(buildHTML(hits, { pinned: true }));
         place(pinPopup, hits, e);
         pinPopup.addTo(map);

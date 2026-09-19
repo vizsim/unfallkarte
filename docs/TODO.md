@@ -156,6 +156,15 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       console.error). Tests: `tests/web/popup-hardening.spec.js` (präparierte Features ersetzen
       einen registrierten Layer; Gegenprobe ohne Escaping schlägt an).
 - [x] JS-Libs vendoren statt unpkg (erledigt 2026-07, siehe `vendor/README.md`).
+- [x] **MapLibre 5.24 → 6.10** (2026-09-19) — Analyse, Messung und Abweichungen vom Plan stehen in
+      [`MAPLIBRE_6_UPGRADE.md`](MAPLIBRE_6_UPGRADE.md). Kurz: ESM-only (Import über
+      `js/lib/maplibre.js`), Pies über `setMissingStyleImageResolver`, WebGL2-Fehlerbanner, zwei
+      `modulepreload`. Zweiter, im Plan nicht vorhergesehener Bruch: `properties` mit
+      Null-Prototyp → `setData` scheiterte stumm (Hover-Pie leer), gefangen vom Smoke-Test.
+      Ladezeit Pages-ähnlich gemessen: 7,66 → 7,30 s. Golden unverändert.
+- [ ] **`vendor/maplibre-gl.js` (5.24) löschen** — bleibt bewusst EINEN Deploy-Zyklus liegen:
+      Pages cacht 10 min, eine gecachte alte `index.html` verweist noch darauf. Frühestens einen
+      Tag nach dem Deploy von 6.10 entfernen (1 MB weniger im Repo-Checkout).
 - [ ] **Deploy ohne Retry/Backoff** (`pipeline/src/unfallkarte/deploy.py`) — ein transienter
       B2-500 bricht `b2 sync` mittendrin ab und hinterlässt ein Teil-Deploy. Retry-Loop
       (3× exponentieller Backoff) für B2, dazu `requests`-Retry für die Geofabrik- und
