@@ -92,5 +92,9 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
 ## Vorgehen
 - Refactor abgeschlossen: accidents (2017–2024), OSM-Layer und alle Szenarien (1/2/3/6/8/9)
   sind portiert, gebaut und deployt; Frontend keyless mit Local-first/B2.
-- Kleine, fokussierte Commits auf `unfallkarte-2026`. Offene Punkte siehe Auto-Memory
+- Kleine, fokussierte Commits auf `main` — das ist zugleich der Branch, den GitHub Pages
+  ausliefert (vizsim.de/unfallkarte/), ein Push ist also ein Produktiv-Deploy. Größere
+  Umbauten auf einem `temp/*`-Branch bauen und erst nach grünen Tests mergen. Der Stand vor
+  dem Pipeline-Refactor hängt als Tag `v2025` (kein Branch — er liegt auf derselben Linie).
+  Offene Punkte siehe Auto-Memory
   bzw. `docs/TODO.md`.

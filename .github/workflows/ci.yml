@@ -14,7 +14,7 @@ name: CI
 
 on:
   push:
-    branches: [main, unfallkarte-2026]
+    branches: [main]
   pull_request:
 
 concurrency:
