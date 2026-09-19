@@ -61,8 +61,28 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
              Mapillary (eigenes Modul mit Token + dynamischen Layern), Radinfrastruktur
              (`js/map/bikeLanesLayers.js`, externe TILDA-Tiles). Radinfra wäre der einfachste
              Nachzügler.
-       - [ ] (später, separat entscheiden) Schritt 5: Legenden-HTML aus der Registry generieren
-             (`index.html` −~600 Z.; höchstes visuelles Risiko, Spezial-Widgets brauchen Ausweg).
+       - [x] Schritt 5a (2026-09-19): **Sichtbarkeit bekommt EINEN Eigentümer.** JS setzt nur
+             noch Zustand (`.legend.collapsed`, `.legend[data-zoom]`, `.is-on`/`.is-due`), über
+             `display` entscheidet CSS. Vorher taten das drei Mechanismen gleichzeitig (inline
+             aus dem JS, CSS-Klasse, 39 inline `display:none` im HTML) — inline gewann, also
+             reparierte `updateLegendVisibilityByZoom` hinterher, was `setLegendCollapsed`
+             überschrieben hatte. Darin liefen zwei Bedingungen unbemerkt tot: `clusterLegendEl`
+             (Schlüssel existierte nie) und `#mapillary-legend` (ID existiert nicht im Repo).
+             `style.display` in legendHandlers.js 11 → 0 (334 → 254 Z.), inline im Markup 39 → 5
+             (die 5 gehören eigenen Modulen). `updateScenarioLegendVisibility` ersatzlos weg —
+             hing an `map.on("zoom")`, lief also bei JEDEM Zoom-Frame.
+       - [~] Schritt 5b (2026-09-19): **Legenden-Einträge aus der Registry erzeugen.**
+             `js/ui/legendMarkup.js` + Feld `legend` ({label, tip, vintage/vintageAttr,
+             swatches} bzw. {heading, note, stops}); im HTML nur noch
+             `<div data-legend-entry="<id>">` — die Reihenfolge bleibt so im Markup ablesbar.
+             Erledigt: schools, health, playgrounds, crossings, laerm1, laerm2.
+             `index.html` 1325 → 1161 Z. (−164). Der Generator wirft laut bei Platzhalter ohne
+             Eintrag bzw. Eintrag ohne `legend`. Nebenbei: das hartkodierte Datum `25-07-31` in
+             den Quellen-Tooltips ist weg (der Stand kam ohnehin aus dem Manifest).
+             **Offen:** obs + movebis (mehrere Überschriften/Swatch-Gruppen, inline gestylte
+             Linienstärken) und bewusst NICHT vorgesehen: svz/telraam (Modus-Radios),
+             maxspeed/uspeed (Farbverlauf bzw. Regler im Block), bikelanes (eigenes Markup).
+             Für die müsste der Generator Layout in Daten kodieren — teurer als der Gewinn.
 2b. [x] **Permalink neu aufgesetzt** (2026-09-19) — Format **v2**:
        `?v=2&map=<zoom>/<lat>/<lng>&uk=…&bet=…&jahr=…&typ=…&art=…&s=…&d=1&l=…&n=…&o=…`,
        benannte Parameter statt positionsbasiertem `?p=a,b,c,…`, Ansicht in OSM-Konvention
@@ -137,9 +157,13 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
 
 ## Frontend / UX
 
-- [ ] **Mobile-Breakpoint** — `style.css` hat keine einzige `@media`-Query; die
-      320-px-Legende verdeckt auf Handys die halbe Karte. Idee: Legende auf kleinen
-      Screens als einklappbares Bottom-Sheet.
+- [x] **Mobile-Breakpoint** (2026-09-19) — erste `@media`-Query im Projekt (< 640px): Legende
+      wird zum Bottom-Sheet, zugeklappt als Startzustand (gemessen 17 % statt ~50 % verdeckte
+      Karte), aufgeklappt max. 72 dvh. Karten-Bedienelemente sitzen über dem Streifen
+      (`--legend-peek` wird gemessen) und blenden aus, wenn aufgeklappt. Suche schrumpft zum
+      44-px-Lupen-Knopf, fährt beim Antippen aus, klappt nur bei leerem Feld wieder ein.
+      Am Desktop mitgenommen: klebende Titelzeile beim Scrollen (Trennung per weichem Schatten
+      statt Linie — 12px darunter steht ohnehin schon ein Trenner). `tests/web/mobile.spec.js`.
 - [x] **Fehler-Banner** (2026-07-11) — ist das Manifest weder lokal noch auf B2
       ladbar, zeigt `js/ui/errorBanner.js` ein schließbares Banner oben mittig
       (+ "Neu laden"); Wiring über `resolveSources().manifestOk` in addSources.js.
@@ -153,9 +177,8 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Bewusst inline geblieben: `display:none` (JS-gemanagter Zustand — Code setzt
       `el.style.display = ""` als Reset), Swatch-**Farben** (Dateninhalt je Layer)
       und Einzelfälle (~149 Reste).
-- [ ] **Legende aus Config generieren** (langfristig) — die repetitiven
-      Legenden-Blöcke in `index.html` sind Hauptquelle für Drift zwischen Layern
-      und Legende. → Teil von Roadmap 2 (Layer-Registry).
+- [~] **Legende aus Config generieren** — läuft, siehe Roadmap 2 Schritt 5b (6 von 13
+      Kontext-Einträgen kommen aus der Registry).
 - [ ] **Touch/Mobile-Durchgang** — Hover-Popups gibt es auf Touch nicht; Tap = Klick = Pin
       funktioniert, aber `openOnClick`-Layer (Tempolimit, Übergänge, Telraam) springen auf
       Touch sofort zu OSM/Telraam ohne Vorschau. Zusammen mit dem Mobile-Breakpoint angehen
