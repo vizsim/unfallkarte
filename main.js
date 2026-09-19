@@ -18,6 +18,7 @@ import { setupLayerToggles } from './js/ui/setupLayerToggles.js';
 import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 import { setupTooltips } from './js/ui/tooltip.js';
 import { setupMobileLayout } from './js/ui/mobileLayout.js';
+import { renderLegendEntries } from './js/ui/legendMarkup.js';
 
 // 📦 Popups — EIN Hover-Popup für alle Layer (Karten-Registry in popupHandlers.js)
 import { setupPopups } from './js/ui/popupHandlers.js';
@@ -72,6 +73,10 @@ export const LAYERS = {
     console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
 
     cleanupLegacyPermalink();
+
+    // Legenden-Einträge aus der Registry erzeugen, BEVOR irgendetwas #toggle-<id> sucht
+    // (applyDataVintages läuft schon bei style.load, setupUI erst bei load).
+    renderLegendEntries();
 
     initMap();
 

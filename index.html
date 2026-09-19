@@ -989,38 +989,7 @@ MAIN HEADER
               target="_blank" rel="noopener noreferrer">tilda-geo.de</a></div>
         </div>
 
-        <div class="mt-6">
-          <label class="ml-10">
-            <input type="checkbox" id="toggle-crossings" />
-            Fußgänger-/Radüberwege anzeigen
-            <span class="info-icon" data-osm-vintage="osm_crossings" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
-          </label>
-        </div>
-        <div id="crossings-legend" class="ml-20 mt-6 fs-11">
-          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
-          <div class="mt-4">
-            <div>
-              <span
-                class="swatch-dot" style="background:#2ECC40;"></span>
-              Ampel (Lichtzeichen)
-            </div>
-            <div>
-              <span
-                class="swatch-dot" style="background:#FF851B;"></span>
-              Markiert (Zebra/Markierung)
-            </div>
-            <div>
-              <span
-                class="swatch-dot" style="background:#FF4136;"></span>
-              Unmarkiert
-            </div>
-            <div>
-              <span
-                class="swatch-dot" style="background:#9aa0a6;"></span>
-              Ohne Typangabe
-            </div>
-          </div>
-        </div>
+        <div data-legend-entry="crossings"></div>
 
 
         <div class="legend-section-subtitle mt-12">Umwelt & Sicherheit</div>
@@ -1149,72 +1118,9 @@ MAIN HEADER
 
 
         <div class="legend-section-subtitle mt-12">Orte & Einrichtungen</div>
-        <div class="mt-6">
-          <label class="ml-10">
-            <input type="checkbox" id="toggle-schools" />
-            Schulen/Kindergärten anzeigen
-            <span class="info-icon" data-osm-vintage="osm_schools" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
-          </label>
-        </div>
-        <div id="schools-legend" class="ml-20 mt-6 fs-11">
-          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
-          <div class="mt-4">
-            <div>
-              <span
-                class="swatch-dot" style="background:#0074D9;"></span>
-              Schule
-            </div>
-            <div>
-              <span
-                class="swatch-dot" style="background:#2ECC40;"></span>
-              Kindergarten
-            </div>
-          </div>
-        </div>
-        <div class="mt-6">
-          <label class="ml-10">
-            <input type="checkbox" id="toggle-health" />
-            Gesundheitseinrichtungen anzeigen
-            <span class="info-icon" data-osm-vintage="osm_health" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
-          </label>
-        </div>
-        <div id="health-legend" class="ml-20 mt-6 fs-11">
-          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
-          <div class="mt-4">
-            <div>
-              <span
-                class="swatch-dot" style="background:#D62728;"></span>
-              Medizinische Einrichtungen (Krankenhaus, Klinik, Reha)
-            </div>
-            <div>
-              <span
-                class="swatch-dot" style="background:#17BECF;"></span>
-              Pflege & Senioren (Pflegeheim, Betreutes Wohnen)
-            </div>
-            <div>
-              <span
-                class="swatch-dot" style="background:#BCBD22;"></span>
-              Einrichtungen für Menschen mit Behinderung
-            </div>
-          </div>
-        </div>
-        <div class="mt-6">
-          <label class="ml-10">
-            <input type="checkbox" id="toggle-playgrounds" />
-            Spielplätze anzeigen
-            <span class="info-icon" data-osm-vintage="osm_playgrounds" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
-          </label>
-        </div>
-        <div id="playgrounds-legend" class="ml-20 mt-6 fs-11">
-          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
-          <div class="mt-4">
-            <div>
-              <span
-                class="swatch-dot" style="background:green;"></span>
-              Spielplätze
-            </div>
-          </div>
-        </div>
+        <div data-legend-entry="schools"></div>
+        <div data-legend-entry="health"></div>
+        <div data-legend-entry="playgrounds"></div>
       </div>
     </div>
 

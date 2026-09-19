@@ -34,6 +34,15 @@ export default [
     {
         id: "schools", kind: "context",
         source: { id: "schools", manifest: "osm_schools" },
+        legend: {
+            label: "Schulen/Kindergärten anzeigen",
+            tip: "Quelle: © OpenStreetMap – Lizenz: ODbL",
+            vintage: "osm_schools",
+            swatches: [
+                { color: "#0074D9", text: "Schule" },
+                { color: "#2ECC40", text: "Kindergarten" },
+            ],
+        },
         layers: [
             {
               id: "schools-points",
@@ -98,6 +107,16 @@ export default [
     {
         id: "health", kind: "context",
         source: { id: "health", manifest: "osm_health" },
+        legend: {
+            label: "Gesundheitseinrichtungen anzeigen",
+            tip: "Quelle: © OpenStreetMap – Lizenz: ODbL",
+            vintage: "osm_health",
+            swatches: [
+                { color: "#D62728", text: "Medizinische Einrichtungen (Krankenhaus, Klinik, Reha)" },
+                { color: "#17BECF", text: "Pflege & Senioren (Pflegeheim, Betreutes Wohnen)" },
+                { color: "#BCBD22", text: "Einrichtungen für Menschen mit Behinderung" },
+            ],
+        },
         layers: [
             {
               id: "health-points",
@@ -196,6 +215,12 @@ export default [
     {
         id: "playgrounds", kind: "context",
         source: { id: "playgrounds", manifest: "osm_playgrounds" },
+        legend: {
+            label: "Spielplätze anzeigen",
+            tip: "Quelle: © OpenStreetMap – Lizenz: ODbL",
+            vintage: "osm_playgrounds",
+            swatches: [{ color: "green", text: "Spielplätze" }],
+        },
         layers: [
             {
               id: "playgrounds-points",
@@ -271,6 +296,17 @@ export default [
     {
         id: "crossings", kind: "context",
         source: { id: "crossings", manifest: "osm_crossings" },
+        legend: {
+            label: "Fußgänger-/Radüberwege anzeigen",
+            tip: "Quelle: © OpenStreetMap – Lizenz: ODbL",
+            vintage: "osm_crossings",
+            swatches: [
+                { color: "#2ECC40", text: "Ampel (Lichtzeichen)" },
+                { color: "#FF851B", text: "Markiert (Zebra/Markierung)" },
+                { color: "#FF4136", text: "Unmarkiert" },
+                { color: "#9aa0a6", text: "Ohne Typangabe" },
+            ],
+        },
         layers: [
             {
               id: "crossings-lines",
