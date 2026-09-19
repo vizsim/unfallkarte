@@ -102,11 +102,8 @@ test("Sc2-Slider filtert nach biped_count (blendete früher ALLES aus: Attribut 
 // erscheint nie. Jede Ausnahme braucht einen Grund; sobald die Tiles das Feld liefern, schlägt
 // der Test an ("Ausnahme überflüssig") und der Eintrag fliegt raus. Siehe docs/TODO.md.
 const KNOWN_POPUP_GAPS = {
-  health: { operator: "osmconf_health.ini exportiert `operator` nicht (Pipeline-TODO, braucht Rebuild)" },
-  playgrounds: {
-    operator: "osmconf_playgrounds.ini exportiert `operator` nicht (Pipeline-TODO)",
-    playground: "osmconf_playgrounds.ini exportiert `playground` nicht (Pipeline-TODO)",
-  },
+  // health/playgrounds: `operator` + `playground` fehlten bis zum OSM-Rebuild am 2026-09-19
+  // (osmconf-Fix 187c78a). Ausnahmen entfernt, die Popup-Zeilen "Träger"/"Ausstattung" leben.
   scenario6: {
     name: "Sc6-Tiles tragen nur oid + Tempo-50-Länge (Pipeline-TODO „Sc6-Tiles ohne Namen“)",
     amenity: "dito",

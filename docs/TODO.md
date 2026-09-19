@@ -168,13 +168,19 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       Buffer (Schulgelände + Kita-Node) im Popup identisch aus; Popup zeigt jetzt Länge +
       OSM-Objekt als Notlösung. Kleine Pipeline-Änderung, große Popup-Verbesserung — dabei
       auch prüfen, welche Attribute Sc1/Sc3/Sc9 mitgeben.
-- [ ] **Tote Popup-Zeilen: OSM-Tags fehlen in den Tiles** — Popup-Zeilen „Träger"/„Ausstattung"
-      erscheinen nie, weil `operator` (Gesundheit, Spielplätze) und `playground` nicht in den
-      Tiles stehen. Config ist gefixt (2026-09-18: `attributes=` in `osmconf_health.ini` /
-      `osmconf_playgrounds.ini`; die Pipeline reicht alle Spalten durch). **Offen: OSM-Rebuild +
-      B2-Deploy** (`unfallkarte osm-build` für health/playgrounds → tiles → deploy). Danach meldet
-      der Vertragstest „Ausnahme überflüssig" → Einträge aus `KNOWN_POPUP_GAPS`
-      (tests/web/contract.spec.js) löschen. (Doppelpunkt-Tags heißen im Tile mit `_`.)
+- [x] **Tote Popup-Zeilen: OSM-Tags fehlen in den Tiles** (Rebuild 2026-09-19) — Popup-Zeilen
+      „Träger"/„Ausstattung" erschienen nie, weil `operator` (Gesundheit, Spielplätze) und
+      `playground` nicht in den Tiles standen. Config-Fix war 187c78a (`attributes=` in
+      `osmconf_health.ini` / `osmconf_playgrounds.ini`), jetzt nachgebaut mit
+      `uv --directory pipeline run unfallkarte osm build health` bzw. `… playgrounds`.
+      **Bewusst auf der ALTEN PBF gebaut** (`germany-latest.osm.pbf`, Datenstand 2026-07-10):
+      so ist jeder Unterschied dem Config-Fix zuzurechnen und nicht OSM-Änderungen seither;
+      `osm build` lädt von sich aus nichts nach (nur `osm fetch --force` täte das), und das
+      Manifest führt korrekt `vintage: 2026-07-10` / `built: 2026-09-19`.
+      Verifiziert: Tile-Felder 9→10 (health) bzw. 5→7 (playgrounds); in Berlin z14 tragen 23/47
+      Gesundheits-Objekte `operator`, Spielplätze 12× `operator` + 25× `playground`.
+      `KNOWN_POPUP_GAPS` um health/playgrounds erleichtert, Vertragstests grün.
+      **Offen: B2-Deploy** (`unfallkarte deploy`). (Doppelpunkt-Tags heißen im Tile mit `_`.)
 - [x] **Lazy-Sources** (2026-09-18, REFACTORING_PLAN §13 Punkt 7) — beim Start werden nur die
       Unfall-Quellen registriert; Quellen + Layer eines Registry-Eintrags entstehen beim ersten
       Einschalten (`ensureEntry` in `js/layers/registry.js`). `addLayers.js` legt nur noch die
