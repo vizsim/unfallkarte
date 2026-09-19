@@ -593,8 +593,16 @@ Pipeline und Doku. Priorisiert; `file:line` = Fundstelle.
     vier parallele Layer-Listen
     (`LEGEND_KEYS`, Destructure, `applyLegendVisibility`-Keys, `EARLY_CONTEXT`) → eine
     deklarative Tabelle `[{key, layerIds, minZoom, dataMinZoom}]` als Single Source of Truth.
-11. **`main.js`** mischt Bootstrap + Filter/Color/Legend + mutable Globals →
-    `accidentFilter.js` extrahieren; doppeltes `willShow`/`accidentsWillShow` zusammenführen.
+11. ✅ *(erledigt 2026-09-19)* **`main.js`** mischte Bootstrap + Filter/Color/Legend + mutable
+    Globals → 412 auf 222 Zeilen. Ausgelagert: `js/map/accidentLayers.js` (Filter, Einfärbung
+    und Sichtbarkeit der Unfall-Layer samt `LAYERS`) und `js/ui/setupMapPanel.js` (Panel unten
+    links + Zoom-/Kompass-Steuerung); die Abschnitts-Pfeile stehen jetzt bei den anderen
+    Klapp-Handlern in `legendHandlers.js` statt als zweiter Mechanismus in `main.js` (dabei
+    eine tote Zeile entfernt: `const content` wurde nie gelesen). `accidentsWillShow()` und
+    das wortgleich ausgeschriebene `willShow` in `updateLayerFilter` sind zu einer Funktion
+    zusammengeführt. Die mutablen Globals sind entschärft: `currentZoomLock` und das
+    URL-Format gehen als Callbacks (`recount`/`writePermalink`) herein, statt dass die Module
+    sie kennen müssen. Golden unverändert grün; Sweep zusätzlich unter `PW_CPU_THROTTLE=6`.
 
 ### ✅ Schon solide
 
