@@ -45,7 +45,8 @@ export function setupEntryControls(map, entry) {
   });
   select?.addEventListener("change", apply);
   toggle.addEventListener("change", (e) => {
-    if (container) container.style.display = e.target.checked ? "block" : "none";
+    // Nur Zustand setzen — über `display` entscheidet style.css (.entry-controls.is-on).
+    container?.classList.toggle("is-on", e.target.checked);
     if (e.target.checked) apply();
   });
 }

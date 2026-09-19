@@ -181,10 +181,50 @@ body {
 
 
 
-.legend.collapsed>.legend-section,
-.legend.collapsed>.scenario-legend-section,
-.legend.collapsed>.legend-subsection-divider {
+/* ═══════════ Sichtbarkeit der Legende: EIN Eigentümer ═══════════
+   JS setzt nur noch ZUSTAND (Klassen / data-Attribute), CSS entscheidet über `display`.
+   Vorher taten das drei Mechanismen gleichzeitig — Inline-`display` aus dem JS, eine
+   CSS-Klasse und 39 inline `display:none` im HTML. Inline gewann, also musste
+   updateLegendVisibilityByZoom() anschließend reparieren, was setLegendCollapsed()
+   überschrieben hatte. In dem Geflecht liefen zwei Bedingungen jahrelang tot, ohne
+   aufzufallen (`clusterLegendEl` und `#mapillary-legend` gab es gar nicht).
+
+   Der gesamte Zustand hängt an genau zwei Dingen: zugeklappt? und Zoom unter 11? */
+
+/* Zugeklappt bleiben nur Titel und Unfallzähler stehen. */
+.legend.collapsed> :not(.legend-title):not(#feature-count-wrapper) {
   display: none;
+}
+
+/* Unter Zoom 11 zeigt die Karte Cluster statt Einzelunfällen — die Legende folgt:
+   Cluster-Block statt Einzel-Filter. Ohne `data-zoom` (vor dem ersten Kartenereignis)
+   gilt der Einzel-Fall, wie es das frühere inline `display:none` am Cluster-Block tat. */
+.legend>#cluster-legend-section {
+  display: none;
+}
+
+.legend[data-zoom="cluster"]>#cluster-legend-section {
+  display: block;
+}
+
+.legend[data-zoom="cluster"]>.legend-section[data-section="einzeln"],
+.legend[data-zoom="cluster"]>.legend-section-divider {
+  display: none;
+}
+
+/* Layer-Legende, Zoom-Hinweis und Regler sind aus, bis JS sie als aktiv markiert.
+   (Vorher stand dieser Startzustand als inline `display:none` im Markup — und wurde
+   vom JS beim ersten Durchlauf wieder überschrieben.) */
+.legend [id$="-legend"],
+.legend .zoom-hint,
+.legend .entry-controls {
+  display: none;
+}
+
+.legend [id$="-legend"].is-on,
+.legend .zoom-hint.is-due,
+.legend .entry-controls.is-on {
+  display: block;
 }
 
 

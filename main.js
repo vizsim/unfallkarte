@@ -26,7 +26,6 @@ import { setupPopups } from './js/ui/popupHandlers.js';
 import {
   updateLegendVisibilityByZoom,
   applyLegendVisibility,
-  updateScenarioLegendVisibility,
   updateLegendColors,
   setupLegendClusterCheckboxSync,
   setupLegendToggleHandlers,
@@ -370,8 +369,8 @@ function setupMapPanel(map) {
 function setupEventHandlers(map) {
   map.on("zoomend", () => updateLegendVisibilityByZoom(map));
   map.on("moveend", () => updateLegendVisibilityByZoom(map));
-  map.on("zoom", updateScenarioLegendVisibility);
-  map.on("load", updateScenarioLegendVisibility);
+  // (Früher hing hier updateScenarioLegendVisibility an "zoom" — also an JEDEM Zoom-Frame,
+  //  nur um Szenario-Abschnitte beim Zuklappen auszublenden. Das macht jetzt CSS.)
 
   // Beim Überschreiten der Zoom-11-Grenze (Cluster <-> Einzelpunkte) sind die neuen
   // Tiles auf moveend/zoomend oft noch nicht gerendert -> queryRenderedFeatures = 0.

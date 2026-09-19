@@ -446,7 +446,7 @@ MAIN HEADER
 
     <!-- Default ausgeblendet: updateLegendVisibilityByZoom() zeigt die Cluster-Legende
          nur bei Zoom < 11. Vermeidet das Block-Flackern beim Start (z12). -->
-    <div class="legend-section" data-section="cluster" id="cluster-legend-section" style="display: none;">
+    <div class="legend-section" data-section="cluster" id="cluster-legend-section">
       <div class="legend-section-divider"></div>
 
       <div class="legend-section-title" data-section-id="cluster">
@@ -528,7 +528,7 @@ MAIN HEADER
             <span class="info-icon"
               data-tip="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
-          <div id="scenario1-slider-container" class="ml-24 mt-6" style="display: none;">
+          <div id="scenario1-slider-container" class="ml-24 mt-6 entry-controls">
             <label for="scenario1-slider">Min. Anzahl Unfälle (Cluster-Größe): <span
                 id="scenario1-slider-value">3</span></label><br>
             <input type="range" id="scenario1-slider" min="3" max="20" step="1" value="3" />
@@ -545,7 +545,7 @@ MAIN HEADER
             <span class="info-icon"
               data-tip="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0 & OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
-          <div id="scenario2-slider-container" class="ml-24 mt-6" style="display: none;">
+          <div id="scenario2-slider-container" class="ml-24 mt-6 entry-controls">
             <label for="scenario2-slider">Min. Anzahl Unfälle je Umfeld (50m): <span
                 id="scenario2-slider-value">3</span></label><br>
             <input type="range" id="scenario2-slider" min="3" max="20" step="1" value="3" />
@@ -560,7 +560,7 @@ MAIN HEADER
             <span class="info-icon"
               data-tip="Vereinfachte M-Uko-Kriterien auf Unfallatlas-Daten (nur Unfälle mit Personenschaden!) — Annäherung, keine amtliche UKo-Typenkarte. Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">i</span>
           </label>
-          <div id="scenario9-controls" class="ml-24 mt-6" style="display: none;">
+          <div id="scenario9-controls" class="ml-24 mt-6 entry-controls">
             <label for="scenario9-rule">Kriterium:</label>
             <select id="scenario9-rule">
               <option value="all" selected>alle</option>
@@ -610,7 +610,7 @@ MAIN HEADER
             Sc8: Schulen mit vermutlich zu viel Lärm anzeigen <span class="info-icon"
               data-tip="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0 & OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
-          <div id="scenario8-slider-container" class="ml-24 mt-6" style="display: none;">
+          <div id="scenario8-slider-container" class="ml-24 mt-6 entry-controls">
             <label for="scenario8-slider">Min. Lärm an Schulen: <span id="scenario8-slider-value">60</span>
               dB(A)</label><br>
             <input type="range" id="scenario8-slider" min="60" max="76" step="1" value="60" />
@@ -653,7 +653,7 @@ MAIN HEADER
         </div>
 
         <div id="mapillary-zoomhint" class="ml-20 mt-6 fs-11">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="14">Zoomstufe 14+</a> sichtbar.</div>
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="14">Zoomstufe 14+</a> sichtbar.</div>
         </div>
 
         <div id="mapillary-filter-options" class="ml-32 mt-6" style="display: none;">
@@ -690,7 +690,7 @@ MAIN HEADER
         </div>
 
         <div id="mapillary-ts-zoomhint" class="ml-20 mt-6 fs-11">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="14">Zoomstufe 14+</a> sichtbar.</div>
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="14">Zoomstufe 14+</a> sichtbar.</div>
         </div>
 
         <div id="mapillary-ts-filter-options" class="ml-32 mt-6" style="display: none;">
@@ -786,8 +786,8 @@ MAIN HEADER
             <span class="info-icon" data-osm-vintage="maxspeed_major" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
-        <div id="maxspeed-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="11">Zoomstufe 11+</a> sichtbar.</div>
+        <div id="maxspeed-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="11">Zoomstufe 11+</a> sichtbar.</div>
           <div><strong>Linienfarbe (Geschwindigkeit)</strong></div>
           <div class="mt-4">
             <div><span class="swatch-line" style="background:#31a354;"></span>
@@ -818,8 +818,8 @@ MAIN HEADER
               data-tip="Quelle: Data from Q2 2019 originally provided by Uber Movement, accessed in [01/2020] – Lizenz: CC BY-NC 4.0">i</span>
           </label>
         </div>
-        <div id="uspeed-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="11">Zoomstufe 11+</a> sichtbar.</div>
+        <div id="uspeed-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="11">Zoomstufe 11+</a> sichtbar.</div>
           <div class="mt-4">
             <div><span class="swatch-line" style="background:#31a354;"></span>
               ≤
@@ -831,7 +831,7 @@ MAIN HEADER
               100 km/h</div>
           </div>
 
-          <div id="uspeed-slider-container" class="ml-24 mt-6" style="display: none;">
+          <div id="uspeed-slider-container" class="ml-24 mt-6 entry-controls">
             <label for="uspeed-slider">Uhrzeit auswählen: <span id="uspeed-slider-value">14</span></label><br>
             <input type="range" id="uspeed-slider" min="0" max="23" step="1" value="14" />
           </div>
@@ -855,8 +855,8 @@ MAIN HEADER
           <div class="mt-3"><label><input type="checkbox" class="svz-src" id="toggle-hvs" /> UBA (&gt;3 Mio/Jahr) <span class="info-icon" data-hvs-vintage data-tip="Quelle: © Umweltbundesamt-DE – Lizenz: dl-by-de/2.0">i</span></label></div>
         </div>
 
-        <div id="svz-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Übersicht — alle Abschnitte ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a>.</div>
+        <div id="svz-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Übersicht — alle Abschnitte ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a>.</div>
           <div style="display:flex; gap:14px; margin-bottom:6px;">
             <label class="row gap-4">
               <input type="radio" name="svz-mode" value="dtv" checked /> DTV
@@ -903,7 +903,7 @@ MAIN HEADER
           </label>
         </div>
 
-        <div id="telraam-legend" class="ml-20 mt-6 fs-11" style="display: none;">
+        <div id="telraam-legend" class="ml-20 mt-6 fs-11">
           <div style="display:flex; gap:14px; margin-bottom:6px;">
             <label class="row gap-4">
               <input type="radio" name="telraam-mode" value="bike" checked /> Rad
@@ -923,7 +923,7 @@ MAIN HEADER
           </div>
 
           <div style="margin-top:6px; color:#666;">Ø der letzten 2 Wochen<span id="telraam-vintage-note"></span> · grau = keine Daten · Klick öffnet Telraam.</div>
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
         </div>
 
 
@@ -934,8 +934,8 @@ MAIN HEADER
             <span class="info-icon" data-tip="Quelle: © TU Dresden, Movebis – Lizenz: CC BY-NC">i</span>
           </label>
         </div>
-        <div id="movebis-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="movebis-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div><strong>Farbe (Durchschnittsgeschwindigkeit)</strong></div>
           <div class="mt-4">
             <div><span class="swatch-square" style="background:#e31a1c;"></span>
@@ -971,8 +971,8 @@ MAIN HEADER
           </label>
         </div>
         <div id="bikelanes-legend"
-          class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+          class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div class="bl-row"><span class="bl-line solid" style="--line-color:#174ed9;"></span>
             <span>Führung baul. abgesetzt von Kfz</span></div>
           <div class="bl-row"><span class="bl-line solid" style="--line-color:#0098f0;"></span>
@@ -996,8 +996,8 @@ MAIN HEADER
             <span class="info-icon" data-osm-vintage="osm_crossings" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
-        <div id="crossings-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="crossings-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div class="mt-4">
             <div>
               <span
@@ -1034,8 +1034,8 @@ MAIN HEADER
           </label>
         </div>
 
-        <div id="laerm1-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="laerm1-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div><strong>Tag-Abend-Nacht-Lärmindex</strong></div>
           <div class="mt-4">LDEN</div>
 
@@ -1072,8 +1072,8 @@ MAIN HEADER
           </label>
         </div>
 
-        <div id="laerm2-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="laerm2-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div><strong>Nacht-Lärmindex</strong></div>
           <div class="mt-4">Lnight</div>
 
@@ -1110,8 +1110,8 @@ MAIN HEADER
           </label>
         </div>
 
-        <div id="obs-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="obs-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div><strong>Überholabstand nach Zone</strong></div>
 
           <!-- Innerorts -->
@@ -1156,8 +1156,8 @@ MAIN HEADER
             <span class="info-icon" data-osm-vintage="osm_schools" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
-        <div id="schools-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="schools-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div class="mt-4">
             <div>
               <span
@@ -1178,8 +1178,8 @@ MAIN HEADER
             <span class="info-icon" data-osm-vintage="osm_health" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
-        <div id="health-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="health-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div class="mt-4">
             <div>
               <span
@@ -1205,8 +1205,8 @@ MAIN HEADER
             <span class="info-icon" data-osm-vintage="osm_playgrounds" data-tip="Quelle: © OpenStreetMap (25-07-31) – Lizenz: ODbL">i</span>
           </label>
         </div>
-        <div id="playgrounds-legend" class="ml-20 mt-6 fs-11" style="display: none;">
-          <div class="zoom-hint" style="display: none;">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
+        <div id="playgrounds-legend" class="ml-20 mt-6 fs-11">
+          <div class="zoom-hint">ℹ️ Daten sind ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a> sichtbar.</div>
           <div class="mt-4">
             <div>
               <span
