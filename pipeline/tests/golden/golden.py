@@ -44,7 +44,12 @@ def capture(parquet: str, out: str) -> None:
     print(f"golden geschrieben: {out}  (n_rows={rec['n_rows']}, Jahre={list(rec['per_year'])})")
 
 
-def compare(parquet: str, golden: str) -> int:
+def diff(parquet: str, golden: str) -> list[str]:
+    """Abweichungen als Liste lesbarer Zeilen; leer == identisch.
+
+    Getrennt von compare(), damit der pytest (tests/test_golden.py) die Abweichungen
+    direkt in die Fehlermeldung schreiben kann statt nur einen Exit-Code zu sehen.
+    """
     want = json.loads(Path(golden).read_text(encoding="utf-8"))
     got = measure(parquet)
     diffs: list[str] = []
@@ -59,9 +64,17 @@ def compare(parquet: str, golden: str) -> int:
     for year, n in want["per_year"].items():
         if got["per_year"].get(year) != n:
             diffs.append(f"Jahr {year}: {n} -> {got['per_year'].get(year)}")
+    # Jahre, die es nur im Parquet gibt: sonst fiele ein NEUES Datenjahr nicht auf,
+    # solange die alten Zahlen stimmen (n_rows fängt es, aber ohne zu sagen welches).
+    for year in sorted(set(got["per_year"]) - set(want["per_year"])):
+        diffs.append(f"Jahr {year}: nicht in der Referenz (neu?) -> {got['per_year'][year]}")
     if got["crs"] != want["crs"]:
         diffs.append(f"crs: {want['crs']} -> {got['crs']}")
+    return diffs
 
+
+def compare(parquet: str, golden: str) -> int:
+    diffs = diff(parquet, golden)
     if diffs:
         print("ABWEICHUNG ggü. Golden:")
         for d in diffs:

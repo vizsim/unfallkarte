@@ -160,11 +160,18 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       B2-500 bricht `b2 sync` mittendrin ab und hinterlässt ein Teil-Deploy. Retry-Loop
       (3× exponentieller Backoff) für B2, dazu `requests`-Retry für die Geofabrik- und
       Accidents-Downloads. *(vorher REFACTORING_PLAN §13 Punkt 4)*
-- [ ] **Golden-Reference der Pipeline läuft in keinem Test** — `pipeline/tests/golden/golden.py`
-      wird von keiner pytest-Datei importiert, die Referenz (`accidents.json`) deckt außerdem
-      nur 2017–2023 ab, die Daten reichen inzwischen bis 2025. Nötig: ein pytest, der
-      `golden.compare` fährt, und die Referenz auf den aktuellen Stand neu aufnehmen.
-      Nicht zu verwechseln mit dem Frontend-Golden (`tests/web/golden.spec.js`), der läuft.
+- [x] **Golden-Reference der Pipeline läuft in keinem Test** (2026-09-19) — `golden.py` gab es
+      seit dem Refactor, aber keine pytest-Datei rief es auf: das Sicherheitsnetz der Pipeline
+      existierte nur, wenn man daran dachte. Jetzt `pipeline/tests/test_golden.py`, zwei Stufen:
+      der Abgleich gegen das echte Parquet (Zeilen, Spalten, Unfälle je Jahr, CRS) läuft lokal
+      und überspringt sich ohne Daten — und eine Plausibilitätsprüfung der Referenz selbst, die
+      IMMER läuft (auch in der CI) und anschlägt, wenn ein Jahr in `accidents.yaml` landet, ohne
+      dass die Referenz nachgezogen wurde; die Fehlermeldung nennt den `capture`-Befehl.
+      `golden.py` um `diff()` ergänzt (lesbare Abweichungen statt nur Exit-Code) und um die
+      Erkennung von Jahren, die NUR im Parquet stehen.
+      Beide Zusicherungen per Gegenprobe verifiziert (2026 eingefügt / Referenzzahl verfälscht →
+      schlagen an). Korrektur zum alten Eintrag: die Referenz war **nicht** veraltet, sie stand
+      längst auf 2017–2025 / 2.219.353 Zeilen. Pipeline-Tests 39 → 41.
       *(vorher REFACTORING_PLAN §13 Punkt 5)*
 
 ## Frontend / UX
