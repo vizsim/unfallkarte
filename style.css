@@ -1064,6 +1064,26 @@ body {
     background: var(--ui-divider);
   }
 
+  /* Die Attribution (Lizenzpflicht: OSM/ODbL, OpenFreeMap, Mapterhorn, Unfallatlas) lag
+     bisher HINTER dem Sheet — sichtbar in keinem der beiden Zustände. Sie gehört über den
+     Streifen. Ausgeklappt wäre sie ein 44px hohes Band über die volle Breite und läge auf
+     dem Karten-Knopf links; darum startet sie auf dem Handy als ⓘ-Knopf und fährt beim
+     Antippen aus (js/ui/mobileLayout.js). */
+  .maplibregl-ctrl-bottom-right {
+    bottom: calc(var(--legend-peek, 96px) + 4px);
+  }
+
+  /* Ausgeklappt lief das Band über die volle Breite — und damit unter den Karten-Knopf
+     unten links (44px + 10px Rand). Hier gedeckelt: der Text bricht lieber um, als sich
+     mit den Bedienelementen zu überlagern. */
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+    /* border-box, weil MapLibre 36px Innenabstand für den ⓘ-Knopf einrechnet — sonst
+       misst die Grenze am falschen Kasten und das Band ragt doch wieder hinüber.
+       74px = 10 Eigenrand + 44 Knopf + 10 Rand links + 10 Luft. */
+    box-sizing: border-box;
+    max-width: calc(100vw - 74px);
+  }
+
   /* Während der Geste schiebt sich das Sheet über die Bedienelemente unten links.
      Die stehen auf demselben z-index (6) und im Markup DAHINTER — ohne diese Zeile
      schwebte der Karten-Knopf mitten im hochgezogenen Sheet. */

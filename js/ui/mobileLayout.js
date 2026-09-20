@@ -54,6 +54,7 @@ export function setupMobileLayout() {
   const applyBreakpoint = (matches) => {
     setLegendCollapsed(matches);
     setGeocoderCollapsed(matches);
+    collapseAttribution(matches);
     publishPeek();
   };
 
@@ -61,6 +62,26 @@ export function setupMobileLayout() {
   // Beim Drehen/Größenändern über die Grenze hinweg nachziehen — aber NICHT bei jeder
   // Größenänderung, sonst klappte das Sheet dem Nutzer unter den Fingern weg.
   mql.addEventListener("change", (e) => applyBreakpoint(e.matches));
+}
+
+/**
+ * Attribution auf dem Handy als ⓘ-Knopf starten.
+ *
+ * MapLibre schaltet unter 640px von selbst in die kompakte Form, öffnet sie aber
+ * ausgeklappt: ein 44px hohes Band über die volle Breite. Über den Streifen gehoben
+ * (style.css) läge das auf dem Karten-Knopf — zugeklappt ist es ein ⓘ, das mit einem
+ * Tipp den vollen Text zeigt. Genannt werden muss trotzdem alles, das ist Lizenzpflicht
+ * (OSM/ODbL, OpenFreeMap, Mapterhorn, Unfallatlas); erreichbar per Tipp reicht dafür.
+ *
+ * Einmal genügt: MapLibre setzt `compact-show` nur, solange die kompakte Form noch nicht
+ * gesetzt ist, und nimmt sie beim Kartenziehen ohnehin wieder weg.
+ */
+function collapseAttribution(matches) {
+  if (!matches) return;
+  const attrib = document.querySelector(".maplibregl-ctrl-attrib");
+  if (!attrib) return;
+  attrib.classList.remove("maplibregl-compact-show");
+  attrib.removeAttribute("open");
 }
 
 // ── Zieh-Geste ──────────────────────────────────────────────────────────────────────

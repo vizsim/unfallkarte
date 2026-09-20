@@ -215,6 +215,15 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       sich am Titel mit dem Finger hoch-/zuziehen — während der Geste rendert es in voller
       Höhe und wird per `transform` zurückgeschoben, beim Loslassen schnappt es (Wurf schlägt
       Weg). Tippen klappt weiter um. Zwei Tests in `tests/web/mobile.spec.js`.
+- [x] **Attribution mobil erreichbar** (2026-09-20) — sie wurde gerendert, lag aber hinter
+      dem Sheet: in KEINEM Zustand sichtbar (Lizenzpflicht OSM/ODbL, OpenFreeMap,
+      Mapterhorn). Jetzt über dem Streifen, auf dem Handy als ⓘ-Knopf (ausgeklappt wäre
+      es ein Band über die volle Breite, das unter den Karten-Knopf links läuft — Breite
+      gedeckelt, Test prüft die Überlappung). Zweites Loch gestopft: der Quellenvermerk
+      der Unfalldaten hing nur am ⓘ-Tooltip, und `tooltip.js` kannte nur `mouseover` —
+      auf Touch ein totes Zeichen. Tipp öffnet jetzt jeden Hinweis (Capture-Phase, damit
+      ein Tipp aufs ⓘ nicht das Sheet umklappt oder einen Layer schaltet), und die
+      Unfall-Quelle trägt zusätzlich ein `attribution` in der Karten-Attribution.
 - [x] **Fehler-Banner** (2026-07-11) — ist das Manifest weder lokal noch auf B2
       ladbar, zeigt `js/ui/errorBanner.js` ein schließbares Banner oben mittig
       (+ "Neu laden"); Wiring über `resolveSources().manifestOk` in addSources.js.

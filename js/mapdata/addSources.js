@@ -13,9 +13,16 @@ const MIGRATED = {
 // Alle Layer sind in die Pipeline migriert — das alte Bucket `unfallkarte-data`
 // (LEGACY) wird nicht mehr gebraucht. (scenario4/5/7 = Mapillary wurden entfernt.)
 
+// Quellenvermerk der Unfalldaten (dl-de/by-2-0 verlangt ihn). Er hing bisher nur am ⓘ der
+// Legende — auf dem Handy unerreichbar, weil der Streifen die Attribution verdeckte und
+// Tooltips auf Touch nicht aufgehen. MapLibre sammelt Quellen-Attributionen selbst ein und
+// zeigt gleiche Zeichenketten nur einmal.
+const ACCIDENT_ATTRIBUTION =
+  'Unfalldaten: © <a href="https://unfallatlas.statistikportal.de/" target="_blank" rel="noopener">Statistisches Bundesamt</a> (dl-de/by-2-0)';
+
 export async function addSources(map, { MAPILLARY_TOKEN, sourcesPromise }) {
   const addVector = (id, url) => {
-    if (!map.getSource(id)) map.addSource(id, { type: "vector", url });
+    if (!map.getSource(id)) map.addSource(id, { type: "vector", url, attribution: ACCIDENT_ATTRIBUTION });
   };
 
   // Pipeline-Layer: Local-first + B2-v2-Fallback über data/manifest.json.

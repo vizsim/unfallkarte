@@ -5,6 +5,7 @@
 // oder Popups abgeschnitten. Erscheint nach 100 ms (statt ~1 s beim nativen title).
 
 const DELAY_MS = 100;
+const TOUCH_HIDE_MS = 6000;   // per Tap geöffnet: schließt sich von selbst wieder
 const GAP = 8;
 
 let tipEl = null;
@@ -79,6 +80,29 @@ export function setupTooltips() {
     if (t) { current = t; show(t); }
   });
   document.addEventListener("focusout", hide);
+
+  // Touch: es gibt kein Hover — ohne das hier war jedes ⓘ auf dem Handy ein totes
+  // Zeichen, samt der Quellen-/Lizenzvermerke, die daran hängen. Ein Tipp öffnet den
+  // Hinweis, der nächste (oder ein Tap daneben) schließt ihn.
+  // In der CAPTURE-Phase und mit stopPropagation: das ⓘ steckt mal in der Titelzeile
+  // des Sheets, mal in einem <label> mit Checkbox — ein Tap darauf soll den Hinweis
+  // zeigen und NICHT das Sheet umklappen oder den Layer schalten. Alle data-tip-Träger
+  // sind reine Hinweis-Zeichen, keine Bedienelemente; es geht also nichts verloren.
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest?.("[data-tip]");
+    if (!t) { hide(); return; }
+    e.preventDefault();
+    e.stopPropagation();
+    // Gegen `current` prüfen reicht NICHT: auch auf Touch schickt der Browser vor dem Tap
+    // ein synthetisches mouseover, das `current` bereits setzt — der erste Tipp hätte
+    // damit "wieder zumachen" bedeutet und der Hinweis wäre nie aufgegangen.
+    if (t === current && tipEl?.classList.contains("is-visible")) { hide(); return; }
+    clearTimeout(showTimer);
+    current = t;
+    show(t);
+    // Ohne Zeiger gibt es kein "verlassen" — nach ein paar Sekunden selbst zumachen.
+    showTimer = setTimeout(hide, TOUCH_HIDE_MS);
+  }, { capture: true });
   // Bei Scroll/Zoom/Resize verschwinden lassen (Position wäre sonst veraltet)
   window.addEventListener("scroll", hide, true);
   window.addEventListener("wheel", hide, { passive: true });

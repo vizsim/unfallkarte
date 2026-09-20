@@ -136,6 +136,57 @@ test.describe("Handy", () => {
     expectNoErrors(errors);
   });
 
+  // Attribution ist Lizenzpflicht (OSM/ODbL, OpenFreeMap, Mapterhorn, Unfallatlas) — und
+  // lag vorher komplett hinter dem Sheet: gerendert, aber in keinem Zustand erreichbar.
+  test("Attribution liegt über dem Streifen und nennt per Tipp Karte UND Daten", async ({ page }) => {
+    const errors = await openMap(page);
+    const attrib = page.locator(".maplibregl-ctrl-attrib");
+
+    const sheetTop = (await page.locator(".legend").boundingBox()).y;
+    const box = await attrib.boundingBox();
+    expect(box.y + box.height, "Attribution liegt hinter dem Sheet").toBeLessThanOrEqual(sheetTop + 1);
+    expect(box.width, "zugeklappt soll sie ein ⓘ-Knopf sein").toBeLessThan(60);
+
+    // Sichtbar heißt: an ihrer Stelle liegt wirklich sie und nichts darüber.
+    const onTop = await page.evaluate(() => {
+      const r = document.querySelector(".maplibregl-ctrl-attrib").getBoundingClientRect();
+      const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return !!el?.closest(".maplibregl-ctrl-attrib");
+    });
+    expect(onTop, "etwas liegt über dem ⓘ").toBe(true);
+
+    await page.click(".maplibregl-ctrl-attrib-button");
+    await expect(attrib).toContainText("OpenStreetMap");
+    await expect(attrib).toContainText("Statistisches Bundesamt");
+
+    // Ausgeklappt lief das Band über die volle Breite und damit unter die Bedienelemente
+    // unten links. Es darf sich mit keinem davon überlappen.
+    const open = await attrib.boundingBox();
+    for (const sel of ["#map-settings-toggle", "#bottom-left-ui-container"]) {
+      const b = await page.locator(sel).boundingBox();
+      const überlappt = b.x < open.x + open.width && b.x + b.width > open.x
+        && b.y < open.y + open.height && b.y + b.height > open.y;
+      expect(überlappt, `${sel} liegt im ausgeklappten Attributions-Band`).toBe(false);
+    }
+    expectNoErrors(errors);
+  });
+
+  test("ⓘ zeigt den Quellenvermerk per Tipp — ohne das Sheet umzuklappen", async ({ page }) => {
+    const errors = await openMap(page);
+    // Auf Touch gibt es kein Hover: ohne Tipp-Unterstützung wäre das ⓘ ein totes Zeichen.
+    await page.click(".legend .legend-title .info-icon");
+
+    const tip = page.locator(".app-tooltip");
+    await expect(tip).toHaveClass(/is-visible/);
+    await expect(tip).toContainText("Statistisches Bundesamt");
+    expect(await isCollapsed(page), "der Tipp aufs ⓘ darf nicht auch umklappen").toBe(true);
+
+    // Zweiter Tipp schließt wieder.
+    await page.click(".legend .legend-title .info-icon");
+    await expect(tip).not.toHaveClass(/is-visible/);
+    expectNoErrors(errors);
+  });
+
   test("Suche ist nur ein Lupen-Knopf und fährt erst beim Antippen aus", async ({ page }) => {
     const errors = await openMap(page);
     const geocoder = page.locator(".geocoder");
