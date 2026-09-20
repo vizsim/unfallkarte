@@ -51,8 +51,11 @@ MAIN HEADER
     <div class="legend-header legend-title" data-toggle="legend-root">
       <div class="grow">
         <div class="legend-heading">Unfallkarte</div>
+        <!-- Der Umbruch ist NUR die Desktop-Form: im schmalen Bottom-Sheet blendet die
+             Mobile-Query das <br> aus, damit die Zeile eine bleibt (Leerzeichen davor
+             ist dafür nötig, am Desktop schluckt es der Umbruch). -->
         <div class="legend-subtext">
-          Unfalldaten aus Unfallatlas<br />von 2017–2025
+          Unfalldaten aus Unfallatlas <br />von 2017–2025
           <span class="info-icon" data-tip="Quelle: Statistisches Bundesamt – Lizenz: dl-de/by-2-0">i</span>
         </div>
       </div>
@@ -1062,11 +1065,9 @@ MAIN HEADER
 
 
 
-    <!-- Trenner als border-top am Wrapper (statt eigenem .legend-section-divider):
-         der Wrapper bleibt bei Zoom <11 sichtbar, ein separater Divider würde dort
-         von updateLegendVisibilityByZoom ausgeblendet. -->
-    <div id="feature-count-wrapper"
-      style="margin-top:12px; padding-top:6px; border-top:1px solid var(--ui-divider); display: flex; align-items: center; gap: 8px;">
+    <!-- Abstände, Trenner und Layout stehen in style.css (#feature-count-wrapper) —
+         sonst gewinnt der Inline-Style gegen die Mobile-Query. -->
+    <div id="feature-count-wrapper">
       <!-- Sichtbare Unfälle + Zoomstufe kompakt als Symbol-Chips (Text im title). -->
       <div id="feature-count" class="fc-stats">
         <span class="fc-stat" data-tip="Sichtbare Unfälle" aria-label="Sichtbare Unfälle">
@@ -1086,8 +1087,11 @@ MAIN HEADER
       <!-- Badge + GitHub-Repo/Issues als eine rechtsbündige Gruppe (statisch rechts,
            unabhängig von der Zahlenbreite links). -->
       <div class="fc-links">
-        <img class="fc-badge" src="https://img.shields.io/badge/Status-Experimental-red" alt="Status: Experimental"
-          title="Status: Experimental" style="height: 20px; display: block;">
+        <!-- Status-Pille: früher ein shields.io-<img> („Status | Experimental", 128px breit
+             und ein Fremd-Request bei jedem Laden). Jetzt inline — schmaler, keyless, und
+             die Karte ist über „experimentell" hinaus. -->
+        <span class="fc-badge" data-tip="Beta: Daten und Funktionen können sich noch ändern"
+          aria-label="Status: Beta">Beta</span>
         <a href="https://github.com/vizsim/unfallkarte" target="_blank" rel="noopener"
           title="Quellcode auf GitHub (vizsim/unfallkarte)" aria-label="Quellcode auf GitHub">
           <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true">

@@ -192,8 +192,19 @@ body {
    Der gesamte Zustand hängt an genau zwei Dingen: zugeklappt? und Zoom unter 11? */
 
 /* Zugeklappt bleiben nur Titel und Unfallzähler stehen. */
-.legend.collapsed> :not(.legend-title):not(#feature-count-wrapper) {
+/* Zugeklappt bleibt nur der Streifen stehen — außer WÄHREND einer Zieh-Geste: dann
+   muss der Inhalt schon da sein (das Sheet wird in voller Höhe gerendert und per
+   transform nach unten geschoben), sonst gäbe es nichts, was mit dem Finger
+   hochkäme. Siehe js/ui/mobileLayout.js. */
+.legend.collapsed:not(.is-dragging)> :not(.legend-title):not(#feature-count-wrapper) {
   display: none;
+}
+
+/* Während der Geste folgt das Sheet dem Finger: kein Scrollen im Inneren (sonst
+   ruckelt es gegen die Bewegung), Schnapp-Animation setzt das JS als Inline-Style. */
+.legend.is-dragging {
+  overflow: hidden;
+  user-select: none;
 }
 
 /* Unter Zoom 11 zeigt die Karte Cluster statt Einzelunfällen — die Legende folgt:
@@ -376,19 +387,18 @@ body {
 
 /* ────────────── Feature Count ────────────── */
 
-#feature-count {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  line-height: 1.3;
-}
-
+/* Das Layout der Zeile selbst steht bei den .fc-*-Regeln weiter unten; hier bleibt
+   nur der Rahmen der Zeile. Trenner als border-top am Wrapper (statt eigenem
+   .legend-section-divider): der Wrapper bleibt bei Zoom <11 sichtbar, ein separater
+   Divider würde dort von updateLegendVisibilityByZoom ausgeblendet. */
 #feature-count-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 12px;
+  padding-top: 6px;
+  border-top: 1px solid var(--ui-divider);
 }
 
 
@@ -701,8 +711,9 @@ body {
 .map-settings-toggle:hover { background: #f3f4f6; }
 
 /* ───── Feature-Count-Zeile: Symbol-Chips + Repo-/Issue-Links (im Legenden-Panel) ───── */
-/* Anzahl + Zoom als linksbündige Spalte (gestapelt); Zahlen fett. */
-.fc-stats { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; color: var(--ui-text); }
+/* Anzahl + Zoom als linksbündige Spalte (gestapelt); Zahlen fett.
+   Auf dem Handy schwenkt die Spalte in eine Zeile (Mobile-Query am Dateiende). */
+.fc-stats { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; line-height: 1.3; color: var(--ui-text); }
 .fc-stat { position: relative; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; cursor: help; }
 .fc-stat svg { flex: none; opacity: .65; }
 .fc-stat #fc-count, .fc-stat #fc-zoom { font-weight: 700; }
@@ -714,7 +725,23 @@ body {
 /* Badge + Icons als EINE rechtsbündige Gruppe -> feste Position von rechts,
    unabhängig von der Zahlenbreite links. */
 .fc-links { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.fc-badge { margin-right: 4px; }
+
+/* Status-Pille (inline statt shields.io-Bild): dezent, aber lesbar — die Karte ist
+   benutzbar, nur noch nicht fertig. */
+.fc-badge {
+  margin-right: 4px;
+  padding: 2px 8px;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  cursor: help;
+}
 .fc-links a { display: inline-flex; align-items: center; color: #4b5563; text-decoration: none; }
 .fc-links a:hover { color: #111827; }
 
@@ -977,7 +1004,44 @@ body {
      an den schmaleren Innenabstand anpassen. Im Sheet ist sie zugleich der Griff. */
   .legend .legend-title {
     margin: 0 -14px;
-    padding: 14px 14px 10px;
+    padding: 12px 14px 8px;
+    /* Griff der Zieh-Geste: der Browser darf hier NICHT selbst scrollen/zoomen,
+       sonst verliert das Sheet den Finger mitten in der Bewegung. */
+    touch-action: none;
+  }
+
+  /* Zugeklappt ist auch die Zählerzeile Teil des Streifens — und damit Griff.
+     Aufgeklappt steht sie unten im Inhalt und muss wieder scrollen dürfen. */
+  .legend.collapsed #feature-count-wrapper {
+    touch-action: none;
+  }
+
+  /* ── Schlanker Streifen ──────────────────────────────────────────────────────
+     Zugeklappt ist der Streifen das, was vom Handy-Bildschirm dauerhaft weg ist —
+     er trug vier Textzeilen (Titel, zwei Zeilen Untertitel, Zähler + Zoom
+     untereinander) und maß 144px. Gleiche Infos, aber zwei Zeilen: Untertitel
+     einzeilig, Zähler und Zoom nebeneinander. Am Desktop bleibt alles wie gehabt. */
+  .legend-heading {
+    font-size: 18px;
+  }
+
+  .legend-subtext br {
+    display: none;
+  }
+
+  .legend-header .toggle-arrow.toggle-root {
+    width: 20px;
+    height: 20px;
+  }
+
+  #feature-count-wrapper {
+    margin-top: 8px;
+  }
+
+  .fc-stats {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
   }
 
   /* Der Root-Pfeil zeigt zugeklappt sonst nach LINKS (Desktop-Konvention: „klappt zur
@@ -998,6 +1062,13 @@ body {
     margin-left: -17px;
     border-radius: 2px;
     background: var(--ui-divider);
+  }
+
+  /* Während der Geste schiebt sich das Sheet über die Bedienelemente unten links.
+     Die stehen auf demselben z-index (6) und im Markup DAHINTER — ohne diese Zeile
+     schwebte der Karten-Knopf mitten im hochgezogenen Sheet. */
+  .legend.is-dragging {
+    z-index: 7;
   }
 
   /* Zugeklappt: Karten-Bedienelemente sitzen direkt ÜBER dem Streifen.

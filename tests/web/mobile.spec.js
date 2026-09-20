@@ -81,6 +81,61 @@ test.describe("Handy", () => {
     expectNoErrors(errors);
   });
 
+  // Zieh-Geste (js/ui/mobileLayout.js): das Sheet folgt dem Finger, statt nur auf Tippen
+  // umzuklappen. Gefahren wird sie hier mit der Maus — das sind dieselben Pointer-Events,
+  // und Playwright kann keinen Finger über den Schirm ziehen.
+  const dragTitle = async (page, dy) => {
+    const box = await page.locator(".legend .legend-title").boundingBox();
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 10; i++) await page.mouse.move(x, y + (dy * i) / 10);
+    return { x, y };
+  };
+
+  test("Sheet lässt sich mit dem Finger hochziehen", async ({ page }) => {
+    const errors = await openMap(page);
+    const legend = page.locator(".legend");
+    const topBefore = (await legend.boundingBox()).y;
+
+    await dragTitle(page, -320);
+
+    // Mitten in der Geste: noch nicht umgeklappt, aber schon mitgewandert — und der
+    // Inhalt, der gleich stehen bleiben soll, ist bereits sichtbar.
+    expect(await isCollapsed(page), "während der Geste bleibt der Zustand offen").toBe(true);
+    await expect(legend).toHaveClass(/is-dragging/);
+    expect((await legend.boundingBox()).y, "Sheet folgt dem Finger nicht").toBeLessThan(topBefore - 100);
+    await expect(page.locator('.legend input[data-group="UKATEGORIE"]').first()).toBeVisible();
+
+    await page.mouse.up();
+
+    // Losgelassen: offen, und keine Reste der Geste (Transform/Klasse) bleiben hängen.
+    await expect.poll(() => isCollapsed(page)).toBe(false);
+    await expect(legend).not.toHaveClass(/is-dragging/);
+    expect(await legend.evaluate((el) => el.style.transform)).toBe("");
+    await expect(page.locator('.legend input[data-group="UKATEGORIE"]').first()).toBeVisible();
+    expectNoErrors(errors);
+  });
+
+  test("Sheet lässt sich wieder zuschieben — und der Streifen sitzt wie vorher", async ({ page }) => {
+    const errors = await openMap(page);
+    const peekBefore = (await page.locator(".legend").boundingBox()).height;
+
+    await page.click(".legend .legend-title");
+    expect(await isCollapsed(page)).toBe(false);
+
+    await dragTitle(page, 320);
+    await page.mouse.up();
+
+    await expect.poll(() => isCollapsed(page)).toBe(true);
+    const peekAfter = (await page.locator(".legend").boundingBox()).height;
+    expect(Math.abs(peekAfter - peekBefore), "Streifenhöhe nach der Geste verschoben").toBeLessThan(2);
+    // Die Bedienelemente unten links müssen wieder über dem Streifen auftauchen.
+    await expect(page.locator("#map-settings-toggle")).toBeVisible();
+    expectNoErrors(errors);
+  });
+
   test("Suche ist nur ein Lupen-Knopf und fährt erst beim Antippen aus", async ({ page }) => {
     const errors = await openMap(page);
     const geocoder = page.locator(".geocoder");
@@ -121,8 +176,12 @@ test.describe("Handy", () => {
   const headerLines = (page) => page.evaluate(() => {
     const legend = document.querySelector(".legend");
     const top = legend.getBoundingClientRect().top;
-    return [...legend.querySelectorAll("*")]
-      .filter((el) => el.getBoundingClientRect().height > 0 && !el.classList.contains("info-icon"))
+    const titleBottom = Math.round(legend.querySelector(".legend-title").getBoundingClientRect().bottom - top);
+    const lines = [...legend.querySelectorAll("*")]
+      // Gesucht sind Trennlinien über die Breite — runde Abzeichen (ⓘ, Status-Pille)
+      // haben zwar einen Rahmen, sind aber keine.
+      .filter((el) => el.getBoundingClientRect().height > 0
+        && !el.classList.contains("info-icon") && !el.classList.contains("fc-badge"))
       .flatMap((el) => ["Top", "Bottom"].filter((side) => {
         const cs = getComputedStyle(el);
         return parseFloat(cs[`border${side}Width`]) > 0 && cs[`border${side}Style`] !== "none";
@@ -130,18 +189,23 @@ test.describe("Handy", () => {
         what: `${el.className}.${side}`,
         dy: Math.round(el.getBoundingClientRect()[side.toLowerCase()] - top),
       })))
-      .filter((l) => l.dy < 200);
+      // Betrachtet wird nur das Feld direkt unter der Titelzeile — auch dieses Fenster
+      // hängt an ihr, nicht an einer festen Pixelzahl.
+      .filter((l) => l.dy < titleBottom + 60);
+    return { lines, titleBottom };
   });
 
   test("unter dem Titel steht genau EINE Trennlinie — in jedem Zustand", async ({ page }) => {
     const errors = await openMap(page);
 
     const check = async (label) => {
-      const lines = await headerLines(page);
+      const { lines, titleBottom } = await headerLines(page);
       expect(lines.map((l) => l.what), `${label}: ${JSON.stringify(lines)}`).toHaveLength(1);
       // Der Abstand des Trenners muss erhalten bleiben — ihn auszublenden hätte den Titel
-      // an den Inhalt geklebt (genau das war die erste, verworfene Lösung).
-      expect(lines[0].dy, `${label}: Trenner klebt am Titel`).toBeGreaterThan(80);
+      // an den Inhalt geklebt (genau das war die erste, verworfene Lösung). Gemessen wird
+      // der Abstand zur Titelzeile, nicht zum oberen Rand: sonst hinge der Test an der
+      // Kopfhöhe und schlüge bei jeder Straffung an.
+      expect(lines[0].dy - titleBottom, `${label}: Trenner klebt am Titel`).toBeGreaterThan(4);
       return lines[0];
     };
 

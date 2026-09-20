@@ -207,6 +207,14 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       44-px-Lupen-Knopf, fährt beim Antippen aus, klappt nur bei leerem Feld wieder ein.
       Am Desktop mitgenommen: klebende Titelzeile beim Scrollen (Trennung per weichem Schatten
       statt Linie — 12px darunter steht ohnehin schon ein Trenner). `tests/web/mobile.spec.js`.
+- [x] **Sheet straffen + Zieh-Geste** (2026-09-20) — der zugeklappte Streifen trug vier
+      Textzeilen und maß 144px; bei gleichem Inhalt jetzt zwei Zeilen und 105px (Untertitel
+      einzeilig, Zähler + Zoom nebeneinander, kleinerer Titel). Status-Abzeichen von einem
+      shields.io-Bild („Status | Experimental", 128px + Fremd-Request bei jedem Laden) auf
+      eine inline gezeichnete Pille „Beta" umgestellt (47px, keyless). Neu: das Sheet lässt
+      sich am Titel mit dem Finger hoch-/zuziehen — während der Geste rendert es in voller
+      Höhe und wird per `transform` zurückgeschoben, beim Loslassen schnappt es (Wurf schlägt
+      Weg). Tippen klappt weiter um. Zwei Tests in `tests/web/mobile.spec.js`.
 - [x] **Fehler-Banner** (2026-07-11) — ist das Manifest weder lokal noch auf B2
       ladbar, zeigt `js/ui/errorBanner.js` ein schließbares Banner oben mittig
       (+ "Neu laden"); Wiring über `resolveSources().manifestOk` in addSources.js.
