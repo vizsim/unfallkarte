@@ -40,8 +40,12 @@ async function fetchJson(url) {
 // Manifest local-first laden — und festhalten, OB es lokal kam. Kam es lokal, existiert
 // ein data/-Baum und per-Datei-Probing lohnt; sonst (deployt/ohne data/) gehen wir direkt
 // auf B2 und sparen pro Datei einen sinnlosen 404-HEAD-Probe.
+//
+// Deployt wird gar nicht erst lokal gesucht: data/ ist gitignoriert, auf Pages gibt es den
+// Baum also garantiert nicht. Die Probe kostete dort einen Roundtrip und 9,4 KB
+// Pages-Fehlerseite für eine Antwort, die immer "nein" lautet.
 async function loadManifestWithSource(localPath, remoteBase) {
-  const local = await fetchJson(localPath);
+  const local = mayHaveLocalTree() ? await fetchJson(localPath) : null;
   if (local) return { manifest: local, fromLocal: true, ok: true };
   const remote = await fetchJson(`${remoteBase}manifest.json`);
   if (remote) return { manifest: remote, fromLocal: false, ok: true };
@@ -55,13 +59,17 @@ export async function loadManifest(localPath = "./data/manifest.json", remoteBas
   return (await loadManifestWithSource(localPath, remoteBase)).manifest;
 }
 
-async function existsLocally(url) {
-  try {
-    const res = await fetch(url, { method: "HEAD" });
-    return res.ok;
-  } catch {
-    return false;
+// Je Datei nur EINE Probe pro Seitenaufruf: die Unfall-Dateien werden von zwei Stellen
+// aufgelöst (resolveAccidentSources ohne Manifest, resolveSources mit) und würden sonst
+// doppelt geprobt. Gemerkt wird die Promise, nicht das Ergebnis — sonst liefen zwei
+// gleichzeitige Aufrufe trotzdem beide los.
+const probeCache = new Map();
+
+function existsLocally(url) {
+  if (!probeCache.has(url)) {
+    probeCache.set(url, fetch(url, { method: "HEAD" }).then((r) => r.ok).catch(() => false));
   }
+  return probeCache.get(url);
 }
 
 /**
@@ -93,13 +101,19 @@ export async function resolveSources({ localBase = LOCAL_BASE, remoteBase = REMO
   const resolved = {};
 
   const entries = Object.entries(manifest).filter(([, m]) => m.file && !m.live && !m.external);
+  const local = [];
   await Promise.all(
     entries.map(async ([id, meta]) => {
       const useLocal = fromLocal && (await existsLocally(`${localBase}${meta.file}`));
-      const base = useLocal ? localBase : remoteBase;
-      resolved[id] = `pmtiles://${base}${meta.file}`;
-      console.info(`[resolveSources] ${id}: ${useLocal ? "lokal" : "B2"} (${meta.file})`);
+      resolved[id] = `pmtiles://${useLocal ? localBase : remoteBase}${meta.file}`;
+      if (useLocal) local.push(id);
     })
+  );
+  // EINE Zeile statt 25: aufgezählt wird nur, was vom Normalfall abweicht (= lokal liegt).
+  // Vorher füllte die Auflösung bei jedem Laden die halbe Konsole und verdeckte echte Meldungen.
+  console.info(
+    `[resolveSources] ${entries.length} Quellen: ${entries.length - local.length}× B2`
+    + (local.length ? `, ${local.length}× lokal (${local.join(", ")})` : "")
   );
 
   return {

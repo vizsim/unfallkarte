@@ -79,6 +79,23 @@ test("fehlender Kartenstil zeigt ein Banner statt einer weißen Seite", async ({
   await expect(page.locator(".error-banner-text")).toContainText(/Kartenstil/);
 });
 
+test("keine sinnlosen 404-Proben im Start-Wasserfall", async ({ page }) => {
+  // Der Testserver läuft auf 127.0.0.1 = Entwicklungszweig, da IST eine lokale Probe
+  // richtig. Geprüft wird deshalb, was auch dort gelten muss: jede Datei höchstens EINMAL
+  // proben. `resolveAccidentSources()` und `resolveSources()` fassen beide die zwei
+  // Unfall-Dateien an — ohne Memoisierung wären das vier Proben statt zwei.
+  const probes = [];
+  page.on("request", (r) => {
+    if (r.method() !== "HEAD" && !/manifest\.json/.test(r.url())) return;
+    probes.push(new URL(r.url()).pathname);
+  });
+  const errors = await openMap(page);
+
+  const doubled = [...new Set(probes)].filter((p) => probes.filter((x) => x === p).length > 1);
+  expect(doubled, `mehrfach geprobt: ${doubled.join(", ")}`).toEqual([]);
+  expectNoErrors(errors);
+});
+
 test("Start lädt nur die Unfall-Tiles, keine Kontext-Layer", async ({ page }) => {
   const reqs = recordRequests(page);
   const errors = await openMap(page);
