@@ -46,7 +46,6 @@ import { showErrorBanner } from './js/ui/errorBanner.js';
 import { applyDataVintages } from './js/utils/applyDataVintages.js';
 import { setupPieChartImageGeneration } from './js/utils/generatePieIcon.js';
 
-let MAPILLARY_TOKEN = '';
 let originalMinZoom = 6;
 let currentZoomLock = null;
 
@@ -60,24 +59,28 @@ const writePermalink = () => updatePermalink(window.map, isInitializingRef);
 
 let accidents = null; // { updateLayerFilter, updateColorStyle } — steht ab setupUI()
 
-(async () => {
-  try {
-    // Tokens je nach Umgebung: lokal aus der gitignorten config.js, sonst config.public.js.
-    const config = await import(isLocalhost ? './js/config/config.js' : './js/config/config.public.js');
-    ({ MAPILLARY_TOKEN } = config);
-    console.log(`🔑 ${isLocalhost ? "Lokale config.js" : "config.public.js"} geladen`);
+// Tokens je nach Umgebung: lokal aus der gitignorten config.js, sonst config.public.js.
+// Bewusst NICHT abgewartet: der Token wird einzig für die zwei Mapillary-Quellen gebraucht,
+// hing aber vor allem anderen — vor dem Style-Fetch, vor dem Kartenkonstruktor, vor der
+// ersten Kachel. Jetzt läuft der Import parallel; addSources() wartet ihn erst ab, wenn die
+// Unfall-Quellen bereits stehen.
+// Der catch gehört dazu: vorher hing initMap() IM try, ein fehlgeschlagener Import ließ also
+// eine weiße Seite zurück (traf localhost ohne config.js). Jetzt startet die Karte in jedem
+// Fall, und nur Mapillary bleibt leer.
+const tokenPromise = import(isLocalhost ? './js/config/config.js' : './js/config/config.public.js')
+  .then(({ MAPILLARY_TOKEN }) => MAPILLARY_TOKEN)
+  .catch((err) => {
+    console.error("❌ Konfig konnte nicht geladen werden — Mapillary-Layer bleiben leer:", err);
+    return "";
+  });
 
-    cleanupLegacyPermalink();
+cleanupLegacyPermalink();
 
-    // Legenden-Einträge aus der Registry erzeugen, BEVOR irgendetwas #toggle-<id> sucht
-    // (applyDataVintages läuft schon bei style.load, setupUI erst bei load).
-    renderLegendEntries();
+// Legenden-Einträge aus der Registry erzeugen, BEVOR irgendetwas #toggle-<id> sucht
+// (applyDataVintages läuft schon bei style.load, setupUI erst bei load).
+renderLegendEntries();
 
-    initMap();
-  } catch (err) {
-    console.error("❌ Konfig konnte nicht geladen werden:", err);
-  }
-})();
+initMap();
 
 async function initMap() {
   // PMTiles-Protokoll registrieren. Quellen binden volle pmtiles://https://… URLs ein
@@ -95,8 +98,19 @@ async function initMap() {
 
   // Style laden und die relative sprite-URL gegen die Seitenherkunft absolut machen:
   // MapLibre verlangt absolute sprite-URLs, der Host variiert aber (localhost / vizsim.de).
+  // Ohne den catch starb die Karte hier STUMM: der Fehler landete in der unbehandelten
+  // Promise, initMap brach ab, und die Seite blieb weiß — obwohl es ein Fehlerbanner gibt.
   const styleUrl = new URL("./style.json", document.baseURI).href;
-  const style = await fetch(styleUrl).then(r => r.json());
+  let style;
+  try {
+    const res = await fetch(styleUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    style = await res.json();
+  } catch (err) {
+    console.error("❌ Kartenstil konnte nicht geladen werden:", err);
+    showErrorBanner("Der Kartenstil konnte nicht geladen werden — die Karte bleibt leer.");
+    return;
+  }
   if (style.sprite && !/^https?:\/\//.test(style.sprite)) {
     style.sprite = new URL(style.sprite, styleUrl).href;
   }
@@ -230,7 +244,7 @@ async function initializeMapModules(map, sourcesPromise) {
   // Vertrag, die URL steht damit fest (siehe ACCIDENT_SOURCES in resolveSources.js). Vorher
   // lagen hier zwei Fetches auf dem kritischen Pfad, bevor eine einzige Kachel angefragt
   // werden konnte — die lokale Manifest-Probe (deployt immer ein 404) und das B2-Manifest.
-  await addSources(map, { MAPILLARY_TOKEN });
+  await addSources(map, { tokenPromise });
   addLayers(map);
 
   // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude, NACH

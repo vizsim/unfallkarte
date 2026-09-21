@@ -51,6 +51,34 @@ test("Unfall-Quellen warten nicht auf das Manifest", async ({ page }) => {
   expect(accidentTiles.length, "keine Unfall-Tile-Anfrage vor dem Manifest").toBeGreaterThan(0);
 });
 
+test("Karte startet, ohne auf die Token-Konfig zu warten", async ({ page }) => {
+  // config.js/config.public.js liefert einzig den Mapillary-Token, hing aber vor dem
+  // Style-Fetch und dem Kartenkonstruktor. Gleiche Prüfung wie beim Manifest: künstlich
+  // verzögern und schauen, ob die Karte trotzdem hochkommt.
+  let configDone = false;
+  await page.route(/js\/config\/config(\.public)?\.js/, async (route) => {
+    await new Promise((r) => setTimeout(r, 5000));
+    configDone = true;
+    await route.continue();
+  });
+
+  await page.goto("/index.html");
+  await page.waitForFunction(
+    () => !!window.map?.getSource?.("accidents_single"),
+    null, { timeout: 15_000 },
+  );
+  expect(configDone, "Konfig war schon durch — Verzögerung hat nicht gegriffen").toBe(false);
+});
+
+test("fehlender Kartenstil zeigt ein Banner statt einer weißen Seite", async ({ page }) => {
+  // Der Style-Fetch lief ohne catch: ein Ausfall landete in einer unbehandelten Promise,
+  // initMap brach ab, die Seite blieb weiß — obwohl errorBanner.js genau dafür existiert.
+  await page.route(/\/style\.json/, (route) => route.fulfill({ status: 503, body: "" }));
+  await page.goto("/index.html");
+  await expect(page.locator(".error-banner")).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator(".error-banner-text")).toContainText(/Kartenstil/);
+});
+
 test("Start lädt nur die Unfall-Tiles, keine Kontext-Layer", async ({ page }) => {
   const reqs = recordRequests(page);
   const errors = await openMap(page);
