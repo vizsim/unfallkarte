@@ -56,4 +56,4 @@ var maplibregl$1 = maplibregl;
 return maplibregl$1;
 
 }));
-//# sourceMappingURL=maplibre-gl.js.map
+

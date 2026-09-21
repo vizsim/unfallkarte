@@ -36,10 +36,25 @@ Deploy-Zyklus** liegen: GitHub Pages cacht 10 Minuten, und eine noch gecachte al
 `index.html` verweist darauf — fehlte die Datei, wäre die Seite für diese Besucher kaputt.
 Danach löschen (siehe `docs/TODO.md`).
 
+## Keine Source Maps
+
+Die `.map`-Dateien vendoren wir **nicht** (zusammen mehrere MB, und Stacktraces aus
+minifiziertem Fremdcode helfen uns selten). Deshalb ist aus jeder Datei die abschließende
+Zeile `//# sourceMappingURL=…` entfernt — sonst sucht der Browser bei offenen
+Entwicklerwerkzeugen danach und füllt die Konsole mit 404-Meldungen, die echte Fehler
+verdecken. Besucher sind davon nie betroffen.
+
 ## Update
 
 Neue Dist-Dateien herunterladen und hier ablegen (gleiche Dateinamen), Versionen in dieser
-Tabelle **und** im Kommentar am Ende von `index.html` anpassen. Dann **`npm run test:web`**
+Tabelle **und** im Kommentar am Ende von `index.html` anpassen. Danach die
+`sourceMappingURL`-Kommentare wieder entfernen (siehe oben):
+
+```bash
+sed -i 's|//# sourceMappingURL=[^[:space:]]*$||' vendor/*.js vendor/*.mjs
+```
+
+Dann **`npm run test:web`**
 — nicht nur ein Browser-Check: beide letzten MapLibre-Upgrades haben den Cluster-Hover
 stumm gebrochen (5.24: Structured-Clone bei `setData`; 6.x: Properties mit Null-Prototyp),
 gefangen hat es jeweils nur der Smoke-Test.
