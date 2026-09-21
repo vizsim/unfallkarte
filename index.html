@@ -35,6 +35,14 @@
        <script> fand sie der Preload-Scanner sofort im HTML. -->
   <link rel="modulepreload" href="./vendor/maplibre-gl.mjs" />
   <link rel="modulepreload" href="./vendor/maplibre-gl-shared.mjs" />
+  <!-- Den Style holt main.js erst in initMap() — also NACHDEM der Browser main.js und
+       dessen Modulgraph geladen und geparst hat. Der Preload-Scanner startet den Fetch
+       stattdessen beim Parsen des HTML.
+       `crossorigin` ist hier PFLICHT, obwohl die Datei gleich-origin liegt: as="fetch"
+       ohne crossorigin lädt im No-CORS-Modus, fetch() benutzt per Default mode:"cors" —
+       der Preload passt dann nicht auf die Anfrage und die Datei kommt ZWEIMAL. Das ist
+       stumm; tests/web/perf.spec.js hält es fest (gegengeprüft: ohne crossorigin 2 statt 1). -->
+  <link rel="preload" href="./style.json" as="fetch" crossorigin />
   <link rel="stylesheet" href="./vendor/maplibre-gl.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
