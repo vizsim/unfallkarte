@@ -4,6 +4,15 @@
 
 profiles:
   # Einzel-Unfälle (run_tippecanoe_accidents_single)
+  #
+  # `include` = die Attribute, die das Frontend aus dem Layer `accidents` liest
+  # (Filter/Paint in accidentLayers.js + styleConfig.js, Zähler in featureCounter.js,
+  # Popup in popupHandlers.js). Das Parquet trägt mehr Spalten, und
+  # write_grouped_geojson legt noch UKATEGORIE__1/2/3 dazu — die braucht aber NUR
+  # der Cluster-Build. Ohne diese Liste steckten 24 Attribute in jedem der 2,2 Mio
+  # Punkte, 11 davon ungelesen (ein z12-Tile über Berlin: 311 statt 178 KB).
+  # Neues Attribut im Frontend? Hier eintragen — tests/web/contract.spec.js schlägt
+  # sonst an (es prüft jedes im Style benutzte Feld gegen die Tile-Metadaten).
   accidents_single:
     layer: accidents
     minzoom: 11
@@ -12,8 +21,28 @@ profiles:
     drop_densest_as_needed: true
     no_feature_limit: true
     no_tile_size_limit: true
+    include:
+      - UKATEGORIE
+      - UJAHR
+      - UMONAT
+      - UWOCHENTAG
+      - USTUNDE
+      - UART
+      - UTYP1
+      - IstRad
+      - IstPKW
+      - IstFuss
+      - IstKrad
+      - IstGkfz
+      - IstSonstig
 
   # Cluster Zoom 6-8 (accumulate UKATEGORIE-One-Hot per sum -> Tortendiagramme)
+  #
+  # Aus einem Cluster liest das Frontend NUR die drei Summen (Torte in addLayers.js,
+  # Popup + Zähler). Alle übrigen Spalten trug bisher der Repräsentant des Clusters
+  # mit — bedeutungslos (es ist der erste Unfall des Clusters, nicht "der" Wert) und
+  # trotzdem in jedem Feature. Die Jahresfilter greifen auf Clustern ohnehin nicht,
+  # `include` macht das jetzt explizit.
   clusters_6_8:
     layer: clusters_6_8
     minzoom: 6
@@ -24,11 +53,15 @@ profiles:
       - "UKATEGORIE__1:sum"
       - "UKATEGORIE__2:sum"
       - "UKATEGORIE__3:sum"
+    include:
+      - UKATEGORIE__1
+      - UKATEGORIE__2
+      - UKATEGORIE__3
     no_feature_limit: true
     no_tile_size_limit: true
     maximum_tile_bytes: 1000000
 
-  # Cluster Zoom 9-11
+  # Cluster Zoom 9-11 (include: wie clusters_6_8, siehe dort)
   clusters_9_11:
     layer: clusters_9_11
     minzoom: 9
@@ -40,6 +73,10 @@ profiles:
       - "UKATEGORIE__1:sum"
       - "UKATEGORIE__2:sum"
       - "UKATEGORIE__3:sum"
+    include:
+      - UKATEGORIE__1
+      - UKATEGORIE__2
+      - UKATEGORIE__3
     no_feature_limit: true
     no_tile_size_limit: true
     maximum_tile_bytes: 1000000

@@ -65,3 +65,27 @@ def test_tippecanoe_single_args() -> None:
     assert "accidents" in args  # Layer-Name = Frontend-Vertrag
     assert "--drop-densest-as-needed" in args
     assert "--no-feature-limit" in args
+
+
+def test_profile_args_translate_include_and_exclude() -> None:
+    args = tiles._profile_args({"include": ["A", "B"], "exclude": ["C"]})
+    assert args.count("-y") == 2 and args.count("-x") == 1
+    # Paarweise, nicht nur irgendwo in der Liste: -y A -y B -x C
+    assert [args[i + 1] for i, a in enumerate(args) if a == "-y"] == ["A", "B"]
+    assert [args[i + 1] for i, a in enumerate(args) if a == "-x"] == ["C"]
+
+
+def test_accident_profiles_carry_only_frontend_attributes() -> None:
+    """Die Attribut-Diät ist ein Vertrag mit dem Frontend: die Einzel-Unfälle tragen
+    die 13 gelesenen Spalten, die Cluster NUR die drei Summen für die Torten.
+    Gegenstück im Browser: tests/web/contract.spec.js (Style -> Tile-Metadaten)."""
+    profiles = tiles._profiles()
+    single = profiles["accidents_single"]["include"]
+    assert "UKATEGORIE" in single and "UJAHR" in single and "IstRad" in single
+    # Die One-Hot-Spalten entstehen nur für die Cluster-Akkumulation.
+    assert not any(k.startswith("UKATEGORIE__") for k in single)
+    for name in ("clusters_6_8", "clusters_9_11"):
+        prof = profiles[name]
+        assert prof["include"] == ["UKATEGORIE__1", "UKATEGORIE__2", "UKATEGORIE__3"]
+        # Jede akkumulierte Spalte muss die Diät überleben, sonst summiert tippecanoe ins Leere.
+        assert {a.split(":")[0] for a in prof["accumulate"]} <= set(prof["include"])

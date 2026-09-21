@@ -30,6 +30,13 @@ def _profile_args(profile: dict[str, Any], layer_override: str | None = None) ->
     layer = layer_override or profile.get("layer")
     if layer:
         args += ["-l", layer]
+    # Attribut-Diät: -y hält NUR die genannten Felder, -x wirft die genannten weg.
+    # Die Quell-Dateien tragen oft weit mehr Spalten, als das Frontend liest — jedes
+    # ungelesene Attribut kostet in JEDEM Feature Platz im Tile (siehe docs/PERFORMANCE_PLAN.md).
+    for key in profile.get("include", []):
+        args += ["-y", key]
+    for key in profile.get("exclude", []):
+        args += ["-x", key]
     if "minzoom" in profile:
         args.append(f"--minimum-zoom={profile['minzoom']}")
     if "maxzoom" in profile:
