@@ -27,6 +27,30 @@ test("style.json wird genau EINMAL geholt (Preload passt auf den fetch)", async 
   expectNoErrors(errors);
 });
 
+test("Unfall-Quellen warten nicht auf das Manifest", async ({ page }) => {
+  // Die Zusicherung verhaltensbasiert prüfen statt über Zeitstempel: das Manifest wird
+  // künstlich um 5 s verzögert. Hingen die Unfall-Quellen daran, käme in der Zeit keine
+  // einzige Kachel. Ihre URL steht ohne Manifest fest (ACCIDENT_SOURCES), also müssen die
+  // Tiles fliegen, während das Manifest noch unterwegs ist.
+  let manifestDone = false;
+  await page.route(/manifest\.json/, async (route) => {
+    await new Promise((r) => setTimeout(r, 5000));
+    manifestDone = true;
+    await route.continue();
+  });
+
+  const reqs = recordRequests(page);
+  await page.goto("/index.html");
+  await page.waitForFunction(
+    () => !!window.map?.getSource?.("accidents_single"),
+    null, { timeout: 15_000 },
+  );
+
+  expect(manifestDone, "Manifest war schon durch — Verzögerung hat nicht gegriffen").toBe(false);
+  const accidentTiles = reqs.filter((r) => r.path.endsWith("accidents_single.pmtiles"));
+  expect(accidentTiles.length, "keine Unfall-Tile-Anfrage vor dem Manifest").toBeGreaterThan(0);
+});
+
 test("Start lädt nur die Unfall-Tiles, keine Kontext-Layer", async ({ page }) => {
   const reqs = recordRequests(page);
   const errors = await openMap(page);

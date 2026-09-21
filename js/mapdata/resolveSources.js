@@ -11,6 +11,23 @@
 const LOCAL_BASE = "./data/";
 const REMOTE_BASE = "https://tiles.vizsim.de/file/unfallkarte-data-v2/";
 
+// Die Unfall-Quellen kommen OHNE Manifest aus: ihre Dateinamen sind ein stabiler Vertrag
+// (pipeline/config/sources.yaml, kein Datum im Namen — siehe CLAUDE.md), die URL steht also
+// schon zur Bauzeit fest. Das spart auf dem kritischen Pfad zwei Fetches, bevor der erste
+// Unfallpunkt fließen kann: die lokale Manifest-Probe (auf Pages garantiert ein 404, samt
+// 9-KB-Fehlerseite) und das Manifest von B2. Das Manifest lädt weiter — parallel, für
+// Datenstände und Kontextlayer.
+// Schlüssel = Frontend-Source-ID, manifestId = Eintrag in sources.yaml (sie weichen bei den
+// Clustern ab). tests/unit/accidentSources.test.js hält beides gegen sources.yaml.
+export const ACCIDENT_SOURCES = {
+  accidents_single: { manifestId: "accidents_single", file: "accidents/accidents_single.pmtiles" },
+  "accidents-cluster": { manifestId: "accidents_cluster", file: "accidents/combined_cluster.pmtiles" },
+};
+
+// ./data/ ist gitignoriert und existiert nur auf dem Entwicklungsrechner; auf Pages ist die
+// Probe ein Roundtrip für eine Antwort, die immer "nein" lautet.
+const mayHaveLocalTree = () => ["localhost", "127.0.0.1"].includes(globalThis.location?.hostname);
+
 async function fetchJson(url) {
   try {
     const res = await fetch(url, { cache: "no-cache" });
@@ -45,6 +62,25 @@ async function existsLocally(url) {
   } catch {
     return false;
   }
+}
+
+/**
+ * URLs der Unfall-Quellen, ohne auf das Manifest zu warten.
+ * Lokal (mit data/-Baum) wird pro Datei einmal geprobt — dort kostet das nichts und
+ * local-first bleibt erhalten; deployt fällt die Probe ersatzlos weg.
+ */
+export async function resolveAccidentSources({ localBase = LOCAL_BASE, remoteBase = REMOTE_BASE } = {}) {
+  const entries = Object.entries(ACCIDENT_SOURCES);
+  if (!mayHaveLocalTree()) {
+    return Object.fromEntries(entries.map(([id, { file }]) => [id, `pmtiles://${remoteBase}${file}`]));
+  }
+  const resolved = await Promise.all(
+    entries.map(async ([id, { file }]) => {
+      const base = (await existsLocally(`${localBase}${file}`)) ? localBase : remoteBase;
+      return [id, `pmtiles://${base}${file}`];
+    })
+  );
+  return Object.fromEntries(resolved);
 }
 
 // Liefert ein Lookup-Objekt: url(id) -> "pmtiles://<lokal|remote>".

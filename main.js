@@ -3,7 +3,7 @@
 
 // 📦 Karte: Bibliothek, Quellen, Layer, Basemap/Terrain
 import { Map as MapLibreMap, addProtocol } from './js/lib/maplibre.js';
-import { addSources } from "./js/mapdata/addSources.js";
+import { addSources, attachManifest } from "./js/mapdata/addSources.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
 import { resolveSources } from "./js/mapdata/resolveSources.js";
 import { addBasemapTerrain } from './js/map/basemapTerrain.js';
@@ -226,8 +226,11 @@ async function initializeMapModules(map, sourcesPromise) {
   setupPieChartImageGeneration(map);
   addNavigationControl(map);
 
-  // async: Local-first-Auflösung (Manifest) — die Promise läuft seit initMap.
-  const sources = await addSources(map, { MAPILLARY_TOKEN, sourcesPromise });
+  // Unfall-Quellen + Layer zuerst und OHNE das Manifest: ihre Dateinamen sind ein stabiler
+  // Vertrag, die URL steht damit fest (siehe ACCIDENT_SOURCES in resolveSources.js). Vorher
+  // lagen hier zwei Fetches auf dem kritischen Pfad, bevor eine einzige Kachel angefragt
+  // werden konnte — die lokale Manifest-Probe (deployt immer ein 404) und das B2-Manifest.
+  await addSources(map, { MAPILLARY_TOKEN });
   addLayers(map);
 
   // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude, NACH
@@ -236,7 +239,10 @@ async function initializeMapModules(map, sourcesPromise) {
   addBikeLanesSource(map);
   addBikeLanesLayers(map);
 
-  // OSM-Quellen-Tooltips mit dem Datenstand aus dem Manifest füllen — Manifest durchreichen,
-  // sonst lädt loadManifest() es ein zweites Mal.
+  // Ab hier das Manifest (läuft seit initMap parallel): es versorgt die Layer-Registry mit
+  // URLs für das lazy Einschalten und die OSM-Quellen-Tooltips mit dem Datenstand.
+  // Reihenfolge ist sicher: map.on("load") wartet auf initializeMapModules, der
+  // Permalink-Restore (der Kontextlayer einschalten kann) läuft erst danach.
+  const sources = await attachManifest(sourcesPromise);
   applyDataVintages(sources.manifest);
 }

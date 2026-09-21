@@ -1,14 +1,12 @@
-import { resolveSources } from "./resolveSources.js";
+import { resolveSources, resolveAccidentSources } from "./resolveSources.js";
 import { showErrorBanner } from "../ui/errorBanner.js";
 import { setSourceResolver } from "../layers/registry.js";
 
-// Beim Start registrierte Quellen: nur die Unfälle (Frontend-Source-ID -> Manifest-ID). Alle
-// anderen legt die Layer-Registry lazy beim ersten Einschalten an (ensureEntry) — sie bekommt
-// dafür unten den URL-Resolver (Local-first ./data/, Fallback B2 unfallkarte-data-v2).
-const MIGRATED = {
-  accidents_single: "accidents_single",
-  "accidents-cluster": "accidents_cluster",
-};
+// Beim Start registrierte Quellen: nur die Unfälle. Alle anderen legt die Layer-Registry lazy
+// beim ersten Einschalten an (ensureEntry) — sie bekommt dafür in attachManifest() den
+// URL-Resolver (Local-first ./data/, Fallback B2 unfallkarte-data-v2).
+// Die Zuordnung Frontend-Source-ID -> Manifest-ID + Dateiname steht in ACCIDENT_SOURCES
+// (resolveSources.js), weil die Unfall-Quellen ohne Manifest auskommen.
 
 // Alle Layer sind in die Pipeline migriert — das alte Bucket `unfallkarte-data`
 // (LEGACY) wird nicht mehr gebraucht. (scenario4/5/7 = Mapillary wurden entfernt.)
@@ -20,24 +18,17 @@ const MIGRATED = {
 const ACCIDENT_ATTRIBUTION =
   'Unfalldaten: © <a href="https://unfallatlas.statistikportal.de/" target="_blank" rel="noopener">Statistisches Bundesamt</a> (dl-de/by-2-0)';
 
-export async function addSources(map, { MAPILLARY_TOKEN, sourcesPromise }) {
+/**
+ * Quellen, die kein Manifest brauchen — laufen sofort, damit die Unfall-Tiles nicht hinter
+ * zwei Manifest-Fetches warten. Den Rest erledigt attachManifest().
+ */
+export async function addSources(map, { MAPILLARY_TOKEN }) {
   const addVector = (id, url) => {
     if (!map.getSource(id)) map.addSource(id, { type: "vector", url, attribution: ACCIDENT_ATTRIBUTION });
   };
 
-  // Pipeline-Layer: Local-first + B2-v2-Fallback über data/manifest.json.
-  // sourcesPromise wird in main.js schon beim Kartenstart angestoßen (parallel zum
-  // Style-/Basemap-Laden); ohne sie hier als Fallback selbst auflösen.
-  const sources = await (sourcesPromise ?? resolveSources());
-  if (!sources.manifestOk) {
-    showErrorBanner(
-      "Die Kartendaten sind gerade nicht erreichbar (Manifest weder lokal noch " +
-      "vom Datenserver ladbar) — Unfall- und Kontextlayer bleiben leer."
-    );
-  }
-  setSourceResolver((manifestId) => sources.url(manifestId));
-  for (const [id, manifestId] of Object.entries(MIGRATED)) {
-    addVector(id, sources.url(manifestId));
+  for (const [id, url] of Object.entries(await resolveAccidentSources())) {
+    addVector(id, url);
   }
 
   // Mapillary (Vektor-Tiles direkt von Mapillary)
@@ -66,7 +57,25 @@ export async function addSources(map, { MAPILLARY_TOKEN, sourcesPromise }) {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
   });
+}
 
+/**
+ * Das Manifest anhängen: es versorgt die Layer-Registry mit URLs (lazy, beim ersten
+ * Einschalten) und die Tooltips mit Datenständen. Läuft NACH den Unfall-Quellen und
+ * blockiert sie damit nicht mehr.
+ *
+ * sourcesPromise wird in main.js schon beim Kartenstart angestoßen (parallel zum Style-
+ * und Basemap-Laden); ohne sie hier als Fallback selbst auflösen.
+ */
+export async function attachManifest(sourcesPromise) {
+  const sources = await (sourcesPromise ?? resolveSources());
+  if (!sources.manifestOk) {
+    showErrorBanner(
+      "Die Kartendaten sind gerade nicht erreichbar (Manifest weder lokal noch " +
+      "vom Datenserver ladbar) — Unfall- und Kontextlayer bleiben leer."
+    );
+  }
+  setSourceResolver((manifestId) => sources.url(manifestId));
   // Manifest weiterverwenden (z. B. applyDataVintages) statt es erneut zu laden.
   return sources;
 }
