@@ -11,7 +11,9 @@
 // Antippen aus.
 //
 // Hier lebt nur, was CSS nicht kann:
-//   1. beim ersten Laden zuklappen (auf dem Desktop bleibt alles wie bisher),
+//   1. beim ersten Laden zuklappen (auf dem Desktop bleibt alles wie bisher) — die Klasse
+//      setzt schon ein Inline-Skript am Anfang von .legend in index.html, VOR dem ersten
+//      Bild; hier kommen Pfeil/aria, Suche und Attribution nach,
 //   2. die tatsächliche Höhe des zugeklappten Sheets als `--legend-peek` melden,
 //      damit die Bedienelemente unten links exakt darüber sitzen statt dahinter,
 //   3. die Suche auf-/zuklappen samt Fokus und Tastatur,
@@ -19,7 +21,8 @@
 
 import { setLegendCollapsed } from "./legendHandlers.js";
 
-// Muss mit der Breakpoint-Breite in style.css übereinstimmen.
+// Muss mit der Breakpoint-Breite in style.css UND dem Inline-Skript am Anfang von .legend
+// (index.html) übereinstimmen.
 export const MOBILE_QUERY = "(max-width: 640px)";
 
 export function setupMobileLayout() {

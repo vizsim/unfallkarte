@@ -47,6 +47,11 @@
   <div id="map"></div>
 
   <div class="legend">
+    <!-- Handy: den Startzustand „zugeklappt" schon beim Parsen setzen, VOR dem ersten Bild.
+         mobileLayout.js läuft erst beim load der Karte — bis dahin stand die komplett
+         ausgeklappte Legende samt aller Layer-Schalter über der Karte und klappte dann weg
+         (gemessen 3–4 s im Mobilfunk-Profil). Grenze = MOBILE_QUERY in mobileLayout.js. -->
+    <script>if (matchMedia("(max-width: 640px)").matches) document.currentScript.parentElement.classList.add("collapsed");</script>
 
 
     <!-- ====================

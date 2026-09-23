@@ -44,6 +44,17 @@ test.describe("Handy", () => {
     expectNoErrors(errors);
   });
 
+  test("Sheet ist schon VOR dem App-JS zugeklappt — die ganze Legende blitzt nicht auf", async ({ page }) => {
+    // Das Zuklappen in mobileLayout.js läuft erst beim load der Karte. Bis dahin stand die
+    // komplett ausgeklappte Legende samt aller Layer-Schalter über der Karte und klappte dann
+    // weg (gemessen 3–4 s im Mobilfunk-Profil). Hier wird das App-JS ganz blockiert: was dann
+    // steht, ist genau das, was vor dem JS gemalt wird.
+    await page.route(/\/(assets\/index-[^/]+\.js|main\.js)$/, (route) => route.abort());
+    await page.goto("/index.html");
+    expect(await isCollapsed(page), "Startzustand hängt am App-JS").toBe(true);
+    expect((await page.locator(".legend").boundingBox()).height, "Sheet steht ausgeklappt").toBeLessThan(200);
+  });
+
   test("Bedienelemente unten links liegen über dem Streifen, nicht dahinter", async ({ page }) => {
     const errors = await openMap(page);
 
