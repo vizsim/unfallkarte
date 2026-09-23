@@ -216,5 +216,11 @@ profiles:
 accidents_build:
   grouped_geojson: "accidents_grouped.geojson.gz"   # Zwischenstand in data/raw/accidents/
   single_output: "accidents_single.pmtiles"
+  # MLT-Variante der Einzel-Unfälle (docs/MLT_EVALUATION.md): tippecanoe baut weiter MVT, danach
+  # wandelt tools/mlt/mvt-to-mlt.mjs Kachel für Kachel um. EIGENER Dateiname statt Ersetzen —
+  # eine noch gecachte alte Seite läse MLT-Kacheln sonst als MVT. Frontend-Vertrag: derselbe
+  # Name steht in sources.yaml und ACCIDENT_SOURCES (js/mapdata/resolveSources.js).
+  # Leer lassen/entfernen = kein MLT.
+  single_mlt_output: "accidents_single_mlt.pmtiles"
   cluster_output: "combined_cluster.pmtiles"
   cluster_profiles: ["clusters_6_8", "clusters_9_11"]

@@ -96,6 +96,21 @@ def accidents_tiles(
         typer.secho(f"{name}: {path}", fg=typer.colors.GREEN)
 
 
+@accidents_app.command("mlt")
+def accidents_mlt(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommando nur zeigen"),
+) -> None:
+    """Wandelt das vorhandene accidents_single.pmtiles nach MLT um (ohne neu zu tilen)."""
+    from unfallkarte import tiles
+
+    out = tiles.convert_accident_tiles_to_mlt(dry_run=dry_run)
+    if out is None:
+        msg = "accidents_build.single_mlt_output ist nicht gesetzt — nichts zu tun."
+        typer.secho(msg, fg=typer.colors.YELLOW)
+        return
+    typer.secho(f"single_mlt: {out}", fg=typer.colors.GREEN)
+
+
 # --- osm (Phase 2) ---
 @osm_app.command("fetch")
 def osm_fetch(force: bool = typer.Option(False, "--force")) -> None:

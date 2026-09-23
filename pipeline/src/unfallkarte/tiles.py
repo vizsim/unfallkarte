@@ -15,9 +15,13 @@ from pathlib import Path
 from shutil import which
 from typing import Any
 
-from unfallkarte.config import get_paths, load_yaml
+from unfallkarte.config import get_paths, load_yaml, repo_root
 
 _CFG = "tiles.yaml"
+
+# Formatwechsel MVT -> MLT (docs/MLT_EVALUATION.md): ein Node-Werkzeug im Repo-Root, weil es die
+# npm-Abhängigkeiten des Frontends nutzt (@maplibre/mlt exakt gepinnt = Decoder in MapLibre).
+MVT_TO_MLT = repo_root().parent / "tools" / "mlt" / "mvt-to-mlt.mjs"
 
 
 def _profiles() -> dict[str, Any]:
@@ -108,6 +112,28 @@ def tile_join(output_path: Path, inputs: list[Path], *, dry_run: bool = False) -
     return output_path
 
 
+def mvt_to_mlt(src: Path, dst: Path, *, dry_run: bool = False) -> Path:
+    """MVT-PMTiles (tippecanoe) -> MLT-PMTiles. Es ändert sich nur das Kachelformat; das Werkzeug
+    liest jede Kachel zurück, vergleicht sie mit dem Original und bricht bei Abweichung ab."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    _run(["node", str(MVT_TO_MLT), str(src), str(dst)], dry_run=dry_run)
+    return dst
+
+
+def convert_accident_tiles_to_mlt(*, dry_run: bool = False) -> Path | None:
+    """Einzel-Unfälle nach MLT, wenn `accidents_build.single_mlt_output` gesetzt ist.
+
+    Eigener CLI-Schritt (`unfallkarte accidents mlt`), damit sich das Format ohne erneutes
+    Tilen (~2 min tippecanoe + GeoJSON-Export) umstellen lässt.
+    """
+    cfg = load_yaml(_CFG)["accidents_build"]
+    if not cfg.get("single_mlt_output"):
+        return None
+    out_dir = get_paths().out("accidents")
+    src, dst = out_dir / cfg["single_output"], out_dir / cfg["single_mlt_output"]
+    return mvt_to_mlt(src, dst, dry_run=dry_run)
+
+
 def write_grouped_geojson(parquet: Path, out_gz: Path) -> Path:
     """Liest das Unfall-Parquet, fügt UKATEGORIE__1/2/3 (One-Hot) hinzu und schreibt
     gezipptes GeoJSON für tippecanoe (Cluster-Akkumulation + Tortendiagramme)."""
@@ -171,7 +197,9 @@ def build_multi_layer(
 def build_accident_tiles(parquet: Path, *, dry_run: bool = False) -> dict[str, Path]:
     """Voller Accident-Tiles-Build: grouped GeoJSON -> single + Cluster-PMTiles.
 
-    Reproduziert accidents_single.pmtiles und combined_cluster.pmtiles.
+    Reproduziert accidents_single.pmtiles und combined_cluster.pmtiles, dazu die MLT-Variante
+    der Einzel-Unfälle, falls konfiguriert (die MVT-Datei bleibt als Eingabe und für noch
+    gecachte alte Seiten bestehen).
     """
     cfg = load_yaml(_CFG)["accidents_build"]
     paths = get_paths()
@@ -194,4 +222,8 @@ def build_accident_tiles(parquet: Path, *, dry_run: bool = False) -> dict[str, P
         for part in tmp_parts:
             part.unlink(missing_ok=True)
 
-    return {"single": single, "cluster": combined}
+    out = {"single": single, "cluster": combined}
+    single_mlt = convert_accident_tiles_to_mlt(dry_run=dry_run)
+    if single_mlt:
+        out["single_mlt"] = single_mlt
+    return out
