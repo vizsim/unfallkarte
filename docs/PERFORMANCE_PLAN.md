@@ -14,7 +14,7 @@ Ergänzt `docs/TODO.md` Roadmap 3 (Vite), ersetzt sie nicht.
 | 1 CDN-Cache für die Tiles | **offen — größter verbleibender Hebel** | heute wird NICHTS gecacht |
 | 2 Attribut-Diät der Tiles | **erledigt + deployt** (`cadff01`) | −40 % / −63 % Dateigröße, −43 % je Kachel |
 | 3 Roundtrip-Diät | **erledigt + deployt** (`cacd3f0`, `77ec4c9`, `acb5ef6`) | live −0,35 s, erste Kachel-Anfrage −0,51 s |
-| 4 Vite | **umgesetzt auf `temp/vite`** — Cutover + Messung offen | siehe [`VITE_MIGRATION.md`](VITE_MIGRATION.md) |
+| 4 Vite | **umgesetzt auf `temp/vite`** — Cutover offen | lokal −0,78 s bis zum ersten Unfallpunkt (Mobilfunk, 2 Reihen), schnelle Leitung ≈ 0 — [`VITE_MIGRATION.md`](VITE_MIGRATION.md) |
 | 5 Lazy-Chunks | offen (nach Vite) | — |
 | 6 Gefühlte Ladezeit, Perf-Budget | teilweise (`tests/web/perf.spec.js` steht) | — |
 
@@ -209,8 +209,8 @@ Zurückgestellt:
 Wie in `docs/MAPLIBRE_6_UPGRADE.md`: Zeit bis zum ersten Unfallpunkt, Profil 1,6 Mbit/s /
 150 ms RTT (CDP `Network.emulateNetworkConditions`), mehrere Läufe, Median **und** Spanne.
 
-- **Nie gegen `npm run serve` messen** — ohne gzip und mit `-c-1` verfälscht der Dev-Server um
-  Sekunden. Für lokale Vergleiche einen Server mit gzip + `max-age=600` benutzen, und die
+- **Nie gegen `npm run dev` oder `vite preview` messen** — ohne gzip und Pages-Cache verfälscht das
+  um Sekunden. Für lokale Vergleiche einen Server mit gzip + `max-age=600` benutzen, und die
   404-Antwort auf ~9,4 KB aufblasen, damit die Manifest-Probe nicht billiger aussieht als
   deployt.
 - **Produktionspfad lokal testen:** über `http://127.0.0.2:<port>` laden. `main.js` und
@@ -220,8 +220,9 @@ Wie in `docs/MAPLIBRE_6_UPGRADE.md`: Zeit bis zum ersten Unfallpunkt, Profil 1,6
   die Kachel-Diät lässt sich nachträglich nicht mehr A/B-testen.
 - **Nach einem Push zehn Minuten warten** (siehe Fund 1).
 
-Die Skripte dazu lagen im Scratchpad dieser Sitzung und sind nicht im Repo. Wenn sie öfter
-gebraucht werden, gehören sie nach `tools/perf/`.
+Die Skripte liegen seit 2026-09-23 im Repo: `tools/perf/pages-like-server.mjs <dir> <port>` und
+`tools/perf/measure-start.mjs <urlA> <urlB> [läufe] [mobil|schnell]` (A/B abwechselnd, frischer
+Kontext je Lauf, Aufwärmlauf je Arm). Vorher lagen sie nur im Scratchpad der jeweiligen Sitzung.
 
 ---
 

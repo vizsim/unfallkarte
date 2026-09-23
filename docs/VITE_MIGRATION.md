@@ -1,7 +1,7 @@
 # Vite-Umstellung — Skizze und Umsetzungsplan
 
-Stand: **2026-09-23** · Schritte 0–3 und 5 umgesetzt auf `temp/vite`; offen: Cutover (4) und
-Messung (6). Konkretisiert `docs/TODO.md` Roadmap 3 und `docs/PERFORMANCE_PLAN.md` Stufe 4.
+Stand: **2026-09-23** · Schritte 0–3, 5 und 6 (lokal) umgesetzt auf `temp/vite`; offen: Cutover (4)
+und die Live-Messung danach. Konkretisiert `docs/TODO.md` Roadmap 3 und `docs/PERFORMANCE_PLAN.md` Stufe 4.
 Gemessene Zahlen tragen ihre Quelle; Schätzungen sind als solche markiert.
 
 ## Warum — und warum nicht
@@ -25,6 +25,9 @@ Gemessene Zahlen tragen ihre Quelle; Schätzungen sind als solche markiert.
 5 Wasserfall-Stufen; ein esbuild-Probe-Bündel davon wog 25 KB gzip. **Schätzung:** auf dem
 Mobilfunk-Profil (1,6 Mbit/s / 150 ms) höchstens ~0,5 s, auf schneller Leitung ≈ 0. Der Gewinn läuft
 parallel zum MapLibre-Download und verschwindet teilweise darin.
+**Gemessen (Schritt 6): −0,78 s auf dem Mobilfunk-Profil** — mehr als geschätzt, auf schneller
+Leitung ≈ 0 wie erwartet. Die Schätzung lag daneben, weil der Modul-Wasserfall eben NICHT parallel
+zu MapLibre lief, sondern vor dem Kartenkonstruktor auf dem kritischen Pfad lag.
 
 ## Was sich ändert
 
@@ -290,13 +293,37 @@ der Preload-Link auf `public/style.json` (fängt `perf.spec.js`).
   - Messregel: gegen `dist/` mit Pages-ähnlichem Server, nie gegen `vite` dev.
 - `docs/TODO.md` Roadmap 3 abhaken, `PERFORMANCE_PLAN.md` Stufe 4 nachziehen.
 
-### Schritt 6 — Messen
+### Schritt 6 — Messen ✓ lokal (2026-09-23) · live offen
 
-Wie in `PERFORMANCE_PLAN.md` („Messmethode"): Pages-ähnlicher Server (gzip, `max-age=600`) einmal
-für `pre-vite` (Repo-Root) und einmal für `dist/`, über `127.0.0.2`, 1,6 Mbit/s / 150 ms, mindestens
-2 Reihen, Median + Spanne. Danach live gegen vizsim.de (Baseline 5,76 s bis zum ersten Unfallpunkt,
-2026-09-21). Die Erwartung ist klein (siehe oben) — ehrlich berichten, auch wenn es ≈ 0 ist. Die
-Mess-Skripte kommen diesmal nach `tools/perf/`.
+Mess-Skripte liegen jetzt im Repo: `tools/perf/pages-like-server.mjs` (gzip, `max-age=600`, Range,
+~9-KB-404 wie Pages) und `tools/perf/measure-start.mjs` (A/B abwechselnd, frischer Browser-Kontext
+je Lauf, ein Aufwärmlauf je Arm). A = `main` wie heute live (`git archive main`), B = `dist/` von
+`temp/vite`; beide über `127.0.0.2` (Produktionspfad, keine Local-first-Proben), ruhige Maschine
+(loadavg < 0,5 vor dem Lauf). Median (Spanne):
+
+| | vorher (`main`) | Vite (`dist/`) | Δ |
+|---|---|---|---|
+| **Mobilfunk, Reihe 1** (7 Läufe) — erster Unfallpunkt | 6,77 s (6,58–7,05) | **5,98 s** (5,93–6,09) | −0,79 s |
+| Mobilfunk, Reihe 1 — fertige Startansicht | 8,37 s (8,34–8,69) | **7,60 s** (7,58–7,71) | −0,77 s |
+| **Mobilfunk, Reihe 2** (5 Läufe) — erster Unfallpunkt | 6,52 s (6,44–6,57) | **5,74 s** (5,66–5,80) | −0,78 s |
+| Mobilfunk, Reihe 2 — fertige Startansicht | 8,14 s (8,10–8,15) | **7,35 s** (7,31–7,42) | −0,79 s |
+| schnelle Leitung (5 Läufe) — erster Unfallpunkt | 1,55 s (1,51–1,73) | 1,48 s (1,39–1,49) | ≈ 0 |
+| schnelle Leitung — fertige Startansicht | 2,15 s (1,94–2,57) | 2,09 s (1,85–2,31) | ≈ 0 |
+| eigene Herkunft (HTML/JS/CSS/Style) | 453 KB in 59 Anfragen | **379 KB in 17 Anfragen** | −74 KB, −42 |
+
+Auf dem Mobilfunk-Profil überlappen sich die Spannen in keiner Reihe — der Gewinn ist echt und
+stabil (−0,78 s in beiden Reihen). Auf schneller Leitung liegt der Unterschied im Rauschen.
+Erklärung (plausibel, nicht einzeln belegt): der Modul-Wasserfall (5 Stufen à 150 ms RTT ≈ 0,75 s)
+lag vor dem Kartenkonstruktor; gebündelt ist es EINE Anfrage, parallel zu MapLibre.
+
+Nebenfund beim Messen (Bildaufzeichnung + Seite ohne JS): auf dem Handy stand vor dem App-JS die
+komplett ausgeklappte Legende über der Karte, bis zum `load` der Karte — 4,0 s (vorher) bzw. 3,2 s
+(Vite) auf dem Mobilfunk-Profil. Nicht durch Vite verursacht, sondern alt; behoben in `6da6a57`
+(Inline-Einzeiler setzt `collapsed` beim Parsen). Ebenso behoben: beim Ziehen des Sheets wurde die
+ganze Seite scrollbar (`167dea5`).
+
+**Offen:** live nach dem Cutover gegen vizsim.de nachmessen (Baseline 5,76 s bis zum ersten
+Unfallpunkt, 2026-09-21) — erst 10 min nach dem Deploy (Pages-Cache).
 
 ## Danach (nicht Teil dieses Plans)
 
