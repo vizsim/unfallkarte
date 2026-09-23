@@ -12,9 +12,13 @@
 //
 // Server: tools/perf/pages-like-server.mjs (gzip + max-age=600 wie GitHub Pages), Host
 // 127.0.0.2 = Produktionspfad ohne Local-first-Proben.
+//
+// CPU_THROTTLE=4 node tools/perf/measure-start.mjs … bremst zusätzlich die CPU (CDP), etwa für
+// Dekodier-Unterschiede, die auf einem Laptop verschwinden, auf dem Handy aber zählen.
 import { chromium } from "@playwright/test";
 
 const [urlA, urlB, runsArg = "7", profile = "mobil"] = process.argv.slice(2);
+const CPU_THROTTLE = Number(process.env.CPU_THROTTLE) || 1;
 if (!urlA || !urlB) {
   console.error("Aufruf: node tools/perf/measure-start.mjs <urlA> <urlB> [läufe=7] [mobil|schnell]");
   process.exit(1);
@@ -30,6 +34,7 @@ async function run(url) {
   const cdp = await ctx.newCDPSession(page);
   await cdp.send("Network.enable");
   if (profile === "mobil") await cdp.send("Network.emulateNetworkConditions", THROTTLE);
+  if (CPU_THROTTLE > 1) await cdp.send("Emulation.setCPUThrottlingRate", { rate: CPU_THROTTLE });
 
   const origin = new URL(url).origin;
   const urls = new Map();
@@ -78,7 +83,7 @@ const median = (xs) => {
   return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
 };
 const fmt = (xs) => `${(median(xs) / 1000).toFixed(2)} s (${(Math.min(...xs) / 1000).toFixed(2)}–${(Math.max(...xs) / 1000).toFixed(2)})`;
-console.log(`\nProfil ${profile}, ${RUNS} Läufe je Arm, Median (Spanne):`);
+console.log(`\nProfil ${profile}${CPU_THROTTLE > 1 ? `, CPU ×${CPU_THROTTLE} gebremst` : ""}, ${RUNS} Läufe je Arm, Median (Spanne):`);
 for (const [key, { url, runs }] of Object.entries(arms)) {
   console.log(`${key} ${url}`);
   console.log(`  erster Unfallpunkt   ${fmt(runs.map((r) => r.firstPoint))}`);
