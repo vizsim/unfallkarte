@@ -23,3 +23,10 @@ def test_mlt_output_has_its_own_file_name() -> None:
     build = load_yaml("tiles.yaml")["accidents_build"]
     assert build["single_mlt_output"] != build["single_output"]
 
+
+def test_sources_yaml_points_to_the_mlt_file() -> None:
+    # sources.yaml (-> Manifest; ACCIDENT_SOURCES hält tests/unit/accidentSources.test.js dagegen)
+    # zeigt auf die MLT-Datei, die die Pipeline baut.
+    build = load_yaml("tiles.yaml")["accidents_build"]
+    single = load_yaml("sources.yaml")["datasets"]["accidents_single"]
+    assert single["file"] == f"accidents/{build['single_mlt_output']}"

@@ -5365,7 +5365,8 @@
    "type": "vector"
   },
   "accidents_single": {
-   "file": "accidents/accidents_single.pmtiles",
+   "encoding": "mlt",
+   "file": "accidents/accidents_single_mlt.pmtiles",
    "type": "vector"
   },
   "bike-lanes": {

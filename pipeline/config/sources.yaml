@@ -9,7 +9,9 @@
 
 datasets:
   accidents_single:
-    file: "accidents/accidents_single.pmtiles"
+    # MLT (MapLibre Tiles), umgewandelt aus der MVT-Datei accidents_single.pmtiles — siehe
+    # accidents_build.single_mlt_output in tiles.yaml. Frontend: ACCIDENT_SOURCES (encoding "mlt").
+    file: "accidents/accidents_single_mlt.pmtiles"
     label: "Unfalldaten"
     attribution: "Unfallatlas der Statistischen Ämter (dl-de/by-2-0)"
     date: auto            # max. Jahr aus accidents.yaml

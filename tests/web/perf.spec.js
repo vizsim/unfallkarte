@@ -5,6 +5,13 @@
 // welche Dateien werden geholt, und wie oft.
 import { test, expect } from "@playwright/test";
 import { openMap, expectNoErrors } from "./helpers.js";
+// Dateinamen der Unfall-Quellen aus DERSELBEN Konstante wie die App (browserlos importierbar,
+// siehe tests/unit/accidentSources.test.js) — ein Format-/Namenswechsel (MVT -> MLT) bricht
+// diese Tests so nicht still.
+import { ACCIDENT_SOURCES } from "../../js/mapdata/resolveSources.js";
+
+const fileName = (path) => path.split("/").pop();
+const ACCIDENT_FILES = Object.values(ACCIDENT_SOURCES).map((s) => fileName(s.file));
 
 /** Anfragen der Seite mitschreiben (Methode mit, damit HEAD-Proben unterscheidbar bleiben). */
 function recordRequests(page) {
@@ -47,7 +54,8 @@ test("Unfall-Quellen warten nicht auf das Manifest", async ({ page }) => {
   );
 
   expect(manifestDone, "Manifest war schon durch — Verzögerung hat nicht gegriffen").toBe(false);
-  const accidentTiles = reqs.filter((r) => r.path.endsWith("accidents_single.pmtiles"));
+  const single = fileName(ACCIDENT_SOURCES.accidents_single.file);
+  const accidentTiles = reqs.filter((r) => r.path.endsWith(single));
   expect(accidentTiles.length, "keine Unfall-Tile-Anfrage vor dem Manifest").toBeGreaterThan(0);
 });
 
@@ -128,11 +136,9 @@ test("Start lädt nur die Unfall-Tiles, keine Kontext-Layer", async ({ page }) =
   // Kachel-Bytes und gehört nicht in diese Zusicherung.
   const loaded = [...new Set(
     reqs.filter((r) => r.method === "GET" && r.path.endsWith(".pmtiles"))
-      .map((r) => r.path.split("/").pop()),
+      .map((r) => fileName(r.path)),
   )];
-  const unexpected = loaded.filter(
-    (f) => !["accidents_single.pmtiles", "combined_cluster.pmtiles"].includes(f),
-  );
+  const unexpected = loaded.filter((f) => !ACCIDENT_FILES.includes(f));
   expect(unexpected, `unerwartete PMTiles beim Start: ${unexpected.join(", ")}`).toEqual([]);
   expectNoErrors(errors);
 });

@@ -19,8 +19,11 @@ const REMOTE_BASE = "https://tiles.vizsim.de/file/unfallkarte-data-v2/";
 // Datenstände und Kontextlayer.
 // Schlüssel = Frontend-Source-ID, manifestId = Eintrag in sources.yaml (sie weichen bei den
 // Clustern ab). tests/unit/accidentSources.test.js hält beides gegen sources.yaml.
+// `encoding: "mlt"`: die Kacheln sind MapLibre Tiles statt MVT (docs/MLT_EVALUATION.md).
+// pmtiles setzt das NICHT selbst in die TileJSON — es muss an addSource stehen. Und MLT hat
+// einen EIGENEN Dateinamen: eine noch gecachte alte Seite läse die Kacheln sonst als MVT.
 export const ACCIDENT_SOURCES = {
-  accidents_single: { manifestId: "accidents_single", file: "accidents/accidents_single.pmtiles" },
+  accidents_single: { manifestId: "accidents_single", file: "accidents/accidents_single_mlt.pmtiles", encoding: "mlt" },
   "accidents-cluster": { manifestId: "accidents_cluster", file: "accidents/combined_cluster.pmtiles" },
 };
 

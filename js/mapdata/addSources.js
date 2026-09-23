@@ -1,4 +1,4 @@
-import { resolveSources, resolveAccidentSources } from "./resolveSources.js";
+import { resolveSources, resolveAccidentSources, ACCIDENT_SOURCES } from "./resolveSources.js";
 import { showErrorBanner } from "../ui/errorBanner.js";
 import { setSourceResolver } from "../layers/registry.js";
 import { MAPILLARY_TOKEN } from "../config/env.js";
@@ -24,12 +24,13 @@ const ACCIDENT_ATTRIBUTION =
  * zwei Manifest-Fetches warten. Den Rest erledigt attachManifest().
  */
 export async function addSources(map) {
-  const addVector = (id, url) => {
-    if (!map.getSource(id)) map.addSource(id, { type: "vector", url, attribution: ACCIDENT_ATTRIBUTION });
+  const addVector = (id, url, encoding) => {
+    if (map.getSource(id)) return;
+    map.addSource(id, { type: "vector", url, attribution: ACCIDENT_ATTRIBUTION, ...(encoding ? { encoding } : {}) });
   };
 
   for (const [id, url] of Object.entries(await resolveAccidentSources())) {
-    addVector(id, url);
+    addVector(id, url, ACCIDENT_SOURCES[id].encoding);
   }
 
   // Mapillary (Vektor-Tiles direkt von Mapillary)

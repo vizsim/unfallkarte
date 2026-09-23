@@ -40,7 +40,8 @@ test("Golden: Quellen, Layer-Definitionen und Toggle-Verhalten", async ({ page }
     for (const id of Object.keys(style.sources).sort()) {
       const s = style.sources[id];
       const ours = s.url?.startsWith("pmtiles://");
-      sources[id] = ours ? { type: s.type, file: fileOf(s.url) } : { type: s.type };
+      // `encoding` mit festhalten: MLT-Kacheln ohne encoding "mlt" liest MapLibre als MVT.
+      sources[id] = ours ? { type: s.type, file: fileOf(s.url), ...(s.encoding ? { encoding: s.encoding } : {}) } : { type: s.type };
     }
 
     // --- layers (Zeichenreihenfolge!) --------------------------------------------------------
