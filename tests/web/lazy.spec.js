@@ -29,7 +29,7 @@ test("Zeichenreihenfolge hängt nicht von der Einschalt-Reihenfolge ab", async (
     const page = await browser.newPage();
     const errors = await openMap(page);
     const order = await page.evaluate(async (reverse) => {
-      const { LAYER_REGISTRY, ensureEntry } = await import("/js/layers/registry.js");
+      const { LAYER_REGISTRY, ensureEntry } = window.__app;
       const ids = LAYER_REGISTRY.map((e) => e.id);
       if (reverse) ids.reverse();
       // ineinander verschränkt statt am Stück: erst jede zweite, dann den Rest

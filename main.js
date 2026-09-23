@@ -19,8 +19,9 @@ import { updateVisibleFeatureCount } from './js/ui/featureCounter.js';
 import { setupTooltips } from './js/ui/tooltip.js';
 import { setupMobileLayout } from './js/ui/mobileLayout.js';
 import { renderLegendEntries } from './js/ui/legendMarkup.js';
-import { setupPopups } from './js/ui/popupHandlers.js';   // EIN Hover-Popup für alle Layer
+import { setupPopups, allPopupEntries } from './js/ui/popupHandlers.js';   // EIN Hover-Popup für alle Layer
 import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
+import { LAYER_REGISTRY, ensureEntry } from './js/layers/registry.js';
 
 // 📦 Legende
 import {
@@ -73,6 +74,12 @@ const tokenPromise = import(isLocalhost ? './js/config/config.js' : './js/config
     console.error("❌ Konfig konnte nicht geladen werden — Mapillary-Layer bleiben leer:", err);
     return "";
   });
+
+// Test-Hook (tests/web/): Playwright braucht DIESELBEN Modul-Instanzen wie die App. Früher
+// importierten die Tests sie im Browser über ihren Pfad (`import("/js/layers/registry.js")`) —
+// im gebündelten Build gibt es diese Pfade nicht mehr. Wie `window.map`: nur lesen, nie
+// darauf aufbauen.
+window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles: pmtiles.PMTiles };
 
 cleanupLegacyPermalink();
 

@@ -44,7 +44,7 @@ test("Frontend-Vertrag: source-layer + benutzte Attribute existieren in den PMTi
       const layers = style.layers.filter((l) => l.source === id && l["source-layer"]);
       const entry = { id, url, problems: [] };
       try {
-        const meta = await new pmtiles.PMTiles(url).getMetadata();
+        const meta = await new window.__app.PMTiles(url).getMetadata();
         const have = new Map((meta.vector_layers ?? []).map((v) => [v.id, new Set(Object.keys(v.fields ?? {}))]));
         for (const l of layers) {
           const fields = have.get(l["source-layer"]);
@@ -116,7 +116,7 @@ test("Frontend-Vertrag: Attribute, die die Popups lesen, existieren in den PMTil
   await ensureAllLayers(page);
 
   const report = await page.evaluate(async (known) => {
-    const { allPopupEntries } = await import("/js/ui/popupHandlers.js");
+    const { allPopupEntries } = window.__app;
     const style = window.map.getStyle();
     const metaCache = new Map();
     const fieldsOfLayer = async (layerId) => {
@@ -124,7 +124,7 @@ test("Frontend-Vertrag: Attribute, die die Popups lesen, existieren in den PMTil
       const src = l && style.sources[l.source];
       if (!src?.url?.startsWith("pmtiles://")) return null; // Laufzeit-/Fremdquellen (hover-point, Mapillary)
       const url = new URL(src.url.slice("pmtiles://".length), document.baseURI).href;
-      if (!metaCache.has(url)) metaCache.set(url, new pmtiles.PMTiles(url).getMetadata());
+      if (!metaCache.has(url)) metaCache.set(url, new window.__app.PMTiles(url).getMetadata());
       const vl = ((await metaCache.get(url)).vector_layers ?? []).find((v) => v.id === l["source-layer"]);
       return vl ? new Set(Object.keys(vl.fields ?? {})) : null;
     };

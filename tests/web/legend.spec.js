@@ -7,7 +7,7 @@ import { openMap, expectNoErrors } from "./helpers.js";
 
 /** Registry-Einträge mit `legend`-Feld — die Erwartung kommt aus derselben Quelle wie das Markup. */
 const generated = (page) => page.evaluate(async () => {
-  const { LAYER_REGISTRY } = await import("/js/layers/registry.js");
+  const { LAYER_REGISTRY } = window.__app;
   return LAYER_REGISTRY.filter((e) => e.legend).map((e) => ({
     id: e.id, dataMinZoom: e.dataMinZoom ?? null, ...e.legend,
   }));

@@ -143,11 +143,12 @@ export async function replaceLayerWithPoint(page, layerId, lngLat, properties) {
 /**
  * Alle Einträge der Layer-Registry anlegen (Quellen + Layer), OHNE sie einzuschalten. Die App
  * legt sie lazy beim ersten Einschalten an; Tests, die den kompletten Style brauchen (Golden,
- * Vertrag), holen das hiermit nach — über dasselbe Modul wie die App (gleiche Instanz).
+ * Vertrag), holen das hiermit nach — über dasselbe Modul wie die App (gleiche Instanz, darum
+ * über den Test-Hook `window.__app` aus main.js und nicht per Import über den Dateipfad).
  */
 export async function ensureAllLayers(page) {
   await page.evaluate(async () => {
-    const { LAYER_REGISTRY, ensureEntry } = await import("/js/layers/registry.js");
+    const { LAYER_REGISTRY, ensureEntry } = window.__app;
     for (const entry of LAYER_REGISTRY) ensureEntry(window.map, entry.id);
   });
 }
