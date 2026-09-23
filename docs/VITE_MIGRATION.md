@@ -1,8 +1,8 @@
 # Vite-Umstellung — Skizze und Umsetzungsplan
 
-Stand: **2026-09-23** · Schritt 0 (Spike) erledigt, Umsetzung läuft auf `temp/vite`. Konkretisiert
-`docs/TODO.md` Roadmap 3 und `docs/PERFORMANCE_PLAN.md` Stufe 4. Gemessene Zahlen tragen ihre
-Quelle; Schätzungen sind als solche markiert.
+Stand: **2026-09-23** · Schritte 0–3 und 5 umgesetzt auf `temp/vite`; offen: Cutover (4) und
+Messung (6). Konkretisiert `docs/TODO.md` Roadmap 3 und `docs/PERFORMANCE_PLAN.md` Stufe 4.
+Gemessene Zahlen tragen ihre Quelle; Schätzungen sind als solche markiert.
 
 ## Warum — und warum nicht
 
@@ -42,8 +42,8 @@ parallel zum MapLibre-Download und verschwindet teilweise darin.
 
 ## Kernfrage: der MapLibre-Worker
 
-`maplibre-gl.mjs` findet seinen Worker **zur Laufzeit**: `new URL(\`./${name}\`, e)` mit
-`e = import.meta.url` (in `vendor/maplibre-gl.mjs`, Funktion `Ki`). Diesen Ausdruck erkennt Vite
+`maplibre-gl.mjs` findet seinen Worker **zur Laufzeit**: ``new URL(`./${name}`, e)`` mit
+`e = import.meta.url` (im minifizierten `maplibre-gl.mjs`, Funktion `Ki`). Diesen Ausdruck erkennt Vite
 nicht, weil die Basis eine Variable ist und nicht `import.meta.url` selbst. Gebündelt zeigt
 `import.meta.url` auf einen Chunk in `assets/`. Die Folge: `assets/maplibre-gl-worker.mjs` → 404,
 und die Karte bekommt keine Tiles. Selbst mit korrektem Pfad importiert der Worker
@@ -208,13 +208,14 @@ Offen geblieben und in Schritt 1/2 zu prüfen: Worker-Laden im Dev-Server innerh
 Spike lag `node_modules` als Symlink außerhalb der Vite-Root → 403, ein Artefakt des Aufbaus) und
 der Preload-Link auf `public/style.json` (fängt `perf.spec.js`).
 
-### Schritt 1 — Vite + npm-Libs
+### Schritt 1 — Vite + npm-Libs ✓ (`12f9e3f`)
 
 - `npm i -D vite`; `npm i -E maplibre-gl@6.10.0 pmtiles@4.5.0 chart.js@4.5.1` (exakt gepinnt,
   dieselben Versionen wie heute → das Verhalten darf sich nicht ändern).
 - `vite.config.js` nach Skizze; Scripts `dev`, `build`, `preview`.
 - `js/lib/maplibre.js` → `export * from "maplibre-gl"` (die dort vorgesehene eine Zeile);
-  MapLibre-CSS per `import` in `main.js`.
+  MapLibre-CSS per `@import` am Anfang von `style.css` (Reihenfolge: MapLibre zuerst, eigene
+  Regeln überschreiben).
 - `main.js`: `import { Protocol } from "pmtiles"`, den `<script>` aus `index.html` entfernen.
 - `uspeedChart.js`: `loadChartJs()` → `import("chart.js/auto")`. Optional nur die gebrauchten
   Komponenten registrieren, das ergibt einen kleineren Chunk.
@@ -226,7 +227,7 @@ der Preload-Link auf `public/style.json` (fängt `perf.spec.js`).
   handgeschriebene `modulepreload`/Vendor-Links aus `index.html` entfernen.
 - `vite:preloadError`-Handler (Stolperstein 7).
 
-### Schritt 2 — Tests gegen den Build
+### Schritt 2 — Tests gegen den Build ✓ (`635bf97`, `12f9e3f`)
 
 - `playwright.config.js`: `webServer.command = npm run build && vite preview --port $PORT --strictPort`,
   `reuseExistingServer: false`.
@@ -239,11 +240,16 @@ der Preload-Link auf `public/style.json` (fängt `perf.spec.js`).
   - „`-shared.mjs` kommt genau einmal über die Leitung" hält Option B fest. Vorher prüfen, ob
     Playwright die Anfragen des Workers sieht.
 - **Abnahme:** `npx playwright test golden` **unverändert** grün (die Umstellung darf am Style
-  nichts ändern), alle übrigen Tests grün, 17 Unit-Tests grün.
+  nichts ändern), alle übrigen Tests grün, Unit-Tests grün. **Erreicht:** 52/52 Playwright
+  gegen den Build, Golden unverändert, 19/19 Unit-Tests; Dev-Server separat geprüft (Worker aus
+  `node_modules`, `data/` lokal, keine Fehler).
 - Von Hand, weil die Suite es nicht abdeckt (siehe `MAPLIBRE_6_UPGRADE.md`): Terrain, Hillshade,
-  3D-Gebäude, Basemap-Wechsel, Uspeed-Chart.
+  3D-Gebäude, Basemap-Wechsel, Uspeed-Chart. **Erledigt** per Skript gegen den Build mit
+  Screenshots: Relief (Terrain + Hillshade, Harz), 345 Gebäude gerendert (Berlin-Mitte), OSM
+  und Esri schalten um, alle Fremd-Kacheln 200, keine Konsolenfehler. Das Uspeed-Chart prüft
+  `traffic.spec.js` jetzt über gezeichnete Pixel.
 
-### Schritt 3 — CI baut, testet und deployt
+### Schritt 3 — CI baut, testet und deployt ✓ (`416d5b7`, actionlint grün)
 
 - Job `web`: `npm ci` → `test:unit` → `npm run build` → Playwright gegen genau dieses `dist/` →
   `actions/upload-pages-artifact`.
@@ -269,7 +275,7 @@ der Preload-Link auf `public/style.json` (fängt `perf.spec.js`).
    Der Stand `pre-vite` ist eine gültige statische Seite; der Revert allein reicht nicht, weil ohne
    Build-Job niemand mehr deployt.
 
-### Schritt 5 — Aufräumen + Doku
+### Schritt 5 — Aufräumen + Doku ✓
 
 - `vendor/` löschen. Die offene TODO „`vendor/maplibre-gl.js` löschen" erledigt sich mit, dazu
   `http-server` aus den devDependencies.

@@ -12,7 +12,11 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
 - **`pipeline/`** — Python-Pipeline (uv-Paket `unfallkarte`): Code in `src/`, Config in
   `pipeline/config/*.yaml`, Tests in `pipeline/tests/`, Daten (gitignored) in `pipeline/data/`.
   CLI immer aus `pipeline/` heraus, z. B. `uv --directory pipeline run unfallkarte <cmd>`.
-- **Repo-Root** — statisches Frontend (`index.html`, `js/`, `style.json`, `style.css`).
+- **Repo-Root** — Frontend, gebaut mit **Vite** (`index.html`, `main.js`, `js/`, `style.css`,
+  `vite.config.js`). `public/` = Dateien, die zur Laufzeit per URL geholt werden und darum
+  ungehasht bleiben (`style.json`, Sprite in `icons/`, og:image). Build → `dist/` (gitignored).
+  Ungebaut läuft das Root nicht (nackte Imports aus npm). Plan/Hintergrund:
+  `docs/VITE_MIGRATION.md`.
 
 ## Harte Regeln (nicht brechen)
 - **Frontend-Vertrag:** PMTiles-**Dateinamen** und **interne Layer-Namen** sind ein
@@ -24,15 +28,23 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
 - **Keyless:** kein MapTiler, kein API-Key im Code. Basemap = OpenFreeMap,
   Terrain/Hillshade = Mapterhorn (gehosteter Endpoint).
 - **Secrets nur in `.env`** (gitignored, in `pipeline/.env`). Niemals Tokens/Keys committen.
+  Einzige bewusste Ausnahme: der öffentliche Mapillary-**Client**-Token in `.env.production`
+  (steht ohnehin im ausgelieferten JS); der lokale liegt in `.env.development.local` (gitignored).
 - **Lizenz:** AGPL-3.0-or-later. Neue Quelldateien dürfen einen kurzen Header tragen.
 
 ## Konventionen
 - **Packaging: uv.** Nie `pip install`. Deps via `uv --directory pipeline add`, Ausführung
   via `uv --directory pipeline run`.
 - **Tools:** `uv run unfallkarte <cmd>`. Lint: `uvx ruff check` (aus `pipeline/`). Tests:
-  `uv run pytest`. Frontend: `npm run serve` (Range-fähig; `python -m http.server` kann
-  keine Range-Requests → lokale PMTiles scheitern), `npm run test:unit` (browserlos,
-  node --test, Sekunden), `npm run test:web` (Playwright).
+  `uv run pytest`. Frontend: `npm run dev` (Vite + HMR; `data/` per Middleware mit
+  Range-Requests), `npm run build` (→ `dist/`), `npm run test:unit` (browserlos,
+  node --test, Sekunden), `npm run test:web` (Playwright gegen den BUILD via `vite preview`;
+  belegter Port = Fehler, zweiter Lauf daneben mit `PW_PORT=4174`).
+- **Vite-Regeln:** `appType: "mpa"` nicht entfernen (sonst beantwortet Vite fehlende Dateien mit
+  200 → Local-first hält sie für lokal vorhanden). `import.meta.env` nur in `js/config/env.js`
+  (Unit-Tests importieren `js/` direkt, in Node ist `import.meta.env` undefined). Tests greifen
+  auf App-Module über den Test-Hook `window.__app` (main.js) zu, nie per `import("/js/…")` — im
+  Bündel gibt es die Pfade nicht.
 - **Permalink:** Format v2 in `js/utils/permalinkFormat.js` — REIN halten (kein DOM, kein
   `window`), sonst fällt die browserlose Testbarkeit weg. DOM-Bindung nur in
   `permalinkState.js`. Kürzel (Layer-Zeichen, Regler-Keys, Stil-Codes) sind Vertrag mit
@@ -55,9 +67,13 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
   nutzergeneriert); Rohwerte nur über `feature.properties` und nie ungeescaped ins HTML.
 - **MapLibre (seit v6 ESM-only):** kein globales `maplibregl` mehr — immer aus
   `js/lib/maplibre.js` importieren (`import { Popup } from "../lib/maplibre.js"`), nie direkt
-  aus `vendor/`. Feature-Objekte aus `queryRenderedFeatures` nie roh in `setData` reichen:
-  `properties` hat einen Null-Prototyp und bricht MapLibres Serializer STUMM → `{ ...f.properties }`.
-  Ladezeiten nie gegen `npm run serve` beurteilen (kein gzip, kein Cache — verfälscht um Sekunden).
+  aus dem Paket. MapLibre wird **nicht gebündelt** (versionierte Kopie + Importmap,
+  `vite.config.js`): es sucht seinen Worker zur Laufzeit neben der eigenen Datei — gebündelt
+  bleibt die Karte ohne jeden Fehler leer. Feature-Objekte aus `queryRenderedFeatures` nie roh
+  in `setData` reichen: `properties` hat einen Null-Prototyp und bricht MapLibres Serializer
+  STUMM → `{ ...f.properties }`. Ladezeiten nie gegen `npm run dev` oder `vite preview`
+  beurteilen (kein gzip, kein Pages-Cache — verfälscht um Sekunden); `dist/` über einen
+  Pages-ähnlichen Server messen.
 - Code: kurz, getippt, ruff-konform. Keine Notebooks in der Pipeline.
 - Config-getrieben: Jahres-Quirks/Filter/Tile-Profile in `pipeline/config/*.yaml`, nicht im Code.
 - Tippecanoe legt FGB-Integer-Attribute als **String** im PMTiles ab → im Frontend immer
@@ -93,14 +109,17 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
   Parquets müssen stabil bleiben (`golden.py compare`). `uv run pytest` + `uvx ruff check` grün.
 - Frontend-Änderungen: `npm run test:web` (Playwright-Smoke-Tests in `tests/web/`, headless
   Chromium) — keine JS-Fehler, Layer laden local-first/B2, Hover/Popup/Klick funktionieren.
-  Neues Verhalten = neuer Test dort. Pflicht vor jedem Upgrade der Libs in `vendor/`.
-- CI (`.github/workflows/ci.yml`): ruff + pytest + Smoke-Tests bei Push/PR.
+  Neues Verhalten = neuer Test dort. Pflicht vor jedem Lib-Upgrade (`package.json`, exakt
+  gepinnt).
+- CI (`.github/workflows/ci.yml`): ruff + pytest + Build + Smoke-Tests bei Push/PR; auf `main`
+  danach Deploy des getesteten `dist/` nach GitHub Pages (nur hinter grünen Frontend-Tests).
 
 ## Vorgehen
 - Refactor abgeschlossen: accidents (2017–2024), OSM-Layer und alle Szenarien (1/2/3/6/8/9)
   sind portiert, gebaut und deployt; Frontend keyless mit Local-first/B2.
-- Kleine, fokussierte Commits auf `main` — das ist zugleich der Branch, den GitHub Pages
-  ausliefert (vizsim.de/unfallkarte/), ein Push ist also ein Produktiv-Deploy. Größere
+- Kleine, fokussierte Commits auf `main` — ein Push dorthin wird nach grünen Frontend-Tests
+  automatisch nach GitHub Pages deployt (vizsim.de/unfallkarte/), ist also ein
+  Produktiv-Deploy. Größere
   Umbauten auf einem `temp/*`-Branch bauen und erst nach grünen Tests mergen. Der Stand vor
   dem Pipeline-Refactor hängt als Tag `v2025` (kein Branch — er liegt auf derselben Linie).
   Offene Punkte siehe Auto-Memory

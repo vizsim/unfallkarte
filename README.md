@@ -31,9 +31,9 @@ Zwei Teile in einem Repo:
 - **`pipeline/`** — Python-Pipeline (uv): lädt Unfalldaten (2017–2025) und OSM, baut
   PMTiles, rechnet die Szenarien, deployt nach Backblaze B2.
   Details und CLI: [`pipeline/README.md`](pipeline/README.md).
-- **Frontend (Repo-Root)** — statische MapLibre-Karte (`index.html`, `js/`, `style.json`),
-  ohne Build-Step. Die PMTiles kommen **local-first** aus `data/`, sonst per **B2-Fallback**;
-  gesteuert über ein generiertes `manifest.json`.
+- **Frontend (Repo-Root)** — MapLibre-Karte (`index.html`, `main.js`, `js/`), gebaut mit
+  **Vite** nach `dist/`. Die PMTiles kommen **local-first** aus `data/`, sonst per
+  **B2-Fallback**; gesteuert über ein generiertes `manifest.json`.
 
 Jede Zeile der Legende entspricht genau einem Eintrag in der **Layer-Registry**
 (`js/layers/`): Quelle, Layer-Definitionen, Popup, Permalink-Zeichen und Legendentext
@@ -80,32 +80,42 @@ Schwellenwerte lassen sich in der Legende per Regler verändern.
 - **Adress-Suche** — [Photon](https://photon.komoot.io/) (Komoot).
 
 Einzige Ausnahme: der optionale Mapillary-Layer braucht einen Mapillary-**Client-Token**
-(`js/config/config.public.js`, öffentlich by design). Pipeline-Secrets wie die B2-Keys
-liegen ausschließlich in `pipeline/.env` (gitignored).
+(`.env.production`, öffentlich by design — er steht ohnehin im ausgelieferten JS).
+Pipeline-Secrets wie die B2-Keys liegen ausschließlich in `pipeline/.env` (gitignored).
 
 ## 🖥️ Frontend lokal starten
 
-Die Seite braucht HTTP — ES-Module und `fetch` funktionieren nicht über `file://`. Wichtig:
-der Server muss **Range-Requests** beherrschen, sonst lassen sich lokale PMTiles nicht
-lesen. `python3 -m http.server` kann das **nicht** (Fehler „no content-length header …").
-
 ```bash
-npm install          # einmalig: Dev-Tooling (http-server + Playwright)
-npm run serve        # -> http://localhost:4173
+npm install          # einmalig: Vite, Playwright und die Karten-Libs
+npm run dev          # Dev-Server mit Hot-Reload -> http://localhost:5173
+npm run build        # Produktions-Build nach dist/
+npm run preview      # dist/ ausliefern -> http://127.0.0.1:4173
 ```
 
-Der Hostname entscheidet über die Konfiguration: `localhost` nimmt deine lokale
-`js/config/config.js` (gitignored), `127.0.0.1` nimmt `js/config/config.public.js` — so
-laufen auch Tests und CI.
+Ungebaut läuft das Repo-Root nicht mehr (die Module importieren `maplibre-gl` und `pmtiles`
+aus npm) — immer über `npm run dev` bzw. den Build.
 
-Alternative ohne `npm install`: ein global installiertes
-[`serve`](https://github.com/vercel/serve) im Repo-Root (`npm i -g serve` →
-`http://localhost:3000`). Es kann Range-Requests und folgt dem `data/`-Symlink (geprüft mit
-14.2.6: `206` auf `data/accidents/*.pmtiles`).
+Deinen lokalen Mapillary-Token legst du in `.env.development.local` ab
+(`VITE_MAPILLARY_TOKEN=…`, gitignored); ohne ihn bleibt nur der Mapillary-Layer leer. Der
+Build nimmt den öffentlichen Token aus `.env.production`.
 
 **Local-first:** liegt ein `data/`-Verzeichnis vor (typischerweise ein Symlink auf
 `pipeline/data/`), kommen die PMTiles von dort — sonst automatisch aus dem B2-Bucket. Du
-brauchst also keine lokalen Daten, um am Frontend zu arbeiten.
+brauchst also keine lokalen Daten, um am Frontend zu arbeiten. Dev-Server und Preview
+liefern `data/` mit Range-Requests aus (Middleware in `vite.config.js`); ins `dist/` kommt es
+nie.
+
+### Libs (maplibre-gl, pmtiles, chart.js)
+
+Exakt gepinnt in `package.json`. Upgrade = `npm i -E maplibre-gl@x.y.z`, danach **immer**
+`npm run test:web` — die letzten beiden MapLibre-Upgrades haben den Cluster-Hover still
+gebrochen, gefangen hat es jeweils nur der Smoke-Test.
+
+**MapLibre wird nicht gebündelt.** Es sucht seinen Worker zur Laufzeit neben der eigenen
+Datei; gebündelt fände es ihn nicht (die Karte bleibt ohne jeden Fehler leer). Der Build
+kopiert darum die drei `.mjs` nach `dist/lib/maplibre-gl@<version>/` und löst den Import per
+Importmap auf (`vite.config.js`). Alle Module importieren MapLibre über `js/lib/maplibre.js`.
+pmtiles wird mitgebündelt, chart.js kommt als eigener Chunk erst beim ersten Uspeed-Chart.
 
 ## ✅ Tests
 
@@ -119,8 +129,8 @@ uv --directory pipeline run pytest     # Pipeline (Dry-Run, keine Daten nötig)
 Die Browser-Tests in `tests/web/` fahren die echte Seite: Lädt die Karte ohne JS-Fehler?
 Liefert der Cluster-Hover das vergrößerte Tortendiagramm? Erscheint bei überlappenden
 Objekten genau **ein** gestapeltes Popup? Überlebt ein Permalink das Kopieren und
-Neuladen samt Reglern? Sie starten ihren Server selbst und nutzen Local-first/B2 wie im
-Betrieb, brauchen also keine lokalen Daten.
+Neuladen samt Reglern? Sie bauen `dist/` und testen genau diesen Stand (`vite preview`),
+nutzen Local-first/B2 wie im Betrieb und brauchen also keine lokalen Daten.
 
 Zwei Tests sind das eigentliche Sicherheitsnetz für Umbauten:
 
@@ -132,8 +142,8 @@ Zwei Tests sind das eigentliche Sicherheitsnetz für Umbauten:
   `source-layer` und jedes im Style benutzte Attribut. Nötig, weil MapLibre bei PMTiles
   **nicht** validiert — der Test fand auf Anhieb zwei Bugs, die monatelang unbemerkt waren.
 
-Alles läuft in der CI (`.github/workflows/ci.yml`). **Vor jedem Upgrade der Libs in
-`vendor/` laufen lassen.**
+Alles läuft in der CI (`.github/workflows/ci.yml`). **Vor jedem Lib-Upgrade laufen
+lassen.**
 
 ## ⚙️ Daten aufbauen (Pipeline)
 
@@ -159,10 +169,11 @@ pyogrio direkt.)
 
 ## 🌿 Branches & Deploy
 
-`main` ist Arbeits- **und** Deploy-Branch: GitHub Pages liefert ihn direkt aus, ein Push
-ist damit ein Produktiv-Deploy. Größere Umbauten laufen über einen `temp/*`-Branch und
-werden erst nach grünen Tests gemergt. Der Stand vor dem Pipeline-Refactor hängt als Tag
-**`v2025`**.
+`main` ist Arbeits- **und** Deploy-Branch: nach jedem Push baut die CI `dist/`, testet
+genau diesen Stand und veröffentlicht ihn auf GitHub Pages — nur wenn die Frontend-Tests
+grün sind (ein paar Minuten nach dem Push). Größere Umbauten laufen über einen
+`temp/*`-Branch und werden erst nach grünen Tests gemergt. Der Stand vor dem
+Pipeline-Refactor hängt als Tag **`v2025`**.
 
 Die PMTiles liegen **nicht** im Git (`data/` ist gitignored), sondern lokal und im
 öffentlichen B2-Bucket. Ein Code-Deploy und ein Daten-Deploy
@@ -178,7 +189,7 @@ Die PMTiles liegen **nicht** im Git (`data/` ist gitignored), sondern lokal und 
 
 ## 🧰 Tech
 
-MapLibre GL JS · PMTiles · tippecanoe · osmium-tool · GeoPandas/pyogrio (Python-Pipeline
+MapLibre GL JS · PMTiles · Vite · tippecanoe · osmium-tool · GeoPandas/pyogrio (Python-Pipeline
 mit **uv**) · OpenFreeMap · Mapterhorn · Backblaze B2 · Photon · radinfra.de/TILDA.
 
 ## 📄 Lizenz

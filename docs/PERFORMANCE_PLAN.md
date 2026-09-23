@@ -14,7 +14,7 @@ Ergänzt `docs/TODO.md` Roadmap 3 (Vite), ersetzt sie nicht.
 | 1 CDN-Cache für die Tiles | **offen — größter verbleibender Hebel** | heute wird NICHTS gecacht |
 | 2 Attribut-Diät der Tiles | **erledigt + deployt** (`cadff01`) | −40 % / −63 % Dateigröße, −43 % je Kachel |
 | 3 Roundtrip-Diät | **erledigt + deployt** (`cacd3f0`, `77ec4c9`, `acb5ef6`) | live −0,35 s, erste Kachel-Anfrage −0,51 s |
-| 4 Vite | offen | — |
+| 4 Vite | **umgesetzt auf `temp/vite`** — Cutover + Messung offen | siehe [`VITE_MIGRATION.md`](VITE_MIGRATION.md) |
 | 5 Lazy-Chunks | offen (nach Vite) | — |
 | 6 Gefühlte Ladezeit, Perf-Budget | teilweise (`tests/web/perf.spec.js` steht) | — |
 

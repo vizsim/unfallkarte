@@ -112,11 +112,14 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
          Layer; eine Bitmaske über die Unfall-Filter spart gegenüber „Defaults weglassen" im
          schlechtesten Fall ein Zeichen, kostet aber Lesbarkeit und macht die Bit-Reihenfolge
          zum harten Vertrag (ein neues Unfalljahr verschöbe alle alten Links).
-3. [ ] **Vite** — ~20 einzeln geladene ES-Module bündeln (Initial-Load), Dev-Server mit
-       HMR, `import.meta.env` statt `config.js`/`config.public.js`-Umschaltung.
-       Haken: GitHub Pages served heute das Repo-Root direkt → braucht eine Action, die
-       `dist/` baut und deployt (Prozesswechsel). Vendor-Libs dann via `package.json`
-       gepinnt statt Handkopie in `vendor/` (Upgrades laufen durch die Smoke-Tests).
+3. [~] **Vite** (2026-09-23, Branch `temp/vite`) — umgesetzt; Plan, Spike und Begründungen in
+       [`VITE_MIGRATION.md`](VITE_MIGRATION.md). Build nach `dist/`; MapLibre bleibt
+       ungebündelt (Importmap + versionierter Ordner — gebündelt fände es seinen Worker nicht,
+       die Karte bliebe ohne jeden Fehler leer); Libs aus npm exakt gepinnt, `vendor/`
+       gelöscht; Mapillary-Token zur Bauzeit (`.env.production` / `.env.development.local`);
+       Playwright testet den Build, die CI deployt genau dieses `dist/` nach Pages.
+       52/52 Playwright, Golden unverändert. **Offen:** Cutover (Pages-Quelle „GitHub Actions"
+       + Merge, Schritt 4), Live-Check, Vorher/Nachher-Messung (Schritt 6).
 4. [ ] **TypeScript** — lohnt an den Stellen mit impliziten Objektformen: Popup-Entry,
        Layer-Registry, Manifest, Permalink-Format. Günstiger Zwischenschritt ohne Build:
        `tsconfig.json` mit `checkJs` + JSDoc-Typen (IDE meldet heute schon z. B.
@@ -173,13 +176,12 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       0x1fffffe8 characters`, Läufe von 4–5 min trotz kürzerem Limit), dessen Ursache offen
       blieb — Artefakt des Probe-Skripts oder echtes Hängen nach abgebrochenen Anfragen.
       Bewusste Entscheidung (User), 4.5.0 trotzdem mitzunehmen, weil der Normalbetrieb belegt
-      ist. **Wenn auf der Live-Seite nach schnellem Zoomen Tiles ausbleiben:** `vendor/pmtiles.js`
-      auf 4.4.1 zurück (`https://unpkg.com/pmtiles@4.4.1/dist/pmtiles.js`), sonst nichts nötig.
+      ist. **Wenn auf der Live-Seite nach schnellem Zoomen Tiles ausbleiben:** pmtiles auf
+      4.4.1 zurück (`npm i -E pmtiles@4.4.1`), sonst nichts nötig.
       Sauber klären ließe es sich mit derselben Probe gegen 4.4.1 UND 4.5.0, Logs nach jedem
       Schritt, nie zwei Playwright-Läufe parallel.
-- [ ] **`vendor/maplibre-gl.js` (5.24) löschen** — bleibt bewusst EINEN Deploy-Zyklus liegen:
-      Pages cacht 10 min, eine gecachte alte `index.html` verweist noch darauf. Frühestens einen
-      Tag nach dem Deploy von 6.10 entfernen (1 MB weniger im Repo-Checkout).
+- [x] **`vendor/maplibre-gl.js` (5.24) löschen** (2026-09-23) — mit dem ganzen `vendor/` beim
+      Vite-Umbau entfernt (Libs kommen jetzt aus npm).
 - [ ] **Deploy ohne Retry/Backoff** (`pipeline/src/unfallkarte/deploy.py`) — ein transienter
       B2-500 bricht `b2 sync` mittendrin ab und hinterlässt ein Teil-Deploy. Retry-Loop
       (3× exponentieller Backoff) für B2, dazu `requests`-Retry für die Geofabrik- und
@@ -290,7 +292,7 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
 ## Sichtbarkeit / Auffindbarkeit
 
 - [x] **Meta-Tags** — `<meta name="description">` + OpenGraph/Twitter-Cards ergänzt
-      (erledigt 2026-07); `og:image` = `docs/screenshot.png`, absolute URLs auf
+      (erledigt 2026-07); `og:image` = `public/screenshot.png` (bis Vite `docs/`), absolute URLs auf
       `vizsim.de/unfallkarte/` (kanonisch; Crawler führen kein JS aus).
       Beim Erneuern des Screenshots mitdenken.
 - [ ] **Favicon ersetzen** — aktuell `stationary-bike-gym-svgrepo-com.svg`
