@@ -1,9 +1,9 @@
 # MLT statt MVT für die Unfall-Tiles — Evaluation
 
 Stand: **2026-09-23**. Schritt 1 (Offline-Vergleich) ist durchgeführt; Schritt 1b (ganzes
-Archiv) und 2 (Browser-Messung) sind erledigt und die Umstellung ist auf dem Branch **`temp/mlt`
-vorbereitet** (Werkzeug, Pipeline, Frontend, Tests) — **offen ist die Entscheidung** (siehe
-„Schritt 2" unten). Offene Punkte stehen wie immer in
+Archiv) und 2 (Browser-Messung) sind erledigt. **Entschieden am 2026-09-23: übernommen** — jetzt
+mit dem JS-Encoder; ein stärkerer Encoder kommt später als reiner Werkzeug-Tausch (Dateiname,
+Format, Frontend und Tests bleiben gleich, die Datei wird nur kleiner). Offene Punkte stehen wie immer in
 [`TODO.md`](TODO.md); hier stehen Begründung, Zahlen und Methode. Was als Zahl dasteht, ist
 gemessen — Vermutungen und Schätzungen sind als solche gekennzeichnet.
 
@@ -286,7 +286,7 @@ erste Kachel. Nebengewinn: −22 % Speicher und Egress auf B2.
 Node-Schritt in der Python-Pipeline (`npm ci` nötig); MapLibre-Upgrades hängen zusätzlich am
 MLT-Decoder; viele Werkzeuge (QGIS, tippecanoe-decode) lesen MLT noch nicht.
 
-## Stand auf `temp/mlt`
+## Umsetzung (von `temp/mlt` nach `main`)
 
 - `tools/mlt/`: `mvt-to-mlt.mjs` (Umwandeln + Prüfen, Ausgabe erst nach bestandener Prüfung
   umbenannt), `compare.mjs` (Größen, Viewport, Dekodieren), `lib.mjs` (PMTiles v3 lesen/schreiben).
@@ -295,24 +295,31 @@ MLT-Decoder; viele Werkzeuge (QGIS, tippecanoe-decode) lesen MLT noch nicht.
 - Frontend: `ACCIDENT_SOURCES.accidents_single` → `accidents_single_mlt.pmtiles` mit
   `encoding: "mlt"`; Golden hält jetzt auch `encoding` fest. 54/54 Playwright mit lokaler Datei.
 
-**Vor einem Merge:** `accidents_single_mlt.pmtiles` nach B2 (`unfallkarte deploy`) — sonst findet
-die CI die Datei nicht (Deploy bleibt dann aus, live passiert nichts). Die MVT-Datei bleibt einen
-Deploy-Zyklus für gecachte alte Seiten; danach als Zwischenstand nach `raw/` verlegen, damit sie
-nicht dauerhaft mit hochgeht (noch nicht umgesetzt).
+**Reihenfolge beim Umstieg (so gelaufen):** erst die Datei nach B2 — `unfallkarte deploy`, der
+Probelauf (`b2 sync --dry-run`) zeigte genau diese eine Datei; öffentlich geprüft: 206, Größe
+byte-gleich, Kacheltyp 6 —, dann die Suite unter CI-Bedingungen (frischer Klon ohne `data/`, alles
+von B2), erst dann der Merge. Ohne die Datei auf B2 wäre die CI rot geblieben und der Deploy
+ausgeblieben — live wäre nichts passiert, aber `main` hinge fest.
 
-## Nächste Schritte (zurückgestellt, siehe TODO.md)
+## Nächste Schritte (siehe TODO.md)
 
-1. **1b — ganzes Archiv konvertieren** (A→MLT, int32, gzip -6, Metadaten übernehmen) und
-   dieselbe Analyse wiederholen: Gesamtgröße, Vollständigkeit, Gleichheit mit A.
-2. **2 — Browser-Messung** auf `temp/mlt`, nur `accidents_single` umgestellt: Bytes, Zeit bis
-   zum ersten Unfallpunkt bei z11 über Berlin, Dekodierzeit im Worker (Performance-Trace).
-3. **3 — Pipeline-Integration**, config-getrieben (z. B. `format: mlt` am Output in
-   `tiles.yaml`), danach die Cluster-Datei.
+Die Schritte 1b, 2 und 3 aus der Planung sind erledigt (siehe oben). Offen:
+
+1. **MVT-Zwischenstand aus dem Deploy nehmen:** tippecanoe schreibt `accidents_single.pmtiles`
+   weiter nach `data/accidents/`, `deploy` lädt es also jedes Mal mit hoch. Nach einem
+   Deploy-Zyklus (gecachte alte Seiten) den Zwischenstand nach `raw/` legen und die alte Datei
+   auf B2 **von Hand** löschen — `b2 sync` löscht nichts von selbst.
+2. **Stärkerer Encoder** (Java-Referenz bzw. Rust aus `maplibre-tile-spec`: RLE, Wörterbuch,
+   FastPFOR) — nur das Pack-Werkzeug tauschen. Schätzung: 30–37 % statt 25–28 %. Achtung
+   int64 → BigInt; die Prüfung im Werkzeug fängt das.
+3. **Cluster-Datei** (`combined_cluster.pmtiles`) genauso umstellen — kleiner (7 MB), Gewinn
+   entsprechend geringer.
 4. Optional: **Upstream-Issue bei freestiler** (INT_32-Spalten, gzip-Stufe, Puffer-Option).
 
-Entscheidungsregel aus der Planung: weiter bei ≥ 30 % weniger gzip-Viewport-Bytes in den
-Städten. C erfüllt das im fairen Vergleich; A→MLT liegt in der Stichprobe bei 24–30 % — dafür
-ohne Frontend-Umbau und mit dem schnellsten Dekodieren. Schritt 1b entscheidet.
+Entscheidungsregel aus der Planung war ≥ 30 % weniger gzip-Viewport-Bytes in den Städten;
+A→MLT erreicht 25–28 %. Übernommen trotzdem: der Gewinn ist dort messbar, wo die Karte am
+langsamsten ist (dichte Städte, langsame Leitung: −1,6 s bis zur fertigen Ansicht), die
+Umwandlung ist vollständig geprüft, und ein besserer Encoder bleibt ein reiner Werkzeug-Tausch.
 
 ## Reproduzieren
 

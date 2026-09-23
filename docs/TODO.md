@@ -258,16 +258,18 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
 
 ## Daten / Pipeline
 
-- [~] **Unfall-Tiles als MLT** — vorbereitet auf `temp/mlt` (2026-09-23), Details + Zahlen in
+- [x] **Unfall-Tiles als MLT** (2026-09-23, übernommen) — Details + Zahlen in
       [`MLT_EVALUATION.md`](MLT_EVALUATION.md): tippecanoe-MVT per `tools/mlt/mvt-to-mlt.mjs`
       (`@maplibre/mlt`, int32) umgewandelt, alle 48.667 Kacheln identisch; Pipeline-Schritt
       `unfallkarte accidents mlt`; Frontend auf `accidents_single_mlt.pmtiles` (`encoding:
       "mlt"`), 54/54 Playwright. Gemessen: Archiv −22 %, Stadt-Viewport −25…−28 % (Schwelle
       30 % knapp verfehlt), Berlin z11 auf Mobilfunk fertige Ansicht 14,7 → 13,1 s; erster
-      Punkt, ländlich und schnelle Leitung ≈ 0. **Offen:** Entscheidung; vor dem Merge die
-      MLT-Datei nach B2 (`unfallkarte deploy`); danach MVT-Zwischenstand nach `raw/`
-      verlegen; optional stärkerer Encoder (Java/Rust), Cluster-Datei, Upstream-Issue bei
-      freestiler.
+      Punkt, ländlich und schnelle Leitung ≈ 0. MLT-Datei vor dem Merge nach B2 (nur diese
+      Datei, öffentlich geprüft), Suite unter CI-Bedingungen grün.
+- [ ] **MLT-Nacharbeiten** (siehe [`MLT_EVALUATION.md`](MLT_EVALUATION.md), „Nächste
+      Schritte"): MVT-Zwischenstand nach einem Deploy-Zyklus nach `raw/` + alte Datei auf B2
+      von Hand löschen (`b2 sync` löscht nicht); stärkerer Encoder (Java/Rust) als
+      Werkzeug-Tausch; Cluster-Datei; optional Upstream-Issue bei freestiler.
 - [ ] **Sc6-Tiles ohne Namen** — `scenario6-polys` tragen nur `oid` +
       `total_tempo50_highway_length_m`, kein `name`/`amenity`. Deshalb sahen überlappende
       Buffer (Schulgelände + Kita-Node) im Popup identisch aus; Popup zeigt jetzt Länge +
