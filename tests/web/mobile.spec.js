@@ -118,6 +118,29 @@ test.describe("Handy", () => {
     expectNoErrors(errors);
   });
 
+  test("Ziehen macht die Seite nicht scrollbar (kein Scrollbalken für die ganze Seite)", async ({ page }) => {
+    // Während der Geste rendert das Sheet in voller Höhe und wird per transform nach unten
+    // geschoben — es ragt dann unter das Fenster. Ohne overflow-Sperre an html/body wurde
+    // davon die GANZE Seite scrollbar (gemessen 1072 bzw. 1132 px bei 844 px Fenster), und
+    // für die Dauer der Geste erschien ein Scrollbalken, der nichts scrollt, was man will.
+    const errors = await openMap(page);
+    const pageScrollable = () => page.evaluate(() => {
+      const d = document.documentElement;
+      return d.scrollHeight > d.clientHeight && !["hidden", "clip"].includes(getComputedStyle(d).overflowY);
+    });
+
+    await dragTitle(page, -320);
+    expect(await pageScrollable(), "beim Hochziehen").toBe(false);
+    await page.mouse.up();
+    await expect.poll(() => isCollapsed(page)).toBe(false);
+
+    await dragTitle(page, 320);
+    expect(await pageScrollable(), "beim Zuschieben").toBe(false);
+    await page.mouse.up();
+    await expect.poll(() => isCollapsed(page)).toBe(true);
+    expectNoErrors(errors);
+  });
+
   test("Sheet lässt sich wieder zuschieben — und der Streifen sitzt wie vorher", async ({ page }) => {
     const errors = await openMap(page);
     const peekBefore = (await page.locator(".legend").boundingBox()).height;

@@ -8,6 +8,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  /* Die Seite selbst scrollt nie — Karte füllt das Fenster, die Legende scrollt in sich.
+     Ohne diese Zeile wurde beim Ziehen des Handy-Sheets die GANZE Seite scrollbar: es ragt
+     während der Geste per transform unter das Fenster (tests/web/mobile.spec.js). */
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
