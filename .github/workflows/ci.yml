@@ -1,6 +1,11 @@
-# CI: Pipeline (ruff + pytest) und Frontend-Smoke-Tests (Playwright).
-# Beide Jobs brauchen keine lokalen Daten: die pytest laufen im Dry-Run, das Frontend
-# holt seine PMTiles per B2-Fallback aus dem public Bucket (kein Secret nötig).
+# CI: Pipeline (ruff + pytest), Frontend (Vite-Build + Tests) und — nur auf main — der
+# Deploy nach GitHub Pages. Kein Job braucht lokale Daten: die pytest laufen im Dry-Run, das
+# Frontend holt seine PMTiles per B2-Fallback aus dem public Bucket (kein Secret nötig).
+#
+# Deploy: Pages liefert NICHT mehr den Branch aus, sondern das dist/, das der web-Job gebaut
+# UND getestet hat (getestet = ausgeliefert). Voraussetzung: Repo-Settings → Pages → Source
+# „GitHub Actions". Ein Push auf main ist damit erst NACH grünen Frontend-Tests live.
+# Hintergrund + Rückweg: docs/VITE_MIGRATION.md (Schritt 4).
 #
 # Action-Versionen: alle auf der Node-24-Laufzeit des Runners (Node 20 ist dort abgekündigt).
 # Das ist unabhängig vom Node, mit dem UNSERE Tests laufen (setup-node: node-version 22).
@@ -16,10 +21,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Deploy von Hand anstoßen (z. B. der erste nach dem Umstellen der Pages-Quelle).
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Auf main NICHT abbrechen: ein laufender Deploy soll zu Ende laufen. Folgen mehrere Pushes
+  # schnell aufeinander, wartet nur der jüngste — dazwischen liegende verfallen von selbst.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   pipeline:
@@ -41,7 +50,7 @@ jobs:
       - run: uv run pytest
 
   web:
-    name: Frontend (Playwright-Smoke-Tests)
+    name: Frontend (Build + Playwright)
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -55,6 +64,7 @@ jobs:
       # Formatfehler, bevor Playwright überhaupt einen Browser installiert.
       - run: npm run test:unit
       - run: npx playwright install --with-deps chromium
+      # Baut dist/ (webServer in playwright.config.js) und testet genau diesen Stand.
       - run: npm run test:web
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() && failure() }}
@@ -64,3 +74,25 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+      # Das getestete dist/ für den Deploy-Job (nur auf main).
+      - uses: actions/upload-pages-artifact@v5
+        if: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+        with:
+          path: dist/
+
+  deploy:
+    name: Deploy (GitHub Pages)
+    # Bewusst NUR hinter den Frontend-Tests: ein roter Pipeline-Test soll die Website nicht
+    # blockieren — er betrifft sie nicht.
+    needs: web
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
