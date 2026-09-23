@@ -1,7 +1,9 @@
 # MLT statt MVT für die Unfall-Tiles — Evaluation
 
-Stand: **2026-09-23**. Schritt 1 (Offline-Vergleich) ist durchgeführt, alles Weitere ist
-**zurückgestellt zugunsten der Vite-Umstellung**. Offene Punkte stehen wie immer in
+Stand: **2026-09-23**. Schritt 1 (Offline-Vergleich) ist durchgeführt; Schritt 1b (ganzes
+Archiv) und 2 (Browser-Messung) sind erledigt und die Umstellung ist auf dem Branch **`temp/mlt`
+vorbereitet** (Werkzeug, Pipeline, Frontend, Tests) — **offen ist die Entscheidung** (siehe
+„Schritt 2" unten). Offene Punkte stehen wie immer in
 [`TODO.md`](TODO.md); hier stehen Begründung, Zahlen und Methode. Was als Zahl dasteht, ist
 gemessen — Vermutungen und Schätzungen sind als solche gekennzeichnet.
 
@@ -16,7 +18,8 @@ gemessen — Vermutungen und Schätzungen sind als solche gekennzeichnet.
 - **Der bessere Weg:** tippecanoe behalten und dessen MVT-Kacheln nach MLT **konvertieren**
   (offizieller Encoder `@maplibre/mlt`, Spalten als int32). Stichprobe: **−24 bis −30 %**
   Transfer, Werte bleiben normale Zahlen (Frontend unverändert bis auf `encoding: "mlt"`),
-  Dekodieren etwa **halb so lang** wie MVT heute. Es ändert sich nur das Format — auch die
+  Dekodieren schneller (fair nachgemessen 28 → 19 ms je schwerer Kachel, nicht „halb so lang",
+  wie die erste Stichprobe nahelegte). Es ändert sich nur das Format — auch die
   Cluster-Datei ließe sich so umstellen.
 
 ---
@@ -230,6 +233,73 @@ Stichprobe mit `encodeTile` aus `@maplibre/mlt` (dieselbe Bibliothek, deren Deco
   nie gegen `npm run serve`, zusätzlich mit CPU-Drosselung — der Dekodier-Gewinn zählt vor
   allem auf dem Handy.
 
+## Schritt 1b — ganzes Archiv umgewandelt (2026-09-23, Branch `temp/mlt`)
+
+Werkzeug: `tools/mlt/mvt-to-mlt.mjs` (A→MLT mit `@maplibre/mlt` 1.3.0 — exakt die Version, deren
+Decoder MapLibre 6.10 mitbringt; Ganzzahl-Spalten int32, Kacheln gzip -6, Metadaten von A
+übernommen). Es liest danach **jede** Kachel zurück und vergleicht sie Feature für Feature mit A.
+Ergebnis: **alle 48.667 Kacheln identisch** (Geometrie + alle 13 Attribute, kein einziger BigInt).
+Dauer 2:02 min (je rund die Hälfte Umwandeln und Prüfen), max. 1,1 GB RAM. Vergleich per
+`tools/mlt/compare.mjs` (dieselbe Methode wie oben — die MVT-Werte stimmen exakt mit A überein):
+
+| | MVT (A) | MLT (A→MLT) | Δ |
+|---|---|---|---|
+| Archiv (gespeichert) | 91,6 MB | 71,6 MB | −22 % |
+| Berlin-Mitte z11, Viewport 3×3 (gzip -6) | 1020 KB | 735 KB | **−28 %** |
+| Berlin-Mitte z12 | 731 KB | 543 KB | −26 % |
+| München z11 / z12 | 657 / 467 KB | 478 / 351 KB | −27 / −25 % |
+| Köln z11 / z12 | 537 / 312 KB | 394 / 235 KB | −27 / −25 % |
+| Görlitz z11 / z12 (ländlich) | 29 / 21 KB | 23 / 17 KB | −21 / −21 % |
+
+**Entscheidungsregel (≥ 30 % in den Städten): knapp verfehlt** — der JS-Encoder schreibt die
+schlichteste Kodierung (Varints, kein RLE/Dictionary/FastPFOR). freestiler kam mit besserer
+Kodierung auf 30–37 %, scheitert aber an INT_64. Ein Encoder mit den stärkeren Verfahren (Java-
+Referenz bzw. Rust aus `maplibre-tile-spec`) würde die 30 % vermutlich überschreiten — **nicht
+getestet**; das Werkzeug ließe sich dafür austauschen, der Rest der Kette (Pipeline, Frontend,
+Tests) bleibt gleich.
+
+## Schritt 2 — Browser-Messung (2026-09-23)
+
+Dieselbe App zweimal gebaut — `main` (MVT) gegen `temp/mlt` (MLT) —, beide über
+`tools/perf/pages-like-server.mjs` auf 127.0.0.1, Kacheln lokal aus demselben `data/`-Baum
+(Local-first), `tools/perf/measure-start.mjs`, abwechselnd, frischer Kontext, 5 Läufe je Arm:
+
+| Ansicht / Profil | | MVT | MLT | Δ |
+|---|---|---|---|---|
+| **Berlin-Mitte z11**, Mobilfunk | erster Unfallpunkt | 10,01 s | 9,78 s | −0,23 s |
+| | **fertige Ansicht** | 14,74 s | **13,12 s** | **−1,62 s (−11 %)** |
+| | eigene Herkunft übertragen | 1531 KB | 1222 KB | −309 KB |
+| Berlin-Mitte z11, Mobilfunk + CPU ×4 | erster Unfallpunkt | 11,42 s | 11,26 s | ≈ 0 (Spannen überlappen) |
+| | fertige Ansicht | 17,70 s | 16,05 s | −1,65 s (−9 %) |
+| Startansicht (z12, ländlich), Mobilfunk | erster Unfallpunkt / fertig | 5,99 / 7,58 s | 6,02 / 7,60 s | ≈ 0 |
+
+Dekodieren derselben Kachel in Node, fair (MVT: Geometrie + Attribute je Feature wie im Worker;
+MLT: `decodeTile` + `getFeatures`): **28 ms gegen 19 ms**.
+
+**Lesart:** Der Gewinn ist **Bandbreite**, nicht CPU — er wächst mit der Unfalldichte (Innenstadt
+bei langsamer Leitung ≈ 1,6 s bis zur fertigen Ansicht) und verschwindet in dünnen Gegenden und
+auf schneller Leitung. Die CPU-Drosselung vergrößert ihn nicht messbar: 9 ms weniger Dekodieren je
+Kachel gehen neben Sekunden Übertragung unter. Der erste Punkt gewinnt kaum, er braucht nur die
+erste Kachel. Nebengewinn: −22 % Speicher und Egress auf B2.
+
+**Kosten:** Build +~2 min (je ~1 min Umwandeln und Prüfen, ~1,1 GB RAM) bei jedem Unfall-Build;
+Node-Schritt in der Python-Pipeline (`npm ci` nötig); MapLibre-Upgrades hängen zusätzlich am
+MLT-Decoder; viele Werkzeuge (QGIS, tippecanoe-decode) lesen MLT noch nicht.
+
+## Stand auf `temp/mlt`
+
+- `tools/mlt/`: `mvt-to-mlt.mjs` (Umwandeln + Prüfen, Ausgabe erst nach bestandener Prüfung
+  umbenannt), `compare.mjs` (Größen, Viewport, Dekodieren), `lib.mjs` (PMTiles v3 lesen/schreiben).
+- Pipeline: `accidents_build.single_mlt_output` in `tiles.yaml`; `unfallkarte accidents mlt`
+  wandelt die vorhandene MVT-Datei um, `accidents tiles` hängt den Schritt an. 3 Tests.
+- Frontend: `ACCIDENT_SOURCES.accidents_single` → `accidents_single_mlt.pmtiles` mit
+  `encoding: "mlt"`; Golden hält jetzt auch `encoding` fest. 54/54 Playwright mit lokaler Datei.
+
+**Vor einem Merge:** `accidents_single_mlt.pmtiles` nach B2 (`unfallkarte deploy`) — sonst findet
+die CI die Datei nicht (Deploy bleibt dann aus, live passiert nichts). Die MVT-Datei bleibt einen
+Deploy-Zyklus für gecachte alte Seiten; danach als Zwischenstand nach `raw/` verlegen, damit sie
+nicht dauerhaft mit hochgeht (noch nicht umgesetzt).
+
 ## Nächste Schritte (zurückgestellt, siehe TODO.md)
 
 1. **1b — ganzes Archiv konvertieren** (A→MLT, int32, gzip -6, Metadaten übernehmen) und
@@ -246,9 +316,12 @@ ohne Frontend-Umbau und mit dem schnellsten Dekodieren. Schritt 1b entscheidet.
 
 ## Reproduzieren
 
-Die Skripte lagen im Scratchpad dieser Sitzung und sind **nicht im Repo**: ein PMTiles-v3-Leser
-(Header + Verzeichnisse, ohne Fremd-Bibliothek), Dekodieren mit `@mapbox/vector-tile` bzw.
-`@maplibre/mlt`, Filtertest mit `@maplibre/maplibre-gl-style-spec`. Stolperstein:
-`@maplibre/mlt` importiert intern ohne Dateiendungen und läuft in Node nur gebündelt (esbuild).
-freestiler lief aus dem venv von `~/pmtiles-projekt`. Wenn das öfter gebraucht wird, gehört es
-nach `tools/mlt/`.
+Schritt 1b/2 (auf `temp/mlt`): `node tools/mlt/mvt-to-mlt.mjs <mvt> <mlt>` bzw.
+`uv --directory pipeline run unfallkarte accidents mlt`, dann
+`node tools/mlt/compare.mjs <mvt> <mlt>`; Browser-Messung mit `tools/perf/` wie oben. Der
+Stolperstein von Schritt 1 — `@maplibre/mlt` importiert intern ohne Dateiendungen — ist dort mit
+einem Resolve-Hook gelöst (`tools/mlt/lib.mjs`), kein Bundler nötig.
+
+Schritt 1 (freestiler) lag nur im Scratchpad jener Sitzung: ein PMTiles-v3-Leser, Dekodieren mit
+`@mapbox/vector-tile` bzw. `@maplibre/mlt`, Filtertest mit `@maplibre/maplibre-gl-style-spec`;
+freestiler lief aus dem venv von `~/pmtiles-projekt`.

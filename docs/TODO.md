@@ -258,14 +258,16 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
 
 ## Daten / Pipeline
 
-- [ ] **Unfall-Tiles als MLT** (zurückgestellt zugunsten Vite) — Offline-Vergleich 2026-09-23,
-      Details + Zahlen in [`MLT_EVALUATION.md`](MLT_EVALUATION.md): MLT spart 30–37 % Transfer
-      auf Stadt-Viewports; freestiler 0.2.0 scheidet aus (Int64 → BigInt bricht alle Filter).
-      Weg: tippecanoe-MVT per `@maplibre/mlt` nach MLT konvertieren (int32).
-      Offen: 1b ganzes Archiv konvertieren + nachmessen → 2 Browser-Messung auf `temp/mlt`
-      → 3 Pipeline-Integration (config-getrieben, danach Cluster). Neuer Dateiname statt
-      Ersetzen; Experiment-Dateien nie unter `pipeline/data/` (`deploy.py` lädt jede
-      `*.pmtiles` hoch). Optional: Upstream-Issue bei freestiler.
+- [~] **Unfall-Tiles als MLT** — vorbereitet auf `temp/mlt` (2026-09-23), Details + Zahlen in
+      [`MLT_EVALUATION.md`](MLT_EVALUATION.md): tippecanoe-MVT per `tools/mlt/mvt-to-mlt.mjs`
+      (`@maplibre/mlt`, int32) umgewandelt, alle 48.667 Kacheln identisch; Pipeline-Schritt
+      `unfallkarte accidents mlt`; Frontend auf `accidents_single_mlt.pmtiles` (`encoding:
+      "mlt"`), 54/54 Playwright. Gemessen: Archiv −22 %, Stadt-Viewport −25…−28 % (Schwelle
+      30 % knapp verfehlt), Berlin z11 auf Mobilfunk fertige Ansicht 14,7 → 13,1 s; erster
+      Punkt, ländlich und schnelle Leitung ≈ 0. **Offen:** Entscheidung; vor dem Merge die
+      MLT-Datei nach B2 (`unfallkarte deploy`); danach MVT-Zwischenstand nach `raw/`
+      verlegen; optional stärkerer Encoder (Java/Rust), Cluster-Datei, Upstream-Issue bei
+      freestiler.
 - [ ] **Sc6-Tiles ohne Namen** — `scenario6-polys` tragen nur `oid` +
       `total_tempo50_highway_length_m`, kein `name`/`amenity`. Deshalb sahen überlappende
       Buffer (Schulgelände + Kita-Node) im Popup identisch aus; Popup zeigt jetzt Länge +
