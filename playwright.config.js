@@ -1,16 +1,19 @@
-// Smoke-Tests für das statische Frontend (tests/web/). Kein Build-Step: http-server
-// liefert das Repo-Root aus (Range-Requests für PMTiles inklusive).
+// Smoke-Tests für das Frontend (tests/web/). Getestet wird der BUILD, nicht der Dev-Server:
+// webServer baut dist/ und liefert es mit `vite preview` aus — genau das Artefakt, das die CI
+// danach deployt (getestet = ausgeliefert).
 //
 // Daten: Local-first + B2-Fallback wie im Betrieb — lokal kommen die PMTiles aus
-// ./data (Symlink auf pipeline/data), in der CI per Fallback aus dem public B2-Bucket.
+// ./data (Symlink auf pipeline/data, per Middleware aus vite.config.js mit Range-Requests),
+// in der CI per Fallback aus dem public B2-Bucket.
 //
-// Bewusst 127.0.0.1 statt localhost: main.js lädt auf "localhost" die gitignorte
-// js/config/config.js — die gibt es in der CI nicht. 127.0.0.1 nimmt config.public.js.
+// Bewusst 127.0.0.1: Local-first probt nur auf localhost/127.0.0.1 (resolveSources.js), und
+// "localhost" kann auf ::1 auflösen, während preview auf IPv4 lauscht.
 import { defineConfig, devices } from "@playwright/test";
 
-// Port überschreibbar: reuseExistingServer lässt zwei gleichzeitige Läufe auf derselben
-// Maschine denselben Server teilen — wer zuerst fertig ist, reißt ihn dem anderen weg
-// (ERR_CONNECTION_REFUSED mitten im Lauf). Zweiter Lauf daneben: PW_PORT=4174 npx playwright test
+// Port überschreibbar, für zwei Läufe nebeneinander: PW_PORT=4174 npx playwright test
+// reuseExistingServer ist AUS: ein schon laufender Server wurde sonst still übernommen — ein
+// alter Build oder gar der Server einer anderen Sitzung (beides passiert). Belegter Port =
+// klarer Fehler statt Tests gegen den falschen Stand.
 const PORT = Number(process.env.PW_PORT) || 4173;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
@@ -46,9 +49,9 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1400, height: 900 } } }],
   webServer: {
-    command: `npx http-server . -a 127.0.0.1 -p ${PORT} -c-1 --silent`,
+    command: `npm run build && npx vite preview --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `${BASE_URL}/index.html`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
+    reuseExistingServer: false,
+    timeout: 60_000,
   },
 });

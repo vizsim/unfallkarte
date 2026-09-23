@@ -22,7 +22,7 @@ kommerzielle Karten-API und ohne API-Key.
 
 👉 **[vizsim.de/unfallkarte](https://vizsim.de/unfallkarte/)**
 
-![Screenshot der Unfallkarte: Unfallpunkte auf der Karte, rechts die Legende mit Filtern](docs/screenshot.png)
+![Screenshot der Unfallkarte: Unfallpunkte auf der Karte, rechts die Legende mit Filtern](public/screenshot.png)
 
 ## 🏗️ Architektur
 

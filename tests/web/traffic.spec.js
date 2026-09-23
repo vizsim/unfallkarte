@@ -49,7 +49,14 @@ test("Uber: Klick auf ein Segment öffnet das Tagesverlauf-Chart", async ({ page
   await expect(popups(page).first().locator(".pop-pinhint")).toContainText("Tagesverlauf");
   await page.mouse.click(pt.x, pt.y);
   await expect(page.locator(".maplibregl-popup canvas#speed-chart")).toHaveCount(1);
-  await expect.poll(() => page.evaluate(() => !!window.Chart), { message: "chart.js nicht nachgeladen" }).toBe(true);
+  // Chart.js hat gezeichnet = der Canvas trägt Pixel. (Früher prüfte der Test das globale
+  // window.Chart; das lazy importierte ESM-Chart.js setzt keines mehr.)
+  await expect.poll(() => page.evaluate(() => {
+    const c = document.querySelector(".maplibregl-popup canvas#speed-chart");
+    const px = c?.getContext("2d").getImageData(0, 0, c.width, c.height).data ?? [];
+    for (let i = 3; i < px.length; i += 4) if (px[i]) return true;
+    return false;
+  }), { message: "chart.js hat nichts gezeichnet" }).toBe(true);
   expectNoErrors(errors);
 });
 

@@ -1,3 +1,7 @@
+/* MapLibre-Grundstil ZUERST: die Regeln unten überschreiben Teile davon (Controls, Popups).
+   Vite löst den Paketpfad auf und bündelt beides in eine CSS-Datei. */
+@import "maplibre-gl/dist/maplibre-gl.css";
+
 /* ───── General Layout ───── */
 html,
 body {

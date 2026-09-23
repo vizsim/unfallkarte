@@ -1,11 +1,11 @@
-// maplibre.js — der EINE Ort, an dem der Pfad zur MapLibre-Bibliothek steht.
+// maplibre.js — der EINE Ort, an dem die MapLibre-Bibliothek importiert wird.
 //
 // Seit v6 ist MapLibre ESM-only: es gibt kein UMD-Bundle und kein globales `maplibregl`
-// mehr. Alle Module importieren von hier statt direkt aus vendor/ — so steht der
-// Vendor-Pfad an genau einer Stelle, und beim späteren Vite-Schritt (docs/TODO.md,
-// Roadmap 3) ändert sich nur diese Zeile auf `from "maplibre-gl"`.
+// mehr. Alle Module importieren von hier statt direkt aus dem Paket.
 //
-// Der Worker (vendor/maplibre-gl-worker.mjs) wird same-origin automatisch über
-// import.meta.url gefunden — kein setWorkerUrl nötig. Die drei .mjs-Dateien gehören
-// zusammen und müssen dieselbe Version haben (siehe vendor/README.md).
-export * from "../../vendor/maplibre-gl.mjs";
+// Im Build wird "maplibre-gl" NICHT gebündelt, sondern per Importmap auf eine versionierte
+// Kopie der drei .mjs aufgelöst (vite.config.js, maplibreExternal): MapLibre findet seinen
+// Worker zur Laufzeit neben der eigenen Datei (import.meta.url), und Hauptthread + Worker
+// teilen sich so dieselbe -shared.mjs. Die drei Dateien müssen dieselbe Version haben —
+// das stellt jetzt package.json sicher.
+export * from "maplibre-gl";

@@ -1,6 +1,7 @@
 import { resolveSources, resolveAccidentSources } from "./resolveSources.js";
 import { showErrorBanner } from "../ui/errorBanner.js";
 import { setSourceResolver } from "../layers/registry.js";
+import { MAPILLARY_TOKEN } from "../config/env.js";
 
 // Beim Start registrierte Quellen: nur die Unfälle. Alle anderen legt die Layer-Registry lazy
 // beim ersten Einschalten an (ensureEntry) — sie bekommt dafür in attachManifest() den
@@ -22,7 +23,7 @@ const ACCIDENT_ATTRIBUTION =
  * Quellen, die kein Manifest brauchen — laufen sofort, damit die Unfall-Tiles nicht hinter
  * zwei Manifest-Fetches warten. Den Rest erledigt attachManifest().
  */
-export async function addSources(map, { tokenPromise }) {
+export async function addSources(map) {
   const addVector = (id, url) => {
     if (!map.getSource(id)) map.addSource(id, { type: "vector", url, attribution: ACCIDENT_ATTRIBUTION });
   };
@@ -30,10 +31,6 @@ export async function addSources(map, { tokenPromise }) {
   for (const [id, url] of Object.entries(await resolveAccidentSources())) {
     addVector(id, url);
   }
-
-  // Erst JETZT den Token abwarten — er hat seit dem Seitenstart Zeit gehabt (main.js stößt
-  // den Import an, ohne ihn abzuwarten) und hält damit keine Unfall-Kachel mehr auf.
-  const MAPILLARY_TOKEN = await tokenPromise;
 
   // Mapillary (Vektor-Tiles direkt von Mapillary)
   map.addSource("mapillary-images", {

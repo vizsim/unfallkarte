@@ -1,17 +1,24 @@
 {
   "name": "unfallkarte-web",
   "private": true,
-  "description": "Dev-Tooling für das statische Frontend der Unfallkarte (Smoke-Tests). Das Frontend selbst hat keinen Build-Step.",
+  "description": "Frontend der Unfallkarte: Vite (Dev-Server + Build nach dist/) und die Tests (node --test, Playwright gegen den Build).",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "scripts": {
-    "serve": "http-server . -a 127.0.0.1 -p 4173 -c-1 --silent",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
     "test:unit": "node --test \"tests/unit/*.test.js\"",
     "test:web": "playwright test",
     "test:web:ui": "playwright test --ui"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "http-server": "^14.1.1"
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "chart.js": "4.5.1",
+    "maplibre-gl": "6.10.0",
+    "pmtiles": "4.5.0"
   }
 }

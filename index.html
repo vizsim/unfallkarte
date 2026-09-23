@@ -16,7 +16,7 @@
   <meta property="og:description"
     content="Interaktive Karte der Verkehrsunfälle 2017–2025 aus dem Unfallatlas — filterbar nach Schwere, Beteiligung, Unfalltyp und Jahr, mit OSM-Kontextlayern und Analyse-Szenarien." />
   <meta property="og:url" content="https://vizsim.de/unfallkarte/" />
-  <meta property="og:image" content="https://vizsim.de/unfallkarte/docs/screenshot.png" />
+  <meta property="og:image" content="https://vizsim.de/unfallkarte/screenshot.png" />
   <meta property="og:image:width" content="1280" />
   <meta property="og:image:height" content="720" />
   <meta property="og:image:alt" content="Kartenansicht mit Unfallpunkten und Filter-Legende" />
@@ -29,12 +29,9 @@
        vorgewärmte Verbindung nicht. -->
   <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
   <link rel="preconnect" href="https://tiles.vizsim.de" crossorigin>
-  <!-- MapLibre 6 ist ESM: ohne diese Hinweise entdeckt der Browser die Bibliothek erst,
-       NACHDEM er main.js geladen und geparst hat, und deren zweite Hälfte (shared) erst
-       danach — zwei zusätzliche Roundtrips auf dem kritischen Pfad. Als klassisches
-       <script> fand sie der Preload-Scanner sofort im HTML. -->
-  <link rel="modulepreload" href="./vendor/maplibre-gl.mjs" />
-  <link rel="modulepreload" href="./vendor/maplibre-gl-shared.mjs" />
+  <!-- MapLibre: Importmap + zwei modulepreload setzt der Build selbst an den Anfang des
+       <head> (vite.config.js, maplibreExternal) — mit dem versionierten Pfad aus
+       package.json. -->
   <!-- Den Style holt main.js erst in initMap() — also NACHDEM der Browser main.js und
        dessen Modulgraph geladen und geparst hat. Der Preload-Scanner startet den Fetch
        stattdessen beim Parsen des HTML.
@@ -43,7 +40,6 @@
        der Preload passt dann nicht auf die Anfrage und die Datei kommt ZWEIMAL. Das ist
        stumm; tests/web/perf.spec.js hält es fest (gegengeprüft: ohne crossorigin 2 statt 1). -->
   <link rel="preload" href="./style.json" as="fetch" crossorigin />
-  <link rel="stylesheet" href="./vendor/maplibre-gl.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -602,7 +598,7 @@ MAIN HEADER
         <div class="mt-6">
           <label class="ml-10">
             <input type="checkbox" id="toggle-scenario3" name="scenario" value="sc3" />
-            Sc3: Kurze Tempo50 Segmente (< 400m) zw. Tempo30 Segmenten anzeigen <span class="info-icon"
+            Sc3: Kurze Tempo50 Segmente (&lt; 400m) zw. Tempo30 Segmenten anzeigen <span class="info-icon"
               data-tip="Quelle: OpenStreetMap – Lizenz: ODbL">i</span>
           </label>
         </div>
@@ -1168,13 +1164,9 @@ MAIN HEADER
   </section>
 
 
-  <!-- Vendored Libs (kein CDN): maplibre-gl 6.10.0 · pmtiles 4.5.0 · chart.js 4.5.1
-       (chart.js wird lazy geladen — erst beim ersten Uspeed-Chart-Popup, siehe
-       uspeedChart.js). Update: neue Dist-Dateien nach vendor/ + Versionen hier &
-       in vendor/README.md anpassen.
-       MapLibre ist seit v6 ESM-only: kein <script>-Tag mehr, die Module importieren es
-       über js/lib/maplibre.js (modulepreload dazu steht im <head>). -->
-  <script src="./vendor/pmtiles.js"></script>
+  <!-- Libs (maplibre-gl, pmtiles, chart.js) kommen aus npm, Versionen exakt gepinnt in
+       package.json. Vite bündelt main.js samt pmtiles; chart.js wird lazy nachgeladen
+       (uspeedChart.js), MapLibre bleibt ungebündelt (siehe vite.config.js). -->
   <script type="module" src="./main.js"></script>
 </body>
 

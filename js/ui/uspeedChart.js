@@ -1,24 +1,19 @@
 // Uber-Speed: Klick auf ein Segment zeigt den Tagesverlauf (24 Stundenwerte) als Chart-Popup.
 
-// chart.js (vendored, ~200 KB) erst beim ersten Uspeed-Chart-Popup nachladen —
-// einziger Nutzer ist showUspeedChartPopup, darum raus aus dem kritischen
-// Startpfad (kein <script>-Tag mehr in index.html).
+// chart.js (~200 KB) erst beim ersten Uspeed-Chart-Popup nachladen — einziger Nutzer ist
+// showUspeedChartPopup, darum raus aus dem kritischen Startpfad. Das dynamische import()
+// macht Vite zu einem eigenen Chunk.
 
 import { Popup } from "../lib/maplibre.js";
 
 let chartJsReady = null;
 function loadChartJs() {
-    chartJsReady ??= new Promise((resolve, reject) => {
-        if (window.Chart) return resolve();
-        const s = document.createElement("script");
-        s.src = "./vendor/chart.umd.min.js";
-        s.onload = () => resolve();
-        s.onerror = () => {
+    chartJsReady ??= import("chart.js/auto")
+        .then((m) => m.default)
+        .catch((err) => {
             chartJsReady = null; // nächster Klick versucht es erneut
-            reject(new Error("vendor/chart.umd.min.js nicht ladbar"));
-        };
-        document.head.appendChild(s);
-    });
+            throw err;
+        });
     return chartJsReady;
 }
 
@@ -42,7 +37,7 @@ export function showUspeedChartPopup(map, p, lngLat) {
         .addTo(map);
 
     setTimeout(() => {
-        loadChartJs().then(() => {
+        loadChartJs().then((Chart) => {
         new Chart(document.getElementById("speed-chart"), {
             type: "line",
             data: {

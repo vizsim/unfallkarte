@@ -51,23 +51,42 @@ test("Unfall-Quellen warten nicht auf das Manifest", async ({ page }) => {
   expect(accidentTiles.length, "keine Unfall-Tile-Anfrage vor dem Manifest").toBeGreaterThan(0);
 });
 
-test("Karte startet, ohne auf die Token-Konfig zu warten", async ({ page }) => {
-  // config.js/config.public.js liefert einzig den Mapillary-Token, hing aber vor dem
-  // Style-Fetch und dem Kartenkonstruktor. Gleiche Prüfung wie beim Manifest: künstlich
-  // verzögern und schauen, ob die Karte trotzdem hochkommt.
-  let configDone = false;
-  await page.route(/js\/config\/config(\.public)?\.js/, async (route) => {
-    await new Promise((r) => setTimeout(r, 5000));
-    configDone = true;
-    await route.continue();
+test("MapLibre ungebündelt: Worker und Hauptthread teilen sich -shared.mjs", async ({ page }) => {
+  // MapLibre sucht seinen Worker zur Laufzeit neben der eigenen Datei (import.meta.url).
+  // Gebündelt fände er ihn nicht (Karte leer, OHNE Fehler), mit setWorkerUrl lüde der Worker
+  // -shared unter eigener URL ein zweites Mal (+121 KB gzip, Spike in docs/VITE_MIGRATION.md).
+  // Darum bleibt MapLibre extern (vite.config.js). Hält das fest: alle drei Dateien kommen
+  // aus EINEM versionierten Ordner, und -shared läuft über genau EINE URL (die zweite Anfrage
+  // — die des Workers — ist dann ein Cache-Treffer). Worker-Anfragen sieht nur der Kontext.
+  const urls = [];
+  page.context().on("request", (r) => {
+    if (/maplibre-gl/.test(r.url())) urls.push(new URL(r.url()).pathname);
   });
+  const errors = await openMap(page);
 
-  await page.goto("/index.html");
-  await page.waitForFunction(
-    () => !!window.map?.getSource?.("accidents_single"),
-    null, { timeout: 15_000 },
-  );
-  expect(configDone, "Konfig war schon durch — Verzögerung hat nicht gegriffen").toBe(false);
+  const dirs = new Set(urls.map((u) => u.slice(0, u.lastIndexOf("/"))));
+  expect([...dirs], `MapLibre-Anfragen: ${JSON.stringify(urls)}`).toEqual([expect.stringMatching(/\/lib\/maplibre-gl@\d+\.\d+\.\d+$/)]);
+  expect(urls.some((u) => u.endsWith("/maplibre-gl-worker.mjs")), "Worker nicht aus dem lib-Ordner geladen").toBe(true);
+  expect(new Set(urls.filter((u) => u.endsWith("-shared.mjs"))).size).toBe(1);
+  expectNoErrors(errors);
+});
+
+test("keine eigene Datei fehlt beim Start", async ({ page, baseURL }) => {
+  // Fängt, was beim Build still verloren gehen kann: eine Datei, die zur Laufzeit per URL
+  // geholt wird und darum in public/ liegen muss (style.json, Sprite, Legenden-Icons), oder
+  // ein Verweis, den Vite nicht umgeschrieben hat. Ausgenommen: die Local-first-Probe nach
+  // ./data/ — dort IST der 404 der Normalfall, sobald eine Datei nicht lokal liegt (CI).
+  const failed = [];
+  const origin = new URL(baseURL).origin;
+  page.on("response", (r) => {
+    const url = new URL(r.url());
+    if (url.origin === origin && r.status() >= 400 && !url.pathname.includes("/data/")) {
+      failed.push(`${r.status()} ${url.pathname}`);
+    }
+  });
+  const errors = await openMap(page);
+  expect(failed).toEqual([]);
+  expectNoErrors(errors);
 });
 
 test("fehlender Kartenstil zeigt ein Banner statt einer weißen Seite", async ({ page }) => {

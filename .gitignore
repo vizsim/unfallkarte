@@ -19,8 +19,8 @@ config.js
 # But keep JSON files in the project root (main) folder
 !/*.json
 
-#also exclude JSON files in the icons folder
-!/icons/*.json
+# ...und JSON unter public/ (style.json, Sprite) — Vite kopiert public/ 1:1 nach dist/
+!/public/**/*.json
 
 # Golden-Reference der Frontend-Tests (muss versioniert sein, sonst fehlt sie der CI)
 !/tests/web/__snapshots__/*.json
@@ -39,7 +39,10 @@ accident_data/
 # Lokaler Local-first-Symlink auf pipeline/data (nicht committen)
 /data
 
-# Node-Dev-Tooling (Frontend-Smoke-Tests, siehe package.json / playwright.config.js)
+# Node-Dev-Tooling (Vite + Playwright, siehe package.json / vite.config.js)
 node_modules/
+/dist/
+# Lokale Vite-Env (z. B. .env.development.local mit dem lokalen Mapillary-Token)
+.env*.local
 test-results/
 playwright-report/

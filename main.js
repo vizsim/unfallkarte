@@ -3,6 +3,7 @@
 
 // 📦 Karte: Bibliothek, Quellen, Layer, Basemap/Terrain
 import { Map as MapLibreMap, addProtocol } from './js/lib/maplibre.js';
+import { Protocol, PMTiles } from "pmtiles";
 import { addSources, attachManifest } from "./js/mapdata/addSources.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
 import { resolveSources } from "./js/mapdata/resolveSources.js";
@@ -51,7 +52,6 @@ let originalMinZoom = 6;
 let currentZoomLock = null;
 
 const isInitializingRef = { value: true }; // Permalink-Restore läuft -> nichts zurückschreiben
-const isLocalhost = location.hostname === "localhost";
 
 // Zähler + Permalink als Callbacks: die Module dahinter sollen weder den Zoom-Lock noch
 // das URL-Format kennen müssen.
@@ -60,26 +60,27 @@ const writePermalink = () => updatePermalink(window.map, isInitializingRef);
 
 let accidents = null; // { updateLayerFilter, updateColorStyle } — steht ab setupUI()
 
-// Tokens je nach Umgebung: lokal aus der gitignorten config.js, sonst config.public.js.
-// Bewusst NICHT abgewartet: der Token wird einzig für die zwei Mapillary-Quellen gebraucht,
-// hing aber vor allem anderen — vor dem Style-Fetch, vor dem Kartenkonstruktor, vor der
-// ersten Kachel. Jetzt läuft der Import parallel; addSources() wartet ihn erst ab, wenn die
-// Unfall-Quellen bereits stehen.
-// Der catch gehört dazu: vorher hing initMap() IM try, ein fehlgeschlagener Import ließ also
-// eine weiße Seite zurück (traf localhost ohne config.js). Jetzt startet die Karte in jedem
-// Fall, und nur Mapillary bleibt leer.
-const tokenPromise = import(isLocalhost ? './js/config/config.js' : './js/config/config.public.js')
-  .then(({ MAPILLARY_TOKEN }) => MAPILLARY_TOKEN)
-  .catch((err) => {
-    console.error("❌ Konfig konnte nicht geladen werden — Mapillary-Layer bleiben leer:", err);
-    return "";
-  });
+// Nach einem Deploy gibt es die Lazy-Chunks der vorigen Version nicht mehr (gehashte Namen,
+// Pages ersetzt den ganzen Stand). Wer die Seite VOR dem Deploy geöffnet hat, bekäme beim
+// ersten Nachladen (z. B. Chart.js) einen 404. Vite meldet das als `vite:preloadError`:
+// einmal neu laden holt die aktuelle Version. Die Marke in sessionStorage verhindert eine
+// Reload-Schleife, falls der Chunk auch danach fehlt (dann greift der normale Fehlerweg).
+window.addEventListener("vite:preloadError", (event) => {
+  try {
+    if (sessionStorage.getItem("uk-chunk-reload")) return;
+    sessionStorage.setItem("uk-chunk-reload", "1");
+  } catch {
+    return; // ohne Storage lieber kein Reload als eine mögliche Schleife
+  }
+  event.preventDefault();
+  location.reload();
+});
 
 // Test-Hook (tests/web/): Playwright braucht DIESELBEN Modul-Instanzen wie die App. Früher
 // importierten die Tests sie im Browser über ihren Pfad (`import("/js/layers/registry.js")`) —
 // im gebündelten Build gibt es diese Pfade nicht mehr. Wie `window.map`: nur lesen, nie
 // darauf aufbauen.
-window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles: pmtiles.PMTiles };
+window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles };
 
 cleanupLegacyPermalink();
 
@@ -92,7 +93,7 @@ initMap();
 async function initMap() {
   // PMTiles-Protokoll registrieren. Quellen binden volle pmtiles://https://… URLs ein
   // (siehe resolveSources.js/addSources.js) -> kein Basis-URL-Mapping nötig.
-  const protocol = new pmtiles.Protocol();
+  const protocol = new Protocol();
   addProtocol("pmtiles", protocol.tile);
 
   // Ansicht aus dem Link schon HIER lesen, damit die Karte direkt an der richtigen Stelle
@@ -251,7 +252,7 @@ async function initializeMapModules(map, sourcesPromise) {
   // Vertrag, die URL steht damit fest (siehe ACCIDENT_SOURCES in resolveSources.js). Vorher
   // lagen hier zwei Fetches auf dem kritischen Pfad, bevor eine einzige Kachel angefragt
   // werden konnte — die lokale Manifest-Probe (deployt immer ein 404) und das B2-Manifest.
-  await addSources(map, { tokenPromise });
+  await addSources(map);
   addLayers(map);
 
   // Keyless Basemaps/Terrain (OpenFreeMap/OSM/Esri + Mapterhorn) + 3D-Gebäude, NACH
