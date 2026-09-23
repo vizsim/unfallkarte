@@ -121,6 +121,7 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
   automatisch nach GitHub Pages deployt (vizsim.de/unfallkarte/), ist also ein
   Produktiv-Deploy. Größere
   Umbauten auf einem `temp/*`-Branch bauen und erst nach grünen Tests mergen. Der Stand vor
-  dem Pipeline-Refactor hängt als Tag `v2025` (kein Branch — er liegt auf derselben Linie).
+  dem Pipeline-Refactor hängt als Tag `v2025` (kein Branch — er liegt auf derselben Linie),
+  der letzte Stand vor Vite als Tag `pre-vite` (Rückweg: `docs/VITE_MIGRATION.md`, Schritt 4).
   Offene Punkte siehe Auto-Memory
   bzw. `docs/TODO.md`.

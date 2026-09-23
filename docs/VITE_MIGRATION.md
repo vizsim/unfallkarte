@@ -1,7 +1,7 @@
 # Vite-Umstellung — Skizze und Umsetzungsplan
 
-Stand: **2026-09-23** · Schritte 0–3, 5 und 6 (lokal) umgesetzt auf `temp/vite`; offen: Cutover (4)
-und die Live-Messung danach. Konkretisiert `docs/TODO.md` Roadmap 3 und `docs/PERFORMANCE_PLAN.md` Stufe 4.
+Stand: **2026-09-23** · **umgesetzt und live** (Cutover `50d7fd5`, Pages-Quelle „GitHub Actions";
+Stand davor als Tag `pre-vite`). Konkretisiert `docs/TODO.md` Roadmap 3 und `docs/PERFORMANCE_PLAN.md` Stufe 4.
 Gemessene Zahlen tragen ihre Quelle; Schätzungen sind als solche markiert.
 
 ## Warum — und warum nicht
@@ -263,7 +263,22 @@ der Preload-Link auf `public/style.json` (fängt `perf.spec.js`).
 - Der Deploy hängt bewusst nur an `web`: ein roter Pipeline-Test soll die Website nicht blockieren.
 - Action-Versionen wie bei den übrigen auf der Node-24-Laufzeit; Runner bleibt `ubuntu-24.04`.
 
-### Schritt 4 — Cutover (ein Zug, du schaltest um)
+### Schritt 4 — Cutover ✓ (2026-09-23, live seit 18:41 UTC)
+
+**So gelaufen:** Vorher die ganze Suite in einem frischen Klon ohne `data/` mit `CI=1` gefahren
+(= Runner-Bedingungen, alles per B2-Fallback): 54/54. Dann Pages-Quelle umgestellt (User) — die
+alte Seite lief dabei unverändert weiter —, `main` per Fast-Forward auf `50d7fd5` (lineare
+Historie wie bisher, kein Merge-Commit), `main` + Tag `pre-vite` (`2f2c68f`) gepusht. Für diesen
+Commit lief erstmals **kein** „pages build and deployment" mehr, nur unsere CI: Pipeline 51 s,
+Frontend (Build + Playwright auf dem Runner) 4:42 min, Deploy 13 s. Live-Check danach (frischer
+Browser gegen vizsim.de): Worker aus `lib/maplibre-gl@6.10.0/`, 2281 Unfallpunkte gerendert,
+Kontext-Layer lazy, Chart-Chunk 200, Handy-Sheet zugeklappt, v1-Link korrekt auf v2
+hochgeschrieben, `og:image` 200 — keine fehlgeschlagene Anfrage, kein Konsolenfehler.
+
+**Wichtig war die Reihenfolge:** erst umstellen, dann pushen. Im Branch-Modus hätte der Push das
+ungebaute Repo-Root veröffentlicht (nackte Imports → leere Karte).
+
+Ursprünglicher Ablauf:
 
 1. Tag `pre-vite` auf den letzten `main`-Stand setzen.
 2. **Repo-Settings → Pages → Source: „GitHub Actions"** (manuell). Laut GitHub bleibt die letzte
@@ -293,7 +308,7 @@ der Preload-Link auf `public/style.json` (fängt `perf.spec.js`).
   - Messregel: gegen `dist/` mit Pages-ähnlichem Server, nie gegen `vite` dev.
 - `docs/TODO.md` Roadmap 3 abhaken, `PERFORMANCE_PLAN.md` Stufe 4 nachziehen.
 
-### Schritt 6 — Messen ✓ lokal (2026-09-23) · live offen
+### Schritt 6 — Messen ✓ (lokal + live, 2026-09-23)
 
 Mess-Skripte liegen jetzt im Repo: `tools/perf/pages-like-server.mjs` (gzip, `max-age=600`, Range,
 ~9-KB-404 wie Pages) und `tools/perf/measure-start.mjs` (A/B abwechselnd, frischer Browser-Kontext
@@ -322,8 +337,18 @@ komplett ausgeklappte Legende über der Karte, bis zum `load` der Karte — 4,0 
 (Inline-Einzeiler setzt `collapsed` beim Parsen). Ebenso behoben: beim Ziehen des Sheets wurde die
 ganze Seite scrollbar (`167dea5`).
 
-**Offen:** live nach dem Cutover gegen vizsim.de nachmessen (Baseline 5,76 s bis zum ersten
-Unfallpunkt, 2026-09-21) — erst 10 min nach dem Deploy (Pages-Cache).
+**Live nachgemessen** (2026-09-23, 10 min nach dem Deploy, ruhige Maschine) mit **demselben
+Skript** wie die Live-Basis vom 2026-09-21 (Zeit ab `goto`, 1,6 Mbit/s / 150 ms, 7 Läufe, Median):
+
+| live | vorher (2026-09-21) | Vite, Reihe 1 | Vite, Reihe 2 |
+|---|---|---|---|
+| erster Unfallpunkt | 5,76 s (5,70–5,84) | **5,13 s** (5,10–5,21) | **5,08 s** (5,02–5,25) |
+| vollständige Startansicht | 6,87 s (6,80–6,96) | **6,26 s** (6,26–6,32) | **6,20 s** (6,14–6,37) |
+| erste Kachel-Anfrage | 2,98 s | **2,47 s** | **2,45 s** |
+
+Online rund −0,65 s, Spannen überlappen nicht. Einschränkung: zwei Tage auseinander, B2/CDN können
+schwanken. Am belastbarsten ist die erste Kachel-Anfrage (−0,5 s) — sie hängt nur daran, wann das
+App-JS bereit ist, nicht an B2. Die saubere A/B-Messung bleibt die lokale oben (−0,78 s).
 
 ## Danach (nicht Teil dieses Plans)
 

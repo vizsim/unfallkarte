@@ -173,7 +173,7 @@ pyogrio direkt.)
 genau diesen Stand und veröffentlicht ihn auf GitHub Pages — nur wenn die Frontend-Tests
 grün sind (ein paar Minuten nach dem Push). Größere Umbauten laufen über einen
 `temp/*`-Branch und werden erst nach grünen Tests gemergt. Der Stand vor dem
-Pipeline-Refactor hängt als Tag **`v2025`**.
+Pipeline-Refactor hängt als Tag **`v2025`**, der letzte Stand vor Vite als Tag **`pre-vite`**.
 
 Die PMTiles liegen **nicht** im Git (`data/` ist gitignored), sondern lokal und im
 öffentlichen B2-Bucket. Ein Code-Deploy und ein Daten-Deploy

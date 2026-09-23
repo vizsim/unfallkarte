@@ -112,14 +112,16 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
          Layer; eine Bitmaske über die Unfall-Filter spart gegenüber „Defaults weglassen" im
          schlechtesten Fall ein Zeichen, kostet aber Lesbarkeit und macht die Bit-Reihenfolge
          zum harten Vertrag (ein neues Unfalljahr verschöbe alle alten Links).
-3. [~] **Vite** (2026-09-23, Branch `temp/vite`) — umgesetzt; Plan, Spike und Begründungen in
+3. [x] **Vite** (2026-09-23, live seit `50d7fd5`) — Plan, Spike, Messungen und Begründungen in
        [`VITE_MIGRATION.md`](VITE_MIGRATION.md). Build nach `dist/`; MapLibre bleibt
        ungebündelt (Importmap + versionierter Ordner — gebündelt fände es seinen Worker nicht,
        die Karte bliebe ohne jeden Fehler leer); Libs aus npm exakt gepinnt, `vendor/`
        gelöscht; Mapillary-Token zur Bauzeit (`.env.production` / `.env.development.local`);
        Playwright testet den Build, die CI deployt genau dieses `dist/` nach Pages.
-       52/52 Playwright, Golden unverändert. **Offen:** Cutover (Pages-Quelle „GitHub Actions"
-       + Merge, Schritt 4), Live-Check, Vorher/Nachher-Messung (Schritt 6).
+       Pages-Quelle jetzt „GitHub Actions" (Push → CI → Deploy nur bei Grün, Stand davor =
+       Tag `pre-vite`). 54/54 Playwright, Golden unverändert. Gemessen: lokal A/B −0,78 s bis
+       zum ersten Unfallpunkt (Mobilfunk), live 5,76 → 5,1 s. Nebenbei zwei alte Handy-Fehler
+       behoben (Sheet blitzte 3–4 s ausgeklappt auf; Ziehen machte die Seite scrollbar).
 4. [ ] **TypeScript** — lohnt an den Stellen mit impliziten Objektformen: Popup-Entry,
        Layer-Registry, Manifest, Permalink-Format. Günstiger Zwischenschritt ohne Build:
        `tsconfig.json` mit `checkJs` + JSDoc-Typen (IDE meldet heute schon z. B.
