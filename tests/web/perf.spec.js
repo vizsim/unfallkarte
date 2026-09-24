@@ -59,6 +59,34 @@ test("Unfall-Quellen warten nicht auf das Manifest", async ({ page }) => {
   expect(accidentTiles.length, "keine Unfall-Tile-Anfrage vor dem Manifest").toBeGreaterThan(0);
 });
 
+test("Unfall-Kacheln und Legende warten nicht auf die Basemap", async ({ page }) => {
+  // MapLibres "load" kommt erst, wenn die Basemap der Startansicht komplett ist (Kacheln,
+  // Glyphen, Sprite). Hing die UI daran, blieb der Unfall-Layer so lange unsichtbar — und
+  // unsichtbare Layer laden keine Kacheln (docs/PERFORMANCE_REPORT_2026-09-24.md, A1).
+  // Verhaltensbasiert wie der Manifest-Test: Basemap-Kacheln 8 s zurückhalten; in der Zeit
+  // müssen die Legende bereit sein UND echte Unfall-Kacheln fliegen. Echt = nicht der Kopf
+  // (Range ab Byte 0); das Blatt-Verzeichnis kann in den ersten 16 KiB liegen, also nicht auf
+  // einen Mindest-Offset prüfen.
+  let basemapReleased = false;
+  await page.route(/tiles\.openfreemap\.org\/planet\/.+\.pbf/, async (route) => {
+    await new Promise((r) => setTimeout(r, 8000));
+    basemapReleased = true;
+    await route.continue().catch(() => {});   // Seite ist dann evtl. schon zu
+  });
+
+  const single = fileName(ACCIDENT_SOURCES.accidents_single.file);
+  const tileRanges = [];
+  page.on("request", (r) => {
+    const range = r.headers().range;
+    if (r.url().endsWith(single) && range && !range.startsWith("bytes=0-")) tileRanges.push(range);
+  });
+
+  await page.goto("/index.html");
+  await page.waitForFunction(() => document.documentElement.dataset.appReady === "true", null, { timeout: 30_000 });
+  await expect.poll(() => tileRanges.length, { timeout: 30_000 }).toBeGreaterThan(0);
+  expect(basemapReleased, "Legende/Unfall-Kacheln kamen erst nach der Basemap").toBe(false);
+});
+
 test("MapLibre ungebündelt: Worker und Hauptthread teilen sich -shared.mjs", async ({ page }) => {
   // MapLibre sucht seinen Worker zur Laufzeit neben der eigenen Datei (import.meta.url).
   // Gebündelt fände er ihn nicht (Karte leer, OHNE Fehler), mit setWorkerUrl lüde der Worker

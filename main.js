@@ -85,7 +85,7 @@ window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles };
 cleanupLegacyPermalink();
 
 // Legenden-Einträge aus der Registry erzeugen, BEVOR irgendetwas #toggle-<id> sucht
-// (applyDataVintages läuft schon bei style.load, setupUI erst bei load).
+// (applyDataVintages und setupUI laufen bei style.load).
 renderLegendEntries();
 
 initMap();
@@ -156,7 +156,12 @@ async function initMap() {
   const ensureModules = () => (modulesReady ??= initializeMapModules(map, sourcesPromise));
   map.on("style.load", ensureModules);
 
-  map.on("load", async () => {
+  // UI + Permalink ebenfalls bei "style.load", NICHT bei "load": die Unfall-Layer starten
+  // unsichtbar und werden erst im Permalink-Restore sichtbar — und unsichtbare Layer fordern
+  // keine Kacheln an. Hing das an "load" (= Basemap komplett: Kacheln, Glyphen, Sprite),
+  // luden die Unfalldaten NACH der Basemap statt parallel zu ihr, und die Legende blieb so
+  // lange tot. Gemessen: docs/PERFORMANCE_REPORT_2026-09-24.md, Befund 1 (A1).
+  map.once("style.load", async () => {
     await ensureModules();   // async (Local-first-Auflösung) -> erst Layer, dann UI
 
     setupUI(map);
@@ -263,7 +268,7 @@ async function initializeMapModules(map, sourcesPromise) {
 
   // Ab hier das Manifest (läuft seit initMap parallel): es versorgt die Layer-Registry mit
   // URLs für das lazy Einschalten und die OSM-Quellen-Tooltips mit dem Datenstand.
-  // Reihenfolge ist sicher: map.on("load") wartet auf initializeMapModules, der
+  // Reihenfolge ist sicher: der UI-Handler in initMap wartet auf initializeMapModules, der
   // Permalink-Restore (der Kontextlayer einschalten kann) läuft erst danach.
   const sources = await attachManifest(sourcesPromise);
   applyDataVintages(sources.manifest);
