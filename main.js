@@ -161,7 +161,7 @@ async function initMap() {
   // unsichtbar und werden erst im Permalink-Restore sichtbar — und unsichtbare Layer fordern
   // keine Kacheln an. Hing das an "load" (= Basemap komplett: Kacheln, Glyphen, Sprite),
   // luden die Unfalldaten NACH der Basemap statt parallel zu ihr, und die Legende blieb so
-  // lange tot. Gemessen: docs/PERFORMANCE_REPORT_2026-09-24.md, Befund 1 (A1).
+  // lange tot. Gemessen: docs/PERFORMANCE_PLAN.md, Stufe 7 (A1).
   map.once("style.load", async () => {
     await ensureModules();   // async (Local-first-Auflösung) -> erst Layer, dann UI
 

@@ -3,8 +3,8 @@
 // Chromium lässt je URL nur EINE Anfrage gleichzeitig laufen (Schreib-Sperre des HTTP-Caches),
 // auch für Range-Anfragen. Alle Kacheln eines Archivs teilen sich die URL — sie liefen darum
 // nacheinander, jede mit einer vollen Antwortzeit von B2 (170–440 ms). Kein Antwort-Header
-// hebt die Sperre auf, nur `cache: "no-store"` in der Anfrage (Minimaltest in
-// docs/PERFORMANCE_REPORT_2026-09-24.md, Befund 2). pmtiles setzt das selbst nur für Chromium
+// hebt die Sperre auf, nur `cache: "no-store"` in der Anfrage (Minimaltest + Messung:
+// docs/PERFORMANCE_PLAN.md, Stufe 7). pmtiles setzt das selbst nur für Chromium
 // unter Windows (aus einem anderen Grund, crbug 40542704) — hier für alle Browser.
 //
 // Preis: Range-Antworten landen nicht im Browser-Cache. B2 schickt ohnehin keine Cache-Header,

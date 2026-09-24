@@ -62,7 +62,7 @@ test("Unfall-Quellen warten nicht auf das Manifest", async ({ page }) => {
 test("Unfall-Kacheln und Legende warten nicht auf die Basemap", async ({ page }) => {
   // MapLibres "load" kommt erst, wenn die Basemap der Startansicht komplett ist (Kacheln,
   // Glyphen, Sprite). Hing die UI daran, blieb der Unfall-Layer so lange unsichtbar — und
-  // unsichtbare Layer laden keine Kacheln (docs/PERFORMANCE_REPORT_2026-09-24.md, A1).
+  // unsichtbare Layer laden keine Kacheln (docs/PERFORMANCE_PLAN.md, Stufe 7, A1).
   // Verhaltensbasiert wie der Manifest-Test: Basemap-Kacheln 8 s zurückhalten; in der Zeit
   // müssen die Legende bereit sein UND echte Unfall-Kacheln fliegen. Echt = nicht der Kopf
   // (Range ab Byte 0); das Blatt-Verzeichnis kann in den ersten 16 KiB liegen, also nicht auf
@@ -96,7 +96,7 @@ test.describe("PMTiles unter Linux/Android/macOS", () => {
   test("PMTiles-Ranges laufen ohne Cache-Sperre (cache: no-store)", async ({ page }) => {
     // Chromium lässt je URL nur EINE Anfrage gleichzeitig laufen (Sperre des HTTP-Caches), auch
     // für Ranges — die Kacheln eines Archivs luden nacheinander. `cache: "no-store"` hebt das
-    // auf (js/mapdata/pmtilesProtocol.js, Report A2). Geprüft wird die Anfrage, nicht die
+    // auf (js/mapdata/pmtilesProtocol.js, PERFORMANCE_PLAN.md Stufe 7, A2). Geprüft wird die Anfrage, nicht die
     // Parallelität selbst: page.route schaltet den HTTP-Cache ab, mit einer Verzögerung per
     // Route sähe also auch der alte Code parallel aus. Der Spion auf fetch fängt dagegen beides,
     // was still kaputtgehen kann: ein pmtiles-Update ohne das Flag und eine Quelle am

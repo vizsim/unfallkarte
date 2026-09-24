@@ -17,6 +17,7 @@ Ergänzt `docs/TODO.md` Roadmap 3 (Vite), ersetzt sie nicht.
 | 4 Vite | **erledigt + live** (`50d7fd5`, 2026-09-23) | live erster Unfallpunkt 5,76 → 5,1 s, erste Kachel-Anfrage 2,98 → 2,46 s; lokal A/B −0,78 s; schnelle Leitung ≈ 0 — [`VITE_MIGRATION.md`](VITE_MIGRATION.md) |
 | 5 Lazy-Chunks | offen (nach Vite) | — |
 | 6 Gefühlte Ladezeit, Perf-Budget | teilweise (`tests/web/perf.spec.js` steht) | — |
+| 7 Startpfad: UI bei `style.load` (A1), PMTiles ohne Cache-Sperre (A2) | **gebaut + gemessen** auf `temp/perf-start` (2026-09-24) | Mobilfunk: Legende 5,26 → 2,73 s, erster Punkt 6,08 → 4,18 s, fertig 7,72 → 5,67 s; Städtesprung schnelle Leitung: Unfall-Kacheln −40 % |
 
 ---
 
@@ -201,6 +202,80 @@ Zurückgestellt:
    entstehen nach dem Filter, die Kacheln sind byte-identisch. Keine Config dafür eintragen.
 7. **`contract.spec.js` braucht keine gepflegte Attributliste** — es leitet die benutzten
    Felder zur Laufzeit aus dem Style ab. Der alte Plan behauptete das Gegenteil.
+
+---
+
+## Stufe 7 — Startpfad: Legende und Unfall-Kacheln entkoppelt (2026-09-24)
+
+Aus dem Performance-Report vom 24.09. (Maßnahmen A1 + A2, dort im Labor mit synthetischen
+Daten gemessen). Hier nachgemessen mit **echten Daten von B2** (TTFB von hier ~0,18 s,
+`cf-cache-status: DYNAMIC`), MLT-Unfallkacheln, Pages-ähnlicher Server, je 7 Läufe, Median
+(Spanne).
+
+**A1 — UI + Permalink bei `style.load` statt `load`** (`main.js`). Die Unfall-Layer starten
+unsichtbar und werden erst im Permalink-Restore sichtbar; unsichtbare Layer laden keine
+Kacheln. Der Restore hing an `load` — und das feuert erst, wenn die Basemap der Startansicht
+komplett ist (Kacheln, Glyphen, Sprite). Die Unfalldaten luden also **nach** der Basemap, die
+Legende war bis dahin tot.
+
+**A2 — PMTiles-Ranges mit `cache: "no-store"`** (`js/mapdata/pmtilesProtocol.js`). Chromium
+lässt je URL nur **eine** Anfrage gleichzeitig laufen (Schreib-Sperre des HTTP-Caches), auch
+für Range-Anfragen, und kein Antwort-Header hebt das auf (Minimaltest: 8 parallele Ranges mit
+300 ms TTFB brauchen 2,45 s statt 0,32 s). Alle Kacheln eines Archivs teilen sich die URL,
+luden also nacheinander. pmtiles setzt `no-store` selbst nur für Chromium **unter Windows**; der
+eigene Handler tut es für alle. Preis: kein Browser-Cache für Ranges — den gab es mangels
+Cache-Headern von B2 ohnehin nicht.
+
+Start, **Mobilfunk** (1,6 Mbit/s / 150 ms):
+
+| | Baseline | A1 | A2 | A1 + A2 |
+|---|---|---|---|---|
+| Legende bedienbar | 4,99–5,26 s | **2,66–2,71 s** | 4,99 s | **2,71–2,73 s** |
+| erster Unfallpunkt | 5,77–6,08 s | 4,40–4,50 s | 5,81 s | **4,13–4,18 s** |
+| fertige Startansicht | 7,43–7,72 s | 5,98–6,10 s | 6,00 s | **5,65–5,67 s** |
+
+(Mehrere Werte = mehrere Serien; die Baseline schwankt zwischen den Serien um ~0,3 s, darum
+immer im selben Lauf vergleichen.) Je Serie direkt verglichen:
+
+- **A1** (2 Serien): Legende −2,5 s, erster Punkt −1,4/−1,5 s, fertig −1,5/−1,6 s.
+- **A2 allein**: Legende und erster Punkt ±0, fertig **−1,4 s** (7,43 → 6,00).
+- **A2 auf A1**: erster Punkt −0,37 s (4,50 → 4,13), fertig −0,45 s (6,10 → 5,65).
+- **A1 + A2 gegen Baseline**: Legende −2,5 s, erster Punkt **−1,9 s**, fertig **−2,05 s**.
+
+Keine der Spannen überlappt. Start, **schnelle Leitung** (ungedrosselt): A1 macht die Legende
+bedienbar in 0,57 statt 1,24 s; erster Punkt und fertige Ansicht nur −0,2 bis −0,5 s, Spannen
+überlappen. A2 ändert beim Start dort nichts Messbares.
+
+**Städtesprung** (nach dem Start `jumpTo` auf z12 nach Köln, München, Hamburg, Leipzig; Zeit bis
+alle Unfall-Kacheln der Ansicht da sind, `isSourceLoaded`), A1 gegen A1 + A2, je 5 Läufe:
+
+| | ohne A2 | mit A2 |
+|---|---|---|
+| schnelle Leitung, Summe 4 Städte | 5,97 s (5,72–6,81) | **3,55 s** (3,34–3,62) |
+| je Stadt | 1,01–1,81 s | 0,53–1,00 s |
+| Mobilfunk, Summe 4 Städte | 22,07 s | 21,88 s (Rauschen) |
+
+Wo A2 wirkt, hängt davon ab, was knapp ist: auf der **schnellen Leitung** bestimmt die
+Wartezeit je Anfrage das Tempo, und die Sperre reiht die ~0,2 s TTFB je Kachel hintereinander.
+Bei **1,6 Mbit/s über einer Stadt** ist die Bandbreite der Engpass (Kacheln bis 178 KB); dort
+füllt auch das Nacheinander die Leitung, und A2 bringt nichts. `idle` bleibt beim Sprung gleich
+(Basemap von OpenFreeMap bestimmt es) — der Gewinn ist, dass die Unfalldaten zuerst stehen.
+
+**Testfalle:** Playwrights Gerät „Desktop Chrome" meldet sich mit einem **Windows**-User-Agent —
+die ganze Testsuite lief also schon immer mit pmtiles' `no-store` und hat die Sperre nie
+gesehen. Der A2-Test (`perf.spec.js`) setzt darum einen Linux-UA; mit dem Geräte-UA war die
+Gegenprobe (Flag entfernt) grün. `measure-start.mjs` nutzt keinen Geräte-UA und misst den
+Standardpfad (Linux = wie Android/macOS).
+
+Tests: A1 hält die OpenFreeMap-Kacheln 8 s zurück und verlangt in der Zeit Legende +
+Unfall-Kachel-Anfragen; A2 prüft per `fetch`-Spion, dass jede PMTiles-Range `no-store` trägt
+(`page.route` taugt dafür nicht: Routing schaltet den HTTP-Cache ab, dann sähe auch der alte
+Code parallel aus). Beide Gegenproben rot.
+
+**Folge für Stufe 1:** nach A2 zahlt man die Ursprungs-TTFB je Ebene (Kopf → Blatt → Kachel)
+nur einmal statt je Kachel. Der Edge-Cache bleibt wertvoll, vor allem beim Pannen/Zoomen, aber
+der Start-Gewinn schrumpft. Die Browser-TTL aus Stufe 1 wirkt nach A2 für niemanden mehr — der
+Nutzen liegt im Edge.
 
 ---
 
