@@ -1,5 +1,6 @@
-// measure-start.mjs — Startzeit A/B: Zeit bis zum ersten sichtbaren Unfallpunkt und bis zur
-// fertigen Startansicht, abwechselnd gegen zwei Server, frischer Browser-Kontext je Lauf.
+// measure-start.mjs — Startzeit A/B: Zeit bis zur bedienbaren Legende, zum ersten sichtbaren
+// Unfallpunkt und zur fertigen Startansicht, abwechselnd gegen zwei Server, frischer
+// Browser-Kontext je Lauf.
 //
 //   node tools/perf/measure-start.mjs <urlA> <urlB> [läufe=7] [profil=mobil|schnell]
 //
@@ -45,6 +46,17 @@ async function run(url) {
     if (urls.get(e.requestId)?.startsWith(origin)) { ownBytes += e.encodedDataLength; ownRequests++; }
   });
 
+  // Legende bedienbar = <html data-app-ready> (permalink.js). Per Observer statt Polling: der
+  // Zeitpunkt ist exakt, und der Observer kostet nichts. Beobachtet wird `document` samt
+  // Unterbaum — beim Init-Skript gibt es <html> noch nicht.
+  await page.addInitScript(() => {
+    new MutationObserver((_, obs) => {
+      if (document.documentElement?.dataset.appReady !== "true") return;
+      window.__appReadyAt = performance.now();
+      obs.disconnect();
+    }).observe(document, { attributes: true, subtree: true, attributeFilter: ["data-app-ready"] });
+  });
+
   const at = (predicate) => page
     .waitForFunction(predicate, null, { polling: 50, timeout: 180_000 })
     .then((h) => h.jsonValue());
@@ -62,8 +74,9 @@ async function run(url) {
       && m.loaded() && m.areTilesLoaded() && !m.isMoving()
       && performance.now();
   });
+  const appReady = await page.evaluate(() => window.__appReadyAt);
   await ctx.close();
-  return { firstPoint, ready, ownKB: ownBytes / 1024, ownRequests };
+  return { appReady, firstPoint, ready, ownKB: ownBytes / 1024, ownRequests };
 }
 
 const arms = { A: { url: urlA, runs: [] }, B: { url: urlB, runs: [] } };
@@ -73,7 +86,7 @@ for (let i = 0; i < RUNS; i++) {
   for (const key of i % 2 ? ["B", "A"] : ["A", "B"]) {
     const r = await run(arms[key].url);
     arms[key].runs.push(r);
-    console.log(`Runde ${i + 1} ${key}: Punkt ${(r.firstPoint / 1000).toFixed(2)} s · fertig ${(r.ready / 1000).toFixed(2)} s · eigen ${r.ownKB.toFixed(0)} KB in ${r.ownRequests} Anfragen`);
+    console.log(`Runde ${i + 1} ${key}: Legende ${(r.appReady / 1000).toFixed(2)} s · Punkt ${(r.firstPoint / 1000).toFixed(2)} s · fertig ${(r.ready / 1000).toFixed(2)} s · eigen ${r.ownKB.toFixed(0)} KB in ${r.ownRequests} Anfragen`);
   }
 }
 await browser.close();
@@ -86,6 +99,7 @@ const fmt = (xs) => `${(median(xs) / 1000).toFixed(2)} s (${(Math.min(...xs) / 1
 console.log(`\nProfil ${profile}${CPU_THROTTLE > 1 ? `, CPU ×${CPU_THROTTLE} gebremst` : ""}, ${RUNS} Läufe je Arm, Median (Spanne):`);
 for (const [key, { url, runs }] of Object.entries(arms)) {
   console.log(`${key} ${url}`);
+  console.log(`  Legende bedienbar    ${fmt(runs.map((r) => r.appReady))}`);
   console.log(`  erster Unfallpunkt   ${fmt(runs.map((r) => r.firstPoint))}`);
   console.log(`  fertige Startansicht ${fmt(runs.map((r) => r.ready))}`);
   console.log(`  eigene Herkunft      ${median(runs.map((r) => r.ownKB)).toFixed(0)} KB in ${median(runs.map((r) => r.ownRequests))} Anfragen`);
