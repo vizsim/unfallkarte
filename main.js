@@ -3,7 +3,8 @@
 
 // 📦 Karte: Bibliothek, Quellen, Layer, Basemap/Terrain
 import { Map as MapLibreMap, addProtocol } from './js/lib/maplibre.js';
-import { Protocol, PMTiles } from "pmtiles";
+import { PMTiles } from "pmtiles";
+import { createPMTilesProtocol } from "./js/mapdata/pmtilesProtocol.js";
 import { addSources, attachManifest } from "./js/mapdata/addSources.js";
 import { addLayers } from "./js/mapdata/addLayers.js";
 import { resolveSources } from "./js/mapdata/resolveSources.js";
@@ -92,9 +93,9 @@ initMap();
 
 async function initMap() {
   // PMTiles-Protokoll registrieren. Quellen binden volle pmtiles://https://… URLs ein
-  // (siehe resolveSources.js/addSources.js) -> kein Basis-URL-Mapping nötig.
-  const protocol = new Protocol();
-  addProtocol("pmtiles", protocol.tile);
+  // (siehe resolveSources.js/addSources.js) -> kein Basis-URL-Mapping nötig. Eigener Handler,
+  // damit die Kacheln eines Archivs parallel statt nacheinander laden (pmtilesProtocol.js).
+  addProtocol("pmtiles", createPMTilesProtocol());
 
   // Ansicht aus dem Link schon HIER lesen, damit die Karte direkt an der richtigen Stelle
   // startet (sonst lädt sie erst Tiles der Default-Ansicht und springt danach weg).

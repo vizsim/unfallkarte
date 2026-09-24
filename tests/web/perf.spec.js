@@ -87,6 +87,42 @@ test("Unfall-Kacheln und Legende warten nicht auf die Basemap", async ({ page })
   expect(basemapReleased, "Legende/Unfall-Kacheln kamen erst nach der Basemap").toBe(false);
 });
 
+test.describe("PMTiles unter Linux/Android/macOS", () => {
+  // Playwrights "Desktop Chrome" meldet sich als WINDOWS — und genau dort schaltet pmtiles
+  // no-store schon selbst ein. Mit dem Geräte-UA wäre dieser Test auch ohne den eigenen
+  // Handler grün (Gegenprobe gemacht). Darum der Standardpfad: jeder andere Chromium.
+  test.use({ userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" });
+
+  test("PMTiles-Ranges laufen ohne Cache-Sperre (cache: no-store)", async ({ page }) => {
+    // Chromium lässt je URL nur EINE Anfrage gleichzeitig laufen (Sperre des HTTP-Caches), auch
+    // für Ranges — die Kacheln eines Archivs luden nacheinander. `cache: "no-store"` hebt das
+    // auf (js/mapdata/pmtilesProtocol.js, Report A2). Geprüft wird die Anfrage, nicht die
+    // Parallelität selbst: page.route schaltet den HTTP-Cache ab, mit einer Verzögerung per
+    // Route sähe also auch der alte Code parallel aus. Der Spion auf fetch fängt dagegen beides,
+    // was still kaputtgehen kann: ein pmtiles-Update ohne das Flag und eine Quelle am
+    // Handler vorbei.
+    await page.addInitScript(() => {
+      const originalFetch = window.fetch;
+      window.__rangeFetches = [];
+      window.fetch = function (input, init) {
+        const url = String(input?.url ?? input);
+        if (url.includes(".pmtiles") && new Headers(init?.headers).has("range")) {
+          window.__rangeFetches.push({ file: url.split("/").pop(), cache: init?.cache ?? "default" });
+        }
+        return originalFetch.apply(this, arguments);
+      };
+    });
+    const errors = await openMap(page);
+
+    const fetches = await page.evaluate(() => window.__rangeFetches);
+    const single = fileName(ACCIDENT_SOURCES.accidents_single.file);
+    expect(fetches.some((f) => f.file === single), `keine Range-Anfrage auf ${single}`).toBe(true);
+    const locked = fetches.filter((f) => f.cache !== "no-store");
+    expect(locked, `Range-Anfragen mit Cache-Sperre: ${JSON.stringify(locked)}`).toEqual([]);
+    expectNoErrors(errors);
+  });
+});
+
 test("MapLibre ungebündelt: Worker und Hauptthread teilen sich -shared.mjs", async ({ page }) => {
   // MapLibre sucht seinen Worker zur Laufzeit neben der eigenen Datei (import.meta.url).
   // Gebündelt fände er ihn nicht (Karte leer, OHNE Fehler), mit setWorkerUrl lüde der Worker
