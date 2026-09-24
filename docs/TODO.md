@@ -202,6 +202,26 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
       längst auf 2017–2025 / 2.219.353 Zeilen. Pipeline-Tests 39 → 41.
       *(vorher REFACTORING_PLAN §13 Punkt 5)*
 
+## Ladezeit / Laufzeit
+
+Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.md) und
+[`PERFORMANCE_REPORT_2026-09-24.md`](PERFORMANCE_REPORT_2026-09-24.md) (IDs = Report).
+
+- [x] **A1 + A2: Startpfad** (2026-09-24, `cd492aa`, `f8b055d`) — UI/Permalink bei `style.load`
+      statt `load`; PMTiles-Ranges mit `cache: "no-store"` gegen die Chromium-Cache-Sperre.
+      Mobilfunk: Legende 5,26 → 2,73 s, erster Punkt 6,08 → 4,18 s, fertig 7,72 → 5,67 s.
+- [ ] **D1 — Zähler nur einmal je Bewegung** (auf `idle`, per `requestIdleCallback`, Abbruch
+      bei `movestart`); heute läuft `recount()` auf `moveend` UND `idle`.
+- [ ] **D3 — Torten-Bilder quantisieren** (5-%-Schritte, drei Größenklassen); vorher mit echten
+      Clustern zählen, wie viele Bilder es real sind (Report Abschnitt 9).
+- [ ] **A7 — Mapillary-TS-Layer unsichtbar anlegen** (`addLayers.js`), sonst Anfragen bei
+      Links direkt auf z ≥ 14.
+- [ ] **B1 — CDN-Cache für `tiles.vizsim.de`** = Stufe 1 in `PERFORMANCE_PLAN.md` (erst Purge,
+      dann Regel scharf).
+- [ ] **C1 — z11-Einzelpunkt-Kacheln** messen (größte z11-Kacheln), dann inhaltlich entscheiden.
+- [ ] **B3 — ZXY-Kacheln über einen Worker** (Muster OSM-US-Tileservice), wenn Kosten/Limits
+      passen. Später: D2 (Zähler im Worker), B4 (Brotli), E1–E4.
+
 ## Frontend / UX
 
 - [x] **Mobile-Breakpoint** (2026-09-19) — erste `@media`-Query im Projekt (< 640px): Legende

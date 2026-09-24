@@ -17,7 +17,7 @@ Ergänzt `docs/TODO.md` Roadmap 3 (Vite), ersetzt sie nicht.
 | 4 Vite | **erledigt + live** (`50d7fd5`, 2026-09-23) | live erster Unfallpunkt 5,76 → 5,1 s, erste Kachel-Anfrage 2,98 → 2,46 s; lokal A/B −0,78 s; schnelle Leitung ≈ 0 — [`VITE_MIGRATION.md`](VITE_MIGRATION.md) |
 | 5 Lazy-Chunks | offen (nach Vite) | — |
 | 6 Gefühlte Ladezeit, Perf-Budget | teilweise (`tests/web/perf.spec.js` steht) | — |
-| 7 Startpfad: UI bei `style.load` (A1), PMTiles ohne Cache-Sperre (A2) | **gebaut + gemessen** auf `temp/perf-start` (2026-09-24) | Mobilfunk: Legende 5,26 → 2,73 s, erster Punkt 6,08 → 4,18 s, fertig 7,72 → 5,67 s; Städtesprung schnelle Leitung: Unfall-Kacheln −40 % |
+| 7 Startpfad: UI bei `style.load` (A1), PMTiles ohne Cache-Sperre (A2) | **erledigt + live** (`cd492aa`, `f8b055d`, 2026-09-24) | Mobilfunk: Legende 5,26 → 2,73 s, erster Punkt 6,08 → 4,18 s, fertig 7,72 → 5,67 s; Städtesprung schnelle Leitung: Unfall-Kacheln −40 % |
 
 ---
 
@@ -207,8 +207,8 @@ Zurückgestellt:
 
 ## Stufe 7 — Startpfad: Legende und Unfall-Kacheln entkoppelt (2026-09-24)
 
-Aus dem Performance-Report vom 24.09. (Maßnahmen A1 + A2, dort im Labor mit synthetischen
-Daten gemessen). Hier nachgemessen mit **echten Daten von B2** (TTFB von hier ~0,18 s,
+Aus dem [Performance-Report vom 24.09.](PERFORMANCE_REPORT_2026-09-24.md) (Maßnahmen A1 + A2,
+dort im Labor mit synthetischen Daten gemessen). Hier nachgemessen mit **echten Daten von B2** (TTFB von hier ~0,18 s,
 `cf-cache-status: DYNAMIC`), MLT-Unfallkacheln, Pages-ähnlicher Server, je 7 Läufe, Median
 (Spanne).
 
@@ -303,9 +303,12 @@ Kontext je Lauf, Aufwärmlauf je Arm). Vorher lagen sie nur im Scratchpad der je
 
 ## Reihenfolge von hier aus
 
-1. **Stufe 1 (CDN + Purge)** — Minuten Aufwand, wirkt auf jede Kachel bei jedem Zoom. Klar der
-   nächste Schritt.
-2. **Vite** — nicht wegen der Bündelung allein, sondern weil gehashte Dateinamen das
-   Deploy-Risiko aus Fund 1 beseitigen und Lazy-Chunks erst danach sinnvoll sind.
-3. Danach neu messen und entscheiden, ob Lazy-Chunks, Cluster-Quelle und die Größenbremse
-   sich noch lohnen.
+Vite (Stufe 4) und der Startpfad (Stufe 7) sind erledigt. Die weitere Reihenfolge steht im
+[Performance-Report](PERFORMANCE_REPORT_2026-09-24.md), Abschnitt 8, die offenen Punkte in
+`docs/TODO.md`:
+
+1. **Laufzeit:** Zähler nur einmal je Bewegung (D1), Torten-Bilder quantisieren (D3).
+2. **Stufe 1 (CDN + Purge)** — nach A2 vor allem fürs Pannen/Zoomen; die Browser-TTL wirkt
+   nicht mehr, der Nutzen liegt im Edge-Cache.
+3. **z11-Einzelpunkt-Kacheln** erst messen, dann inhaltlich entscheiden (C1).
+4. Zielbild ZXY über einen Worker (B3), wenn Kosten und Limits passen.
