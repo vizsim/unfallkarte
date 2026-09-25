@@ -6,10 +6,10 @@
 // konnten still von den Layer-Farben abweichen.
 //
 // Umfang bewusst begrenzt: generiert wird das GERÜST (Toggle-Zeile, Beschriftung,
-// Quellen-Icon, Legenden-Container, Zoom-Hinweis) plus einfache Farbflecken-Listen. Blöcke
-// mit eigenen Widgets — Modus-Radios (svz, telraam), Farbverläufe (maxspeed), eigenes
-// Markup (bikelanes) — bleiben handgeschrieben im HTML stehen. Ein Generator, der auch die
-// abdeckt, wäre umständlicher als die 13 Blöcke, die er ersetzt.
+// Quellen-Icon, Legenden-Container, Zoom-Hinweis) plus einfache Farbflecken-Listen, Stufen-
+// Skalen und ein Modus-Umschalter mit je einer Skala (population). Blöcke mit eigenen
+// Widgets — die älteren Modus-Radios mit Verlaufsbalken (svz, telraam), Farbverläufe
+// (maxspeed), eigenes Markup (bikelanes) — bleiben handgeschrieben im HTML stehen.
 //
 // Platzhalter im HTML: <div data-legend-entry="<id>"></div> an genau der Stelle, an der der
 // Eintrag erscheinen soll. Die Reihenfolge bleibt damit im Markup ablesbar (die Registry ist
@@ -29,6 +29,17 @@ import { LAYER_REGISTRY } from "../layers/registry.js";
  * @property {string} [heading]                fette Zwischenüberschrift über der Stufen-Skala
  * @property {string} [note]                   Zeile darunter (z. B. der Index-Kurzname "LDEN")
  * @property {{color: string, text: string}[]} [stops]  Stufen-Skala (Rechtecke, untereinander)
+ * @property {{name: string, options: LegendMode[]}} [modes]  Modus-Umschalter: Radios + je Modus
+ *                                             eine eigene Skala. `name` = Radio-Gruppe, zugleich
+ *                                             Ziel im Permalink (CONTROLS). Erste Option = Default.
+ *                                             Die Karte schaltet der Eintrag selbst um (setup()).
+ *
+ * @typedef {Object} LegendMode
+ * @property {string} value                    Radio-Wert (steht in geteilten Links — nie umbenennen)
+ * @property {string} label                    Text am Radio
+ * @property {string} [heading]                wie oben, aber je Modus
+ * @property {string} [note]
+ * @property {{color: string, text: string}[]} [stops]
  */
 
 function buildToggleRow(entry) {
@@ -58,6 +69,70 @@ function buildToggleRow(entry) {
   return row;
 }
 
+/** Überschrift, Notiz und Stufen-Skala — für den Eintrag selbst und für jeden Modus. */
+function buildScale({ heading, note, stops }) {
+  const out = [];
+  if (heading) {
+    const h = document.createElement("div");
+    h.append(Object.assign(document.createElement("strong"), { textContent: heading }));
+    out.push(h);
+  }
+  if (note) {
+    const n = document.createElement("div");
+    n.className = "mt-4";
+    n.textContent = note;
+    out.push(n);
+  }
+  if (stops?.length) {
+    const ramp = document.createElement("div");
+    ramp.className = "legend-ramp";
+    for (const { color, text } of stops) {
+      const row = document.createElement("div");
+      row.className = "row";
+      const rect = document.createElement("div");
+      rect.className = "swatch-rect";
+      rect.style.background = color;
+      const span = document.createElement("span");
+      span.textContent = text;
+      row.append(rect, span);
+      ramp.append(row);
+    }
+    out.push(ramp);
+  }
+  return out;
+}
+
+/**
+ * Chip-Reihe + je Modus ein Skalen-Block. Die Chips sind echte Radios (Tastatur, Permalink
+ * `kind: "radio"`), nur als Pille gestylt. Welcher Block zu sehen ist, entscheidet style.css
+ * über die Zustandsklasse `.is-active` — hier wird nur sie umgeschaltet, nie `display`.
+ */
+function buildModes({ name, options }) {
+  const radios = document.createElement("div");
+  radios.className = "legend-modes";
+  radios.setAttribute("role", "radiogroup");
+  radios.setAttribute("aria-label", "Einfärbung");
+  const blocks = options.map((mode) => {
+    const block = document.createElement("div");
+    block.className = "legend-mode";
+    block.dataset.mode = mode.value;
+    block.append(...buildScale(mode));
+    return block;
+  });
+  const show = (value) => blocks.forEach((b) => b.classList.toggle("is-active", b.dataset.mode === value));
+
+  options.forEach((mode, i) => {
+    const label = document.createElement("label");
+    label.className = "legend-chip";
+    const input = Object.assign(document.createElement("input"), { type: "radio", name, value: mode.value, checked: i === 0 });
+    input.addEventListener("change", () => input.checked && show(mode.value));
+    label.append(input, Object.assign(document.createElement("span"), { textContent: mode.label }));
+    radios.append(label);
+  });
+  show(options[0].value);
+  return [radios, ...blocks];
+}
+
 function buildLegendBlock(entry) {
   const box = document.createElement("div");
   box.id = `${entry.id}-legend`;          // DOM-Vertrag (CLAUDE.md): nicht umbenennen
@@ -77,34 +152,8 @@ function buildLegendBlock(entry) {
     box.append(hint);
   }
 
-  const { heading, note, stops } = entry.legend;
-  if (heading) {
-    const h = document.createElement("div");
-    h.append(Object.assign(document.createElement("strong"), { textContent: heading }));
-    box.append(h);
-  }
-  if (note) {
-    const n = document.createElement("div");
-    n.className = "mt-4";
-    n.textContent = note;
-    box.append(n);
-  }
-  if (stops?.length) {
-    const ramp = document.createElement("div");
-    ramp.className = "legend-ramp";
-    for (const { color, text } of stops) {
-      const row = document.createElement("div");
-      row.className = "row";
-      const rect = document.createElement("div");
-      rect.className = "swatch-rect";
-      rect.style.background = color;
-      const span = document.createElement("span");
-      span.textContent = text;
-      row.append(rect, span);
-      ramp.append(row);
-    }
-    box.append(ramp);
-  }
+  if (entry.legend.modes) box.append(...buildModes(entry.legend.modes));
+  box.append(...buildScale(entry.legend));
 
   const swatches = entry.legend.swatches ?? [];
   if (swatches.length) {

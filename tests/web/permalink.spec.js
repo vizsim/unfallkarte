@@ -18,6 +18,7 @@ const snapshotState = (page) => page.evaluate(() => ({
     uhr: document.getElementById("uspeed-slider")?.value,
     svz: document.querySelector('input[name="svz-mode"]:checked')?.value,
     telraam: document.querySelector('input[name="telraam-mode"]:checked')?.value,
+    population: document.querySelector('input[name="population-mode"]:checked')?.value,
   },
 }));
 
@@ -41,7 +42,7 @@ test("Permalink-Roundtrip: alle Kontext-Layer, Szenarien und Regler überleben K
     set("scenario9-slider", "7");
     set("scenario9-rule", "usp3_3y", "change");
     set("uspeed-slider", "8");
-    for (const [name, value] of [["svz-mode", "sv"], ["telraam-mode", "car"]]) {
+    for (const [name, value] of [["svz-mode", "sv"], ["telraam-mode", "car"], ["population-mode", "a65"]]) {
       const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
       radio.checked = true;
       radio.dispatchEvent(new Event("change", { bubbles: true }));
@@ -52,7 +53,7 @@ test("Permalink-Roundtrip: alle Kontext-Layer, Szenarien und Regler überleben K
 
   const before = await snapshotState(page);
   expect(before.toggles.length).toBeGreaterThan(15);
-  expect(before.controls).toEqual({ sc9: "7", sc9rule: "usp3_3y", uhr: "8", svz: "sv", telraam: "car" });
+  expect(before.controls).toEqual({ sc9: "7", sc9rule: "usp3_3y", uhr: "8", svz: "sv", telraam: "car", population: "a65" });
   const url = await page.evaluate(() => location.pathname + location.search);
 
   await page.goto("about:blank");

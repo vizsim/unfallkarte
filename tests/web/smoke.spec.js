@@ -218,3 +218,28 @@ test("Bevölkerung (Zensus): Zellen rendern ab z11, Popup nennt Einwohner", asyn
   await expect(popups(page).first()).toContainText("Einwohner");
   expectNoErrors(errors);
 });
+
+test("Bevölkerung: Modus-Umschalter färbt um, zeigt die passende Skala und landet im Link", async ({ page }) => {
+  const errors = await openMap(page);
+  const colorAttr = () => page.evaluate(() => window.map.getPaintProperty("population-cells", "fill-color")?.[1]?.[1]?.[1]);
+  const activeScale = () => page.evaluate(() =>
+    [...document.querySelectorAll("#population-legend .legend-mode")].filter((el) => getComputedStyle(el).display !== "none").map((el) => el.dataset.mode));
+  const pick = (value) => page.evaluate((v) => document.querySelector(`input[name="population-mode"][value="${v}"]`).click(), value);
+
+  // Lazy-Fall: Modus wählen, BEVOR der Layer existiert -> beim Einschalten muss er greifen
+  await pick("u18");
+  await toggleOn(page, ["toggle-population"]);
+  expect(await colorAttr()).toBe("Unter18");
+  expect(await activeScale()).toEqual(["u18"]);
+
+  await pick("alter");
+  expect(await colorAttr()).toBe("Durchschnittsalter");
+  expect(await activeScale()).toEqual(["alter"]);
+  // Link sofort nachgezogen (nicht erst bei der nächsten Kartenbewegung)
+  expect(await page.evaluate(() => new URLSearchParams(location.search).get("o"))).toContain("pm:alter");
+
+  await pick("ew");
+  expect(await colorAttr()).toBe("Einwohner");
+  expect(await page.evaluate(() => new URLSearchParams(location.search).get("o") ?? "")).not.toContain("pm:"); // Default fällt raus
+  expectNoErrors(errors);
+});

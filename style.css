@@ -558,10 +558,10 @@ body {
 
 /* Toggle-Labels in Szenarien + Kontext: hängender Einzug, damit umgebrochene Zeilen
    unter dem Text (nicht links unter der Checkbox) weiterlaufen. Ausgenommen:
-   Sektions-Header (liegen außerhalb .legend-section-content), Slider-Labels (for=…)
-   und Flex-Labels (.row, z. B. Mapillary-Filter mit Icon). */
-.scenario-legend-section .legend-section-content label:not([for]):not(.row):not([style*="flex"]),
-.legend-section[data-section="kontext"] .legend-section-content label:not([for]):not(.row):not([style*="flex"]) {
+   Sektions-Header (liegen außerhalb .legend-section-content), Slider-Labels (for=…),
+   Flex-Labels (.row, z. B. Mapillary-Filter mit Icon) und Modus-Chips (.legend-chip). */
+.scenario-legend-section .legend-section-content label:not([for]):not(.row):not([style*="flex"]):not(.legend-chip),
+.legend-section[data-section="kontext"] .legend-section-content label:not([for]):not(.row):not([style*="flex"]):not(.legend-chip) {
   display: block;
   padding-left: 1.45em;
   text-indent: -1.45em;
@@ -1164,4 +1164,59 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* Modus-Umschalter aus legendMarkup.js: Chips in einer Reihe (Stil wie die Gebietsebenen-
+   Auswahl in mapillary_coverage_analysis); zu sehen ist nur die Skala des gewählten Modus
+   (JS setzt .is-active, hier fällt die Entscheidung). Unter jedem Chip steckt ein echtes
+   Radio — unsichtbar, aber fokussierbar und per Pfeiltasten bedienbar. */
+.legend-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.legend-chip {
+  position: relative;
+  cursor: pointer;
+}
+.legend-chip input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+.legend-chip span {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  background: var(--ui-hover);
+  color: var(--ui-text);
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: 0.85;
+  transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+.legend-chip:hover span {
+  opacity: 1;
+}
+.legend-chip input:checked + span {
+  border-color: var(--ui-accent);
+  background: rgba(29, 78, 216, 0.14);
+  opacity: 1;
+}
+.legend-chip input:focus-visible + span {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+.legend-mode:not(.is-active) {
+  display: none;
+}
+@media (max-width: 640px) {
+  .legend-chip span {
+    padding: 6px 10px;   /* Tippfläche am Handy */
+  }
 }
