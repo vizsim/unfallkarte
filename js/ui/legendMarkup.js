@@ -28,7 +28,8 @@ import { LAYER_REGISTRY } from "../layers/registry.js";
  * @property {{color: string, text: string, shape?: string}[]} [swatches]  einfache Farbfleck-Liste
  * @property {string} [heading]                fette Zwischenüberschrift über der Stufen-Skala
  * @property {string} [note]                   Zeile darunter (z. B. der Index-Kurzname "LDEN")
- * @property {{color: string, text: string}[]} [stops]  Stufen-Skala (Rechtecke, untereinander)
+ * @property {{color: string, text: string, outline?: string}[]} [stops]  Stufen-Skala (Rechtecke,
+ *                                             untereinander); `outline` = Rand wie auf der Karte
  * @property {{name: string, options: LegendMode[]}} [modes]  Modus-Umschalter: Radios + je Modus
  *                                             eine eigene Skala. `name` = Radio-Gruppe, zugleich
  *                                             Ziel im Permalink (CONTROLS). Erste Option = Default.
@@ -39,7 +40,7 @@ import { LAYER_REGISTRY } from "../layers/registry.js";
  * @property {string} label                    Text am Radio
  * @property {string} [heading]                wie oben, aber je Modus
  * @property {string} [note]
- * @property {{color: string, text: string}[]} [stops]
+ * @property {{color: string, text: string, outline?: string}[]} [stops]
  */
 
 function buildToggleRow(entry) {
@@ -86,12 +87,13 @@ function buildScale({ heading, note, stops }) {
   if (stops?.length) {
     const ramp = document.createElement("div");
     ramp.className = "legend-ramp";
-    for (const { color, text } of stops) {
+    for (const { color, text, outline } of stops) {
       const row = document.createElement("div");
       row.className = "row";
       const rect = document.createElement("div");
       rect.className = "swatch-rect";
       rect.style.background = color;
+      if (outline) rect.style.boxShadow = `inset 0 0 0 1px ${outline}`;
       const span = document.createElement("span");
       span.textContent = text;
       row.append(rect, span);

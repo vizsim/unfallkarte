@@ -67,6 +67,84 @@
   "place_country_minor",
   "place_country_major",
   {
+   "id": "population-cells-1km",
+   "layout": {
+    "visibility": "none"
+   },
+   "maxzoom": 11,
+   "minzoom": 8,
+   "paint": {
+    "fill-color": [
+     "step",
+     [
+      "/",
+      [
+       "to-number",
+       [
+        "get",
+        "Einwohner"
+       ],
+       -1
+      ],
+      100
+     ],
+     "rgba(0, 0, 0, 0)",
+     0.000001,
+     "#fbe0c6",
+     1,
+     "#f8be8a",
+     3,
+     "#f59a4f",
+     10,
+     "#ec7a26",
+     25,
+     "#d8600e",
+     50,
+     "#b44a06",
+     100,
+     "#8a3804",
+     250,
+     "#5f2602"
+    ],
+    "fill-opacity": 0.6,
+    "fill-outline-color": [
+     "step",
+     [
+      "/",
+      [
+       "to-number",
+       [
+        "get",
+        "Einwohner"
+       ],
+       -1
+      ],
+      100
+     ],
+     "rgba(0, 0, 0, 0)",
+     0.000001,
+     "#fbe0c6",
+     1,
+     "#f8be8a",
+     3,
+     "#f59a4f",
+     10,
+     "#ec7a26",
+     25,
+     "#d8600e",
+     50,
+     "#b44a06",
+     100,
+     "#8a3804",
+     250,
+     "#5f2602"
+    ]
+   },
+   "source": "population_1km",
+   "sourceLayer": "rasters-1km-polys",
+   "type": "fill"
+  },
+  {
    "id": "population-cells",
    "layout": {
     "visibility": "none"
@@ -84,6 +162,10 @@
       -1
      ],
      "rgba(0, 0, 0, 0)",
+     0.000001,
+     "#fbe0c6",
+     1,
+     "#f8be8a",
      3,
      "#f59a4f",
      10,
@@ -97,7 +179,35 @@
      250,
      "#5f2602"
     ],
-    "fill-opacity": 0.6
+    "fill-opacity": 0.6,
+    "fill-outline-color": [
+     "step",
+     [
+      "to-number",
+      [
+       "get",
+       "Einwohner"
+      ],
+      -1
+     ],
+     "rgba(0, 0, 0, 0)",
+     0.000001,
+     "#fbe0c6",
+     1,
+     "#f8be8a",
+     3,
+     "#f59a4f",
+     10,
+     "#ec7a26",
+     25,
+     "#d8600e",
+     50,
+     "#b44a06",
+     100,
+     "#8a3804",
+     250,
+     "#5f2602"
+    ]
    },
    "source": "population",
    "sourceLayer": "rasters-polys",
@@ -5938,6 +6048,10 @@
    "file": "census/population_100m.pmtiles",
    "type": "vector"
   },
+  "population_1km": {
+   "file": "census/population_1km.pmtiles",
+   "type": "vector"
+  },
   "scenario1": {
    "file": "scenarios/scenario1_cluster_accidents_ms100.pmtiles",
    "type": "vector"
@@ -6154,7 +6268,8 @@
    "toggle-population": {
     "layersOff": [],
     "layersOn": [
-     "population-cells"
+     "population-cells",
+     "population-cells-1km"
     ],
     "legendsOn": [
      "population-legend"
@@ -6438,7 +6553,8 @@
    "toggle-population": {
     "layersOff": [],
     "layersOn": [
-     "population-cells"
+     "population-cells",
+     "population-cells-1km"
     ],
     "legendsOn": [
      "population-legend"
@@ -6745,15 +6861,14 @@
    "toggle-population": {
     "layersOff": [],
     "layersOn": [
-     "population-cells"
+     "population-cells",
+     "population-cells-1km"
     ],
     "legendsOn": [
      "population-legend"
     ],
     "permalink": ",w",
-    "zoomHints": [
-     "population-legend"
-    ]
+    "zoomHints": []
    },
    "toggle-scenario1": {
     "layersOff": [],

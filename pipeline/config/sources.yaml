@@ -192,13 +192,13 @@ datasets:
 
   # --- Kontextlayer Bevölkerung (Zensus 2022, 100-m-Gitter) ---
   # Gebaut von census.py (`unfallkarte census build`), reproduziert die frühere Kette aus
-  # erreichbarad + routing_bulk (Herkunft: docs/TODO.md). Layer `rasters-polys`, nur z9–10
-  # (darüber überzoomt), ~50 Attribute — bewusst wie das Original; Verschlanken ist ein
-  # eigener Schritt (TODO). Daneben entsteht census/population_100m.parquet (nicht deployt).
+  # erreichbarad + routing_bulk (Herkunft: docs/TODO.md); Kachel-Einstellungen in tiles.yaml.
+  # Daneben entsteht census/population_100m.parquet mit allen ~50 Merkmalen (nicht deployt).
   census_population:
     file: "census/population_100m.pmtiles"
     label: "Bevölkerung (Zensus 2022)"
-    attribution: "© Statistisches Bundesamt (Destatis), Zensus 2022 (dl-de/by-2-0)"
+    # Die 100-m-Kacheln tragen auch PLZ (OSM-basiert) + RegioStaR (BMV) -> beide nennen.
+    attribution: "© Statistisches Bundesamt (Destatis), Zensus 2022 (dl-de/by-2-0); PLZ-Gebiete © OpenStreetMap-Mitwirkende (ODbL); RegioStaR © BMV"
     date: { fixed: "2022" }   # Stichtag 15.05.2022
     # Archivkopien in data/raw/census/ — nicht alle sind noch aus dem Netz beschaffbar.
     raw:
@@ -209,6 +209,14 @@ datasets:
       # BMV, Regionalstatistische Raumtypologie: https://www.bmv.de/SharedDocs/DE/Artikel/G/regionalstatistische-raumtypologie.html
       regiostar: "2023 RegioStaR-Referenzdateien.xlsx"
       regiostar_sheet: "ReferenzGebietsstand2023"
+      # 1-km-Gitter derselben npgeo-Quelle (Übersicht bis z10, ohne PLZ/RegioStaR)
+      grid_1km: "Zensus2022_grid_final_7053549391879339012_1km.gpkg"
+
+  census_population_1km:
+    file: "census/population_1km.pmtiles"
+    label: "Bevölkerung (Zensus 2022, 1 km)"
+    attribution: "© Statistisches Bundesamt (Destatis), Zensus 2022 (dl-de/by-2-0)"
+    date: { fixed: "2022" }   # Rohdaten + Build: census_population
 
   # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
   # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.

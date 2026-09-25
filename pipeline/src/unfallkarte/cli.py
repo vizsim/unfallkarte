@@ -191,13 +191,15 @@ def census_check() -> None:
 
 @census_app.command("build")
 def census_build(
+    reuse_parquet: bool = typer.Option(
+        False, "--reuse-parquet", help="Vorhandenes Parquet nehmen statt neu zu joinen"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
 ) -> None:
-    """Gitter + PLZ + RegioStaR -> census/population_100m.parquet + .pmtiles (`rasters-polys`)."""
+    """Gitter + PLZ + RegioStaR -> census/population_100m.parquet + PMTiles (100 m und 1 km)."""
     from unfallkarte import census
 
-    out = census.build(dry_run=dry_run)
-    typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
+    for name, path in census.build(reuse_parquet=reuse_parquet, dry_run=dry_run).items():
+        typer.secho(f"PMTiles {name}: {path}", fg=typer.colors.GREEN)
 
 
 # --- laerm / UBA-Umgebungslärm ---

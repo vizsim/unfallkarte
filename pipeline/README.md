@@ -29,7 +29,7 @@ unfallkarte laerm fetch|build             # UBA-Umgebungslärm (Tag/Nacht)
 unfallkarte obs fetch|build               # OpenBikeSensor-Überholabstände
 unfallkarte telraam fetch|build           # Telraam-Zählstellen
 unfallkarte movebis build                 # movebis Rad-Geschwindigkeiten (GPKG lokal)
-unfallkarte census check|build            # Zensus 2022, 100-m-Gitter (Rohdaten lokal, Archiv)
+unfallkarte census check|build            # Zensus 2022, 100 m + 1 km (Rohdaten lokal, Archiv)
 unfallkarte manifest                      # data/manifest.json (Local-first + Datenstand)
 unfallkarte deploy                        # b2 sync (PMTiles + manifest)
 ```
@@ -60,6 +60,7 @@ Update-Ablauf; accidents- und osm-Strang sind unabhängig und können parallel l
 | `osm fetch` | ~10 min | 4,5 GB Geofabrik-PBF (netzabhängig) |
 | `osm build all` | ~20 min | 6 Layer; je Layer osmium-Filter über die volle PBF + Tippecanoe |
 | `scenario run-all` | ~30 min | Szenarien 1/2/3/6/8/9; teuerstes: 3 (Tempo-30-Netz-Analyse, ~18 min) |
+| `census build` | ~5 min | Join ~1,5 min + Tippecanoe; `--reuse-parquet` ~2 min (nur Kacheln neu) |
 | `manifest` + `deploy` | ~3 min | b2 sync; ~2,5 min für ~1,1 GB Upload bei Voll-Update |
 
 ## Layout

@@ -47,6 +47,13 @@ def _profile_args(profile: dict[str, Any], layer_override: str | None = None) ->
         args.append(f"--maximum-zoom={profile['maxzoom']}")
     if "base_zoom" in profile:
         args.append(f"--base-zoom={profile['base_zoom']}")
+    if "full_detail" in profile:
+        # Koordinatenauflösung am maxzoom (Default 12 = 4096 Einheiten je Kachel). Höher, wenn
+        # Geometrie weit überzoomt wird und Ecken sonst sichtbar auf ein grobes Raster springen.
+        args.append(f"--full-detail={profile['full_detail']}")
+    if profile.get("no_tiny_polygon_reduction"):
+        # Kleine Polygone NICHT zu Ersatzquadraten zusammenfassen (Gitterzellen bei kleinem Zoom).
+        args.append("--no-tiny-polygon-reduction")
     if "drop_rate" in profile:
         args.append(f"--drop-rate={profile['drop_rate']}")
     if "simplification" in profile:

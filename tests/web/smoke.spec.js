@@ -199,7 +199,7 @@ test("ÖPNV-Haltestellen: Bus, Straßenbahn und Bahn rendern, Popup nennt das Ve
   expectNoErrors(errors);
 });
 
-test("Bevölkerung (Zensus): Zellen rendern ab z11, Popup nennt Einwohner", async ({ page }) => {
+test("Bevölkerung (Zensus): 100-m-Zellen ab z11, Popup nennt Einwohner, PLZ und Raumtyp", async ({ page }) => {
   const errors = await openMap(page);
   await toggleOn(page, ["toggle-population"]);
   await jumpTo(page, BERLIN, 14);
@@ -214,8 +214,25 @@ test("Bevölkerung (Zensus): Zellen rendern ab z11, Popup nennt Einwohner", asyn
   await page.evaluate(() => { const cb = document.querySelector('.section-checkbox[data-section="einzeln"]'); if (cb.checked) cb.click(); });
   await hoverAt(page, pt);
   await expect(popups(page)).toHaveCount(1);
-  await expect(popups(page).first()).toContainText("Bevölkerung");
+  await expect(popups(page).first()).toContainText("100-m-Zelle");
   await expect(popups(page).first()).toContainText("Einwohner");
+  await expect(popups(page).first()).toContainText("RegioStaR 71"); // Berlin = Metropole
+  expectNoErrors(errors);
+});
+
+test("Bevölkerung (Zensus): Übersicht bis z10 aus dem 1-km-Gitter, Popup nennt Mittel je Hektar", async ({ page }) => {
+  const errors = await openMap(page);
+  await toggleOn(page, ["toggle-population"]);
+  await page.evaluate(() => { const cb = document.querySelector('.section-checkbox[data-section="einzeln"]'); if (cb.checked) cb.click(); });
+  await jumpTo(page, BERLIN, 9);
+
+  const pt = await waitForBusiestPoint(page, ["population-cells-1km"], { message: "keine 1-km-Zelle gerendert" });
+  // bei z9 darf das 100-m-Gitter NICHT laden (sonst wären die großen Kacheln zurück)
+  expect(await page.evaluate(() => window.map.queryRenderedFeatures({ layers: ["population-cells"] }).length)).toBe(0);
+  await hoverAt(page, pt);
+  await expect(popups(page)).toHaveCount(1);
+  await expect(popups(page).first()).toContainText("1-km-Zelle");
+  await expect(popups(page).first()).toContainText("je Hektar");
   expectNoErrors(errors);
 });
 
@@ -234,12 +251,17 @@ test("Bevölkerung: Modus-Umschalter färbt um, zeigt die passende Skala und lan
 
   await pick("alter");
   expect(await colorAttr()).toBe("Durchschnittsalter");
+  // 1-km-Layer zieht mit: je-Hektar-Modi durch 100 geteilt, das Alter nicht
+  const km = () => page.evaluate(() => JSON.stringify(window.map.getPaintProperty("population-cells-1km", "fill-color")));
+  expect(await km()).toContain("Durchschnittsalter");
+  expect(await km()).not.toContain('["/"');
   expect(await activeScale()).toEqual(["alter"]);
   // Link sofort nachgezogen (nicht erst bei der nächsten Kartenbewegung)
   expect(await page.evaluate(() => new URLSearchParams(location.search).get("o"))).toContain("pm:alter");
 
   await pick("ew");
   expect(await colorAttr()).toBe("Einwohner");
+  expect(await km()).toContain('["/",["to-number",["get","Einwohner"],-1],100]');
   expect(await page.evaluate(() => new URLSearchParams(location.search).get("o") ?? "")).not.toContain("pm:"); // Default fällt raus
   expectNoErrors(errors);
 });

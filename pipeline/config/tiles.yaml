@@ -157,16 +157,36 @@ profiles:
     no_tile_size_limit: true
     force_feature_limit: true
 
-  # Zensus 2022, 100-m-Gitter (census.py). Layer-Name = Frontend-Vertrag (`rasters-polys`).
-  # Flags 1:1 aus routing_bulk prepare_population.ipynb: nur z9–10, darüber überzoomt das
-  # Frontend. Kacheln dadurch groß (Berlin z10 ~1,4 MB entpackt) — Zoombereich/Attribute
-  # verschlanken ist ein eigener Schritt (docs/TODO.md).
+  # Zensus 2022 (census.py). Layer-Namen = Frontend-Vertrag (js/layers/context-population.js).
+  # `include` = die Felder, die die Karte liest — census.py schreibt nur diese ins FGB (das
+  # Parquet behält alle ~50). Bis 2026-09 (1:1 aus routing_bulk): z9–10, alle Attribute, Zahlen
+  # als Text; bei hohem Zoom sprangen die Ecken sichtbar auf das ~6-m-Raster der z10-Kacheln.
+  #
+  # 100 m ab z11 (darunter übernimmt das 1-km-Gitter). maxzoom 12 mit full_detail 13 = ~0,75 m
+  # Raster — die Zellen bleiben bis z18 Rechtecke. Tiny-Polygon-Reduktion aus: bei z11 sind die
+  # Zellen in Süddeutschland knapp unter 4 px² und würden sonst zu Ersatzquadraten.
   census_population:
-    minzoom: 9
-    maxzoom: 10
+    minzoom: 11
+    maxzoom: 12
+    full_detail: 13
+    no_tiny_polygon_reduction: true
     no_feature_limit: true
     no_tile_size_limit: true
-    force_feature_limit: true
+    # Text-Felder kosten wenig: Vektorkacheln speichern jeden Wert nur einmal je Kachel
+    # (gemessen: name_23 = +5 MB auf 146 MB). plz/RegioStaR7 bewusst drin (später nützlich).
+    include: [Einwohner, Unter18, AnteilUnter18, a65undaelter, AnteilUeber65,
+              Durchschnittsalter, name_23, plz, RegioStaR7]
+
+  # 1 km für die Übersicht z8–10 (bei z8 ~2,6 px je Zelle, darum ohne Tiny-Polygon-Reduktion).
+  # z7 gemessen und verworfen: Kacheln im Median 300 KB, max 519 KB (z8: 89 / 196 KB).
+  census_population_1km:
+    minzoom: 8
+    maxzoom: 10
+    no_tiny_polygon_reduction: true
+    no_feature_limit: true
+    no_tile_size_limit: true
+    include: [Einwohner, Unter18, AnteilUnter18, a65undaelter, AnteilUeber65,
+              Durchschnittsalter]
 
   # Telraam-Zählstellen (kurze Straßensegmente, Linien). Layer-Name = Frontend-Vertrag.
   # Wenige Features (~1,4k DE) → kein Dropping, ab z9 sichtbar, z14 überzoomt nach oben.

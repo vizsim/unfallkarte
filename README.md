@@ -45,8 +45,8 @@ stehen dort an einer Stelle statt über acht Dateien verteilt.
   Tortendiagrammen nach Schweregrad.
 - **OSM-Kontext** (ODbL) — Schulen und Kindergärten, Gesundheitseinrichtungen,
   Spielplätze, Querungen und Übergänge, ÖPNV-Haltestellen, Tempolimit-Straßennetz.
-- **Bevölkerung** — Zensus 2022 im 100-m-Gitter (Destatis): Einwohner, unter 18, ab 65,
-  Durchschnittsalter.
+- **Bevölkerung** — Zensus 2022 (Destatis) im 100-m-Gitter, in der Übersicht im 1-km-Gitter:
+  Einwohner, unter 18, ab 65, Durchschnittsalter.
 - **Verkehr & Umwelt** — Verkehrsmengen (SVZ der Länder, BASt-Bundesfernstraßen,
   UBA-Hauptverkehrsstraßen), Rad-Geschwindigkeiten (movebis/Stadtradeln), Überholabstände
   ([OpenBikeSensor](https://www.openbikesensor.org/)), Umgebungslärm (UBA, Tag und Nacht),
