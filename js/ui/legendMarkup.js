@@ -21,7 +21,7 @@ import { LAYER_REGISTRY } from "../layers/registry.js";
  * @typedef {Object} LegendSpec  Feld `legend` eines Registry-Eintrags
  * @property {string} label                    Text neben der Checkbox
  * @property {string} [tip]                    Quellen-/Lizenz-Hinweis am ⓘ-Icon
- * @property {string} [vintage]                Manifest-ID für den Datenstand -> data-osm-vintage="<id>"
+ * @property {string} [vintage]                Manifest-ID für Quelle + Datenstand -> data-vintage="<id>"
  * @property {string} [vintageAttr]            stattdessen ein wertloser Haken, z. B. "laerm-vintage"
  *                                             -> data-laerm-vintage. Beides füllt
  *                                             js/utils/applyDataVintages.js zur Laufzeit in `tip`.
@@ -58,7 +58,7 @@ function buildToggleRow(entry) {
   if (tip || vintage || vintageAttr) {
     const icon = document.createElement("span");
     icon.className = "info-icon";
-    if (vintage) icon.dataset.osmVintage = vintage;
+    if (vintage) icon.dataset.vintage = vintage;
     if (vintageAttr) icon.setAttribute(`data-${vintageAttr}`, "");
     if (tip) icon.dataset.tip = tip;
     icon.textContent = "i";

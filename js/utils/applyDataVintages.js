@@ -1,21 +1,22 @@
 // js/utils/applyDataVintages.js
 //
-// Füllt die OSM-Quellen-Tooltips (info-icon) dynamisch mit dem Datenstand
-// (vintage) aus dem Manifest — statt ein hartkodiertes Datum im HTML zu pflegen.
-// `vintage` kommt aus `osmium fileinfo` der Geofabrik-PBF (siehe pipeline manifest.py),
-// z. B. "2025-07-31". Markup: <span class="info-icon" data-osm-vintage="<manifest-id>">.
+// Füllt die Quellen-Tooltips (info-icon) dynamisch aus dem Manifest — Quelle UND Datenstand,
+// statt beides von Hand im HTML/in der Registry zu pflegen. Beides kommt aus
+// pipeline/config/sources.yaml: `attribution` wörtlich, `vintage` je nach Quelle aus
+// `osmium fileinfo` der Geofabrik-PBF (z. B. "2025-07-31") oder als Festwert (z. B. "2022").
+// Markup: <span class="info-icon" data-vintage="<manifest-id>">.
+//
+// Früher stand hier fest „© OpenStreetMap … ODbL" — richtig, solange nur OSM-Layer das
+// Attribut trugen; der Zensus-Layer bekam so eine falsche Quelle.
 
 import { loadManifest } from "../mapdata/resolveSources.js";
 import { formatDateDE } from "./formatDate.js";
 
 export async function applyDataVintages(manifest) {
   const mf = manifest || (await loadManifest());
-  document.querySelectorAll("[data-osm-vintage]").forEach((el) => {
-    const id = el.getAttribute("data-osm-vintage");
-    const vintage = mf && mf[id] && mf[id].vintage;
-    if (vintage) {
-      el.dataset.tip = `Quelle: © OpenStreetMap (${formatDateDE(vintage)}) – Lizenz: ODbL`;
-    }
+  document.querySelectorAll("[data-vintage]").forEach((el) => {
+    const { vintage, attribution } = mf?.[el.dataset.vintage] ?? {};
+    if (vintage && attribution) el.dataset.tip = `Quelle: ${attribution} · Stand ${formatDateDE(vintage)}`;
   });
 
   // Telraam: eigener Quellen-/Lizenztext (CC BY-NC) + Prozessierungsdatum (Manifest-

@@ -27,7 +27,7 @@ test("jeder erzeugte Eintrag steht vollständig im DOM", async ({ page }) => {
       return {
         label: cb.closest("label").textContent.replace(/\s+/g, " ").replace(/\s*i$/, "").trim(),
         boxClass: box.className,
-        vintage: icon?.dataset.osmVintage ?? null,
+        vintage: icon?.dataset.vintage ?? null,
         zoom: box.querySelector(".zoom-link")?.dataset.zoom ?? null,
         swatches: [...box.querySelectorAll(".mt-4 > div")].map((row) => ({
           text: row.textContent.trim(),
@@ -55,11 +55,13 @@ test("keine Platzhalter übrig — jeder wurde ersetzt", async ({ page }) => {
   expectNoErrors(errors);
 });
 
-test("Datenstand im Tooltip kommt aus dem Manifest, nicht aus dem Markup", async ({ page }) => {
+test("Quelle + Datenstand im Tooltip kommen aus dem Manifest, nicht aus dem Markup", async ({ page }) => {
   const errors = await openMap(page);
-  // Im HTML stand früher ein hartkodiertes Datum, das beim OSM-Rebuild veraltete.
-  const tip = await page.evaluate(() =>
-    document.getElementById("toggle-schools").closest("label").querySelector(".info-icon").dataset.tip);
-  expect(tip).toMatch(/^Quelle: © OpenStreetMap \(\d{2}\.\d{2}\.\d{4}\) – Lizenz: ODbL$/);
+  const tipOf = (id) => page.evaluate((id) =>
+    document.getElementById(`toggle-${id}`).closest("label").querySelector(".info-icon").dataset.tip, id);
+  // Im HTML stand früher ein hartkodiertes Datum, das beim OSM-Rebuild veraltete …
+  await expect.poll(() => tipOf("schools")).toMatch(/^Quelle: © OpenStreetMap-Mitwirkende \(ODbL\) · Stand \d{2}\.\d{2}\.\d{4}$/);
+  // … und fest „OpenStreetMap" als Quelle — auch am Zensus-Layer (Primärquelle Destatis).
+  await expect.poll(() => tipOf("population")).toMatch(/^Quelle: © Statistisches Bundesamt \(Destatis\).* · Stand 2022$/);
   expectNoErrors(errors);
 });
