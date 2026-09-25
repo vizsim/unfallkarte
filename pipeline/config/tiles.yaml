@@ -157,6 +157,17 @@ profiles:
     no_tile_size_limit: true
     force_feature_limit: true
 
+  # Zensus 2022, 100-m-Gitter (census.py). Layer-Name = Frontend-Vertrag (`rasters-polys`).
+  # Flags 1:1 aus routing_bulk prepare_population.ipynb: nur z9–10, darüber überzoomt das
+  # Frontend. Kacheln dadurch groß (Berlin z10 ~1,4 MB entpackt) — Zoombereich/Attribute
+  # verschlanken ist ein eigener Schritt (docs/TODO.md).
+  census_population:
+    minzoom: 9
+    maxzoom: 10
+    no_feature_limit: true
+    no_tile_size_limit: true
+    force_feature_limit: true
+
   # Telraam-Zählstellen (kurze Straßensegmente, Linien). Layer-Name = Frontend-Vertrag.
   # Wenige Features (~1,4k DE) → kein Dropping, ab z9 sichtbar, z14 überzoomt nach oben.
   telraam_segments:

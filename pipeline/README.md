@@ -29,6 +29,7 @@ unfallkarte laerm fetch|build             # UBA-Umgebungslärm (Tag/Nacht)
 unfallkarte obs fetch|build               # OpenBikeSensor-Überholabstände
 unfallkarte telraam fetch|build           # Telraam-Zählstellen
 unfallkarte movebis build                 # movebis Rad-Geschwindigkeiten (GPKG lokal)
+unfallkarte census check|build            # Zensus 2022, 100-m-Gitter (Rohdaten lokal, Archiv)
 unfallkarte manifest                      # data/manifest.json (Local-first + Datenstand)
 unfallkarte deploy                        # b2 sync (PMTiles + manifest)
 ```

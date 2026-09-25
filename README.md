@@ -44,7 +44,9 @@ stehen dort an einer Stelle statt über acht Dateien verteilt.
 - **Unfälle 2017–2025** (Unfallatlas) — Einzelpunkte ab Zoom 11, darunter Cluster mit
   Tortendiagrammen nach Schweregrad.
 - **OSM-Kontext** (ODbL) — Schulen und Kindergärten, Gesundheitseinrichtungen,
-  Spielplätze, Querungen und Übergänge, Tempolimit-Straßennetz.
+  Spielplätze, Querungen und Übergänge, ÖPNV-Haltestellen, Tempolimit-Straßennetz.
+- **Bevölkerung** — Zensus 2022 im 100-m-Gitter (Destatis): Einwohner, unter 18, ab 65,
+  Durchschnittsalter.
 - **Verkehr & Umwelt** — Verkehrsmengen (SVZ der Länder, BASt-Bundesfernstraßen,
   UBA-Hauptverkehrsstraßen), Rad-Geschwindigkeiten (movebis/Stadtradeln), Überholabstände
   ([OpenBikeSensor](https://www.openbikesensor.org/)), Umgebungslärm (UBA, Tag und Nacht),
@@ -161,7 +163,7 @@ uv run unfallkarte manifest && uv run unfallkarte deploy
 
 Ein neues Unfalljahr ist ein YAML-Block in `pipeline/config/accidents.yaml` — kein
 Code-Edit. Kontextlayer analog: `uv run unfallkarte <hvs|laerm|obs|telraam> fetch|build`
-bzw. `movebis build`.
+bzw. `movebis build` und `census build` (Zensus aus Archivkopien in `data/raw/census/`).
 
 System-Binaries (nicht über pip): `tippecanoe` und `tile-join`, `osmium-tool`; die b2-CLI
 über `uv tool install b2`. (`ogr2ogr`/gdal-bin wird **nicht** gebraucht — OSM-PBF liest

@@ -191,15 +191,24 @@ datasets:
     boundary_url: "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/1_deutschland/4_niedrig.geo.json"
 
   # --- Kontextlayer Bevölkerung (Zensus 2022, 100-m-Gitter) ---
-  # ÜBERGANGSLÖSUNG: 1:1-Kopie der Kacheln aus routing_bulk (alter Bucket, dort
-  # Zensus2022_100m_poly_GER_wPLZ_wRS_ew_10.pmtiles), NICHT von dieser Pipeline gebaut und
-  # darum nicht reproduzierbar. Layer `rasters-polys`, nur z9–10 (darüber überzoomt), ~50
-  # Attribute. Sauberer Neubau steht in docs/TODO.md.
+  # Gebaut von census.py (`unfallkarte census build`), reproduziert die frühere Kette aus
+  # erreichbarad + routing_bulk (Herkunft: docs/TODO.md). Layer `rasters-polys`, nur z9–10
+  # (darüber überzoomt), ~50 Attribute — bewusst wie das Original; Verschlanken ist ein
+  # eigener Schritt (TODO). Daneben entsteht census/population_100m.parquet (nicht deployt).
   census_population:
     file: "census/population_100m.pmtiles"
     label: "Bevölkerung (Zensus 2022)"
     attribution: "© Statistisches Bundesamt (Destatis), Zensus 2022 (dl-de/by-2-0)"
     date: { fixed: "2022" }   # Stichtag 15.05.2022
+    # Archivkopien in data/raw/census/ — nicht alle sind noch aus dem Netz beschaffbar.
+    raw:
+      # npgeo-Hub der vfdb (ArcGIS): https://plattform-npgeo-vfdb.hub.arcgis.com/maps/87285c05ac3b498a8cbf257c3c23a37d/about
+      grid: "Zensus2022_grid_final_8736829269455000_100m.gpkg"
+      # PLZ-Gebiete, Stand 2025-03-12 (vermutlich suche-postleitzahl.org, OSM-basiert -> ODbL)
+      plz: "plz-5stellig.gpkg"
+      # BMV, Regionalstatistische Raumtypologie: https://www.bmv.de/SharedDocs/DE/Artikel/G/regionalstatistische-raumtypologie.html
+      regiostar: "2023 RegioStaR-Referenzdateien.xlsx"
+      regiostar_sheet: "ReferenzGebietsstand2023"
 
   # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
   # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.

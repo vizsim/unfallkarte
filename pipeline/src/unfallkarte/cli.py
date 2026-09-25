@@ -1,6 +1,6 @@
 """CLI-Einstieg: `unfallkarte <gruppe> <befehl>`.
 
-Gruppen: accidents/osm/scenario (Kern), hvs/laerm/obs/telraam/movebis/uber (Kontextlayer),
+Gruppen: accidents/osm/scenario (Kern), hvs/laerm/obs/telraam/movebis/uber/census (Kontextlayer),
 dazu top-level `manifest` + `deploy`. Die Logik lebt in den gleichnamigen Modulen;
 hier nur Typer-Wiring (Imports lazy, damit die CLI schnell startet).
 """
@@ -23,6 +23,7 @@ laerm_app = typer.Typer(no_args_is_help=True, help="UBA-Umgebungslärm (Lärmkar
 obs_app = typer.Typer(no_args_is_help=True, help="OpenBikeSensor-Überholabstände")
 movebis_app = typer.Typer(no_args_is_help=True, help="movebis (Stadtradeln) Rad-Geschwindigkeiten")
 uber_app = typer.Typer(no_args_is_help=True, help="Uber Movement (Berlin Q2/2019) Pkw-Speed")
+census_app = typer.Typer(no_args_is_help=True, help="Zensus 2022, 100-m-Gitter (Einwohner)")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
@@ -32,6 +33,7 @@ app.add_typer(laerm_app, name="laerm")
 app.add_typer(obs_app, name="obs")
 app.add_typer(movebis_app, name="movebis")
 app.add_typer(uber_app, name="uber")
+app.add_typer(census_app, name="census")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -174,6 +176,27 @@ def hvs_build(
     from unfallkarte import hvs
 
     out = hvs.build(dry_run=dry_run)
+    typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
+
+
+# --- census / Zensus 2022 ---
+@census_app.command("check")
+def census_check() -> None:
+    """Prüft, dass die drei Rohdateien in data/raw/census/ liegen (nicht alle neu beschaffbar)."""
+    from unfallkarte import census
+
+    for key, path in census.raw_files().items():
+        typer.echo(f"{key:10} {path.name}  ({path.stat().st_size / 1e6:,.0f} MB)")
+
+
+@census_app.command("build")
+def census_build(
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """Gitter + PLZ + RegioStaR -> census/population_100m.parquet + .pmtiles (`rasters-polys`)."""
+    from unfallkarte import census
+
+    out = census.build(dry_run=dry_run)
     typer.secho(f"PMTiles: {out}", fg=typer.colors.GREEN)
 
 
