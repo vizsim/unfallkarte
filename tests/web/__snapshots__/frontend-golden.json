@@ -6059,17 +6059,6 @@
     "permalink": ",l",
     "zoomHints": []
    },
-   "toggle-laerm2": {
-    "layersOff": [],
-    "layersOn": [
-     "laerm2"
-    ],
-    "legendsOn": [
-     "laerm2-legend"
-    ],
-    "permalink": ",r",
-    "zoomHints": []
-   },
    "toggle-mapillary": {
     "layersOff": [],
     "layersOn": [
@@ -6356,17 +6345,6 @@
      "laerm1-legend"
     ],
     "permalink": ",l",
-    "zoomHints": []
-   },
-   "toggle-laerm2": {
-    "layersOff": [],
-    "layersOn": [
-     "laerm2"
-    ],
-    "legendsOn": [
-     "laerm2-legend"
-    ],
-    "permalink": ",r",
     "zoomHints": []
    },
    "toggle-mapillary": {
@@ -6660,19 +6638,6 @@
     "permalink": ",l",
     "zoomHints": [
      "laerm1-legend"
-    ]
-   },
-   "toggle-laerm2": {
-    "layersOff": [],
-    "layersOn": [
-     "laerm2"
-    ],
-    "legendsOn": [
-     "laerm2-legend"
-    ],
-    "permalink": ",r",
-    "zoomHints": [
-     "laerm2-legend"
     ]
    },
    "toggle-mapillary": {

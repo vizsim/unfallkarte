@@ -922,20 +922,16 @@ MAIN HEADER
         </div>
 
         <div id="telraam-legend" class="ml-20 mt-6 fs-11">
-          <div style="display:flex; gap:14px; margin-bottom:6px;">
-            <label class="row gap-4">
-              <input type="radio" name="telraam-mode" value="bike" checked /> Rad
-            </label>
-            <label class="row gap-4">
-              <input type="radio" name="telraam-mode" value="car" /> Auto
-            </label>
+          <div class="legend-modes" role="radiogroup" aria-label="Einfärbung">
+            <label class="legend-chip"><input type="radio" name="telraam-mode" value="bike" checked /><span>Rad</span></label>
+            <label class="legend-chip"><input type="radio" name="telraam-mode" value="car" /><span>Auto</span></label>
           </div>
 
-          <div class="telraam-ramp" data-mode="bike">
+          <div class="telraam-ramp legend-mode is-active" data-mode="bike">
             <div style="height:8px; border-radius:2px; background:linear-gradient(to right,#ffffcc,#c2e699,#78c679,#31a354,#006837);"></div>
             <div style="display:flex; justify-content:space-between; color:#666;"><span>0</span><span>Ø Rad/Tag</span><span>1500+</span></div>
           </div>
-          <div class="telraam-ramp" data-mode="car" style="display:none;">
+          <div class="telraam-ramp legend-mode" data-mode="car">
             <div style="height:8px; border-radius:2px; background:linear-gradient(to right,#ffffb2,#fecc5c,#fd8d3c,#f03b20,#bd0026);"></div>
             <div style="display:flex; justify-content:space-between; color:#666;"><span>0</span><span>Ø Auto/Tag</span><span>9000+</span></div>
           </div>
@@ -1017,7 +1013,6 @@ MAIN HEADER
         <div data-legend-entry="laerm1"></div>
 
 
-        <div data-legend-entry="laerm2"></div>
 
 
         <div class="mt-6">

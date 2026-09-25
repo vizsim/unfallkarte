@@ -253,9 +253,9 @@ function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegen
   applyMode(initMode ? initMode.value : "dtv"); // ruft applyLayers()
 }
 
-// Telraam-Umschalter Auto/Rad: setzt die Linienfarbe auf den gewählten Modus und zeigt die
-// passende Farb-Rampe.
-function setupTelraamMode(map) {
+// Telraam-Umschalter Auto/Rad (Chips): setzt die Linienfarbe auf den gewählten Modus und
+// markiert die passende Farb-Rampe (.is-active — die Anzeige entscheidet style.css).
+function setupTelraamMode(map, { onChange } = {}) {
   const radios = document.querySelectorAll('input[name="telraam-mode"]');
   if (!radios.length) return;
 
@@ -264,12 +264,15 @@ function setupTelraamMode(map) {
       map.setPaintProperty("telraam", "line-color", telraamColorExpr(mode));
     }
     document.querySelectorAll(".telraam-ramp").forEach(el => {
-      el.style.display = el.dataset.mode === mode ? "block" : "none";
+      el.classList.toggle("is-active", el.dataset.mode === mode);
     });
   };
 
   const current = () => document.querySelector('input[name="telraam-mode"]:checked')?.value ?? "bike";
-  radios.forEach(r => r.addEventListener("change", () => apply(current())));
+  radios.forEach(r => r.addEventListener("change", () => {
+    apply(current());
+    onChange?.(); // Link sofort nachziehen (wie beim Einwohner-Modus)
+  }));
   // Lazy: der Layer entsteht erst beim Einschalten (im Rad-Default) -> gewählten Modus nachziehen.
   // (Dieser Listener läuft NACH dem generischen Toggle, der den Layer anlegt.)
   document.getElementById("toggle-telraam")?.addEventListener("change", (e) => {

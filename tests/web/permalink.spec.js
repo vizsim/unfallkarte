@@ -19,6 +19,7 @@ const snapshotState = (page) => page.evaluate(() => ({
     svz: document.querySelector('input[name="svz-mode"]:checked')?.value,
     telraam: document.querySelector('input[name="telraam-mode"]:checked')?.value,
     population: document.querySelector('input[name="population-mode"]:checked')?.value,
+    laerm: document.querySelector('input[name="laerm-mode"]:checked')?.value,
   },
 }));
 
@@ -42,7 +43,7 @@ test("Permalink-Roundtrip: alle Kontext-Layer, Szenarien und Regler überleben K
     set("scenario9-slider", "7");
     set("scenario9-rule", "usp3_3y", "change");
     set("uspeed-slider", "8");
-    for (const [name, value] of [["svz-mode", "sv"], ["telraam-mode", "car"], ["population-mode", "a65"]]) {
+    for (const [name, value] of [["svz-mode", "sv"], ["telraam-mode", "car"], ["population-mode", "a65"], ["laerm-mode", "night"]]) {
       const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
       radio.checked = true;
       radio.dispatchEvent(new Event("change", { bubbles: true }));
@@ -53,7 +54,7 @@ test("Permalink-Roundtrip: alle Kontext-Layer, Szenarien und Regler überleben K
 
   const before = await snapshotState(page);
   expect(before.toggles.length).toBeGreaterThan(15);
-  expect(before.controls).toEqual({ sc9: "7", sc9rule: "usp3_3y", uhr: "8", svz: "sv", telraam: "car", population: "a65" });
+  expect(before.controls).toEqual({ sc9: "7", sc9rule: "usp3_3y", uhr: "8", svz: "sv", telraam: "car", population: "a65", laerm: "night" });
   const url = await page.evaluate(() => location.pathname + location.search);
 
   await page.goto("about:blank");
@@ -108,5 +109,24 @@ test("alter ?p=-Link wird gelesen und auf v2 hochgeschrieben", async ({ page }) 
 
   // … und die URL steht jetzt im neuen Format (kein ?p= mehr).
   expect(await page.evaluate(() => location.search)).toMatch(/^\?v=2&map=12\.50\/52\.52000\/13\.40500&l=cz&n=9$/);
+  expectNoErrors(errors);
+});
+
+test("Alter Link mit Lärm (Nacht) als eigenem Layer (l=r) -> Lärm-Layer im Modus Nacht", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
+  await page.goto("/index.html?v=2&map=12.00/52.52000/13.40500&l=r");
+  await page.waitForFunction(() => document.documentElement.dataset.appReady === "true" && window.map?.loaded?.(), null, { timeout: 90_000 });
+
+  const state = await page.evaluate(() => ({
+    on: document.getElementById("toggle-laerm1").checked,
+    mode: document.querySelector('input[name="laerm-mode"]:checked')?.value,
+    visible: ["laerm1", "laerm2"].map((id) => window.map.getLayer(id) ? window.map.getLayoutProperty(id, "visibility") : "absent"),
+    scale: [...document.querySelectorAll("#laerm1-legend .legend-mode.is-active")].map((el) => el.dataset.mode),
+  }));
+  expect(state).toEqual({ on: true, mode: "night", visible: ["none", "visible"], scale: ["night"] });
+  // … und hochgeschrieben auf das neue Kürzel + Modus
+  expect(await param(page, "l")).toBe("l");
+  expect(await param(page, "o")).toBe("lm:night");
   expectNoErrors(errors);
 });

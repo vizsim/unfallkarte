@@ -376,7 +376,7 @@ export function addLayers(map) {
     "scenario1", "scenario2", "scenario3", "scenario6", "scenario8", "scenario9",
     "maxspeed", "movebis", "obs",
     "hvs", "svz", // SVZ-Verkehrsmengen ÜBER dem groben hvs-Fallback
-    "laerm1", "laerm2", "uspeed", "telraam",
+    "laerm1", "uspeed", "telraam", // laerm1 = beide Lärm-Layer (Tag-Abend-Nacht + Nacht)
     addMapillaryLayer, addMapillaryTSLayer,
   ];
   setDrawOrder(DRAW_ORDER.map((step) => {

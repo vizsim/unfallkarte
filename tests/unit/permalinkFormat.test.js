@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
-    CONTROLS, FILTER_GROUPS, kontextKeys, mergeState, parse, parseLegacy, serialize, styleShortMap,
+    CONTROLS, FILTER_GROUPS, RESERVED_LAYER_CHARS, kontextKeys, mergeState, parse, parseLegacy, serialize, styleShortMap,
 } from "../../js/utils/permalinkFormat.js";
 
 /** Der Zustand, mit dem die App startet (entspricht den Defaults in index.html). */
@@ -173,6 +173,34 @@ test("Zeichen-Vertrag: jede Kennung ist eindeutig vergeben", () => {
     assert.equal(new Set(chars).size, chars.length, "doppeltes Kontext-Zeichen");
     const keys = CONTROLS.map((c) => c.key);
     assert.equal(new Set(keys).size, keys.length, "doppeltes Regler-Kürzel");
-    // Reserviert: t/i waren früher Terrain/Hillshade — nie neu vergeben.
-    for (const reserved of ["t", "i"]) assert.ok(!chars.includes(reserved), `Zeichen "${reserved}" ist reserviert`);
+    // Reserviert: t/i waren früher Terrain/Hillshade, r war „Lärm (Nacht)" — nie neu vergeben.
+    for (const reserved of ["t", "i", "r"]) {
+        assert.ok(RESERVED_LAYER_CHARS.includes(reserved), `"${reserved}" fehlt in RESERVED_LAYER_CHARS`);
+        assert.ok(!chars.includes(reserved), `Zeichen "${reserved}" ist reserviert`);
+    }
+});
+
+test("Alter Lärm-Nacht-Link (l=r) öffnet den Lärm-Layer im Modus Nacht", () => {
+    const state = parse("?v=2&map=12.00/52.52000/13.40500&l=cr");
+    assert.deepEqual(state.layers.sort(), ["crossings", "laerm1"]);
+    assert.deepEqual(state.controls, { lm: "night" });
+    // … und wird beim Hochschreiben zu l + Modus
+    const neu = serialize(mergeState(defaults(), state), defaults());
+    assert.match(neu, /&l=cl(&|$)/);
+    assert.match(neu, /&o=lm:night(&|$)/);
+});
+
+test("Beide alten Lärm-Haken (l + r): ein Layer, Default-Modus; ein Modus im Link gewinnt", () => {
+    const both = parse("?v=2&map=12.00/52.52000/13.40500&l=lr");
+    assert.deepEqual(both.layers, ["laerm1"]);
+    assert.equal(both.controls?.lm, undefined);
+    const explicit = parse("?v=2&map=12.00/52.52000/13.40500&l=r&o=lm:den");
+    assert.deepEqual(explicit.layers, ["laerm1"]);
+    assert.deepEqual(explicit.controls, { lm: "den" });
+});
+
+test("v1-Link mit Lärm Nacht (…,r) wird ebenfalls abgebildet", () => {
+    const state = parseLegacy("52.52000,13.40500,12.50,U,1_2_3|1_2|17|1|1,,r");
+    assert.deepEqual(state.layers, ["laerm1"]);
+    assert.deepEqual(state.controls, { lm: "night" });
 });

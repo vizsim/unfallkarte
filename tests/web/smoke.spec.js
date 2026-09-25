@@ -116,7 +116,7 @@ test("Sweep: alle Kontext-Layer + Szenarien an, Raster abfahren -> Popups, keine
   await toggleOn(page, [
     "toggle-schools", "toggle-playgrounds", "toggle-health", "toggle-crossings", "toggle-platforms", "toggle-population",
     "toggle-maxspeed",
-    "toggle-laerm1", "toggle-laerm2", "toggle-hvs", "toggle-svz", "toggle-telraam", "toggle-obs",
+    "toggle-laerm1", "toggle-hvs", "toggle-svz", "toggle-telraam", "toggle-obs",
     "toggle-movebis", "toggle-uspeed", "toggle-scenario1", "toggle-scenario2", "toggle-scenario3",
     "toggle-scenario6", "toggle-scenario8", "toggle-scenario9",
   ]);

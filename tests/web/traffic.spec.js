@@ -99,8 +99,9 @@ test("Telraam: Auto/Rad-Umschalter tauscht Farb-Expression und Legenden-Rampe", 
 
   await page.click('input[name="telraam-mode"][value="car"]', { force: true });
   expect(await color()).toContain("car_per_day");
+  // Berechnete Sichtbarkeit statt el.style: die Rampe schaltet über .is-active + CSS
   const ramps = await page.evaluate(() => [...document.querySelectorAll(".telraam-ramp")]
-    .map((el) => [el.dataset.mode, el.style.display]));
+    .map((el) => [el.dataset.mode, getComputedStyle(el).display]));
   expect(ramps).toContainEqual(["car", "block"]);
   expect(ramps).toContainEqual(["bike", "none"]);
   expectNoErrors(errors);
