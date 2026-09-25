@@ -639,18 +639,35 @@ body {
 /* ===== SVZ-Verkehrsmengen-Legende: 5 Klassen, Linie + Punkt je Klasse parallel =====
    Farbe UND Größe kodieren die Menge -> Swatches wachsen mit. Feste Swatch-Breite,
    damit die Labels trotz variabler Punktgröße bündig bleiben. */
+#svz-legend .svz-head {
+  margin-bottom: 6px;
+  color: var(--ui-text-muted);
+}
+#svz-legend .svz-head strong {
+  color: var(--ui-text);
+}
+#svz-legend .svz-hint {
+  margin-top: 4px;
+  color: var(--ui-text-muted);
+}
+/* Drei Spalten je Zeile: Linie | Punkt (zentriert) | Wert (rechtsbündig, gleich breite
+   Ziffern) — so fluchten Tausenderpunkte und Einheiten untereinander. */
 #svz-legend .svz-row {
   display: flex;
   align-items: center;
-  margin: 3px 0;
+  gap: 10px;
+  min-height: 20px;
+  margin: 2px 0;
 }
-#svz-legend .svz-swatch {
-  width: 54px;
+#svz-legend .svz-dot-box {
+  width: 20px;
   flex: none;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: 8px;
+  justify-content: center;
+}
+#svz-legend .svz-label--value {
+  min-width: 7ch;
+  text-align: right;
 }
 #svz-legend .svz-line {
   display: inline-block;

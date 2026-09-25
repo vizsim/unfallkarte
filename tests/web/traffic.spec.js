@@ -81,6 +81,16 @@ test("SVZ: Master + Unter-Haken schalten ihre Layer; SV-Modus schreibt Größen 
   const widthSv = await page.evaluate(() => JSON.stringify(window.map.getPaintProperty("svz-lines", "line-width")));
   expect(widthSv).not.toBe(widthDtv);
   expect(widthSv).toContain("sv_anteil");
+  // Größen-Legende wird aus den Karten-Schwellen erzeugt (Referenzwerte, keine Klassen)
+  const labels = (mode) => page.evaluate((m) =>
+    [...document.querySelectorAll(`#svz-legend .svz-scale[data-mode="${m}"] .svz-label`)].map((el) => el.textContent), mode);
+  expect(await labels("dtv")).toEqual(["5.000", "15.000", "30.000", "≥ 50.000"]);
+  expect(await labels("sv")).toEqual(["5 %", "10 %", "20 %", "≥ 30 %"]);
+  // Legende: nur die SV-Rampe sichtbar (Chips schalten über .is-active + CSS)
+  const ramps = await page.evaluate(() => [...document.querySelectorAll(".svz-ramp")]
+    .map((el) => [el.dataset.mode, getComputedStyle(el).display]));
+  expect(ramps).toContainEqual(["sv", "block"]);
+  expect(ramps).toContainEqual(["dtv", "none"]);
   // UBA hat keinen SV-Anteil -> Layer aus, Haken gesperrt
   expect(await vis(page, ["hvs"])).toEqual(["none"]);
   expect(await page.evaluate(() => document.getElementById("toggle-hvs").disabled)).toBe(true);

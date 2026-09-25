@@ -875,37 +875,25 @@ MAIN HEADER
 
         <div id="svz-legend" class="ml-20 mt-6 fs-11">
           <div class="zoom-hint">ℹ️ Übersicht — alle Abschnitte ab <a href="#" class="zoom-link" data-zoom="9">Zoomstufe 9+</a>.</div>
-          <div style="display:flex; gap:14px; margin-bottom:6px;">
-            <label class="row gap-4">
-              <input type="radio" name="svz-mode" value="dtv" checked /> DTV
-            </label>
-            <label class="row gap-4">
-              <input type="radio" name="svz-mode" value="sv" /> SV-Anteil
-            </label>
+          <div class="legend-modes" role="radiogroup" aria-label="Darstellung">
+            <label class="legend-chip"><input type="radio" name="svz-mode" value="dtv" checked /><span>DTV</span></label>
+            <label class="legend-chip"><input type="radio" name="svz-mode" value="sv" /><span>SV-Anteil</span></label>
           </div>
 
-          <!-- DTV-Rampe (Kfz/24h): monochrom schwarz, Größe = Menge; Linie + Punkt je Klasse parallel. -->
-          <div class="svz-ramp" data-mode="dtv">
-            <div style="margin-bottom:4px; color:#444;"><strong>Menge</strong> (Kfz/24h) · Größe</div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:2px;background:#222;"></span><span class="svz-dot" style="width:6px;height:6px;background:#222;"></span></span><span class="svz-label">&lt; 5.000</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:3px;background:#222;"></span><span class="svz-dot" style="width:8px;height:8px;background:#222;"></span></span><span class="svz-label">5–15.000</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:4px;background:#222;"></span><span class="svz-dot" style="width:10px;height:10px;background:#222;"></span></span><span class="svz-label">15–30.000</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:6px;background:#222;"></span><span class="svz-dot" style="width:13px;height:13px;background:#222;"></span></span><span class="svz-label">30–50.000</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:8px;background:#222;"></span><span class="svz-dot" style="width:16px;height:16px;background:#222;"></span></span><span class="svz-label">&gt; 50.000</span></div>
+          <!-- Größen-Legenden je Modus: monochrom, Größe = Wert (Linie = Segment, Punkt =
+               Zählstelle). Die Zeilen erzeugt js/layers/traffic-volumes.js (renderSvzScales)
+               aus denselben Konstanten wie die Karte. -->
+          <div class="svz-ramp legend-mode is-active" data-mode="dtv">
+            <div class="svz-head"><strong>Kfz pro Tag</strong> (DTV)</div>
+            <div class="svz-scale" data-mode="dtv"></div>
           </div>
-
-          <!-- SV-Anteil-Rampe (% Schwerverkehr) — ebenfalls monochrom, Größe = Anteil. -->
-          <div class="svz-ramp" data-mode="sv" style="display:none;">
-            <div style="margin-bottom:4px; color:#444;"><strong>SV-Anteil</strong> (Schwerverkehr %) · Größe</div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:2px;background:#222;"></span><span class="svz-dot" style="width:6px;height:6px;background:#222;"></span></span><span class="svz-label">&lt; 5 %</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:3px;background:#222;"></span><span class="svz-dot" style="width:8px;height:8px;background:#222;"></span></span><span class="svz-label">5–10 %</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:4px;background:#222;"></span><span class="svz-dot" style="width:10px;height:10px;background:#222;"></span></span><span class="svz-label">10–20 %</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:6px;background:#222;"></span><span class="svz-dot" style="width:13px;height:13px;background:#222;"></span></span><span class="svz-label">20–30 %</span></div>
-            <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:8px;background:#222;"></span><span class="svz-dot" style="width:16px;height:16px;background:#222;"></span></span><span class="svz-label">&gt; 30 %</span></div>
+          <div class="svz-ramp legend-mode" data-mode="sv">
+            <div class="svz-head"><strong>Schwerverkehrsanteil</strong></div>
+            <div class="svz-scale" data-mode="sv"></div>
           </div>
-
-          <div class="svz-row"><span class="svz-swatch"><span class="svz-line" style="height:3px;background:#b4b4b4;"></span><span class="svz-dot" style="width:9px;height:9px;background:#b4b4b4;"></span></span><span class="svz-label">keine Angabe</span></div>
-          <div style="margin-top:6px; color:#666;">Dick = viel Verkehr · Linien = Länder-Segmente &amp; UBA-Hauptverkehrsstraßen (Jahresmenge ÷ 365) · Punkte = Zählstellen (BW/SL) &amp; BASt (A+B) · Klick für Details.<br/>Ganze Karte, alle Länder &amp; Quellen → <a href="https://vizsim.de/svz" target="_blank" rel="noopener">vizsim.de/svz</a></div>
+          <div class="svz-scale" data-mode="nodata"></div>
+          <div class="svz-hint">Stärke wächst stufenlos zwischen den Werten (Größen bei Zoomstufe 14). Linien = Länder-Segmente &amp; UBA-Hauptverkehrsstraßen (Jahresmenge ÷ 365) · Punkte = Zählstellen (BW/SL) &amp; BASt (A+B) · Klick für Details.</div>
+          <div class="svz-hint">Ganze Karte, alle Länder &amp; Quellen → <a href="https://vizsim.de/svz" target="_blank" rel="noopener">vizsim.de/svz</a></div>
         </div>
 
         <!-- UBA-HVS hat keine eigene Legende mehr — es teilt die SVZ-Größenlegende oben

@@ -169,6 +169,50 @@ const renderHvs = (p) => {
 const fmtInt = (v) => (v === undefined || v === null || v === "") ? "—" : Math.round(Number(v)).toLocaleString("de-DE");
 
 // ---------------------------------------------------------------------------------------------
+// Größen-Legende — aus DENSELBEN Konstanten wie die Karte (SVZ_BREAKS/_WIDTHS/_RADII), damit
+// Zahlen und Strichstärken nicht auseinanderlaufen (von Hand standen dort 2–8 px statt der
+// echten 1,5–6 px). Die Größe wächst stufenlos (interpolate) — darum Referenzwerte an den
+// Schwellen statt Klassen: „5–15.000" behauptete Stufen, die die Karte nicht hat.
+// Gezeichnet in der Größe bei Zoom 14 (Faktor 1,0 in SVZ_ZOOM_STOPS).
+// ---------------------------------------------------------------------------------------------
+const SVZ_SCALE_FORMAT = { dtv: (v) => v.toLocaleString("de-DE"), sv: (v) => `${v} %` };
+
+function svzLegendRow(width, radius, color, text, isValue = true) {
+  const row = document.createElement("div");
+  row.className = "svz-row";
+  const line = Object.assign(document.createElement("span"), { className: "svz-line" });
+  Object.assign(line.style, { height: `${width}px`, background: color });
+  const dot = Object.assign(document.createElement("span"), { className: "svz-dot" });
+  Object.assign(dot.style, { width: `${radius * 2}px`, height: `${radius * 2}px`, background: color });
+  const dotBox = Object.assign(document.createElement("span"), { className: "svz-dot-box" });
+  dotBox.append(dot);
+  const label = Object.assign(document.createElement("span"), {
+    className: isValue ? "svz-label svz-label--value" : "svz-label", textContent: text,
+  });
+  row.append(line, dotBox, label);
+  return row;
+}
+
+function renderSvzScales() {
+  for (const el of document.querySelectorAll("#svz-legend .svz-scale")) {
+    const mode = el.dataset.mode;
+    if (mode === "nodata") {
+      // Karte: ohne Wert -> kleinste Größe, grau
+      el.replaceChildren(svzLegendRow(SVZ_WIDTHS[0], SVZ_RADII[0], SVZ_NODATA, "keine Angabe", false));
+      continue;
+    }
+    const breaks = SVZ_BREAKS[mode];
+    const format = SVZ_SCALE_FORMAT[mode];
+    // ab der ersten Schwelle > 0; der letzte Wert ist die Obergrenze der Skala („≥")
+    el.replaceChildren(...breaks.slice(1).map((value, i) => {
+      const k = i + 1;
+      const text = `${k === breaks.length - 1 ? "≥ " : ""}${format(value)}`;
+      return svzLegendRow(SVZ_WIDTHS[k], SVZ_RADII[k], SVZ_INK, text);
+    }));
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Toggle-Logik
 // ---------------------------------------------------------------------------------------------
 
@@ -176,6 +220,7 @@ const fmtInt = (v) => (v === undefined || v === null || v === "") ? "—" : Math
 function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegendVisibilityByZoom, ensure, onChange }) {
   const master = document.getElementById("toggle-svz");
   if (!master) return;
+  renderSvzScales();
   const kids = document.getElementById("svz-children");
   const ubaCb = document.getElementById("toggle-hvs");
   const groups = [
@@ -234,8 +279,9 @@ function setupVerkehrsmengen(map, { zoomLock, applyLegendVisibility, updateLegen
   const applyMode = (m) => {
     mode = m;
     paintMode();
+    // Chips: passende Rampe per .is-active markieren — die Anzeige entscheidet style.css
     document.querySelectorAll(".svz-ramp").forEach(el => {
-      el.style.display = el.dataset.mode === mode ? "block" : "none";
+      el.classList.toggle("is-active", el.dataset.mode === mode);
     });
     applyLayers(); // UBA-Sichtbarkeit + disabled-Status an den Modus anpassen
   };
