@@ -14,6 +14,7 @@ const CLUSTER_LAYERS = ["pie-clusters-coarse-layer", "pie-clusters-fine-layer"];
 const BERLIN = [13.405, 52.52];
 const ADLERSHOF = [13.5492, 52.4346]; // Schulgelände mit Sc2 + Sc6 + OSM-Schule übereinander (Issue #30)
 const RUDOWER_CHAUSSEE = [13.535, 52.43]; // überlappende Sc9-Unfallhäufungen (Issue #31)
+const ALEXANDERPLATZ = [13.4125, 52.5219]; // Bus, Straßenbahn und S-/U-Bahn an einem Platz
 
 test("Karte lädt ohne JS-Fehler, Kernquellen sind da", async ({ page }) => {
   const errors = await openMap(page);
@@ -113,7 +114,7 @@ test("#31: überlappende Flächen DESSELBEN Szenarios werden alle gezeigt", asyn
 test("Sweep: alle Kontext-Layer + Szenarien an, Raster abfahren -> Popups, keine Fehler", async ({ page }) => {
   const errors = await openMap(page);
   await toggleOn(page, [
-    "toggle-schools", "toggle-playgrounds", "toggle-health", "toggle-crossings", "toggle-maxspeed",
+    "toggle-schools", "toggle-playgrounds", "toggle-health", "toggle-crossings", "toggle-platforms", "toggle-maxspeed",
     "toggle-laerm1", "toggle-laerm2", "toggle-hvs", "toggle-svz", "toggle-telraam", "toggle-obs",
     "toggle-movebis", "toggle-uspeed", "toggle-scenario1", "toggle-scenario2", "toggle-scenario3",
     "toggle-scenario6", "toggle-scenario8", "toggle-scenario9",
@@ -171,5 +172,28 @@ test("openOnClick: Klick auf ein Tempolimit-Segment öffnet OpenStreetMap statt 
   expect(osmTab.url()).toMatch(/openstreetmap\.org\/way\/\d+/);
   await osmTab.close();
   await expect(popups(page).locator(".maplibregl-popup-close-button")).toHaveCount(0); // nicht fixiert
+  expectNoErrors(errors);
+});
+
+test("ÖPNV-Haltestellen: Bus, Straßenbahn und Bahn rendern, Popup nennt das Verkehrsmittel", async ({ page }) => {
+  const errors = await openMap(page);
+  await toggleOn(page, ["toggle-platforms"]);
+  await jumpTo(page, ALEXANDERPLATZ, 16);
+
+  const layers = ["platforms-points", "platforms-lines", "platforms-polygons"];
+  const pt = await waitForBusiestPoint(page, layers, { message: "keine Haltestelle gerendert" });
+
+  // Alle drei Verkehrsmittel am Platz; Bahnsteige sind Ways (Linie/Fläche), Bushalte Nodes
+  const props = await page.evaluate((layers) =>
+    window.map.queryRenderedFeatures({ layers }).map((f) => ({ ...f.properties, layer: f.layer.id })), layers);
+  expect(props.some((p) => p.tram === "yes"), "keine Straßenbahn-Haltestelle").toBe(true);
+  expect(props.some((p) => p.highway === "bus_stop"), "keine Bushaltestelle").toBe(true);
+  expect(props.some((p) => p.railway === "platform" && p.tram !== "yes" && p.layer !== "platforms-points"),
+    "kein Bahnsteig als Linie/Fläche").toBe(true);
+
+  await hoverAt(page, pt);
+  await expect(popups(page)).toHaveCount(1);
+  await expect(popups(page).first()).toContainText("Haltestelle");
+  await expect(popups(page).first()).toContainText("Verkehrsmittel");
   expectNoErrors(errors);
 });

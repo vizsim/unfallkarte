@@ -28,8 +28,8 @@ datasets:
     attribution: "© OpenStreetMap-Mitwirkende (ODbL)"
     date: auto            # aus `osmium fileinfo` der Geofabrik-PBF
 
-  # Konsument: routing_bulk (dort Layer-Toggle + Startpunkt-Gewichtung);
-  # im unfallkarte-Frontend (noch) nicht eingebunden.
+  # Konsumenten: Kontextlayer „ÖPNV-Haltestellen" (js/layers/context-osm.js) und routing_bulk
+  # (dort Layer-Toggle + Startpunkt-Gewichtung) — Layer-Name + Attribute sind für beide Vertrag.
   osm_platforms:
     file: "osm/platforms.pmtiles"
     label: "ÖPNV-Haltestellen"

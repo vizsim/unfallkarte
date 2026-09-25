@@ -1,4 +1,4 @@
-// Kontext-Layer aus OpenStreetMap: Orte & Einrichtungen, Querungen.
+// Kontext-Layer aus OpenStreetMap: Orte & Einrichtungen, Querungen, ÖPNV-Haltestellen.
 import { row, osmLink } from "../ui/popupHelpers.js";
 
 const schoolTitle = { school: "Schule", kindergarten: "Kindergarten" };
@@ -28,6 +28,41 @@ const renderCrossing = (p) => `
         ${row("Blindenleitsystem", p.tactile_paving)}
         ${row("Bordstein", p.kerb)}
     </table>`;
+
+// ÖPNV-Haltestellen: Verkehrsmittel aus den OSM-Tags. EINE Regelliste speist Kartenfarbe,
+// Legende und Popup. Reihenfolge = Vorrang: ein Halt für Bus + Tram gilt als Tram, und
+// Tram-Bahnsteige tragen meist auch railway=platform, darum steht Tram vor Bahn.
+const platformModes = [
+    { label: "Straßenbahn", color: "#C2185B", tags: { tram: ["yes"], railway: ["tram_stop"] } },
+    { label: "Bahn (Zug, S-/U-Bahn)", color: "#1F5AA6", tags: { train: ["yes"], railway: ["platform", "halt", "station"] } },
+    { label: "Bus", color: "#8E44AD", tags: { bus: ["yes"], highway: ["bus_stop"] } },
+];
+const platformOther = { label: "Ohne Angabe", color: "#9aa0a6" };
+
+const platformModeOf = (p) =>
+    platformModes.find((m) => Object.entries(m.tags).some(([key, values]) => values.includes(p[key]))) ?? platformOther;
+
+const platformColor = [
+    "case",
+    ...platformModes.flatMap((m) => [
+        ["any", ...Object.entries(m.tags).map(([key, values]) => ["match", ["get", key], values, true, false])],
+        m.color,
+    ]),
+    platformOther.color,
+];
+
+const renderPlatform = (p) => `
+    <div class="pop-title">Haltestelle</div>
+    <table class="pop-table">
+        ${row("Name", p.name)}
+        ${row("Verkehrsmittel", platformModeOf(p).label)}
+        ${row("Netz", p.network)}
+        ${row("Betreiber", p.operator)}
+    </table>`;
+
+// Flächen aus GDAL-multipolygons: geschlossener Way -> osm_way_id, Relation -> osm_id
+const platformAreaLink = (p) =>
+    (p.osm_way_id ? { href: `https://www.openstreetmap.org/way/${p.osm_way_id}`, label: "OpenStreetMap" } : osmLink("relation")(p));
 
 /** @type {import("./registry.js").LayerEntry[]} */
 export default [
@@ -342,6 +377,64 @@ export default [
         popups: [
             { id: "crossings-points", layers: ["crossings-points"], eyebrow: "OSM", render: renderCrossing, link: osmLink("node"), openOnClick: true },
             { id: "crossings-lines", layers: ["crossings-lines"], eyebrow: "OSM", render: renderCrossing, link: osmLink("way"), openOnClick: true },
+        ]
+    },
+    {
+        // Haltestellen als Node (meist Bus), Bahnsteige als Way (Linie oder Fläche, meist Bahn).
+        // Ist ein Halt als bus_stop-Node UND als platform-Way gemappt, erscheint er doppelt;
+        // für die Anzeige egal (siehe osm.yaml).
+        id: "platforms", kind: "context",
+        source: { id: "platforms", manifest: "osm_platforms" },
+        legend: {
+            label: "ÖPNV-Haltestellen anzeigen",
+            tip: "Quelle: © OpenStreetMap – Lizenz: ODbL",
+            vintage: "osm_platforms",
+            swatches: [...platformModes, platformOther].map(({ color, label }) => ({ color, text: label })),
+        },
+        layers: [
+            {
+              id: "platforms-polygons",
+              type: "fill",
+              "source-layer": "germany_osm_platforms",
+              filter: ["==", ["geometry-type"], "Polygon"],
+              paint: {
+                "fill-color": platformColor,
+                "fill-opacity": 0.35,
+                "fill-outline-color": platformColor
+              }
+            },
+            {
+              id: "platforms-lines",
+              type: "line",
+              "source-layer": "germany_osm_platforms",
+              filter: ["==", ["geometry-type"], "LineString"],
+              layout: { "line-cap": "round" },
+              paint: {
+                "line-color": platformColor,
+                "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1, 16, 4],
+                "line-opacity": 0.85
+              }
+            },
+            {
+              id: "platforms-points",
+              type: "circle",
+              "source-layer": "germany_osm_platforms",
+              filter: ["==", ["geometry-type"], "Point"],
+              paint: {
+                "circle-color": platformColor,
+                "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 2, 14, 5, 16, 7],
+                // weißer Rand: unterscheidet Haltestellen von den dunkel umrandeten Übergängen
+                "circle-stroke-color": "#ffffff",
+                "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 12.5, 0, 13.5, 1.5],
+                "circle-opacity": 0.9
+              }
+            }
+        ],
+        permalink: "n", dataMinZoom: 12,
+        popups: [
+            { id: "platforms-points", layers: ["platforms-points"], eyebrow: "OSM", render: renderPlatform, link: osmLink("node"), openOnClick: true },
+            { id: "platforms-lines", layers: ["platforms-lines"], eyebrow: "OSM", render: renderPlatform, link: osmLink("way"), openOnClick: true },
+            { id: "platforms-polygons", layers: ["platforms-polygons"], eyebrow: "OSM", render: renderPlatform, link: platformAreaLink, openOnClick: true },
         ]
     },
 ];
