@@ -50,6 +50,7 @@
 import contextOsm from "./context-osm.js";
 import contextNoise from "./context-noise.js";
 import contextCycling from "./context-cycling.js";
+import contextPopulation from "./context-population.js";
 import scenarios from "./scenarios.js";
 import trafficSpeed from "./traffic-speed.js";
 import trafficVolumes from "./traffic-volumes.js";
@@ -67,7 +68,7 @@ const withDefaults = (entry) => {
 
 /** @type {LayerEntry[]} */
 export const LAYER_REGISTRY = [
-    ...contextOsm, ...contextNoise, ...contextCycling, ...trafficSpeed, ...trafficVolumes, ...scenarios,
+    ...contextOsm, ...contextNoise, ...contextCycling, ...contextPopulation, ...trafficSpeed, ...trafficVolumes, ...scenarios,
 ].map(withDefaults);
 
 // Beim Laden prüfen statt später rätseln: doppelte IDs/Permalink-Zeichen wären stille Bugs.

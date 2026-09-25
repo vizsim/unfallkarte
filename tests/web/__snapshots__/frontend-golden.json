@@ -67,6 +67,41 @@
   "place_country_minor",
   "place_country_major",
   {
+   "id": "population-cells",
+   "layout": {
+    "visibility": "none"
+   },
+   "minzoom": 11,
+   "paint": {
+    "fill-color": [
+     "step",
+     [
+      "to-number",
+      [
+       "get",
+       "Einwohner"
+      ],
+      0
+     ],
+     "#f59a4f",
+     10,
+     "#ec7a26",
+     25,
+     "#d8600e",
+     50,
+     "#b44a06",
+     100,
+     "#8a3804",
+     250,
+     "#5f2602"
+    ],
+    "fill-opacity": 0.6
+   },
+   "source": "population",
+   "sourceLayer": "rasters-polys",
+   "type": "fill"
+  },
+  {
    "filter": [
     "==",
     [
@@ -5897,6 +5932,10 @@
    "file": "osm/playgrounds.pmtiles",
    "type": "vector"
   },
+  "population": {
+   "file": "census/population_100m.pmtiles",
+   "type": "vector"
+  },
   "scenario1": {
    "file": "scenarios/scenario1_cluster_accidents_ms100.pmtiles",
    "type": "vector"
@@ -6119,6 +6158,17 @@
      "playgrounds-legend"
     ],
     "permalink": ",p",
+    "zoomHints": []
+   },
+   "toggle-population": {
+    "layersOff": [],
+    "layersOn": [
+     "population-cells"
+    ],
+    "legendsOn": [
+     "population-legend"
+    ],
+    "permalink": ",w",
     "zoomHints": []
    },
    "toggle-scenario1": {
@@ -6403,6 +6453,17 @@
      "playgrounds-legend"
     ],
     "permalink": ",p",
+    "zoomHints": []
+   },
+   "toggle-population": {
+    "layersOff": [],
+    "layersOn": [
+     "population-cells"
+    ],
+    "legendsOn": [
+     "population-legend"
+    ],
+    "permalink": ",w",
     "zoomHints": []
    },
    "toggle-scenario1": {
@@ -6712,6 +6773,19 @@
     "permalink": ",p",
     "zoomHints": [
      "playgrounds-legend"
+    ]
+   },
+   "toggle-population": {
+    "layersOff": [],
+    "layersOn": [
+     "population-cells"
+    ],
+    "legendsOn": [
+     "population-legend"
+    ],
+    "permalink": ",w",
+    "zoomHints": [
+     "population-legend"
     ]
    },
    "toggle-scenario1": {

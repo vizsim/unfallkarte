@@ -370,6 +370,7 @@ export function addLayers(map) {
   // Cluster, Mapillary); ihre Layer-IDs dienen den Lazy-Layern als beforeId-Anker.
   // tests/web/golden.spec.js hält die resultierende Reihenfolge fest.
   const DRAW_ORDER = [
+    "population", // Flächen ganz unten: alles andere liegt darüber
     "schools", "health", "playgrounds", "crossings", "platforms",
     addAccidentLayersToMap, addAccidentClusterLayers,
     "scenario1", "scenario2", "scenario3", "scenario6", "scenario8", "scenario9",

@@ -190,5 +190,16 @@ datasets:
     # DE-Außengrenze (low-res) für den Clip; einmalig gezogen + gecacht.
     boundary_url: "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/1_deutschland/4_niedrig.geo.json"
 
+  # --- Kontextlayer Bevölkerung (Zensus 2022, 100-m-Gitter) ---
+  # ÜBERGANGSLÖSUNG: 1:1-Kopie der Kacheln aus routing_bulk (alter Bucket, dort
+  # Zensus2022_100m_poly_GER_wPLZ_wRS_ew_10.pmtiles), NICHT von dieser Pipeline gebaut und
+  # darum nicht reproduzierbar. Layer `rasters-polys`, nur z9–10 (darüber überzoomt), ~50
+  # Attribute. Sauberer Neubau steht in docs/TODO.md.
+  census_population:
+    file: "census/population_100m.pmtiles"
+    label: "Bevölkerung (Zensus 2022)"
+    attribution: "© Statistisches Bundesamt (Destatis), Zensus 2022 (dl-de/by-2-0)"
+    date: { fixed: "2022" }   # Stichtag 15.05.2022
+
   # Die Mapillary-Mapping-Szenarien (sc4/5/7) werden in der neuen Implementierung
   # bewusst NICHT übernommen → keine mapillary_trafficsigns/-markings-Quellen hier.

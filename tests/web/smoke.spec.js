@@ -114,7 +114,8 @@ test("#31: überlappende Flächen DESSELBEN Szenarios werden alle gezeigt", asyn
 test("Sweep: alle Kontext-Layer + Szenarien an, Raster abfahren -> Popups, keine Fehler", async ({ page }) => {
   const errors = await openMap(page);
   await toggleOn(page, [
-    "toggle-schools", "toggle-playgrounds", "toggle-health", "toggle-crossings", "toggle-platforms", "toggle-maxspeed",
+    "toggle-schools", "toggle-playgrounds", "toggle-health", "toggle-crossings", "toggle-platforms", "toggle-population",
+    "toggle-maxspeed",
     "toggle-laerm1", "toggle-laerm2", "toggle-hvs", "toggle-svz", "toggle-telraam", "toggle-obs",
     "toggle-movebis", "toggle-uspeed", "toggle-scenario1", "toggle-scenario2", "toggle-scenario3",
     "toggle-scenario6", "toggle-scenario8", "toggle-scenario9",
@@ -195,5 +196,25 @@ test("ÖPNV-Haltestellen: Bus, Straßenbahn und Bahn rendern, Popup nennt das Ve
   await expect(popups(page)).toHaveCount(1);
   await expect(popups(page).first()).toContainText("Haltestelle");
   await expect(popups(page).first()).toContainText("Verkehrsmittel");
+  expectNoErrors(errors);
+});
+
+test("Bevölkerung (Zensus): Zellen rendern ab z11, Popup nennt Einwohner", async ({ page }) => {
+  const errors = await openMap(page);
+  await toggleOn(page, ["toggle-population"]);
+  await jumpTo(page, BERLIN, 14);
+
+  const pt = await waitForBusiestPoint(page, ["population-cells"], { message: "keine Zensus-Zelle gerendert" });
+  // Einwohner liegt in den Kacheln teils als String -> to-number muss greifen, sonst alles Klasse 1
+  const maxEw = await page.evaluate(() =>
+    Math.max(...window.map.queryRenderedFeatures({ layers: ["population-cells"] }).map((f) => Number(f.properties.Einwohner))));
+  expect(maxEw, "Berlin-Mitte ohne dichte Zelle (>= 100 EW/ha)?").toBeGreaterThanOrEqual(100);
+
+  // Nur der Zensus-Layer, sonst gewinnt am Punkt womöglich ein Unfall
+  await page.evaluate(() => { const cb = document.querySelector('.section-checkbox[data-section="einzeln"]'); if (cb.checked) cb.click(); });
+  await hoverAt(page, pt);
+  await expect(popups(page)).toHaveCount(1);
+  await expect(popups(page).first()).toContainText("Bevölkerung");
+  await expect(popups(page).first()).toContainText("Einwohner");
   expectNoErrors(errors);
 });
