@@ -298,18 +298,32 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
 - [ ] **Zensus 2022 sauber in die Pipeline** — der Kontextlayer „Einwohner"
       (`census/population_100m.pmtiles`, 2026-09-25) ist eine **1:1-Kopie** der Kacheln aus
       `routing_bulk` (alter Bucket, `Zensus2022_100m_poly_GER_wPLZ_wRS_ew_10.pmtiles`),
-      also nicht reproduzierbar. Herkunft nur halb klar: gebaut von
-      `routing_bulk/preprocessing/prepare_population.ipynb`, das aber schon von einem fertigen
-      `Zensus2022_100m_poly_GER_wPLZ_wRS.parquet` ausgeht (Ursprung offen; Zensus-Gitter +
-      PLZ + RegioStaR + Gemeinde, ~50 Attribute inkl. Heizung/Miete/Leerstand). Schwächen der
-      Kopie: nur z9–10 (darüber überzoomt, Kacheln in Berlin ~1,4 MB entpackt), fremder
-      Layer-Name `rasters-polys`, Zahlen teils als String.
-      Ziel: `unfallkarte census` aus den Destatis-Gitterdaten (Einwohner + Altersgruppen,
-      [Zensus 2022: Gitterzellen](https://www.zensus2022.de/DE/Ergebnisse-des-Zensus/gitterzellen.html))
-      → Parquet (auch als Pipeline-Eingang für Szenarien, z. B. Lärmbetroffene je Abschnitt) +
-      PMTiles mit schlanken Attributen und passendem Zoombereich. Layer-Name und Attribute
-      sind dann Vertrag mit `js/layers/context-population.js` — beim Umbenennen mitziehen,
-      ebenso `routing_bulk` (liest `Einwohner`/`Unter18`/`AnteilUnter18` aus `rasters-polys`).
+      also nicht reproduzierbar. Schwächen der Kopie: nur z9–10 (darüber überzoomt, Kacheln in
+      Berlin ~1,4 MB entpackt), fremder Layer-Name `rasters-polys`, Zahlen teils als String,
+      ~50 Attribute, von denen die Karte 7 braucht.
+      **Herkunft (rekonstruiert 2026-09-25, alles lokal vorhanden):**
+      1. Rohdaten: Zensus-2022-Gitter 100 m vom
+         [npgeo-Hub der vfdb](https://plattform-npgeo-vfdb.hub.arcgis.com/maps/87285c05ac3b498a8cbf257c3c23a37d/about)
+         → `Zensus2022_grid_final_8736829269455000_100m.gpkg` (1,05 GB, EPSG:3857; bringt
+         Einwohner, Altersgruppen, Haushalt, Miete, Leerstand, Heizung, Baujahr + `ags` schon
+         verbunden mit). Liegt in `Nextcloud/Analysen/erreichbarad_alt/data/`.
+      2. `erreichbarad/erreichbarad/1aa_add_plz_to_pop_ger_v03_regiosta.ipynb` (Nextcloud):
+         Zell-Mittelpunkte `within` PLZ-Gebiete (`plz-5stellig.gpkg`, Stand 2025-03-12;
+         vermutlich suche-postleitzahl.org, OSM-basiert → ODbL) -> `plz`; dann
+         `2023 RegioStaR-Referenzdateien.xlsx` (BMV, Blatt `ReferenzGebietsstand2023`) über
+         `ags` == `gem_23` (8-stellig) -> `name_23`, `RegioStaR7` (alle 3.081.328 Zellen
+         getroffen) -> `Zensus2022_100m_poly_GER_wPLZ_wRS.parquet`. Zutaten + Parquet auch in
+         `~/erreichbarad_viz/data/regio/`.
+      3. `routing_bulk/preprocessing/prepare_population.ipynb`: Parquet -> FGB -> tippecanoe
+         `--layer=rasters-polys` z9–10 -> PMTiles.
+      Ziel: `unfallkarte census` — Rohgitter (erst nach `pipeline/data/raw/census/` + B2
+      `raw/` sichern, der Hub-Download kann verschwinden) -> Parquet in 25832/4326 (auch
+      Pipeline-Eingang für Szenarien, z. B. Lärmbetroffene je Abschnitt) + PMTiles mit
+      schlanken Attributen und passendem Zoombereich. PLZ/RegioStaR braucht die Karte nicht —
+      weglassen hält die Lizenz sauber bei dl-de/by-2-0 (die PLZ bringen sonst ODbL mit).
+      Layer-Name und Attribute sind dann Vertrag mit `js/layers/context-population.js` — beim
+      Umbenennen mitziehen, ebenso `routing_bulk` (liest `Einwohner`/`Unter18`/`AnteilUnter18`
+      aus `rasters-polys`) und `matsim-py-helper` (siehe Aufräumen, altes Bucket).
 - [x] **Tote Popup-Zeilen: OSM-Tags fehlen in den Tiles** (Rebuild 2026-09-19) — Popup-Zeilen
       „Träger"/„Ausstattung" erschienen nie, weil `operator` (Gesundheit, Spielplätze) und
       `playground` nicht in den Tiles standen. Config-Fix war 187c78a (`attributes=` in
@@ -372,10 +386,13 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
       verifiziert).
 - [ ] Altes B2-Bucket `unfallkarte-data` hat nach der Uber-Migration keinen
       Verbraucher mehr → stilllegbar (vorher kurz verifizieren, dass nichts
-      Externes darauf zeigt). **Doch einer:** `routing_bulk` liest die Zensus-Kacheln von
-      dort (`POPULATION_PMTILES_URL` in `src/core/config.js`). Die Datei liegt seit
-      2026-09-25 byte-gleich auch unter `unfallkarte-data-v2/census/population_100m.pmtiles`
-      → routing_bulk umstellen, dann ist der Weg frei.
+      Externes darauf zeigt). **Doch, drei** (Suche über ~/ am 2026-09-25):
+      - `routing_bulk`: Zensus-Kacheln (`POPULATION_PMTILES_URL` in `src/core/config.js`)
+      - `matsim-py-helper`: dieselben Zensus-Kacheln (`pop_writer_v02/_v03*.ipynb`)
+      - `maplibre_routing`: `planetiler-de.pmtiles` (`style.json`) — liegt NICHT im v2-Bucket
+      Die Zensus-Datei liegt seit 2026-09-25 byte-gleich unter
+      `unfallkarte-data-v2/census/population_100m.pmtiles` → die ersten beiden umstellen;
+      für die Planetiler-Basiskarte erst ein neues Zuhause klären, dann ist der Weg frei.
 
 ## Uber-Speed-Layer
 
