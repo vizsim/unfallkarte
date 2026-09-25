@@ -39,6 +39,9 @@ accident_data/
 # Lokaler Local-first-Symlink auf pipeline/data (nicht committen)
 /data
 
+# Interne Notizen (Ideensammlungen, nicht öffentlich)
+/docs/intern/
+
 # Node-Dev-Tooling (Vite + Playwright, siehe package.json / vite.config.js)
 node_modules/
 /dist/
