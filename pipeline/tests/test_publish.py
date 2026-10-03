@@ -1,9 +1,8 @@
 """Tests für publish: öffentliches Schema, unfall_id, Abdeckung, Dateien, README, Deploy.
 
 Laufen ohne Daten (die CI hat keine) auf einer kleinen synthetischen Tabelle im Schema von
-accidents.harmonize() — mit den Eigenheiten der Echtdaten: UIDENTSTLAE fehlt 2016/2018/2019,
-ist 2021 für NRW verstümmelt (19-stellig, doppelt), OBJECTID fehlt 2025, IstGkfz 2017, PLST vor
-2023. Nur der Abgleich der echten Veröffentlichung mit der Golden-Reference braucht Daten.
+accidents.harmonize() (tests/synthetic.py — mit den Eigenheiten der Echtdaten). Nur der
+Abgleich der echten Veröffentlichung mit der Golden-Reference braucht Daten.
 """
 
 from __future__ import annotations
@@ -11,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -19,65 +19,18 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import pytest
+from synthetic import ERSTES_JAHR, N, harmonisiert
 
 from unfallkarte import accidents, publish
 from unfallkarte.config import get_paths
 
 CFG = publish.load_config()
-
-# Land, RegBez, Kreis, Gemeinde, Länge, Breite, Streuung (Grad), erstes Jahr.
-# Kottbusser Tor und Köln, weil die README-Beispiele dort abfragen.
-ORTE = [
-    (11, 0, 2, 2, 13.4183, 52.4990, 0.0002, 2018),  # Berlin, Kottbusser Tor
-    (11, 0, 2, 2, 13.4100, 52.5000, 0.0050, 2018),  # Berlin-Kreuzberg
-    (5, 3, 15, 0, 6.9600, 50.9400, 0.0200, 2019),   # Köln
-    (2, 0, 0, 0, 9.9900, 53.5500, 0.0200, 2016),    # Hamburg
-    (13, 0, 3, 0, 12.1000, 54.0900, 0.0200, 2020),  # Rostock
-]
-ERSTES_JAHR = {"02": 2016, "05": 2019, "11": 2018, "13": 2020}
 TEST_CFG = {**CFG, "row_group_size": 200, "erstes_jahr": ERSTES_JAHR}
-N = 30  # Unfälle je Ort und Jahr
 
 GEBIET = {"type": "FeatureCollection", "features": [{
     "type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [[
         [13.395, 52.493], [13.425, 52.490], [13.433, 52.501], [13.414, 52.509],
         [13.392, 52.503], [13.395, 52.493]]]}}]}
-
-
-def harmonisiert() -> pd.DataFrame:
-    """Kleine Tabelle im Schema von accidents.harmonize()."""
-    rng = np.random.default_rng(7)
-    teile = []
-    for jahr in range(2016, 2026):
-        oid = 0
-        for land, rb, kr, gem, lon, lat, s, ab in ORTE:
-            if jahr < ab:
-                continue
-            k = np.arange(oid, oid + N)
-            oid += N
-            if jahr in (2016, 2018, 2019):
-                uid = [None] * N
-            elif jahr == 2021 and land == 5:  # als Zahl gerundet: führende Null weg, doppelt
-                uid = [f"5{jahr % 100}{i % 7:012d}0000" for i in k]
-            else:
-                uid = [f"{land:02d}{jahr % 100}{i:012d}{jahr}" for i in k]
-            ints = {c: rng.integers(lo, hi, N) for c, lo, hi in [
-                ("UMONAT", 1, 13), ("USTUNDE", 0, 24), ("UWOCHENTAG", 1, 8),
-                ("UKATEGORIE", 1, 4), ("UART", 0, 10), ("UTYP1", 1, 8), ("LICHT", 0, 3),
-                ("USTRZUSTAND", 0, 3), ("IstRad", 0, 2), ("IstPKW", 0, 2), ("IstFuss", 0, 2),
-                ("IstKrad", 0, 2), ("IstSonstig", 0, 2)]}
-            teile.append(pd.DataFrame({
-                "OBJECTID": (k + 1).astype(float) if jahr != 2025 else np.nan,
-                "UIDENTSTLA": uid,
-                "ULAND": land, "UREGBEZ": rb, "UKREIS": kr, "UGEMEINDE": gem, "UJAHR": jahr,
-                **ints,
-                "IstGkfz": rng.integers(0, 2, N).astype(float) if jahr != 2017 else np.nan,
-                "PLST": rng.integers(1, 3, N).astype(float) if jahr >= 2023 else np.nan,
-                "LINREFX": 0.0, "LINREFY": 0.0,
-                "XGCSWGS84": lon + rng.normal(0, s, N),
-                "YGCSWGS84": lat + rng.normal(0, s, N),
-            }))
-    return pd.concat(teile, ignore_index=True)
 
 
 @pytest.fixture(scope="module")
@@ -272,6 +225,33 @@ def test_deploy_trockenlauf_und_schluessel(built: tuple[Path, dict],
                         lambda: SimpleNamespace(b2_archive_key_id="id-x", b2_archive_key="geheim"))
     env = publish._b2_env()
     assert env["B2_APPLICATION_KEY_ID"] == "id-x" and env["B2_APPLICATION_KEY"] == "geheim"
+
+
+def test_readme_neu_und_nur_geaenderte_dateien_hochladen(built: tuple[Path, dict], tmp_path: Path,
+                                                         monkeypatch: pytest.MonkeyPatch) -> None:
+    out, latest = built
+    pub = tmp_path / "pub"
+    shutil.copytree(out, pub)   # Kopie: `built` ist modulweit geteilt
+    remote = {CFG["prefix"] + p.name: publish._sha1(p) for p in pub.iterdir()}
+
+    # `publish readme`: nur das README ändert sich, kein neuer Datenstand.
+    publish.readme(pub, {**TEST_CFG, "karten_export": True})
+    assert "Kartenausschnitt als GeoJSON" in (pub / "README.md").read_text(encoding="utf-8")
+    assert sorted(p.name for p in pub.iterdir()) == sorted(p.name for p in out.iterdir())
+
+    uploads: list[str] = []
+    monkeypatch.setattr(publish, "which", lambda _: "/usr/bin/b2")
+    monkeypatch.setattr(publish, "get_settings",
+                        lambda: SimpleNamespace(b2_archive_key_id="id", b2_archive_key="k"))
+    monkeypatch.setattr(publish, "_remote_sha1", lambda *_: remote)
+    monkeypatch.setattr(publish.subprocess, "run", lambda cmd, **_: uploads.append(cmd[-1]))
+    publish.deploy(pub, TEST_CFG)
+    assert uploads == [CFG["prefix"] + "README.md"]   # die 86 MB bleiben, wo sie sind
+
+    # Liegt die versionierte Datei mit anderem Inhalt im Bucket: Abbruch statt Überschreiben.
+    remote[CFG["prefix"] + latest["datei"]] = "0" * 40
+    with pytest.raises(RuntimeError, match="anderem Inhalt"):
+        publish.deploy(pub, TEST_CFG)
 
 
 # --- accidents.harmonize -----------------------------------------------------------------

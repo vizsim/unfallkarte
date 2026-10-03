@@ -9,7 +9,7 @@
 dataset: unfallorte                  # wie die amtlichen Jahresdateien (Unfallorte<Jahr>)
 host: "https://data.vizsim.de/"
 readme_vorlage: "publish_README.md"  # in config/; die Platzhalter {{…}} füllt `publish build`
-karten_export: false                 # true erst mit dem Export in der Karte (Stufe 2)
+karten_export: true                  # README nennt den Export in der Karte (seit 2026-10)
 
 # Ziel: der B2-Bucket hinter data.vizsim.de (Cloudflare davor), neben den Mapillary-Ordnern.
 # Schlüssel mit Schreibrecht darauf: B2_ARCHIVE_KEY_ID/B2_ARCHIVE_KEY in .env (wie im

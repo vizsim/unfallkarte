@@ -32,7 +32,7 @@ unfallkarte movebis build                 # movebis Rad-Geschwindigkeiten (GPKG 
 unfallkarte census check|build            # Zensus 2022, 100 m + 1 km (Rohdaten lokal, Archiv)
 unfallkarte manifest                      # data/manifest.json (Local-first + Datenstand)
 unfallkarte deploy                        # b2 sync (PMTiles + manifest)
-unfallkarte publish build|deploy          # alle Unfälle als GeoParquet → data.vizsim.de
+unfallkarte publish build|readme|deploy   # alle Unfälle als GeoParquet → data.vizsim.de
 ```
 
 `publish` ist ein eigener Strang neben den Kacheln: alle Jahre der Registry (auch die mit

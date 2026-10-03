@@ -130,6 +130,14 @@ def publish_build(
                 fg=typer.colors.GREEN)
 
 
+@publish_app.command("readme")
+def publish_readme() -> None:
+    """Nur README.md neu rendern (z. B. nach `karten_export: true`) — kein neuer Datenstand."""
+    from unfallkarte import publish
+
+    typer.secho(f"geschrieben: {publish.readme()}", fg=typer.colors.GREEN)
+
+
 @publish_app.command("deploy")
 def publish_deploy(
     dry_run: bool = typer.Option(False, "--dry-run", help="b2-Kommandos nur zeigen"),

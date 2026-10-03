@@ -405,6 +405,16 @@ def write_all(df: pd.DataFrame, out_dir: Path, cfg: dict[str, Any], version: str
     return latest
 
 
+def readme(out_dir: Path | None = None, cfg: dict[str, Any] | None = None) -> Path:
+    """Nur das README neu rendern (z. B. nach `karten_export: true`) — ohne neuen Datenstand."""
+    cfg = cfg or load_config()
+    out_dir = out_dir or get_paths().out(cfg["subdir"])
+    latest = json.loads((out_dir / "latest.json").read_text(encoding="utf-8"))
+    path = out_dir / "README.md"
+    path.write_text(render_readme(latest, cfg), encoding="utf-8")
+    return path
+
+
 def build(version: str | None = None) -> dict[str, Any]:
     """Alle Jahre der Registry → data/publish/<dataset>/ (siehe Moduldoku)."""
     cfg = load_config()
@@ -466,18 +476,35 @@ def _b2_env() -> dict[str, str]:
             "B2_APPLICATION_KEY": s.b2_archive_key}
 
 
-def _remote_sizes(bucket: str, prefix: str, env: dict[str, str]) -> dict[str, int | None]:
+def _remote_sha1(bucket: str, prefix: str, env: dict[str, str]) -> dict[str, str | None]:
+    """Dateiname → SHA-1 im Bucket. Ab ~100 MB lädt b2 in Teilen hoch; dann steht die Summe
+    nicht in contentSha1 ("none"), sondern in fileInfo.large_file_sha1. None = unbekannt."""
     res = subprocess.run(["b2", "ls", "--json", f"b2://{bucket}/{prefix}"],
                          capture_output=True, text=True, env=env)
     if res.returncode != 0:
         raise RuntimeError(f"b2 ls b2://{bucket}/{prefix} fehlgeschlagen — Schlüssel prüfen.")
-    return {f["fileName"]: f.get("size") for f in json.loads(res.stdout or "[]")}
+    out = {}
+    for f in json.loads(res.stdout or "[]"):
+        sha1 = str(f.get("contentSha1") or "").removeprefix("unverified:")
+        if len(sha1) != 40:
+            sha1 = str((f.get("fileInfo") or {}).get("large_file_sha1") or "")
+        out[f["fileName"]] = sha1 if len(sha1) == 40 else None
+    return out
+
+
+def _sha1(path: Path) -> str:
+    h = hashlib.sha1(usedforsecurity=False)
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def deploy(out_dir: Path | None = None, cfg: dict[str, Any] | None = None, *,
            dry_run: bool = False) -> None:
     """Lädt data/publish/<dataset>/ hoch: versionierte Datei zuerst (falls neu), latest.json
-    zuletzt."""
+    zuletzt. Was im Bucket schon mit gleicher Prüfsumme liegt, wird übersprungen — ein neues
+    README lädt so nur das README hoch, nicht noch einmal die 86-MB-Datei."""
     cfg = cfg or load_config()
     out_dir = out_dir or get_paths().out(cfg["subdir"])
     bucket, prefix = cfg["deploy"]["bucket"], cfg["prefix"]
@@ -489,16 +516,17 @@ def deploy(out_dir: Path | None = None, cfg: dict[str, Any] | None = None, *,
     if which("b2") is None:
         raise RuntimeError("'b2' nicht installiert (uv tool install b2).")
     env = _b2_env()
-    remote = _remote_sizes(bucket, prefix, env)
+    remote = _remote_sha1(bucket, prefix, env)
     for step in plan:
-        if step["immutable"] and step["b2_name"] in remote:
-            local = Path(step["local"]).stat().st_size
-            if remote[step["b2_name"]] not in (None, local):
-                raise RuntimeError(
-                    f"{step['b2_name']} liegt mit anderer Größe im Bucket. Versionierte Dateien "
-                    "werden nie überschrieben — mit neuem Stand bauen (`publish build --stand`)."
-                )
-            print(f"  = {step['b2_name']} liegt schon im Bucket (unveränderlich) → übersprungen")
+        name = step["b2_name"]
+        same = name in remote and remote[name] == _sha1(Path(step["local"]))
+        if step["immutable"] and name in remote and not same:
+            raise RuntimeError(
+                f"{name} liegt mit anderem Inhalt im Bucket. Versionierte Dateien werden nie "
+                "überschrieben — mit neuem Stand bauen (`publish build --stand`)."
+            )
+        if same:
+            print(f"  = {name} unverändert → übersprungen")
             continue
         cmd = _upload_cmd(bucket, step)
         print(f"  $ {shlex.join(cmd)}")
