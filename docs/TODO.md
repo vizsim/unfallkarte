@@ -358,17 +358,23 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
 - [x] **Name** (2026-10-03): `unfallorte` (`dataset` in `publish.yaml`) — wie die amtlichen
       Jahresdateien `Unfallorte<Jahr>`; benennt die Daten, nicht das Portal „Unfallatlas“.
       Seit dem Upload sind Ordner, Dateinamen und `latest.json` ein Vertrag mit fremden Skripten.
-- [ ] **D5 — Deploy nach data.vizsim.de** (Bucket `vizsim-public-archive`, Cloudflare davor):
-      `B2_ARCHIVE_KEY_ID`/`B2_ARCHIVE_KEY` in `pipeline/.env`. CORS sieht passend aus (die
-      Mapillary-Karte liest dort schon per Range; `content-range`/`etag` exponiert).
-      **Browser Integrity Check bleibt an** — getestet 2026-10-03: er sperrt nur die
-      Standardkennung von `urllib`; DuckDB, GDAL, R, curl, wget und `requests` bekommen 200,
-      das README-Beispiel setzt einen User-Agent. Prüfen: die Cache-Regel des Hosts (JSON kommt
-      als HIT mit `max-age=14400`) — lässt sie `no-cache` für `latest.json` und den Alias gelten?
-      Gegen Kosten durch Massen-Downloads: B2 „Caps & Alerts“ (Tageslimits). Lifecycle-Regel für
-      `<dataset>/` (überschriebene Fassungen nach 30 Tagen löschen — `b2 bucket update
-      --lifecycle-rule` setzt ALLE Regeln neu); Ordnerliste auf data.vizsim.de ergänzen, falls
-      statisch. Dann `publish deploy` und Link-Check (curl/DuckDB, Konzept § 2.6).
+- [x] **D5 — Deploy nach data.vizsim.de** (2026-10-03): `publish deploy` hat die 7 Dateien
+      nach `vizsim-public-archive/unfallorte/` geladen (Stand 2026-10-03, 2016–2025). Link-Check
+      über die öffentliche URL: Range + CORS (206, Origin vizsim.de), Content-Types, alle 10
+      Python-Beispiele + das SQL-Beispiel des README gegen die echte URL (DuckDB per HTTPS,
+      Download mit SHA-256-Prüfung). Ordnerliste und README-Ansicht macht der Worker auf
+      data.vizsim.de von selbst. **Browser Integrity Check bleibt an** — er sperrt nur die
+      Standardkennung von `urllib` (DuckDB, GDAL, R, curl, wget, `requests` → 200).
+- [ ] **Cloudflare-Cache für die beweglichen Dateien** — B2 liefert `latest.json`, Alias und
+      CSVs mit `no-cache`, Cloudflare macht daraus `max-age=14400` und cacht am Edge (HIT). Nach
+      dem nächsten Update zeigen sie also bis zu ~4 h den alten Stand (unschädlich: `latest.json`
+      zeigt dann auf die alte, weiter vorhandene Datei). Abhilfe: Cache Rule für
+      `/unfallorte/*` „Edge TTL + Browser TTL: Header der Origin respektieren“, oder nach dem
+      Deploy diese Dateien purgen.
+- [ ] **Vor dem nächsten Deploy**: Lifecycle-Regel für `unfallorte/` (überschriebene Fassungen
+      nach 30 Tagen löschen; der Bucket hat bisher keine Regeln — `b2 bucket update
+      --lifecycle-rule` setzt trotzdem immer ALLE neu). Optional B2 „Caps & Alerts“
+      (Tageslimits gegen Massen-Downloads).
 - [ ] **D6/D7 — Export in der Karte** (Kartenausschnitt, GeoJSON/CSV, hyparquet + fzstd lazy;
       Entwurf `accidentExport.js` im Zip, an Echtdaten getestet; Obergrenze 50.000 Unfälle).
       Mit dem Export `karten_export: true` in `publish.yaml` (Hinweise im README).
