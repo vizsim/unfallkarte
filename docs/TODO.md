@@ -375,7 +375,9 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
       nach 30 Tagen löschen; der Bucket hat bisher keine Regeln — `b2 bucket update
       --lifecycle-rule` setzt trotzdem immer ALLE neu). Optional B2 „Caps & Alerts“
       (Tageslimits gegen Massen-Downloads).
-- [x] **D6/D7 — Export in der Karte** (2026-10-03, `temp/export`): Download-Symbol in der
+- [x] **D6/D7 — Export in der Karte** (LIVE seit 2026-10-03, main d061e50; online getestet:
+      Kreuzberg z14,5 → 3.039 Unfälle aus 860 KB über data.vizsim.de in 1,1 s; README dort
+      nennt den Export). Download-Symbol in der
       Zählerzeile → `<dialog>` „Unfälle herunterladen“ (Kartenausschnitt; Filter wie in der
       Karte oder alle Unfälle der Datei inkl. 2016; GeoJSON/CSV; Quellenvermerk zum Kopieren).
       `js/export/accidentExport.js` (rein, Unit-Tests) + `exportDialog.js`, beides mit hyparquet
@@ -384,7 +386,7 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
       860 KB. Grenzen: bis 15 MB direkt, bis 60 MB auf Nachfrage, max. 50.000 Unfälle.
       Playwright gegen eine Fixture (`tests/fixtures/export/`, aus `pipeline/tests/synthetic.py`).
       Pipeline: `publish readme` (README ohne neuen Stand), `publish deploy` lädt nur Geändertes
-      (SHA-1). Nach dem Merge: `publish readme` + `publish deploy` → README nennt den Export.
+      (SHA-1) — das README-Update lud genau eine Datei hoch.
 - [ ] **D8 — Gebiet zeichnen** mit Terra Draw (Entscheidung 2026-10-03: Bibliothek statt eigener
       ~140 Zeilen wie in routing_bulk — Bearbeiten, Touch, später Rechteck/Kreis; ~33 KB gzip,
       lazy; Adapter importiert nur terra-draw, passt zu MapLibre 6). Gebiet im Permalink
