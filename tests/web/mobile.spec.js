@@ -191,7 +191,7 @@ test.describe("Handy", () => {
 
     await page.click(".maplibregl-ctrl-attrib-button");
     await expect(attrib).toContainText("OpenStreetMap");
-    await expect(attrib).toContainText("Statistisches Bundesamt");
+    await expect(attrib).toContainText("Statistische Ämter des Bundes und der Länder");
 
     // Ausgeklappt lief das Band über die volle Breite und damit unter die Bedienelemente
     // unten links. Es darf sich mit keinem davon überlappen.
@@ -212,7 +212,7 @@ test.describe("Handy", () => {
 
     const tip = page.locator(".app-tooltip");
     await expect(tip).toHaveClass(/is-visible/);
-    await expect(tip).toContainText("Statistisches Bundesamt");
+    await expect(tip).toContainText("Statistische Ämter des Bundes und der Länder");
     expect(await isCollapsed(page), "der Tipp aufs ⓘ darf nicht auch umklappen").toBe(true);
 
     // Zweiter Tipp schließt wieder.

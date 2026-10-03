@@ -38,8 +38,10 @@ test("Attribution: der Quellen-Link der Unfalldaten bleibt ein Link", async ({ p
   await settle(page);
 
   const link = page.locator('.maplibregl-ctrl-attrib-inner a[href="https://unfallatlas.statistikportal.de/"]');
-  await expect(link).toHaveText("Statistisches Bundesamt");
+  await expect(link).toHaveText("Unfallatlas");
   await expect(link).toHaveAttribute("target", "_blank");
+  // Bereitsteller nach dl-de/by-2-0 — wie im Export und auf data.vizsim.de.
+  await expect(page.locator(".maplibregl-ctrl-attrib-inner")).toContainText("© Statistische Ämter des Bundes und der Länder");
   expectNoErrors(errors);
 });
 

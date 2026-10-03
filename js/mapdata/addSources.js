@@ -17,7 +17,7 @@ import { MAPILLARY_TOKEN } from "../config/env.js";
 // Tooltips auf Touch nicht aufgehen. MapLibre sammelt Quellen-Attributionen selbst ein und
 // zeigt gleiche Zeichenketten nur einmal.
 const ACCIDENT_ATTRIBUTION =
-  'Unfalldaten: © <a href="https://unfallatlas.statistikportal.de/" target="_blank" rel="noopener">Statistisches Bundesamt</a> (dl-de/by-2-0)';
+  'Unfalldaten: <a href="https://unfallatlas.statistikportal.de/" target="_blank" rel="noopener">Unfallatlas</a> © Statistische Ämter des Bundes und der Länder (dl-de/by-2-0)';
 
 /**
  * Quellen, die kein Manifest brauchen — laufen sofort, damit die Unfall-Tiles nicht hinter
