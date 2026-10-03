@@ -103,6 +103,11 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
   (kein Datum im Namen), Datum lebt im Manifest. Einziger Legacy-Layer: Uber-uspeed läuft
   noch vom alten Bucket `unfallkarte-data` (siehe `LEGACY` in `js/mapdata/addSources.js`);
   Lärm/OBS/HVS sind in die Pipeline migriert.
+- **Veröffentlichung** (`unfallkarte publish build|deploy`, `pipeline/config/publish.yaml`): alle
+  Unfälle als EINE GeoParquet-Datei nach `data.vizsim.de/<dataset>/` — anderer Bucket
+  (`vizsim-public-archive`, Schlüssel `B2_ARCHIVE_KEY_*`), nie über `deploy`/`b2 sync`. Ab dem
+  ersten Upload sind Dateinamen und `latest.json` ein Vertrag mit fremden Skripten; versionierte
+  Dateien nie überschreiben. Jahre mit `karte: false` (2016) gibt es nur dort, nicht in der Karte.
 
 ## Verifizieren (Sicherheitsnetz)
 - **Golden-Reference** (`pipeline/tests/golden/`): Feature-Counts/Spalten/Jahre des Accident-

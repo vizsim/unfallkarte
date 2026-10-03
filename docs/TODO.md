@@ -338,6 +338,40 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
       14,4 → 12,6 s. Die 12 s dort zeigen: der nächste große Hebel ist die Nutzlast selbst
       (maplibre-gl ~1 MB + ~20 Einzel-Module → Vite/Bundling, Roadmap 3; Unfall-Tiles).
 
+## Daten-Export (alle Unfälle als Datei auf data.vizsim.de)
+
+Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskripte in
+`docs/intern/entwuerfe_datenexport.zip`). Stufe 1 auf `temp/datenexport`.
+
+- [x] **D0 — Echtmessung** (2026-10-03): `UIDENTSTLAE` fehlt 2016/2018/2019 ganz und ist 2021
+      für NRW verstümmelt (als Zahl gerundet, 823 doppelte IDs) → `unfall_id` nimmt je Land und
+      Jahr ersatzweise `o<OBJECTID>` und gilt nur „innerhalb eines Stands“. `PLST` erst ab 2023;
+      `IstGkfz` nur 2017 leer (2016 gefüllt); Rheinland-Pfalz schon 2016 dabei (DSB sagt 2017);
+      Berlin/Hamburg haben Bezirks-`ags`, nie den Stadtschlüssel. Datei 2016–2025: 86,5 MB,
+      238 Row Groups; Stadtteil 1,7 MB, eine ID ≈ 1 MB, Gemeinde Köln 3,7 MB (hyparquet).
+- [x] **D1–D4 — `accidents.harmonize()` + `unfallkarte publish build|deploy`** (2026-10-03):
+      `harmonize()` aus `build()` gelöst (Karten-Parquet inhaltlich identisch, Golden grün), 2016
+      mit `karte: false` (nur Veröffentlichung), `publish.py` + `config/publish.yaml` +
+      README-Vorlage `config/publish_README.md`; Abdeckung wird gegen `erstes_jahr` geprüft.
+      Tests in `pipeline/tests/test_publish.py` (synthetisch, inkl. aller README-Beispiele über
+      DuckDB) + lokaler Abgleich der Veröffentlichung mit der Golden-Reference.
+- [ ] **Name festlegen, bevor etwas hochgeladen ist** — `dataset` in `publish.yaml`
+      (Arbeitsname `unfallatlas`). Danach sind Ordner, Dateinamen und `latest.json` ein Vertrag
+      mit fremden Skripten.
+- [ ] **D5 — Deploy nach data.vizsim.de** (Bucket `vizsim-public-archive`, Cloudflare davor):
+      `B2_ARCHIVE_KEY_ID`/`B2_ARCHIVE_KEY` in `pipeline/.env`; CORS am Bucket prüfen
+      (`b2 bucket get`: Header `range`, `content-range`/`content-length`/`etag` exponiert);
+      Cloudflare: Browser Integrity Check für den Host aus (Python-Standardkennung → 403),
+      optional Cache-Regel nur für die versionierten Dateien; Lifecycle-Regel für `unfallatlas/`
+      (überschriebene Fassungen nach 30 Tagen löschen — `b2 bucket update --lifecycle-rule`
+      setzt ALLE Regeln neu); Ordnerliste auf data.vizsim.de ergänzen, falls statisch. Dann
+      `publish deploy` und Link-Check (curl/DuckDB, Konzept § 2.6).
+- [ ] **D6/D7 — Export in der Karte** (Kartenausschnitt, GeoJSON/CSV, hyparquet + fzstd lazy;
+      Entwurf `accidentExport.js` im Zip, an Echtdaten getestet; Obergrenze 50.000 Unfälle).
+      Mit dem Export `karten_export: true` in `publish.yaml` (Hinweise im README).
+- [ ] **D8 — Gebiet zeichnen** (gemeinsam mit der Report-Auswahl „Gebiet“).
+- [ ] Quellenvermerk: vorgegebenen Wortlaut des Bereitstellers prüfen (Konzept § 7.3).
+
 ## Sichtbarkeit / Auffindbarkeit
 
 - [x] **Meta-Tags** — `<meta name="description">` + OpenGraph/Twitter-Cards ergänzt
