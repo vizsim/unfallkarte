@@ -24,6 +24,7 @@ import { renderLegendEntries } from './js/ui/legendMarkup.js';
 import { setupPopups, allPopupEntries } from './js/ui/popupHandlers.js';   // EIN Hover-Popup für alle Layer
 import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 import { LAYER_REGISTRY, ensureEntry } from './js/layers/registry.js';
+import { getArea, onAreaChange } from './js/selection/areaSelection.js';
 
 // 📦 Legende
 import {
@@ -81,7 +82,7 @@ window.addEventListener("vite:preloadError", (event) => {
 // importierten die Tests sie im Browser über ihren Pfad (`import("/js/layers/registry.js")`) —
 // im gebündelten Build gibt es diese Pfade nicht mehr. Wie `window.map`: nur lesen, nie
 // darauf aufbauen.
-window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles };
+window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles, getArea };
 
 cleanupLegacyPermalink();
 
@@ -210,11 +211,13 @@ function setupUI(map) {
   );
 
   // Export „Unfälle herunterladen": Dialog, hyparquet und fzstd erst beim ersten Klick
-  // (eigener Vite-Chunk) — der Start der Karte bezahlt nichts dafür.
+  // (eigener Vite-Chunk) — der Start der Karte bezahlt nichts dafür. Ein gezeichnetes Gebiet
+  // (js/selection/) steht im Permalink (sel=g:); Terra Draw lädt erst beim Zeichnen.
   document.getElementById("export-open")?.addEventListener("click", async () => {
     const { openExportDialog } = await import("./js/export/exportDialog.js");
     openExportDialog(map);
   });
+  onAreaChange(() => writePermalink());
 
   // Radinfrastruktur (TILDA) — externer Live-Layer, läuft nicht über die Layer-Registry.
   document.getElementById('toggle-bikelanes')?.addEventListener('change', (e) => {

@@ -45,6 +45,7 @@
 //   (Fallback-Zeile + einmaliges console.error), der Rest des Stapels bleibt stehen.
 
 import { Popup } from "../lib/maplibre.js";
+import { isDrawing, onDrawingChange } from "../map/drawingState.js";
 
 const MAX_HOVER_CARDS = 3;  // Hover zeigt max. so viele Karten; fixiert = alle
 const MAX_WIDTH = "340px";
@@ -196,12 +197,16 @@ export function setupHoverPopup(map, entries) {
         if (pinPopup) pinPopup.remove(); // feuert "close" -> setzt pinPopup/pinKeys zurück
     };
 
+    // Beim Zeichnen eines Gebiets setzt ein Klick nur Punkte (js/selection/drawArea.js):
+    // offene Fenster weg, und bis zum Ende weder Vorschau noch Fixieren.
+    onDrawingChange((on) => { if (on) { clear(); unpin(); } });
+
     map.on("mousemove", (e) => {
         // Auf Touch schiebt der Browser vor dem Klick ein synthetisches mousemove nach.
         // Daraus eine Vorschau zu bauen, die der Tap im nächsten Moment durch das fixierte
         // Fenster ersetzt, wäre nur ein Aufblitzen — und der Hinweis „Klick fixiert …"
         // ergibt ohne Zeigegerät keinen Sinn.
-        if (isTouch()) return;
+        if (isTouch() || isDrawing()) return;
 
         let hits = collect(e.point);
         const anyHit = hits.length > 0;
@@ -230,6 +235,7 @@ export function setupHoverPopup(map, entries) {
     map.on("mouseout", clear);
 
     map.on("click", (e) => {
+        if (isDrawing()) return;
         const hits = collect(e.point);
         if (!hits.length) { unpin(); return; }
         const top = hits[0];

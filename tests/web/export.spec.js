@@ -3,67 +3,22 @@
 // Daten: eine kleine Veröffentlichung aus synthetischen Unfällen (tests/fixtures/export/,
 // neu schreiben mit `uv --directory pipeline run python tests/synthetic.py`). Die Route liefert
 // sie mit Range-Antworten wie data.vizsim.de aus — für die lokale UND die Online-Adresse. So
-// laufen die Tests deterministisch und ohne Netz zu data.vizsim.de.
+// laufen die Tests deterministisch und ohne Netz zu data.vizsim.de (helpers.js).
 import { test, expect } from "@playwright/test";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import { openMap, jumpTo, expectNoErrors } from "./helpers.js";
+import {
+  FIXTURE_FILE, downloadExport as download, expectNoErrors, jumpTo, openMap,
+  parseExportCSV as parseCSV, serveExportFixture as serveFixture,
+} from "./helpers.js";
 
-const FIXTURE = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "export", "unfallorte");
-const FIXTURE_FILE = "unfallorte_2016-2025_2026-10-01.parquet";
 const KOTTBUSSER_TOR = [13.4183, 52.499];
-
-/** Fixture unter **\/unfallorte/** ausliefern, mit 206 auf Range-Anfragen. Liefert das Protokoll. */
-async function serveFixture(page) {
-  const log = [];
-  await page.route("**/unfallorte/**", async (route) => {
-    const req = route.request();
-    const name = new URL(req.url()).pathname.split("/").pop();
-    const range = req.headers().range ?? null;
-    log.push({ name, method: req.method(), range });
-    let body;
-    try {
-      body = readFileSync(join(FIXTURE, name));
-    } catch {
-      return route.fulfill({ status: 404 });
-    }
-    const headers = { "content-type": name.endsWith(".json") ? "application/json" : "application/vnd.apache.parquet", "accept-ranges": "bytes" };
-    const m = /bytes=(\d+)-(\d*)/.exec(range ?? "");
-    if (!m) return route.fulfill({ status: 200, body, headers });
-    const start = Number(m[1]);
-    const end = m[2] ? Math.min(Number(m[2]), body.length - 1) : body.length - 1;
-    return route.fulfill({
-      status: 206,
-      body: body.subarray(start, end + 1),
-      headers: { ...headers, "content-range": `bytes ${start}-${end}/${body.length}` },
-    });
-  });
-  return log;
-}
-
-async function download(page, format) {
-  const [dl] = await Promise.all([
-    page.waitForEvent("download"),
-    page.click(`#export-dialog .export-format[data-format="${format}"]`),
-  ]);
-  return { name: dl.suggestedFilename(), text: readFileSync(await dl.path(), "utf8") };
-}
-
-/** CSV (Semikolon, Dezimalkomma) → Zeilen als Objekte. Die Klartexte enthalten kein Semikolon. */
-function parseCSV(text) {
-  const [head, ...lines] = text.replace(/^﻿/, "").trimEnd().split("\r\n");
-  const keys = head.split(";");
-  return lines.map((line) => Object.fromEntries(line.split(";").map((v, i) => [keys[i], v])));
-}
 
 const countIn = async (status) => parseInt((await status.textContent()).replace(/\./g, ""), 10);
 
-test("Start lädt weder den Export-Code noch Unfalldaten aus der Veröffentlichung", async ({ page }) => {
+test("Start lädt weder Export- noch Zeichen-Code (Terra Draw) noch Unfalldaten aus der Veröffentlichung", async ({ page }) => {
   const urls = [];
   page.on("request", (r) => urls.push(r.url()));
   const errors = await openMap(page);
-  expect(urls.filter((u) => /exportDialog|hyparquet|\/unfallorte\//.test(u))).toEqual([]);
+  expect(urls.filter((u) => /exportDialog|drawArea|hyparquet|terra-draw|\/unfallorte\//.test(u))).toEqual([]);
   expectNoErrors(errors);
 });
 

@@ -6,7 +6,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
-    CONTROLS, FILTER_GROUPS, RESERVED_LAYER_CHARS, kontextKeys, mergeState, parse, parseLegacy, serialize, styleShortMap,
+    CONTROLS, FILTER_GROUPS, RESERVED_LAYER_CHARS, decodePolyline, encodePolyline, kontextKeys, mergeState, parse,
+    parseLegacy, serialize, styleShortMap,
 } from "../../js/utils/permalinkFormat.js";
 
 /** Der Zustand, mit dem die App startet (entspricht den Defaults in index.html). */
@@ -203,4 +204,33 @@ test("v1-Link mit Lärm Nacht (…,r) wird ebenfalls abgebildet", () => {
     const state = parseLegacy("52.52000,13.40500,12.50,U,1_2_3|1_2|17|1|1,,r");
     assert.deepEqual(state.layers, ["laerm1"]);
     assert.deepEqual(state.controls, { lm: "night" });
+});
+
+// --- Gebiet (?sel=g:<Polyline>) ---------------------------------------------------------
+
+test("Polyline: Beispiel aus der Google-Doku, hin und zurück", () => {
+    const points = [[38.5, -120.2], [40.7, -120.95], [43.252, -126.453]];
+    assert.equal(encodePolyline(points), "_p~iF~ps|U_ulLnnqC_mqNvxq`@");
+    assert.deepEqual(decodePolyline("_p~iF~ps|U_ulLnnqC_mqNvxq`@"), points);
+    assert.throws(() => decodePolyline("_p~iF~ps|U_"), /bricht ab/);
+});
+
+test("Gebiet: steht als sel=g: im Link (prozentkodiert), kommt als geschlossenes Polygon zurück", () => {
+    const ring = [[13.4, 52.5], [13.45, 52.5], [13.45, 52.52], [13.4, 52.52], [13.4, 52.5]];
+    const area = { type: "Polygon", coordinates: [ring] };
+    const query = serialize({ ...defaults(), area }, defaults());
+    const sel = new URLSearchParams(query).get("sel");
+    assert.ok(sel.startsWith("g:"));
+    assert.ok(!/[|`{}^\\[\]]/.test(query.split("sel=")[1]), "Polyline-Sonderzeichen sind kodiert");
+    assert.deepEqual(roundtrip({ ...defaults(), area }).area, area);
+    // ohne Gebiet kein Parameter — die Startansicht bleibt kurz
+    assert.ok(!serialize(defaults(), defaults()).includes("sel="));
+});
+
+test("Gebiet: kaputter oder fremder sel-Wert fällt weg, der Rest des Links gilt", () => {
+    const state = parse("?v=2&map=14/52.5/13.4&sel=g:_p~iF~ps|U_");
+    assert.equal(state.area, undefined);
+    assert.equal(state.view.zoom, 14);
+    assert.equal(parse("?v=2&map=14/52.5/13.4&sel=k:abc").area, undefined);   // künftige Auswahlart
+    assert.equal(parse("?v=2&map=14/52.5/13.4&sel=g:_p~iF~ps|U").area, undefined); // < 3 Punkte
 });

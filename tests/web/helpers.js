@@ -1,5 +1,7 @@
 // Gemeinsame Helfer für die Frontend-Smoke-Tests.
 import { expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 // Erwartetes Rauschen: Local-first probt ./data/<file> und fällt bei 404 auf B2 zurück —
 // der Browser loggt jeden 404 als console.error. Alles andere ist ein echter Fehler.
@@ -156,3 +158,56 @@ export async function ensureAllLayers(page) {
 /** Sichtbarkeit je Layer: "absent" (noch nicht angelegt) | "none" | "visible". */
 export const layerVisibility = (page, ids) => page.evaluate((ids) =>
   ids.map((id) => (window.map.getLayer(id) ? window.map.getLayoutProperty(id, "visibility") ?? "visible" : "absent")), ids);
+
+// --- Export / Gebiet: Fixture der Veröffentlichung ---------------------------------------
+
+const FIXTURE_DIR = fileURLToPath(new URL("../fixtures/export/unfallorte/", import.meta.url));
+export const FIXTURE_FILE = "unfallorte_2016-2025_2026-10-01.parquet";
+
+/**
+ * Kleine Veröffentlichung (tests/fixtures/export/, aus pipeline/tests/synthetic.py) unter
+ * **\/unfallorte/** ausliefern — lokal wie online, mit 206 auf Range-Anfragen wie
+ * data.vizsim.de. So laufen Export-Tests deterministisch und ohne Netz. Liefert das Protokoll.
+ */
+export async function serveExportFixture(page) {
+  const log = [];
+  await page.route("**/unfallorte/**", async (route) => {
+    const req = route.request();
+    const name = new URL(req.url()).pathname.split("/").pop();
+    const range = req.headers().range ?? null;
+    log.push({ name, method: req.method(), range });
+    let body;
+    try {
+      body = readFileSync(FIXTURE_DIR + name);
+    } catch {
+      return route.fulfill({ status: 404 });
+    }
+    const headers = { "content-type": name.endsWith(".json") ? "application/json" : "application/vnd.apache.parquet", "accept-ranges": "bytes" };
+    const m = /bytes=(\d+)-(\d*)/.exec(range ?? "");
+    if (!m) return route.fulfill({ status: 200, body, headers });
+    const start = Number(m[1]);
+    const end = m[2] ? Math.min(Number(m[2]), body.length - 1) : body.length - 1;
+    return route.fulfill({
+      status: 206,
+      body: body.subarray(start, end + 1),
+      headers: { ...headers, "content-range": `bytes ${start}-${end}/${body.length}` },
+    });
+  });
+  return log;
+}
+
+/** Download über einen Format-Knopf des Export-Dialogs; liefert Dateiname + Text. */
+export async function downloadExport(page, format) {
+  const [dl] = await Promise.all([
+    page.waitForEvent("download"),
+    page.click(`#export-dialog .export-format[data-format="${format}"]`),
+  ]);
+  return { name: dl.suggestedFilename(), text: readFileSync(await dl.path(), "utf8") };
+}
+
+/** CSV (Semikolon, Dezimalkomma) → Zeilen als Objekte. Die Klartexte enthalten kein Semikolon. */
+export function parseExportCSV(text) {
+  const [head, ...lines] = text.replace(/^﻿/, "").trimEnd().split("\r\n");
+  const keys = head.split(";");
+  return lines.map((line) => Object.fromEntries(line.split(";").map((v, i) => [keys[i], v])));
+}

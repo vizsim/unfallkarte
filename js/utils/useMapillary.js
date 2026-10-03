@@ -1,4 +1,5 @@
 import { applyZoomLock } from './zoomLock.js';
+import { isDrawing } from '../map/drawingState.js';
 import { updateLegendVisibilityByZoom } from '../ui/legendHandlers.js';
 
 
@@ -14,7 +15,9 @@ export function setupMapillary(map, {
 
 
 function setupInteractivity(map) {
+  // Beim Zeichnen eines Gebiets gehören Klick und Cursor dem Zeichenwerkzeug (drawingState.js).
   map.on("click", "mapillary-images-layer", (e) => {
+    if (isDrawing()) return;
     const feature = e.features?.[0];
     const imageId = feature?.properties?.id;
     if (imageId) {
@@ -23,10 +26,10 @@ function setupInteractivity(map) {
   });
 
   map.on("mouseenter", "mapillary-images-layer", () => {
-    map.getCanvas().style.cursor = "pointer";
+    if (!isDrawing()) map.getCanvas().style.cursor = "pointer";
   });
   map.on("mouseleave", "mapillary-images-layer", () => {
-    map.getCanvas().style.cursor = "";
+    if (!isDrawing()) map.getCanvas().style.cursor = "";
   });
 }
 

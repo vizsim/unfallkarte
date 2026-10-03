@@ -1301,3 +1301,47 @@ body {
 .export-quelle { margin: 0 0 6px; }
 .export-more { margin: 10px 0 0; color: var(--ui-text-muted); font-size: 12px; }
 .export-more a { color: var(--ui-accent); }
+.export-area-actions { margin: 2px 0 0; color: var(--ui-text-muted); font-size: 12px; }
+.export-link { padding: 0; border: 0; background: none; color: var(--ui-accent); font-size: 12px; text-decoration: underline; cursor: pointer; }
+
+/* ────────────── Gebiet zeichnen (js/selection/drawArea.js) ────────────── */
+/* Leiste oben mittig, solange gezeichnet wird: Hinweis + Punkt zurück / Abbrechen / Fertig.
+   Am Handy rückt sie neben den Such-Knopf (der dort zur Lupe gefaltet ist). */
+.draw-bar {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  width: min(560px, calc(100vw - 24px));
+  padding: 8px 10px 8px 14px;
+  transform: translateX(-50%);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-sm);
+  color: var(--ui-text);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.draw-hint { flex: 1 1 220px; margin: 0; }
+.draw-actions { display: flex; gap: 6px; }
+.draw-actions button {
+  padding: 5px 10px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font: inherit;
+  cursor: pointer;
+}
+.draw-actions button:hover { background: var(--ui-hover); }
+.draw-actions .draw-done { border-color: var(--ui-accent); background: var(--ui-accent); color: #fff; font-weight: 600; }
+.draw-actions .draw-done:hover { background: #1e40af; }
+@media (max-width: 640px) {
+  .draw-bar { left: 64px; right: 10px; width: auto; transform: none; }
+}

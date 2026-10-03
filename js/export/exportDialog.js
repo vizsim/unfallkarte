@@ -1,20 +1,22 @@
 // exportDialog.js — der Dialog „Unfälle herunterladen" (die DOM-Seite des Exports).
 //
 // Kommt samt accidentExport.js, hyparquet und fzstd erst beim ersten Klick auf den
-// Download-Knopf (dynamischer Import in main.js → eigener Vite-Chunk). Gebiet ist der
-// Kartenausschnitt; Filter wie in der Karte (dieselbe Logik wie der MapLibre-Filter) oder alle
-// Unfälle der Datei — die reicht weiter zurück als die Karte.
+// Download-Knopf (dynamischer Import in main.js → eigener Vite-Chunk). Gebiet: Kartenausschnitt
+// oder ein gezeichnetes Gebiet (js/selection/; Terra Draw lädt erst beim Zeichnen). Filter: wie
+// in der Karte (dieselbe Logik wie der MapLibre-Filter) oder alle Unfälle der Datei — die reicht
+// weiter zurück als die Karte.
 //
 // Ablauf: Footer-Statistik → Schätzung → bis LIMITS.confirmBytes direkt, bis maxBytes auf
-// Nachfrage die Row Groups des Ausschnitts lesen → im Browser filtern → die Datei erst beim
-// Klick erzeugen. Filter umschalten lädt nichts nach.
+// Nachfrage die Row Groups des Gebiets lesen → im Browser filtern → die Datei erst beim Klick
+// erzeugen. Filter umschalten lädt nichts nach.
 
 import {
-  LIMITS, bboxPolygon, citation, coverageWarnings, estimate, fileColumn, fileName, matchesSelection,
-  openDataset, readArea, resolveLatestUrl, toCSV, toGeoJSON, yearRanges,
+  LIMITS, bboxOf, bboxPolygon, citation, coverageWarnings, estimate, fileColumn, fileName,
+  matchesSelection, openDataset, readArea, resolveLatestUrl, toCSV, toGeoJSON, yearRanges,
 } from "./accidentExport.js";
 import { GROUPS, readSelection } from "../map/accidentLayers.js";
 import { mayHaveLocalTree } from "../mapdata/resolveSources.js";
+import { getArea, setArea } from "../selection/areaSelection.js";
 import { translations } from "../ui/accidentLabels.js";
 
 const GROUP_NAMES = { UKATEGORIE: "Schwere", UART: "Unfallart", UTYP1: "Unfalltyp" };
@@ -28,18 +30,21 @@ const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 const allValues = (group) =>
   [...document.querySelectorAll(`input[data-group="${group}"]`)].map((cb) => parseInt(cb.value, 10));
 
+let map = null;
 let ui = null;              // Elemente des Dialogs, einmal gebaut
 let datasetPromise = null;  // openDataset, einmal je Sitzung (nach einem Fehler neu)
 let latest = null;          // latest.json der geöffneten Datei
-let area = null;            // { key, geometry, bytes, rows } — der zuletzt gelesene Ausschnitt
+let loaded = null;          // { key, geometry, drawn, bytes, rows } — das zuletzt gelesene Gebiet
 let output = null;          // { rows, sel, hints } — was ein Klick auf GeoJSON/CSV schreibt
 let run = 0;                // verwirft Ergebnisse überholter Läufe
 
-/** Dialog öffnen und den aktuellen Kartenausschnitt vorbereiten. */
-export function openExportDialog(map) {
+/** Dialog öffnen: mit gezeichnetem Gebiet, wenn es eins gibt, sonst mit dem Kartenausschnitt. */
+export function openExportDialog(mapInstance) {
+  map = mapInstance;
   ui ??= buildDialog();
+  setAreaMode(getArea() ? "drawn" : "view");
   ui.dialog.showModal();
-  prepare(map);
+  prepare();
 }
 
 function dataset() {
@@ -57,14 +62,47 @@ function dataset() {
   return datasetPromise;
 }
 
-async function prepare(map) {
-  const id = ++run;
-  const b = map.getBounds();
-  const bbox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()];
-  const key = bbox.map((v) => v.toFixed(6)).join(",");
-  if (area?.key === key && area.rows) return render();   // derselbe Ausschnitt: schon gelesen
+// --- Gebiet ------------------------------------------------------------------------------
 
-  area = { key, geometry: bboxPolygon(bbox), bytes: 0, rows: null };
+const areaMode = () => ui.dialog.querySelector('input[name="export-area"]:checked').value;
+
+function setAreaMode(mode) {
+  ui.dialog.querySelector(`input[name="export-area"][value="${mode}"]`).checked = true;
+  const has = !!getArea();
+  ui.drawnLabel.textContent = has ? "Gezeichnetes Gebiet" : "Gebiet zeichnen";
+  ui.areaActions.hidden = !(has && mode === "drawn");
+}
+
+const viewPolygon = () => {
+  const b = map.getBounds();
+  return bboxPolygon([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map((v) => Math.round(v * 1e6) / 1e6));
+};
+
+/** Zeichnen (initial = null) oder bearbeiten; der Dialog geht solange zu und danach wieder auf. */
+async function editArea(initial) {
+  ui.dialog.close();
+  try {
+    const { drawArea } = await import("../selection/drawArea.js");
+    const result = await drawArea(map, initial);
+    if (result) setArea(map, result);
+  } catch (err) {
+    console.error("[export] Zeichnen fehlgeschlagen:", err);
+  }
+  setAreaMode(getArea() ? "drawn" : "view");
+  ui.dialog.showModal();
+  prepare();
+}
+
+// --- Laden -------------------------------------------------------------------------------
+
+async function prepare() {
+  const id = ++run;
+  const drawn = areaMode() === "drawn" ? getArea() : null;
+  const geometry = drawn ?? viewPolygon();
+  const key = JSON.stringify(geometry.coordinates);
+  if (loaded?.key === key && loaded.rows) return render();   // dasselbe Gebiet: schon gelesen
+
+  loaded = { key, geometry, drawn: !!drawn, bytes: 0, rows: null };
   setStatus("Lade den Datenkatalog …", { busy: true });
   let ds;
   try {
@@ -75,20 +113,20 @@ async function prepare(map) {
   }
   if (id !== run) return;
 
-  const est = estimate(ds, bbox);
-  area.bytes = est.bytes;
+  const est = estimate(ds, bboxOf(geometry));
+  loaded.bytes = est.bytes;
   if (!est.groups) {
-    area.rows = [];
+    loaded.rows = [];
     return render();
   }
   if (est.bytes > LIMITS.maxBytes) {
     return setStatus(
-      `Der Ausschnitt ist zu groß für den Browser: Er berührt ${fmtMB(est.bytes)} Daten (Grenze ${fmtMB(LIMITS.maxBytes)}). `
-      + "Zoome näher heran oder nimm die Gesamtdatei (Link unten).",
+      `Zu groß für den Browser: Hier wären ${fmtMB(est.bytes)} zu laden (Grenze ${fmtMB(LIMITS.maxBytes)}). `
+      + "Zoome näher heran, zeichne ein kleineres Gebiet oder nimm die Gesamtdatei (Link unten).",
     );
   }
   if (est.bytes > LIMITS.confirmBytes) {
-    setStatus(`Für diesen Ausschnitt sind ${fmtMB(est.bytes)} zu laden.`);
+    setStatus(`Hier sind ${fmtMB(est.bytes)} zu laden.`);
     ui.load.textContent = `${fmtMB(est.bytes)} laden`;
     ui.load.hidden = false;
     ui.load.onclick = () => load(id, ds);
@@ -98,11 +136,11 @@ async function prepare(map) {
 }
 
 async function load(id, ds) {
-  setStatus(`Lade ${fmtMB(area.bytes)} …`, { busy: true });
+  setStatus(`Lade ${fmtMB(loaded.bytes)} …`, { busy: true });
   try {
-    const rows = await readArea(ds, area.geometry);
+    const rows = await readArea(ds, loaded.geometry);
     if (id !== run) return;
-    area.rows = rows;
+    loaded.rows = rows;
     render();
   } catch (err) {
     if (id === run) fail(err);
@@ -112,9 +150,10 @@ async function load(id, ds) {
 function render() {
   const mode = ui.dialog.querySelector('input[name="export-filter"]:checked').value;
   const sel = mode === "map" ? readSelection() : null;
-  const rows = area.rows.filter((r) => matchesSelection(r, sel));
+  const rows = loaded.rows.filter((r) => matchesSelection(r, sel));
   const years = sel ? sel.byGroup.UJAHR : range(...latest.jahre);
   const firstMapYear = Math.min(...allValues("UJAHR"));
+  const where = loaded.drawn ? "im Gebiet" : "im Ausschnitt";
 
   const hints = ["Nur Unfälle mit Personenschaden (Unfallatlas)."];
   if (!sel && latest.jahre[0] < firstMapYear) {
@@ -126,14 +165,14 @@ function render() {
   ui.filterText.textContent = describe(sel);
   ui.hints.replaceChildren(...hints.map((h) => Object.assign(document.createElement("li"), { textContent: h })));
   const ok = rows.length > 0 && rows.length <= LIMITS.maxRows;
-  if (!area.rows.length) setStatus("Im Kartenausschnitt liegen keine Unfälle.");
-  else if (!rows.length) setStatus("Mit diesem Filter bleibt im Ausschnitt kein Unfall.");
+  if (!loaded.rows.length) setStatus(`${loaded.drawn ? "Im Gebiet" : "Im Kartenausschnitt"} liegen keine Unfälle.`);
+  else if (!rows.length) setStatus(`Mit diesem Filter bleibt ${where} kein Unfall.`);
   else if (!ok) {
     setStatus(`${fmtN(rows.length)} Unfälle — mehr als ${fmtN(LIMITS.maxRows)} sind zu viel für eine Datei aus dem Browser. `
       + "Zoome näher heran, filtere stärker oder nimm die Gesamtdatei.");
   } else {
-    const of = sel && rows.length !== area.rows.length ? ` (von ${fmtN(area.rows.length)} im Ausschnitt)` : "";
-    setStatus(`${fmtN(rows.length)} Unfälle${of} · geladen ${fmtMB(area.bytes)}`, { ok: true });
+    const of = sel && rows.length !== loaded.rows.length ? ` (von ${fmtN(loaded.rows.length)} ${where})` : "";
+    setStatus(`${fmtN(rows.length)} Unfälle${of} · geladen ${fmtMB(loaded.bytes)}`, { ok: true });
   }
   for (const btn of ui.formats) btn.disabled = !ok;
 }
@@ -161,7 +200,7 @@ function download(format) {
   const { rows, sel, hints } = output;
   const created = new Date().toISOString();
   const text = format === "geojson"
-    ? toGeoJSON(rows, latest, { created, geometry: area.geometry, filterText: describe(sel), warnings: hints })
+    ? toGeoJSON(rows, latest, { created, geometry: loaded.geometry, filterText: describe(sel), warnings: hints })
     : toCSV(rows, latest);
   const type = format === "geojson" ? "application/geo+json" : "text/csv;charset=utf-8";
   const a = Object.assign(document.createElement("a"), {
@@ -201,7 +240,17 @@ function buildDialog() {
       </div>
       <dl class="export-grid">
         <dt>Gebiet</dt>
-        <dd>Kartenausschnitt</dd>
+        <dd>
+          <div class="legend-modes" role="radiogroup" aria-label="Gebiet">
+            <label class="legend-chip"><input type="radio" name="export-area" value="view" checked><span>Kartenausschnitt</span></label>
+            <label class="legend-chip"><input type="radio" name="export-area" value="drawn"><span class="export-drawn-label">Gebiet zeichnen</span></label>
+          </div>
+          <p class="export-area-actions" hidden>
+            <button type="button" class="export-link" data-area="edit">bearbeiten</button> ·
+            <button type="button" class="export-link" data-area="redraw">neu zeichnen</button> ·
+            <button type="button" class="export-link" data-area="delete">löschen</button>
+          </p>
+        </dd>
         <dt>Filter</dt>
         <dd>
           <div class="legend-modes" role="radiogroup" aria-label="Filter">
@@ -237,13 +286,30 @@ function buildDialog() {
     quelle: el(".export-quelle"),
     copy: el(".export-copy"),
     formats: [...dialog.querySelectorAll(".export-format")],
+    drawnLabel: el(".export-drawn-label"),
+    areaActions: el(".export-area-actions"),
   };
 
   el(".export-close").addEventListener("click", () => dialog.close());
   // Klick auf den abgedunkelten Hintergrund schließt (der Inhalt liegt in .export-body).
   dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
   dialog.querySelectorAll('input[name="export-filter"]').forEach((input) =>
-    input.addEventListener("change", () => area?.rows && render()));
+    input.addEventListener("change", () => loaded?.rows && render()));
+  // „Gebiet zeichnen" ohne Gebiet startet das Zeichnen; mit Gebiet schaltet es nur um.
+  dialog.querySelectorAll('input[name="export-area"]').forEach((input) =>
+    input.addEventListener("change", () => {
+      if (input.value === "drawn" && !getArea()) return editArea(null);
+      setAreaMode(input.value);
+      prepare();
+    }));
+  dialog.querySelectorAll("[data-area]").forEach((btn) => btn.addEventListener("click", () => {
+    const action = btn.dataset.area;
+    if (action === "edit") return editArea(getArea());
+    if (action === "redraw") return editArea(null);
+    setArea(map, null);   // löschen
+    setAreaMode("view");
+    prepare();
+  }));
   refs.formats.forEach((btn) => btn.addEventListener("click", () => download(btn.dataset.format)));
   refs.copy.addEventListener("click", async () => {
     try {

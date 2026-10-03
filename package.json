@@ -24,6 +24,8 @@
     "fzstd": "0.1.1",
     "hyparquet": "1.31.2",
     "maplibre-gl": "6.11.2",
-    "pmtiles": "4.5.0"
+    "pmtiles": "4.5.0",
+    "terra-draw": "1.35.0",
+    "terra-draw-maplibre-gl-adapter": "1.4.1"
   }
 }

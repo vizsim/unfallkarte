@@ -11,6 +11,7 @@
 // ändert. Das ist idempotent und reihenfolge-unabhängig.
 
 import { CONTROLS, FILTER_GROUPS, kontextKeys } from "./permalinkFormat.js";
+import { getArea, setArea } from "../selection/areaSelection.js";
 
 const byId = (id) => document.getElementById(id);
 const checkedValues = (selector) => [...document.querySelectorAll(selector)].filter((el) => el.checked).map((el) => el.value);
@@ -48,6 +49,7 @@ export function readState(map) {
         layers: Object.keys(kontextKeys).filter((id) => byId(`toggle-${id}`)?.checked),
         scenarios: checkedValues('input[name="scenario"]'),
         controls: readControls(),
+        area: getArea(),
     };
 }
 
@@ -123,4 +125,6 @@ export function applyState(map, state) {
     if (state.layers) {
         for (const id of Object.keys(kontextKeys)) setChecked(byId(`toggle-${id}`), state.layers.includes(id));
     }
+    // Gebiet nur anzeigen (einfacher GeoJSON-Layer) — Terra Draw lädt erst beim Bearbeiten.
+    if (state.area) setArea(map, state.area, { silent: true });
 }
