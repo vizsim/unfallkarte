@@ -8,6 +8,15 @@
 download_base: "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/"
 
 years:
+  # 2016: am 2026-10-03 gegen den NRW-Mirror geprüft. 151.673 Zeilen, 8 Länder (laut
+  # Datensatzbeschreibung 7 — Rheinland-Pfalz ist aber schon dabei). Ohne UIDENTSTLAE (nur
+  # OBJECTID), Straßenzustand heißt IstStrasse, IstGkfz ist gefüllt (erst 2017 leer).
+  # `karte: false` = nur für die Veröffentlichung (`publish`), nicht für Kacheln/Szenarien.
+  "2016":
+    zip: "Unfallorte2016_EPSG25832_CSV.zip"
+    csv_path: "csv/Unfallorte_2016_LinRef.txt"
+    sep: ";"
+    karte: false
   "2017":
     zip: "Unfallorte2017_EPSG25832_CSV.zip"
     csv_path: "csv/Unfallorte2017_LinRef.txt"
@@ -56,6 +65,12 @@ years:
 lon_col: "XGCSWGS84"
 lat_col: "YGCSWGS84"
 crs: "EPSG:4326"
+# Dieselbe Lage in EPSG:25832: in harmonize() ebenfalls Komma->Punkt, build() verwirft sie.
+utm_cols: ["LINREFX", "LINREFY"]
+
+# Als Text lesen: die 20-stellige Unfallnummer würde als Zahl zu uint64/float (führende
+# Null weg, beim Zusammenführen der Jahre gerundet).
+text_cols: ["UIDENTSTLAE", "UIDENTSTLA"]
 
 # Spalten-Harmonisierung über alle Jahre (alt -> neu).
 rename:
@@ -65,6 +80,7 @@ rename:
   OID_: OBJECTID
   IstStrassenzustand: USTRZUSTAND
   STRZUSTAND: USTRZUSTAND
+  IstStrasse: USTRZUSTAND
   IstSonstige: IstSonstig
 
 # Spalten, die nach dem Geocoding gedroppt werden (Exporter-Kompatibilität).

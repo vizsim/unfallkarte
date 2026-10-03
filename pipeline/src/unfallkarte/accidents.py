@@ -40,6 +40,19 @@ def _csv_path(year: str, spec: dict[str, Any]) -> Path:
     return get_paths().raw / _SUBDIR / year / spec["csv_path"]
 
 
+def map_years(cfg: dict[str, Any] | None = None) -> list[str]:
+    """Jahre für Karte, Kacheln und Szenarien — ohne `karte: false` (nur Veröffentlichung)."""
+    cfg = cfg or _registry()
+    return sorted(y for y, spec in cfg["years"].items() if spec.get("karte", True))
+
+
+def _available(cfg: dict[str, Any], years: list[str] | None) -> list[str]:
+    selected = [y for y in _select_years(cfg, years) if _csv_path(y, cfg["years"][y]).exists()]
+    if not selected:
+        raise FileNotFoundError("Keine entpackten Jahres-CSVs gefunden — erst `accidents fetch`.")
+    return selected
+
+
 def fetch(years: list[str] | None = None, *, force: bool = False) -> list[str]:
     """Lädt die Jahres-ZIPs und entpackt sie nach data/raw/accidents/<year>/.
 
@@ -80,31 +93,48 @@ def fetch(years: list[str] | None = None, *, force: bool = False) -> list[str]:
     return done
 
 
-def build(years: list[str] | None = None) -> Path:
-    """Harmonisiert alle (vorhandenen) Jahre zu einem GeoParquet.
+def harmonize(years: list[str] | None = None) -> pd.DataFrame:
+    """Liest die (vorhandenen) Jahres-CSVs und vereinheitlicht sie zu EINER Tabelle.
 
-    Output: data/accidents/<basename>_<min>-<max>_oid.parquet. Der Jahresbereich
-    wird aus den tatsächlich gebauten Jahren abgeleitet (kein hartes '2017-2023').
+    Spaltennamen nach `rename`, alle vier Koordinatenspalten Komma->Punkt, Unfallnummer als
+    Text. Noch mit allen Spalten (UIDENTSTLA, OBJECTID, LINREF*) — `build()` verwirft für die
+    Kacheln einen Teil, `publish` bildet daraus das öffentliche Schema. Default: alle Jahre
+    der Registry, auch die mit `karte: false`.
     """
     cfg = _registry()
-    paths = get_paths()
     rename = cfg.get("rename", {})
-    lon, lat = cfg["lon_col"], cfg["lat_col"]
-
-    selected = [y for y in _select_years(cfg, years) if _csv_path(y, cfg["years"][y]).exists()]
-    if not selected:
-        raise FileNotFoundError("Keine entpackten Jahres-CSVs gefunden — erst `accidents fetch`.")
+    text = dict.fromkeys(cfg.get("text_cols", []), str)
 
     frames: list[pd.DataFrame] = []
-    for year in selected:
+    for year in _available(cfg, years):
         spec = cfg["years"][year]
-        df = pd.read_csv(_csv_path(year, spec), sep=spec.get("sep", ";"), low_memory=False)
+        df = pd.read_csv(
+            _csv_path(year, spec), sep=spec.get("sep", ";"), low_memory=False, dtype=text
+        )
         frames.append(df.rename(columns=rename))
     data = pd.concat(frames, ignore_index=True)
 
     # Koordinaten: Komma->Punkt, float.
-    for col in (lon, lat):
-        data[col] = data[col].astype(str).str.replace(",", ".", regex=False).astype(float)
+    for col in (cfg["lon_col"], cfg["lat_col"], *cfg.get("utm_cols", [])):
+        if col in data:
+            data[col] = data[col].astype(str).str.replace(",", ".", regex=False).astype(float)
+    return data
+
+
+def build(years: list[str] | None = None) -> Path:
+    """Harmonisiert alle (vorhandenen) Kartenjahre zu einem GeoParquet.
+
+    Output: data/accidents/<basename>_<min>-<max>_oid.parquet. Der Jahresbereich
+    wird aus den tatsächlich gebauten Jahren abgeleitet (kein hartes '2017-2023').
+    Jahre mit `karte: false` (nur Veröffentlichung) bleiben draußen.
+    """
+    cfg = _registry()
+    paths = get_paths()
+    lon, lat = cfg["lon_col"], cfg["lat_col"]
+
+    karte = map_years(cfg)
+    selected = _available(cfg, [y for y in _select_years(cfg, years) if y in karte])
+    data = harmonize(selected)
 
     gdf = gpd.GeoDataFrame(
         data, geometry=gpd.points_from_xy(data[lon], data[lat]), crs=cfg["crs"]

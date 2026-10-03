@@ -18,6 +18,7 @@ from pathlib import Path
 
 import pytest
 
+from unfallkarte.accidents import map_years
 from unfallkarte.config import get_paths, load_yaml
 
 GOLDEN_JSON = Path(__file__).parent / "golden" / "accidents.json"
@@ -33,9 +34,12 @@ def _golden_module():
 
 
 def _expected_parquet() -> Path:
-    """Pfad wie accidents.build ihn bildet: <subdir>/<basename>_<min>-<max>_oid.parquet."""
+    """Pfad wie accidents.build ihn bildet: <subdir>/<basename>_<min>-<max>_oid.parquet.
+
+    Nur Kartenjahre — Jahre mit `karte: false` (2016) baut `build()` nicht ein.
+    """
     cfg = load_yaml("accidents.yaml")
-    years = sorted(int(y) for y in cfg["years"])
+    years = sorted(int(y) for y in map_years(cfg))
     out = cfg["output"]
     return get_paths().out(out["subdir"]) / f"{out['basename']}_{years[0]}-{years[-1]}_oid.parquet"
 
@@ -50,7 +54,7 @@ def test_reference_covers_the_configured_years() -> None:
     assert GOLDEN_JSON.exists(), f"Golden-Referenz fehlt: {GOLDEN_JSON}"
 
     want = __import__("json").loads(GOLDEN_JSON.read_text(encoding="utf-8"))
-    configured = {str(y) for y in load_yaml("accidents.yaml")["years"]}
+    configured = set(map_years(load_yaml("accidents.yaml")))
     covered = set(want["per_year"])
 
     missing = sorted(configured - covered)
