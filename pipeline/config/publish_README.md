@@ -148,7 +148,7 @@ URL = BASE + "{{alias}}"
 
 # Stand, Schlüssel und Prüfsumme stehen in latest.json. Der eigene User-Agent ist nötig,
 # weil manche Server die Standardkennung von Python ablehnen.
-KOPF = {"User-Agent": "unfallatlas-beispiel"}
+KOPF = {"User-Agent": "unfallorte-beispiel"}
 with urllib.request.urlopen(urllib.request.Request(BASE + "latest.json", headers=KOPF)) as antwort:
     latest = json.load(antwort)
 

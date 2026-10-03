@@ -355,9 +355,9 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
       README-Vorlage `config/publish_README.md`; Abdeckung wird gegen `erstes_jahr` geprüft.
       Tests in `pipeline/tests/test_publish.py` (synthetisch, inkl. aller README-Beispiele über
       DuckDB) + lokaler Abgleich der Veröffentlichung mit der Golden-Reference.
-- [ ] **Name festlegen, bevor etwas hochgeladen ist** — `dataset` in `publish.yaml`
-      (Arbeitsname `unfallatlas`). Danach sind Ordner, Dateinamen und `latest.json` ein Vertrag
-      mit fremden Skripten.
+- [x] **Name** (2026-10-03): `unfallorte` (`dataset` in `publish.yaml`) — wie die amtlichen
+      Jahresdateien `Unfallorte<Jahr>`; benennt die Daten, nicht das Portal „Unfallatlas“.
+      Seit dem Upload sind Ordner, Dateinamen und `latest.json` ein Vertrag mit fremden Skripten.
 - [ ] **D5 — Deploy nach data.vizsim.de** (Bucket `vizsim-public-archive`, Cloudflare davor):
       `B2_ARCHIVE_KEY_ID`/`B2_ARCHIVE_KEY` in `pipeline/.env`. CORS sieht passend aus (die
       Mapillary-Karte liest dort schon per Range; `content-range`/`etag` exponiert).

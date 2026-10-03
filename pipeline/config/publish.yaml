@@ -6,7 +6,7 @@
 
 # Name = Ordner und Dateipräfix: data/publish/<dataset>/, <host><dataset>/, <dataset>_latest.parquet.
 # Ab dem ersten Upload ein Vertrag mit Skripten (URLs) — danach nicht mehr umbenennen.
-dataset: unfallatlas
+dataset: unfallorte                  # wie die amtlichen Jahresdateien (Unfallorte<Jahr>)
 host: "https://data.vizsim.de/"
 readme_vorlage: "publish_README.md"  # in config/; die Platzhalter {{…}} füllt `publish build`
 karten_export: false                 # true erst mit dem Export in der Karte (Stufe 2)
