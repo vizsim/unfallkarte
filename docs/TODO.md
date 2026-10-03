@@ -359,13 +359,16 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
       (Arbeitsname `unfallatlas`). Danach sind Ordner, Dateinamen und `latest.json` ein Vertrag
       mit fremden Skripten.
 - [ ] **D5 — Deploy nach data.vizsim.de** (Bucket `vizsim-public-archive`, Cloudflare davor):
-      `B2_ARCHIVE_KEY_ID`/`B2_ARCHIVE_KEY` in `pipeline/.env`; CORS am Bucket prüfen
-      (`b2 bucket get`: Header `range`, `content-range`/`content-length`/`etag` exponiert);
-      Cloudflare: Browser Integrity Check für den Host aus (Python-Standardkennung → 403),
-      optional Cache-Regel nur für die versionierten Dateien; Lifecycle-Regel für `unfallatlas/`
-      (überschriebene Fassungen nach 30 Tagen löschen — `b2 bucket update --lifecycle-rule`
-      setzt ALLE Regeln neu); Ordnerliste auf data.vizsim.de ergänzen, falls statisch. Dann
-      `publish deploy` und Link-Check (curl/DuckDB, Konzept § 2.6).
+      `B2_ARCHIVE_KEY_ID`/`B2_ARCHIVE_KEY` in `pipeline/.env`. CORS sieht passend aus (die
+      Mapillary-Karte liest dort schon per Range; `content-range`/`etag` exponiert).
+      **Browser Integrity Check bleibt an** — getestet 2026-10-03: er sperrt nur die
+      Standardkennung von `urllib`; DuckDB, GDAL, R, curl, wget und `requests` bekommen 200,
+      das README-Beispiel setzt einen User-Agent. Prüfen: die Cache-Regel des Hosts (JSON kommt
+      als HIT mit `max-age=14400`) — lässt sie `no-cache` für `latest.json` und den Alias gelten?
+      Gegen Kosten durch Massen-Downloads: B2 „Caps & Alerts“ (Tageslimits). Lifecycle-Regel für
+      `<dataset>/` (überschriebene Fassungen nach 30 Tagen löschen — `b2 bucket update
+      --lifecycle-rule` setzt ALLE Regeln neu); Ordnerliste auf data.vizsim.de ergänzen, falls
+      statisch. Dann `publish deploy` und Link-Check (curl/DuckDB, Konzept § 2.6).
 - [ ] **D6/D7 — Export in der Karte** (Kartenausschnitt, GeoJSON/CSV, hyparquet + fzstd lazy;
       Entwurf `accidentExport.js` im Zip, an Echtdaten getestet; Obergrenze 50.000 Unfälle).
       Mit dem Export `karten_export: true` in `publish.yaml` (Hinweise im README).
