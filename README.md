@@ -86,9 +86,10 @@ Schwellenwerte lassen sich in der Legende per Regler verändern.
 ## ⬇️ Daten herunterladen
 
 - **In der Karte:** Das Download-Symbol unten in der Legende lädt die Unfälle im
-  **Kartenausschnitt** — gefiltert wie in der Karte oder alle — als **GeoJSON** (QGIS, uMap)
-  oder **CSV** (Excel, deutsch formatiert). Dazu gibt es den Quellenvermerk zum Kopieren und
-  Hinweise, wo der Unfallatlas für ein Land und Jahr keine Daten enthält.
+  **Kartenausschnitt** oder in einem **selbst gezeichneten Gebiet** — gefiltert wie in der Karte
+  oder alle — als **GeoJSON** (QGIS, uMap) oder **CSV** (Excel, deutsch formatiert). Dazu gibt
+  es den Quellenvermerk zum Kopieren und Hinweise, wo der Unfallatlas für ein Land und Jahr keine
+  Daten enthält. Das gezeichnete Gebiet steht im Link — teilen zeigt dasselbe Gebiet.
 - **Als Datei:** [data.vizsim.de/unfallorte](https://data.vizsim.de/unfallorte/) — alle
   Unfälle **2016–2025** (rund 2,4 Mio.) in **einer GeoParquet-Datei**, Spaltennamen wie in
   der Datensatzbeschreibung, räumlich sortiert. DuckDB lädt für einen Stadtteil nur ein bis
@@ -221,7 +222,7 @@ data.vizsim.de (`publish deploy`, eigener Bucket) ist ein dritter.
 
 ## 🧰 Tech
 
-MapLibre GL JS · PMTiles · GeoParquet + hyparquet · Vite · tippecanoe · osmium-tool ·
+MapLibre GL JS · PMTiles · GeoParquet + hyparquet · Terra Draw · Vite · tippecanoe · osmium-tool ·
 GeoPandas/pyogrio (Python-Pipeline mit **uv**) · DuckDB (Tests) · OpenFreeMap · Mapterhorn ·
 Backblaze B2 · Photon · radinfra.de/TILDA.
 

@@ -387,10 +387,16 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
       Playwright gegen eine Fixture (`tests/fixtures/export/`, aus `pipeline/tests/synthetic.py`).
       Pipeline: `publish readme` (README ohne neuen Stand), `publish deploy` lädt nur Geändertes
       (SHA-1) — das README-Update lud genau eine Datei hoch.
-- [ ] **D8 — Gebiet zeichnen** mit Terra Draw (Entscheidung 2026-10-03: Bibliothek statt eigener
-      ~140 Zeilen wie in routing_bulk — Bearbeiten, Touch, später Rechteck/Kreis; ~33 KB gzip,
-      lazy; Adapter importiert nur terra-draw, passt zu MapLibre 6). Gebiet im Permalink
-      (`sel=g:<Polyline>`), Popups beim Zeichnen pausieren, „Fertig/Abbrechen“ fürs Handy.
+- [x] **D8 — Gebiet zeichnen** (2026-10-03, `temp/gebiet`) mit Terra Draw 1.35 (Entscheidung:
+      Bibliothek statt eigener ~140 Zeilen wie in routing_bulk — Bearbeiten, Touch, später
+      Rechteck/Kreis). Im Export-Dialog: Gebiet „Kartenausschnitt | Gebiet zeichnen“, danach
+      bearbeiten · neu zeichnen · löschen. Leiste oben (Punkt zurück, Abbrechen, Fertig — Fertig
+      ist auf dem Handy der einzige Abschluss), Esc bricht ab, Popups und Mapillary-Klick pausieren
+      (`drawingState.js`). Gebiet im Permalink `sel=g:<Polyline>` (prozentkodiert); ein Link
+      zeigt es als schlichte Fläche, Terra Draw (33,8 KB gzip) lädt erst beim Zeichnen.
+      Tests: 3 Unit (Polyline, sel), 4 Playwright (Maus, Link + Ecke ziehen, Esc/drei Punkte, Touch).
+- [ ] Später: Auswertung im Gebiet (Report) auf derselben Auswahl; Kreis um eine Kreuzung
+      (`sel=k:…`, Terra Draw hat den Modus schon).
 - [ ] Quellenvermerk: vorgegebenen Wortlaut des Bereitstellers prüfen (Konzept § 7.3).
 
 ## Sichtbarkeit / Auffindbarkeit

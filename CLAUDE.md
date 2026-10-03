@@ -72,6 +72,11 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
   versionierte Datei; „wie in der Karte“ = `readSelection()` aus `accidentLayers.js`. Web-Tests
   liefern `tests/fixtures/export/` per Route mit Range aus (neu: `uv --directory pipeline run
   python tests/synthetic.py`).
+- **Gebiet** (`js/selection/`): `areaSelection.js` hält das gezeichnete Gebiet und zeigt es als
+  schlichten GeoJSON-Layer (Hauptbündel, Permalink `sel=g:<Polyline>`); `drawArea.js` zeichnet
+  und bearbeitet mit Terra Draw — nur per dynamischem `import()`, Terra Draw läuft nur während des
+  Zeichnens. Solange setzt ein Klick nur Punkte: **jeder `map.on("click"…)`-Handler und jedes
+  Cursor-Setzen prüft `isDrawing()`** (`js/map/drawingState.js`; Hover-Popup + Mapillary tun es).
 - **MapLibre (seit v6 ESM-only):** kein globales `maplibregl` mehr — immer aus
   `js/lib/maplibre.js` importieren (`import { Popup } from "../lib/maplibre.js"`), nie direkt
   aus dem Paket. MapLibre wird **nicht gebündelt** (versionierte Kopie + Importmap,
