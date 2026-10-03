@@ -126,7 +126,8 @@ sha256sum -c --ignore-missing SHA256SUMS
 
 <!-- karten-export -->
 Ohne Programmieren geht es auch: In der [Unfallkarte](https://vizsim.de/unfallkarte/) zum Gebiet
-zoomen und die Unfälle im Ausschnitt als GeoJSON (für QGIS, uMap) oder CSV (für Excel) laden.
+zoomen und über das Download-Symbol unten in der Legende die Unfälle im Ausschnitt als GeoJSON
+(für QGIS, uMap) oder CSV (für Excel) laden.
 <!-- /karten-export -->
 
 ### Vorbereitung
