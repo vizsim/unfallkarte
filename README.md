@@ -1,7 +1,7 @@
-![Status: Experimental](https://img.shields.io/badge/Status-Experimental-red)
+![Status: Beta](https://img.shields.io/badge/Status-Beta-4338ca)
 ![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue)
 
-# 🚧 Unfallkarte (Deutschland)
+# Unfallkarte (Deutschland)
 
 **Interaktive Webkarte für Verkehrsunfälle in Deutschland.** Über 2,2 Millionen polizeilich
 erfasste Unfälle mit Personenschaden aus den Jahren **2017–2025** — filterbar nach Schwere,
@@ -13,6 +13,11 @@ Karte sonst nur ahnen kann — wo häufen sich Unfälle im Schulumfeld, wo unter
 kurzes Tempo-50-Stück eine sonst durchgängige 30er-Zone, wo liegen Unfallhäufungen nach
 den Kriterien der Unfallkommissionen.
 
+Die Unfälle lassen sich auch **herunterladen**: aus der Karte der aktuelle Ausschnitt als
+GeoJSON oder CSV, und alle Jahre **2016–2025 als eine GeoParquet-Datei** auf
+[data.vizsim.de/unfallorte](https://data.vizsim.de/unfallorte/) — direkt aus dem Netz
+abfragbar, etwa mit DuckDB.
+
 Quelle der Unfalldaten ist der [Unfallatlas der Statistischen Ämter](https://unfallatlas.statistikportal.de/)
 (dl-de/by-2-0). Rohdaten und OpenStreetMap werden zu **PMTiles** verarbeitet und in einer
 MapLibre-Karte gezeigt — ausschließlich über offene, frei gehostete Dienste, ohne
@@ -20,7 +25,9 @@ kommerzielle Karten-API und ohne API-Key.
 
 ## 🚀 Online ansehen
 
-👉 **[vizsim.de/unfallkarte](https://vizsim.de/unfallkarte/)**
+👉 **[vizsim.de/unfallkarte](https://vizsim.de/unfallkarte/)** — die Karte
+
+👉 **[data.vizsim.de/unfallorte](https://data.vizsim.de/unfallorte/)** — alle Unfälle als Datei, mit Anleitung
 
 ![Screenshot der Unfallkarte: Unfallpunkte auf der Karte, rechts die Legende mit Filtern](public/screenshot.png)
 
@@ -28,9 +35,9 @@ kommerzielle Karten-API und ohne API-Key.
 
 Zwei Teile in einem Repo:
 
-- **`pipeline/`** — Python-Pipeline (uv): lädt Unfalldaten (2017–2025) und OSM, baut
-  PMTiles, rechnet die Szenarien, deployt nach Backblaze B2.
-  Details und CLI: [`pipeline/README.md`](pipeline/README.md).
+- **`pipeline/`** — Python-Pipeline (uv): lädt Unfalldaten (2016–2025) und OSM, baut
+  PMTiles, rechnet die Szenarien, deployt nach Backblaze B2 und veröffentlicht alle Unfälle
+  als GeoParquet auf data.vizsim.de. Details und CLI: [`pipeline/README.md`](pipeline/README.md).
 - **Frontend (Repo-Root)** — MapLibre-Karte (`index.html`, `main.js`, `js/`), gebaut mit
   **Vite** nach `dist/`. Die PMTiles kommen **local-first** aus `data/`, sonst per
   **B2-Fallback**; gesteuert über ein generiertes `manifest.json`.
@@ -73,6 +80,22 @@ Schwellenwerte lassen sich in der Legende per Regler verändern.
 > amtliche Feststellung — ob eine Stelle ein Unfallschwerpunkt ist, entscheidet die
 > zuständige Unfallkommission.
 
+## ⬇️ Daten herunterladen
+
+- **In der Karte:** Das Download-Symbol unten in der Legende lädt die Unfälle im
+  **Kartenausschnitt** — gefiltert wie in der Karte oder alle — als **GeoJSON** (QGIS, uMap)
+  oder **CSV** (Excel, deutsch formatiert). Dazu gibt es den Quellenvermerk zum Kopieren und
+  Hinweise, wo der Unfallatlas für ein Land und Jahr keine Daten enthält.
+- **Als Datei:** [data.vizsim.de/unfallorte](https://data.vizsim.de/unfallorte/) — alle
+  Unfälle **2016–2025** (rund 2,4 Mio.) in **einer GeoParquet-Datei**, Spaltennamen wie in
+  der Datensatzbeschreibung, räumlich sortiert. DuckDB lädt für einen Stadtteil nur ein bis
+  zwei MB statt der ganzen Datei; das README dort zeigt Abfragen für Rechteck, Umkreis,
+  Polygon, Gemeinde und einzelne Unfälle.
+
+Der Export in der Karte liest dieselbe Datei per HTTP-Range — einen Server dafür gibt es
+nicht. Beides ist eine Aufbereitung, **kein amtlicher Datensatz** (Lizenz dl-de/by-2-0,
+Quellenvermerk nötig). Die Karte zeigt 2017–2025; 2016 steht nur in der Datei.
+
 ## 🌐 Offene Dienste — ohne Registrierung, ohne API-Key
 
 - **Basemap** — [OpenFreeMap](https://openfreemap.org/) Positron (inkl. Fonts), dazu
@@ -107,7 +130,7 @@ brauchst also keine lokalen Daten, um am Frontend zu arbeiten. Dev-Server und Pr
 liefern `data/` mit Range-Requests aus (Middleware in `vite.config.js`); ins `dist/` kommt es
 nie.
 
-### Libs (maplibre-gl, pmtiles, chart.js)
+### Libs (maplibre-gl, pmtiles, chart.js, hyparquet)
 
 Exakt gepinnt in `package.json`. Upgrade = `npm i -E maplibre-gl@x.y.z`, danach **immer**
 `npm run test:web` — die letzten beiden MapLibre-Upgrades haben den Cluster-Hover still
@@ -117,7 +140,8 @@ gebrochen, gefangen hat es jeweils nur der Smoke-Test.
 Datei; gebündelt fände es ihn nicht (die Karte bleibt ohne jeden Fehler leer). Der Build
 kopiert darum die drei `.mjs` nach `dist/lib/maplibre-gl@<version>/` und löst den Import per
 Importmap auf (`vite.config.js`). Alle Module importieren MapLibre über `js/lib/maplibre.js`.
-pmtiles wird mitgebündelt, chart.js kommt als eigener Chunk erst beim ersten Uspeed-Chart.
+pmtiles wird mitgebündelt, chart.js kommt als eigener Chunk erst beim ersten Uspeed-Chart,
+der Export (hyparquet + fzstd) erst beim ersten Klick auf das Download-Symbol.
 
 ## ✅ Tests
 
@@ -132,7 +156,8 @@ Die Browser-Tests in `tests/web/` fahren die echte Seite: Lädt die Karte ohne J
 Liefert der Cluster-Hover das vergrößerte Tortendiagramm? Erscheint bei überlappenden
 Objekten genau **ein** gestapeltes Popup? Überlebt ein Permalink das Kopieren und
 Neuladen samt Reglern? Sie bauen `dist/` und testen genau diesen Stand (`vite preview`),
-nutzen Local-first/B2 wie im Betrieb und brauchen also keine lokalen Daten.
+nutzen Local-first/B2 wie im Betrieb und brauchen also keine lokalen Daten. Der Export-Test
+liefert eine kleine Testdatei (`tests/fixtures/export/`) selbst mit Range-Antworten aus.
 
 Zwei Tests sind das eigentliche Sicherheitsnetz für Umbauten:
 
@@ -159,10 +184,11 @@ uv run unfallkarte accidents tiles data/accidents/accidents_germany_2017-2025_oi
 uv run unfallkarte osm fetch && uv run unfallkarte osm build all
 uv run unfallkarte scenario run-all
 uv run unfallkarte manifest && uv run unfallkarte deploy
+uv run unfallkarte publish build && uv run unfallkarte publish deploy   # data.vizsim.de/unfallorte
 ```
 
 Ein neues Unfalljahr ist ein YAML-Block in `pipeline/config/accidents.yaml` — kein
-Code-Edit. Kontextlayer analog: `uv run unfallkarte <hvs|laerm|obs|telraam> fetch|build`
+Code-Edit. Jahre mit `karte: false` (derzeit 2016) gehen nur in die Veröffentlichung. Kontextlayer analog: `uv run unfallkarte <hvs|laerm|obs|telraam> fetch|build`
 bzw. `movebis build` und `census build` (Zensus aus Archivkopien in `data/raw/census/`).
 
 System-Binaries (nicht über pip): `tippecanoe` und `tile-join`, `osmium-tool`; die b2-CLI
@@ -179,7 +205,8 @@ Pipeline-Refactor hängt als Tag **`v2025`**, der letzte Stand vor Vite als Tag 
 
 Die PMTiles liegen **nicht** im Git (`data/` ist gitignored), sondern lokal und im
 öffentlichen B2-Bucket. Ein Code-Deploy und ein Daten-Deploy
-(`uv run unfallkarte deploy`) sind zwei getrennte Vorgänge.
+(`uv run unfallkarte deploy`) sind zwei getrennte Vorgänge; die Veröffentlichung auf
+data.vizsim.de (`publish deploy`, eigener Bucket) ist ein dritter.
 
 ## 📚 Weitere Doku
 
@@ -191,8 +218,9 @@ Die PMTiles liegen **nicht** im Git (`data/` ist gitignored), sondern lokal und 
 
 ## 🧰 Tech
 
-MapLibre GL JS · PMTiles · Vite · tippecanoe · osmium-tool · GeoPandas/pyogrio (Python-Pipeline
-mit **uv**) · OpenFreeMap · Mapterhorn · Backblaze B2 · Photon · radinfra.de/TILDA.
+MapLibre GL JS · PMTiles · GeoParquet + hyparquet · Vite · tippecanoe · osmium-tool ·
+GeoPandas/pyogrio (Python-Pipeline mit **uv**) · DuckDB (Tests) · OpenFreeMap · Mapterhorn ·
+Backblaze B2 · Photon · radinfra.de/TILDA.
 
 ## 📄 Lizenz
 
