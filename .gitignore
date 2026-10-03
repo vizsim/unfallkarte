@@ -25,6 +25,10 @@ config.js
 # Golden-Reference der Frontend-Tests (muss versioniert sein, sonst fehlt sie der CI)
 !/tests/web/__snapshots__/*.json
 
+# Kleine Testdaten der Frontend-Tests (Export-Fixture, ~85 KB) — sonst fehlen sie der CI
+!/tests/fixtures/**/*.json
+!/tests/fixtures/**/*.parquet
+
 # Ignore virtual environment
 unfallkarte_env/
 accident_data/

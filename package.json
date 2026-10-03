@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "chart.js": "4.5.1",
+    "fzstd": "0.1.1",
+    "hyparquet": "1.31.2",
     "maplibre-gl": "6.11.2",
     "pmtiles": "4.5.0"
   }

@@ -209,6 +209,13 @@ function setupUI(map) {
     writePermalink
   );
 
+  // Export „Unfälle herunterladen": Dialog, hyparquet und fzstd erst beim ersten Klick
+  // (eigener Vite-Chunk) — der Start der Karte bezahlt nichts dafür.
+  document.getElementById("export-open")?.addEventListener("click", async () => {
+    const { openExportDialog } = await import("./js/export/exportDialog.js");
+    openExportDialog(map);
+  });
+
   // Radinfrastruktur (TILDA) — externer Live-Layer, läuft nicht über die Layer-Registry.
   document.getElementById('toggle-bikelanes')?.addEventListener('change', (e) => {
     setBikeLanesVisible(map, e.target.checked);

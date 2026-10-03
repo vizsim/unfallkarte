@@ -769,6 +769,10 @@ body {
 }
 .fc-links a { display: inline-flex; align-items: center; color: #4b5563; text-decoration: none; }
 .fc-links a:hover { color: #111827; }
+/* Knopf im Stil der Links daneben (Export-Dialog). */
+.fc-icon-btn { display: inline-flex; align-items: center; padding: 0; border: 0; background: none; color: #4b5563; cursor: pointer; }
+.fc-icon-btn:hover { color: #111827; }
+.fc-icon-btn:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; border-radius: 4px; }
 
 .map-settings-panel {
   position: absolute; left: 10px; bottom: 64px; width: 300px;
@@ -1237,3 +1241,63 @@ body {
     padding: 6px 10px;   /* Tippfläche am Handy */
   }
 }
+
+/* ────────────── Export-Dialog (js/export/exportDialog.js) ────────────── */
+/* Natives <dialog> (showModal): Fokus, Esc und Hintergrund liefert der Browser. Der Inhalt
+   steckt in .export-body, damit ein Klick auf den Hintergrund als Klick aufs <dialog> zählt. */
+.export-dialog {
+  width: min(480px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  box-shadow: var(--ui-shadow);
+}
+.export-dialog::backdrop { background: rgba(15, 23, 42, 0.35); }
+:where(.export-dialog) button { font: inherit; }   /* schwach: Klassen-Regeln gewinnen */
+.export-body { padding: 16px 18px; font-size: 13px; line-height: 1.45; }
+.export-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.export-head h2 { margin: 0; font-size: 16px; color: var(--ui-text-strong); }
+.export-close { padding: 0 4px; border: 0; background: none; color: var(--ui-text-muted); font-size: 22px; line-height: 1; cursor: pointer; }
+.export-close:hover { color: var(--ui-text-strong); }
+.export-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 6px; }
+.export-grid dt { padding-top: 3px; color: var(--ui-text-muted); font-weight: 600; }
+.export-grid dd { margin: 0; }
+.export-grid .legend-modes { margin-bottom: 4px; }
+.export-filter-text { margin: 0; color: var(--ui-text-muted); font-size: 12px; }
+.export-status { margin: 10px 0 6px; color: var(--ui-text-muted); font-weight: 600; }
+.export-status.is-ok { color: var(--ui-text-strong); }
+.export-load,
+.export-copy {
+  padding: 4px 10px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.export-load { margin-bottom: 8px; border-color: var(--ui-accent); color: var(--ui-accent); font-weight: 600; }
+.export-load:hover,
+.export-copy:hover { background: var(--ui-hover); }
+.export-hints { margin: 0 0 12px; padding-left: 18px; color: var(--ui-text-muted); font-size: 12px; }
+.export-hints:empty { display: none; }
+.export-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.export-format {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--ui-accent);
+  border-radius: var(--ui-radius-sm);
+  background: var(--ui-accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.export-format small { display: block; font-weight: 400; opacity: 0.85; }
+.export-format:disabled { border-color: var(--ui-border); background: var(--ui-hover); color: var(--ui-text-muted); cursor: not-allowed; }
+.export-source { padding: 8px 10px; border-radius: var(--ui-radius-sm); background: var(--ui-hover); font-size: 11.5px; }
+.export-quelle { margin: 0 0 6px; }
+.export-more { margin: 10px 0 0; color: var(--ui-text-muted); font-size: 12px; }
+.export-more a { color: var(--ui-accent); }

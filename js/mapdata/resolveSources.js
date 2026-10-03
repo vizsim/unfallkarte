@@ -28,8 +28,8 @@ export const ACCIDENT_SOURCES = {
 };
 
 // ./data/ ist gitignoriert und existiert nur auf dem Entwicklungsrechner; auf Pages ist die
-// Probe ein Roundtrip für eine Antwort, die immer "nein" lautet.
-const mayHaveLocalTree = () => ["localhost", "127.0.0.1"].includes(globalThis.location?.hostname);
+// Probe ein Roundtrip für eine Antwort, die immer "nein" lautet. (Auch der Export fragt das.)
+export const mayHaveLocalTree = () => ["localhost", "127.0.0.1"].includes(globalThis.location?.hostname);
 
 async function fetchJson(url) {
   try {

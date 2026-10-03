@@ -1,0 +1,176 @@
+{
+ "datei": "unfallorte_2016-2025_2026-10-01.parquet",
+ "alias": "unfallorte_latest.parquet",
+ "url": "https://data.vizsim.de/unfallorte/unfallorte_2016-2025_2026-10-01.parquet",
+ "version": "2026-10-01",
+ "jahre": [
+  2016,
+  2025
+ ],
+ "zeilen": 1170,
+ "row_groups": 6,
+ "bytes": 80764,
+ "footer_bytes": 22553,
+ "sha256": "af7263c7c382403d387cc66e975f8a1107e40d7a47b071decc82a96a42e6acd7",
+ "quellenvermerk": "Unfallatlas, © Statistische Ämter des Bundes und der Länder, dl-de/by-2-0 (https://www.govdata.de/dl-de/by-2-0), https://unfallatlas.statistikportal.de/. Daten geändert: Jahresdateien zusammengeführt, Spaltennamen vereinheitlicht, Koordinaten als Zahl, Spalten unfall_id, ags und geometry ergänzt, LINREFX/LINREFY, OBJECTID und UIDENTSTLAE nicht als eigene Spalten übernommen, räumlich sortiert (vizsim).",
+ "quelle": {
+  "bereitsteller": "© Statistische Ämter des Bundes und der Länder",
+  "datensatz": "Unfallatlas",
+  "datensatz_url": "https://unfallatlas.statistikportal.de/",
+  "download_url": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+  "lizenz": "Datenlizenz Deutschland – Namensnennung – Version 2.0",
+  "lizenz_kurz": "dl-de/by-2-0",
+  "lizenz_url": "https://www.govdata.de/dl-de/by-2-0",
+  "veraenderung": "Daten geändert: Jahresdateien zusammengeführt, Spaltennamen vereinheitlicht, Koordinaten als Zahl, Spalten unfall_id, ags und geometry ergänzt, LINREFX/LINREFY, OBJECTID und UIDENTSTLAE nicht als eigene Spalten übernommen, räumlich sortiert (vizsim)."
+ },
+ "schluessel": {
+  "UKATEGORIE": {
+   "1": "Unfall mit Getöteten",
+   "2": "Unfall mit Schwerverletzten",
+   "3": "Unfall mit Leichtverletzten"
+  },
+  "UART": {
+   "0": "Unfall anderer Art",
+   "1": "Zusammenstoß mit anfahrendem/anhaltendem/ruhendem Fahrzeug",
+   "2": "Zusammenstoß mit vorausfahrendem/wartendem Fahrzeug",
+   "3": "Zusammenstoß mit seitlich in gleicher Richtung fahrendem Fahrzeug",
+   "4": "Zusammenstoß mit entgegenkommendem Fahrzeug",
+   "5": "Zusammenstoß mit einbiegendem/kreuzendem Fahrzeug",
+   "6": "Zusammenstoß zwischen Fahrzeug und Fußgänger",
+   "7": "Aufprall auf Fahrbahnhindernis",
+   "8": "Abkommen von Fahrbahn nach rechts",
+   "9": "Abkommen von Fahrbahn nach links"
+  },
+  "UTYP1": {
+   "1": "Fahrunfall",
+   "2": "Abbiegeunfall",
+   "3": "Einbiegen/Kreuzen-Unfall",
+   "4": "Überschreiten-Unfall",
+   "5": "Unfall durch ruhenden Verkehr",
+   "6": "Unfall im Längsverkehr",
+   "7": "sonstiger Unfall"
+  },
+  "ULICHTVERH": {
+   "0": "Tageslicht",
+   "1": "Dämmerung",
+   "2": "Dunkelheit"
+  },
+  "USTRZUSTAND": {
+   "0": "trocken",
+   "1": "nass/feucht/schlüpfrig",
+   "2": "winterglatt"
+  },
+  "UWOCHENTAG": {
+   "1": "Sonntag",
+   "2": "Montag",
+   "3": "Dienstag",
+   "4": "Mittwoch",
+   "5": "Donnerstag",
+   "6": "Freitag",
+   "7": "Samstag"
+  },
+  "PLST": {
+   "1": "Unfallort nach regulärem Verfahren plausibilisiert",
+   "2": "Unfallort nach erweitertem Verfahren für Unfälle mit Fahrradbeteiligung plausibilisiert"
+  },
+  "ULAND": {
+   "01": "Schleswig-Holstein",
+   "02": "Hamburg",
+   "03": "Niedersachsen",
+   "04": "Bremen",
+   "05": "Nordrhein-Westfalen",
+   "06": "Hessen",
+   "07": "Rheinland-Pfalz",
+   "08": "Baden-Württemberg",
+   "09": "Bayern",
+   "10": "Saarland",
+   "11": "Berlin",
+   "12": "Brandenburg",
+   "13": "Mecklenburg-Vorpommern",
+   "14": "Sachsen",
+   "15": "Sachsen-Anhalt",
+   "16": "Thüringen"
+  }
+ },
+ "beteiligung": {
+  "IstRad": "Fahrrad",
+  "IstPKW": "Pkw",
+  "IstFuss": "Fußgänger",
+  "IstKrad": "Kraftrad",
+  "IstGkfz": "Güterkraftfahrzeug",
+  "IstSonstige": "sonstiges Verkehrsmittel"
+ },
+ "abdeckung": {
+  "01": [],
+  "02": [
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "03": [],
+  "04": [],
+  "05": [
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "06": [],
+  "07": [],
+  "08": [],
+  "09": [],
+  "10": [],
+  "11": [
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "12": [],
+  "13": [
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025
+  ],
+  "14": [],
+  "15": [],
+  "16": []
+ },
+ "id_ersatz": {
+  "2016": [
+   "02"
+  ],
+  "2018": [
+   "02",
+   "11"
+  ],
+  "2019": [
+   "02",
+   "05",
+   "11"
+  ],
+  "2021": [
+   "05"
+  ]
+ },
+ "gkfz_leer": [
+  2017
+ ]
+}

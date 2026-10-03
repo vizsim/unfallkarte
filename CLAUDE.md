@@ -65,6 +65,13 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
   `map.on("mousemove", layerId)`-Handler (sonst wieder überlappende Popups).
   `render(props, feature)`: `props` ist bereits HTML-escaped (OSM-Attribute sind
   nutzergeneriert); Rohwerte nur über `feature.properties` und nie ungeescaped ins HTML.
+- **Export** (`js/export/`): `accidentExport.js` REIN (kein DOM → `tests/unit/`),
+  `exportDialog.js` DOM; beides samt hyparquet/fzstd NUR per dynamischem `import()` (eigener
+  Chunk, der Start bezahlt nichts — `export.spec.js` prüft das). Daten = die Veröffentlichung
+  (`latest.json` local-first `./data/publish/unfallorte/`, sonst data.vizsim.de), immer die
+  versionierte Datei; „wie in der Karte“ = `readSelection()` aus `accidentLayers.js`. Web-Tests
+  liefern `tests/fixtures/export/` per Route mit Range aus (neu: `uv --directory pipeline run
+  python tests/synthetic.py`).
 - **MapLibre (seit v6 ESM-only):** kein globales `maplibregl` mehr — immer aus
   `js/lib/maplibre.js` importieren (`import { Popup } from "../lib/maplibre.js"`), nie direkt
   aus dem Paket. MapLibre wird **nicht gebündelt** (versionierte Kopie + Importmap,

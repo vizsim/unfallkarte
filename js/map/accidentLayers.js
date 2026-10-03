@@ -20,7 +20,7 @@ export const LAYERS = {
 };
 
 /** Die fünf Filter-Dimensionen des Datensatzes. Reihenfolge = Reihenfolge im Filter. */
-const GROUPS = ["UKATEGORIE", "UART", "UTYP1", "UJAHR"];
+export const GROUPS = ["UKATEGORIE", "UART", "UTYP1", "UJAHR"];
 
 const selectedValues = (group) =>
   [...document.querySelectorAll(`input[data-group="${group}"]:checked`)].map((cb) => parseInt(cb.value));
@@ -28,8 +28,9 @@ const selectedValues = (group) =>
 const selectedBeteiligungen = () =>
   [...document.querySelectorAll("input[data-field]:checked")].map((cb) => cb.dataset.field);
 
-/** Aktuelle Auswahl je Dimension — einmal lesen, mehrfach verwenden. */
-function readSelection() {
+/** Aktuelle Auswahl je Dimension — einmal lesen, mehrfach verwenden. Auch der Export
+ *  filtert damit („wie in der Karte", js/export/accidentExport.js → matchesSelection). */
+export function readSelection() {
   const byGroup = Object.fromEntries(GROUPS.map((g) => [g, selectedValues(g)]));
   const beteiligungen = selectedBeteiligungen();
   return {
