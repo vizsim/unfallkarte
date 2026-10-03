@@ -49,7 +49,10 @@ stehen dort an einer Stelle statt über acht Dateien verteilt.
 ## 🗂️ Daten & Ebenen
 
 - **Unfälle 2017–2025** (Unfallatlas) — Einzelpunkte ab Zoom 11, darunter Cluster mit
-  Tortendiagrammen nach Schweregrad.
+  Tortendiagrammen nach Schweregrad. Nur Unfälle mit Personenschaden, und **nicht alle Länder
+  für alle Jahre**: Berlin ist ab 2018 dabei, Nordrhein-Westfalen und Thüringen ab 2019,
+  Mecklenburg-Vorpommern ab 2020. Ein fehlendes Land ist nicht unfallfrei — für Vergleiche
+  über die Jahre nur Länder nehmen, die durchgehend enthalten sind.
 - **OSM-Kontext** (ODbL) — Schulen und Kindergärten, Gesundheitseinrichtungen,
   Spielplätze, Querungen und Übergänge, ÖPNV-Haltestellen, Tempolimit-Straßennetz.
 - **Bevölkerung** — Zensus 2022 (Destatis) im 100-m-Gitter, in der Übersicht im 1-km-Gitter:
