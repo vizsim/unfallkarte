@@ -387,7 +387,7 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
       Playwright gegen eine Fixture (`tests/fixtures/export/`, aus `pipeline/tests/synthetic.py`).
       Pipeline: `publish readme` (README ohne neuen Stand), `publish deploy` lädt nur Geändertes
       (SHA-1) — das README-Update lud genau eine Datei hoch.
-- [x] **D8 — Gebiet zeichnen** (2026-10-03, `temp/gebiet`) mit Terra Draw 1.35 (Entscheidung:
+- [x] **D8 — Gebiet zeichnen** (LIVE seit 2026-10-03, main 2438d7d; online getestet) mit Terra Draw 1.35 (Entscheidung:
       Bibliothek statt eigener ~140 Zeilen wie in routing_bulk — Bearbeiten, Touch, später
       Rechteck/Kreis). Im Export-Dialog: Gebiet „Kartenausschnitt | Gebiet zeichnen“, danach
       bearbeiten · neu zeichnen · löschen. Leiste oben (Punkt zurück, Abbrechen, Fertig — Fertig
