@@ -31,6 +31,18 @@ test("Karte lädt ohne JS-Fehler, Kernquellen sind da", async ({ page }) => {
   expectNoErrors(errors);
 });
 
+// MapLibre 6.11 bereinigt Attributionen per Positivliste (Tags/Attribute) statt per Sperrliste.
+// Unsere Quellenangaben enthalten Links — die müssen Links bleiben, samt neuem Tab.
+test("Attribution: der Quellen-Link der Unfalldaten bleibt ein Link", async ({ page }) => {
+  const errors = await openMap(page);
+  await settle(page);
+
+  const link = page.locator('.maplibregl-ctrl-attrib-inner a[href="https://unfallatlas.statistikportal.de/"]');
+  await expect(link).toHaveText("Statistisches Bundesamt");
+  await expect(link).toHaveAttribute("target", "_blank");
+  expectNoErrors(errors);
+});
+
 test("Cluster-Hover: vergrößertes Pie + genau ein Popup, Aufräumen beim Verlassen", async ({ page }) => {
   const errors = await openMap(page);
   await jumpTo(page, BERLIN, 8);

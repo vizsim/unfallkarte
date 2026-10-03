@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "chart.js": "4.5.1",
-    "maplibre-gl": "6.10.0",
+    "maplibre-gl": "6.11.2",
     "pmtiles": "4.5.0"
   }
 }
