@@ -1,7 +1,8 @@
 """CLI-Einstieg: `unfallkarte <gruppe> <befehl>`.
 
 Gruppen: accidents/osm/scenario (Kern), hvs/laerm/obs/telraam/movebis/uber/census (Kontextlayer),
-dazu top-level `manifest` + `deploy`. Die Logik lebt in den gleichnamigen Modulen;
+publish (alle Unfälle als Datei für data.vizsim.de), dazu top-level `manifest` + `deploy`.
+Die Logik lebt in den gleichnamigen Modulen;
 hier nur Typer-Wiring (Imports lazy, damit die CLI schnell startet).
 """
 
@@ -24,6 +25,8 @@ obs_app = typer.Typer(no_args_is_help=True, help="OpenBikeSensor-Überholabstän
 movebis_app = typer.Typer(no_args_is_help=True, help="movebis (Stadtradeln) Rad-Geschwindigkeiten")
 uber_app = typer.Typer(no_args_is_help=True, help="Uber Movement (Berlin Q2/2019) Pkw-Speed")
 census_app = typer.Typer(no_args_is_help=True, help="Zensus 2022, 100-m-Gitter (Einwohner)")
+publish_app = typer.Typer(
+    no_args_is_help=True, help="Alle Unfälle als GeoParquet-Datei für data.vizsim.de")
 app.add_typer(accidents_app, name="accidents")
 app.add_typer(osm_app, name="osm")
 app.add_typer(scenario_app, name="scenario")
@@ -34,6 +37,7 @@ app.add_typer(obs_app, name="obs")
 app.add_typer(movebis_app, name="movebis")
 app.add_typer(uber_app, name="uber")
 app.add_typer(census_app, name="census")
+app.add_typer(publish_app, name="publish")
 
 
 def _todo(phase: str, what: str) -> None:
@@ -111,6 +115,31 @@ def accidents_mlt(
         typer.secho(msg, fg=typer.colors.YELLOW)
         return
     typer.secho(f"single_mlt: {out}", fg=typer.colors.GREEN)
+
+
+# --- publish (Veröffentlichung auf data.vizsim.de) ---
+@publish_app.command("build")
+def publish_build(
+    stand: str = typer.Option(None, "--stand", help="Stand im Dateinamen. Default: heute"),
+) -> None:
+    """Alle Jahre -> data/publish/<dataset>/ (GeoParquet, latest.json, CSVs, README)."""
+    from unfallkarte import publish
+
+    latest = publish.build(stand)
+    typer.secho(f"{latest['datei']}: {latest['zeilen']:,} Unfälle, {latest['bytes'] / 1e6:.1f} MB",
+                fg=typer.colors.GREEN)
+
+
+@publish_app.command("deploy")
+def publish_deploy(
+    dry_run: bool = typer.Option(False, "--dry-run", help="b2-Kommandos nur zeigen"),
+) -> None:
+    """Lädt die Veröffentlichung in den Bucket hinter data.vizsim.de (latest.json zuletzt)."""
+    from unfallkarte import publish
+
+    publish.deploy(dry_run=dry_run)
+    msg = "Trockenlauf — nichts hochgeladen." if dry_run else "publish deploy abgeschlossen."
+    typer.secho(msg, fg=typer.colors.GREEN)
 
 
 # --- osm (Phase 2) ---

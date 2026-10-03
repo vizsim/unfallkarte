@@ -32,7 +32,12 @@ unfallkarte movebis build                 # movebis Rad-Geschwindigkeiten (GPKG 
 unfallkarte census check|build            # Zensus 2022, 100 m + 1 km (Rohdaten lokal, Archiv)
 unfallkarte manifest                      # data/manifest.json (Local-first + Datenstand)
 unfallkarte deploy                        # b2 sync (PMTiles + manifest)
+unfallkarte publish build|deploy          # alle Unfälle als GeoParquet → data.vizsim.de
 ```
+
+`publish` ist ein eigener Strang neben den Kacheln: alle Jahre der Registry (auch die mit
+`karte: false`) in einem öffentlichen Schema, eigener Bucket (`config/publish.yaml`), Upload
+per `b2 file upload` je Datei statt `b2 sync`.
 
 ## System-Binaries (nicht via pip)
 
@@ -62,6 +67,7 @@ Update-Ablauf; accidents- und osm-Strang sind unabhängig und können parallel l
 | `scenario run-all` | ~30 min | Szenarien 1/2/3/6/8/9; teuerstes: 3 (Tempo-30-Netz-Analyse, ~18 min) |
 | `census build` | ~5 min | Join ~1,5 min + Tippecanoe; `--reuse-parquet` ~2 min (nur Kacheln neu) |
 | `manifest` + `deploy` | ~3 min | b2 sync; ~2,5 min für ~1,1 GB Upload bei Voll-Update |
+| `publish build` | ~45 s | 10 Jahre, 2,4 Mio. Zeilen → 86 MB GeoParquet + Begleitdateien |
 
 ## Layout
 

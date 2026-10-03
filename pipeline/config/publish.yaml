@@ -1,0 +1,157 @@
+# Veröffentlichung aller Unfälle als EINE GeoParquet-Datei auf data.vizsim.de
+# (`unfallkarte publish build|deploy`). Liest dieselben harmonisierten Jahre wie
+# `accidents build` plus die Jahre mit `karte: false`, schreibt aber ein eigenes, öffentliches
+# Schema: GROSSBUCHSTABEN = Namen der Datensatzbeschreibung des Unfallatlas, kleingeschrieben =
+# von uns ergänzt (unfall_id, ags, geometry).
+
+# Name = Ordner und Dateipräfix: data/publish/<dataset>/, <host><dataset>/, <dataset>_latest.parquet.
+# Ab dem ersten Upload ein Vertrag mit Skripten (URLs) — danach nicht mehr umbenennen.
+dataset: unfallatlas
+host: "https://data.vizsim.de/"
+readme_vorlage: "publish_README.md"  # in config/; die Platzhalter {{…}} füllt `publish build`
+karten_export: false                 # true erst mit dem Export in der Karte (Stufe 2)
+
+# Ziel: der B2-Bucket hinter data.vizsim.de (Cloudflare davor), neben den Mapillary-Ordnern.
+# Schlüssel mit Schreibrecht darauf: B2_ARCHIVE_KEY_ID/B2_ARCHIVE_KEY in .env (wie im
+# Mapillary-Projekt). Bewusst nicht `unfallkarte deploy` (b2 sync): Header je Datei, feste
+# Reihenfolge, versionierte Dateien nie überschreiben.
+deploy:
+  bucket: "vizsim-public-archive"          # Ordner im Bucket = <dataset>/
+  content_type:
+    .parquet: "application/vnd.apache.parquet"
+    .json: "application/json"
+    .csv: "text/csv; charset=utf-8"
+    .md: "text/markdown; charset=utf-8"
+    SHA256SUMS: "text/plain; charset=utf-8"
+  cache_control:
+    versioniert: "public, max-age=31536000, immutable"   # Inhalt ändert sich nie
+    sonst: "no-cache"                                    # Alias, latest.json, CSVs, README
+
+# Datei-Layout. An den Echtdaten 2017–2025 gemessen (2026-10-03): 80,9 MB, Footer 565 KB;
+# Stadtteil (3 × 2 km) 1,3–1,7 MB, eine unfall_id ≈ 1 MB, Gemeinde Köln 4 MB.
+row_group_size: 10000
+compression: zstd
+compression_level: 9
+hilbert_order: 16                    # Raster 65.536 × 65.536 über die Bounding Box
+bloom_filter:                        # je Row Group; Suche nach ID/Gemeinde überspringt den Rest
+  unfall_id: {ndv: 10000, fpp: 0.01}
+  ags: {ndv: 1000, fpp: 0.01}
+
+# Erstes Jahr je Land, geprüft an den Daten (2026-10-03; Rheinland-Pfalz ist entgegen der
+# Datensatzbeschreibung schon 2016 dabei). Der Build bricht ab, wenn ein Land vorher Zeilen
+# hat oder danach ein Jahr fehlt — fängt vertauschte Schlüssel und kaputte Jahresdateien.
+erstes_jahr:
+  "01": 2016
+  "02": 2016
+  "03": 2017
+  "04": 2016
+  "05": 2019
+  "06": 2016
+  "07": 2016
+  "08": 2016
+  "09": 2016
+  "10": 2017
+  "11": 2018
+  "12": 2017
+  "13": 2020
+  "14": 2016
+  "15": 2017
+  "16": 2019
+
+# Versionstabelle im README. Je Veröffentlichung eine Zeile ergänzen (Stand = Monat).
+versionen:
+  - stand: "2026-10"
+    aenderung: "erste Veröffentlichung"
+
+# Quellenvermerk nach dl-de/by-2-0 (Bereitsteller, Lizenz, Verweis auf den Datensatz,
+# Hinweis auf Veränderung). Steht in latest.json und den Parquet-Metadaten.
+quelle:
+  bereitsteller: "© Statistische Ämter des Bundes und der Länder"
+  datensatz: "Unfallatlas"
+  datensatz_url: "https://unfallatlas.statistikportal.de/"
+  download_url: "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/"
+  lizenz: "Datenlizenz Deutschland – Namensnennung – Version 2.0"
+  lizenz_kurz: "dl-de/by-2-0"
+  lizenz_url: "https://www.govdata.de/dl-de/by-2-0"
+  veraenderung: >-
+    Daten geändert: Jahresdateien zusammengeführt, Spaltennamen vereinheitlicht,
+    Koordinaten als Zahl, Spalten unfall_id, ags und geometry ergänzt, LINREFX/LINREFY,
+    OBJECTID und UIDENTSTLAE nicht als eigene Spalten übernommen, räumlich sortiert (vizsim).
+
+# Interne Namen (accidents.yaml → rename) zurück auf die Namen der Datensatzbeschreibung.
+rename:
+  UIDENTSTLA: UIDENTSTLAE
+  LICHT: ULICHTVERH
+  IstSonstig: IstSonstige
+
+# Schlüssel mit amtlichem Klartext (Datensatzbeschreibung Unfallatlas).
+schluessel:
+  UKATEGORIE:
+    1: "Unfall mit Getöteten"
+    2: "Unfall mit Schwerverletzten"
+    3: "Unfall mit Leichtverletzten"
+  UART:
+    0: "Unfall anderer Art"
+    1: "Zusammenstoß mit anfahrendem/anhaltendem/ruhendem Fahrzeug"
+    2: "Zusammenstoß mit vorausfahrendem/wartendem Fahrzeug"
+    3: "Zusammenstoß mit seitlich in gleicher Richtung fahrendem Fahrzeug"
+    4: "Zusammenstoß mit entgegenkommendem Fahrzeug"
+    5: "Zusammenstoß mit einbiegendem/kreuzendem Fahrzeug"
+    6: "Zusammenstoß zwischen Fahrzeug und Fußgänger"
+    7: "Aufprall auf Fahrbahnhindernis"
+    8: "Abkommen von Fahrbahn nach rechts"
+    9: "Abkommen von Fahrbahn nach links"
+  UTYP1:
+    1: "Fahrunfall"
+    2: "Abbiegeunfall"
+    3: "Einbiegen/Kreuzen-Unfall"
+    4: "Überschreiten-Unfall"
+    5: "Unfall durch ruhenden Verkehr"
+    6: "Unfall im Längsverkehr"
+    7: "sonstiger Unfall"
+  ULICHTVERH:
+    0: "Tageslicht"
+    1: "Dämmerung"
+    2: "Dunkelheit"
+  USTRZUSTAND:
+    0: "trocken"
+    1: "nass/feucht/schlüpfrig"
+    2: "winterglatt"
+  UWOCHENTAG:
+    1: "Sonntag"
+    2: "Montag"
+    3: "Dienstag"
+    4: "Mittwoch"
+    5: "Donnerstag"
+    6: "Freitag"
+    7: "Samstag"
+  PLST:
+    1: "Unfallort nach regulärem Verfahren plausibilisiert"
+    2: "Unfallort nach erweitertem Verfahren für Unfälle mit Fahrradbeteiligung plausibilisiert"
+  ULAND:
+    "01": "Schleswig-Holstein"
+    "02": "Hamburg"
+    "03": "Niedersachsen"
+    "04": "Bremen"
+    "05": "Nordrhein-Westfalen"
+    "06": "Hessen"
+    "07": "Rheinland-Pfalz"
+    "08": "Baden-Württemberg"
+    "09": "Bayern"
+    "10": "Saarland"
+    "11": "Berlin"
+    "12": "Brandenburg"
+    "13": "Mecklenburg-Vorpommern"
+    "14": "Sachsen"
+    "15": "Sachsen-Anhalt"
+    "16": "Thüringen"
+
+# Beteiligung: 1 = beteiligt, 0 = nicht beteiligt. IstGkfz ist 2017 leer: Güterkraftfahrzeuge
+# stecken in diesem Jahr in IstSonstige (2016 sind sie getrennt erfasst).
+beteiligung:
+  IstRad: "Fahrrad"
+  IstPKW: "Pkw"
+  IstFuss: "Fußgänger"
+  IstKrad: "Kraftrad"
+  IstGkfz: "Güterkraftfahrzeug"
+  IstSonstige: "sonstiges Verkehrsmittel"

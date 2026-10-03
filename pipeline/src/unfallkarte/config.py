@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     b2_application_key_id: str = ""
     b2_application_key: str = ""
     b2_bucket_name: str = "unfallkarte-data-v2"
+    # Schlüssel für den Bucket hinter data.vizsim.de (`publish deploy`), wie im Mapillary-Projekt.
+    b2_archive_key_id: str = ""
+    b2_archive_key: str = ""
     mapillary_token: str = ""
     telraam_api_key: str = ""
 
