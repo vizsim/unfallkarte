@@ -159,13 +159,16 @@ def test_bloom_filter_und_sortierung(built: tuple[Path, dict]) -> None:
 def test_readme_gerendert(built: tuple[Path, dict]) -> None:
     out, latest = built
     text = (out / "README.md").read_text(encoding="utf-8")
-    assert "{{" not in text and "karten-export" not in text and "Kartenausschnitt" not in text
+    assert "{{" not in text and "karten-export" not in text
     assert f"| Umfang | {latest['zeilen']:,} Unfälle |".replace(",", ".") in text
     assert "2016, 2018 und 2019 vollständig und 2021 für Nordrhein-Westfalen" in text
     assert "**`IstGkfz` fehlt 2017.**" in text
     assert "   | ab 2016 | ab 2018 | ab 2019 | ab 2020 |\n   |---|" in text
-    mit_export = publish.render_readme(latest, {**TEST_CFG, "karten_export": True})
-    assert "Kartenausschnitt als GeoJSON" in mit_export and "karten-export" not in mit_export
+    # Hinweise auf den Karten-Export je nach Schalter — unabhängig vom Wert in publish.yaml.
+    ohne = publish.render_readme(latest, {**TEST_CFG, "karten_export": False})
+    mit = publish.render_readme(latest, {**TEST_CFG, "karten_export": True})
+    assert "Kartenausschnitt" not in ohne and "karten-export" not in ohne
+    assert "Kartenausschnitt als GeoJSON" in mit and "karten-export" not in mit
 
 
 def test_readme_beispiele_laufen(built: tuple[Path, dict], tmp_path: Path,
@@ -232,6 +235,7 @@ def test_readme_neu_und_nur_geaenderte_dateien_hochladen(built: tuple[Path, dict
     out, latest = built
     pub = tmp_path / "pub"
     shutil.copytree(out, pub)   # Kopie: `built` ist modulweit geteilt
+    publish.readme(pub, {**TEST_CFG, "karten_export": False})   # Stand im Bucket: ohne Hinweis
     remote = {CFG["prefix"] + p.name: publish._sha1(p) for p in pub.iterdir()}
 
     # `publish readme`: nur das README ändert sich, kein neuer Datenstand.
