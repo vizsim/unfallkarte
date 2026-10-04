@@ -2,7 +2,7 @@
 """Zensus 2022, 100-m- und 1-km-Gitter → Parquet + PMTiles (Kontextlayer „Einwohner").
 
 Reproduziert die Kette, die bis 2026-09 außerhalb dieser Pipeline lief (Herkunft in
-docs/TODO.md):
+docs/DONE.md):
   1. npgeo-Hub (vfdb): Zensus-2022-Gitter 100 m mit ~45 Merkmalen + Gemeindeschlüssel `ags`
   2. erreichbarad `1aa_add_plz_to_pop_ger_v03_regiosta.ipynb`: Zellmitte `within` PLZ-Gebiet
      -> `plz`; RegioStaR 2023 über `ags` == `gem_23` (INNER Join) -> `name_23`, `RegioStaR7`

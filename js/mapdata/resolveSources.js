@@ -29,6 +29,8 @@ export const ACCIDENT_SOURCES = {
 
 // ./data/ ist gitignoriert und existiert nur auf dem Entwicklungsrechner; auf Pages ist die
 // Probe ein Roundtrip für eine Antwort, die immer "nein" lautet. (Auch der Export fragt das.)
+// Bewusst am Hostnamen, NICHT an `import.meta.env.DEV`: sonst probte der gebaute Stand
+// (`vite preview`) nie lokal, und contract.spec.js prüfte still B2 statt der frisch gebauten Tiles.
 export const mayHaveLocalTree = () => ["localhost", "127.0.0.1"].includes(globalThis.location?.hostname);
 
 async function fetchJson(url) {

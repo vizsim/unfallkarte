@@ -3,7 +3,7 @@
 // Vorher stand dieselbe Information an ~8 Stellen (addSources MIGRATED, addLayers,
 // setupLayerToggles, drei Listen in legendHandlers, permalink kontextKeys, popupHandlers,
 // index.html) und lief auseinander — z. B. fehlten Telraam/Radinfra im Permalink. Jetzt
-// leiten diese Module ihre Listen hier ab. Umbau in Schritten (docs/TODO.md, Roadmap 2);
+// leiten diese Module ihre Listen hier ab. Umbau in Schritten (docs/DONE.md, Roadmap 2);
 // abgesichert durch tests/web/golden.spec.js.
 //
 // Stand Schritt 4: alle Kontext-Layer + Szenarien inkl. ihrer Layer-Definitionen. addLayers.js

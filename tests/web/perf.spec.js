@@ -126,7 +126,7 @@ test.describe("PMTiles unter Linux/Android/macOS", () => {
 test("MapLibre ungebündelt: Worker und Hauptthread teilen sich -shared.mjs", async ({ page }) => {
   // MapLibre sucht seinen Worker zur Laufzeit neben der eigenen Datei (import.meta.url).
   // Gebündelt fände er ihn nicht (Karte leer, OHNE Fehler), mit setWorkerUrl lüde der Worker
-  // -shared unter eigener URL ein zweites Mal (+121 KB gzip, Spike in docs/VITE_MIGRATION.md).
+  // -shared unter eigener URL ein zweites Mal (+121 KB gzip, gemessen im Spike vor dem Vite-Umbau).
   // Darum bleibt MapLibre extern (vite.config.js). Hält das fest: alle drei Dateien kommen
   // aus EINEM versionierten Ordner, und -shared läuft über genau EINE URL (die zweite Anfrage
   // — die des Workers — ist dann ein Cache-Treffer). Worker-Anfragen sieht nur der Kontext.

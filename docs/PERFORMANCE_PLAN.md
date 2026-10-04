@@ -1,21 +1,21 @@
 # Initiale Ladezeit — Plan, Messungen, offene Punkte
 
-Stand: **2026-09-21**. Der Plan vom 20.09. war eine Analyse ohne Zahlen; seither ist Stufe 0
-(messen) durchgeführt und die Stufen 2 und 3 sind gebaut, getestet und deployt. Was hier als
-Zahl steht, ist gemessen — Schätzungen sind als solche gekennzeichnet.
+Stand: **2026-09-24**. Der Plan vom 20.09. war eine Analyse ohne Zahlen; seither ist Stufe 0
+(messen) durchgeführt und die Stufen 2, 3, 4 (Vite) und 7 (Startpfad) sind gebaut, getestet und
+deployt. Was hier als Zahl steht, ist gemessen — Schätzungen sind als solche gekennzeichnet.
 
-Ergänzt `docs/TODO.md` Roadmap 3 (Vite), ersetzt sie nicht.
+Offene Punkte daraus stehen in `docs/TODO.md` (Abschnitt „Ladezeit / Laufzeit“).
 
 ## Stand auf einen Blick
 
 | Stufe | Status | Ergebnis |
 |---|---|---|
 | 0 Messen | **erledigt** | siehe „Was Stufe 0 ergeben hat" |
-| 1 CDN-Cache für die Tiles | **offen — größter verbleibender Hebel** | heute wird NICHTS gecacht |
+| 1 CDN-Cache für die Tiles | **offen** → TODO.md (B1) | heute wird NICHTS gecacht; nach Stufe 7 vor allem fürs Pannen/Zoomen |
 | 2 Attribut-Diät der Tiles | **erledigt + deployt** (`cadff01`) | −40 % / −63 % Dateigröße, −43 % je Kachel |
 | 3 Roundtrip-Diät | **erledigt + deployt** (`cacd3f0`, `77ec4c9`, `acb5ef6`) | live −0,35 s, erste Kachel-Anfrage −0,51 s |
-| 4 Vite | **erledigt + live** (`50d7fd5`, 2026-09-23) | live erster Unfallpunkt 5,76 → 5,1 s, erste Kachel-Anfrage 2,98 → 2,46 s; lokal A/B −0,78 s; schnelle Leitung ≈ 0 — [`VITE_MIGRATION.md`](VITE_MIGRATION.md) |
-| 5 Lazy-Chunks | offen (nach Vite) | — |
+| 4 Vite | **erledigt + live** (`50d7fd5`, 2026-09-23) | live erster Unfallpunkt 5,76 → 5,1 s, erste Kachel-Anfrage 2,98 → 2,46 s; lokal A/B −0,78 s; schnelle Leitung ≈ 0 — Verlauf in `DONE.md` |
+| 5 Lazy-Chunks | offen → TODO.md (E1, später) | laut Report alle Ideen zusammen ≈ 15 KB gzip |
 | 6 Gefühlte Ladezeit, Perf-Budget | teilweise (`tests/web/perf.spec.js` steht) | — |
 | 7 Startpfad: UI bei `style.load` (A1), PMTiles ohne Cache-Sperre (A2) | **erledigt + live** (`cd492aa`, `f8b055d`, 2026-09-24) | Mobilfunk: Legende 5,26 → 2,73 s, erster Punkt 6,08 → 4,18 s, fertig 7,72 → 5,67 s; Städtesprung schnelle Leitung: Unfall-Kacheln −40 % |
 
@@ -90,7 +90,7 @@ Gegenprobe, dass nur Attribute fehlen und keine Daten: Berlin z12 trägt vorher 
 
 ---
 
-## Stufe 1 — CDN-Cache für die Tiles (offen, größter Hebel)
+## Stufe 1 — CDN-Cache für die Tiles (offen → TODO.md, B1)
 
 PMTiles ist **eine** Datei, aus der der Browser Bereiche holt: Kopf → Verzeichnis → Kachel.
 Drei Anfragen für die erste Kachel, und weiter für jede neue Gegend — jede mit voller
@@ -131,11 +131,11 @@ Punkt lässt sich nicht mehr auf seine Quellzeile zurückführen. Ebenso die Geb
 (`ULAND`, `UREGBEZ`, `UKREIS`, `UGEMEINDE`), die man für ein künftiges „nach Landkreis filtern"
 bräuchte. Beides ist eine Zeile in `tiles.yaml` plus ein Rebuild entfernt.
 
-**Offen geblieben:** `no_tile_size_limit` + `no_feature_limit` stehen in 14 bzw. 13 Profilen und
-hebeln `drop_densest_as_needed` sowie `maximum_tile_bytes` aus. Nach der Diät liegt die größte
-gemessene Kachel bei ~178 KB — die Bremse scharf zu machen hieße, Unfälle bei niedrigem Zoom
-wegzulassen. Das ist eine inhaltliche, keine Performance-Entscheidung; erst neu messen, dann
-getrennt entscheiden.
+**Offen geblieben** (→ TODO.md, C1): `no_tile_size_limit` + `no_feature_limit` stehen in 14
+bzw. 13 Profilen und hebeln `drop_densest_as_needed` sowie `maximum_tile_bytes` aus. Nach der
+Diät liegt die größte gemessene Kachel bei ~178 KB — die Bremse scharf zu machen hieße, Unfälle
+bei niedrigem Zoom wegzulassen. Das ist eine inhaltliche, keine Performance-Entscheidung; erst
+neu messen, dann getrennt entscheiden.
 
 ---
 
@@ -164,13 +164,14 @@ Zurückgestellt:
   fragt MapLibre dort keine Kacheln an, es bleibt der PMTiles-Kopf der Quelle. Der läuft
   parallel zum Kopf der Unfall-Quelle, ist also kein serieller Roundtrip. Dem stünde gegenüber,
   Cluster-Layer, Zähler, Legende und den Permalink-auf-z8-Fall aus dem Kernpfad zu lösen —
-  mehr Fläche als die drei erledigten Schritte zusammen. Erst nach Stufe 1 neu bewerten.
+  mehr Fläche als die drei erledigten Schritte zusammen. Erst nach Stufe 1 neu bewerten
+  (→ TODO.md, B1).
 - **`cache: "no-cache"` beim Manifest.** Ohne `Cache-Control`/`ETag` von B2 ist ein Wechsel auf
-  `"default"` heute wirkungslos. Gehört zu Stufe 1.
+  `"default"` heute wirkungslos. Gehört zu Stufe 1 (→ TODO.md, B1).
 - **Doppelte Probe in der Entwicklung.** `resolveAccidentSources()` probt die zwei
   Unfall-Dateien, `resolveSources()` probt alle 25 inklusive derselben zwei. Zwei überflüssige
   HEAD-Anfragen, nur auf localhost, ohne übertragene Bytes. Ein memoisiertes `existsLocally`
-  wäre der Einzeiler.
+  wäre der Einzeiler. *Erledigt:* `probeCache` in `resolveSources.js` (je Datei eine Probe).
 
 ---
 
@@ -192,12 +193,14 @@ Zurückgestellt:
 3. **`manifest.generate()` stempelt `built` für alle 25 Einträge auf heute**
    (`manifest.py:86`) — ein Regenerieren verpasst unbeteiligten Layern ein falsches Baudatum.
    Das Feld wird vom Frontend nirgends gelesen. Sauberer wäre, es aus der mtime der jeweiligen
-   Datei abzuleiten.
+   Datei abzuleiten. → offen in TODO.md.
 4. **Toter Dekorator:** über `accidents_tiles` in `cli.py` hängt ein
    `@accidents_app.command("build")`, den der echte `build`-Befehl (Parquet) überschreibt.
+   *Erledigt:* jeder Befehl trägt heute genau einen Dekorator.
 5. **Source-Map-404 in der Konsole:** die Vendor-Dateien tragen `sourceMappingURL`-Kommentare,
    die `.map`-Dateien vendoren wir nicht. Kosmetisch, nur bei offenen Entwicklerwerkzeugen
    sichtbar — beim Vendoring die Kommentarzeile entfernen oder die Maps mitnehmen.
+   *Erledigt mit Vite:* `vite.config.js` streicht die Kommentarzeile beim Kopieren.
 6. **`-x` greift nicht auf Tippecanoes eigene Cluster-Attribute** (`point_count` & Co.): sie
    entstehen nach dem Filter, die Kacheln sind byte-identisch. Keine Config dafür eintragen.
 7. **`contract.spec.js` braucht keine gepflegte Attributliste** — es leitet die benutzten
@@ -281,8 +284,8 @@ Nutzen liegt im Edge.
 
 ## Messmethode (zum Nachmessen)
 
-Wie in `docs/MAPLIBRE_6_UPGRADE.md`: Zeit bis zum ersten Unfallpunkt, Profil 1,6 Mbit/s /
-150 ms RTT (CDP `Network.emulateNetworkConditions`), mehrere Läufe, Median **und** Spanne.
+Zeit bis zum ersten Unfallpunkt, Profil 1,6 Mbit/s / 150 ms RTT (CDP
+`Network.emulateNetworkConditions`), mehrere Läufe, Median **und** Spanne.
 
 - **Nie gegen `npm run dev` oder `vite preview` messen** — ohne gzip und Pages-Cache verfälscht das
   um Sekunden. Für lokale Vergleiche einen Server mit gzip + `max-age=600` benutzen, und die
@@ -304,11 +307,5 @@ Kontext je Lauf, Aufwärmlauf je Arm). Vorher lagen sie nur im Scratchpad der je
 ## Reihenfolge von hier aus
 
 Vite (Stufe 4) und der Startpfad (Stufe 7) sind erledigt. Die weitere Reihenfolge steht im
-[Performance-Report](PERFORMANCE_REPORT_2026-09-24.md), Abschnitt 8, die offenen Punkte in
-`docs/TODO.md`:
-
-1. **Laufzeit:** Zähler nur einmal je Bewegung (D1), Torten-Bilder quantisieren (D3).
-2. **Stufe 1 (CDN + Purge)** — nach A2 vor allem fürs Pannen/Zoomen; die Browser-TTL wirkt
-   nicht mehr, der Nutzen liegt im Edge-Cache.
-3. **z11-Einzelpunkt-Kacheln** erst messen, dann inhaltlich entscheiden (C1).
-4. Zielbild ZXY über einen Worker (B3), wenn Kosten und Limits passen.
+[Performance-Report](PERFORMANCE_REPORT_2026-09-24.md), Abschnitt 8; die offenen Punkte stehen
+in dieser Reihenfolge in `docs/TODO.md` („Ladezeit / Laufzeit“).

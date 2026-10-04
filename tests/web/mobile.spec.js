@@ -28,7 +28,7 @@ test.describe("Handy", () => {
 
     expect(await isCollapsed(page), "Legende sollte auf dem Handy zugeklappt starten").toBe(true);
 
-    // Der eigentliche Punkt aus docs/TODO.md: vorher verdeckte sie die halbe Karte.
+    // Der eigentliche Punkt aus docs/DONE.md: vorher verdeckte sie die halbe Karte.
     const covered = await coverage(page, ".legend");
     expect(covered, `Legende verdeckt ${(covered * 100).toFixed(0)} % der Karte`).toBeLessThan(0.25);
 

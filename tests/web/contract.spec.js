@@ -100,7 +100,7 @@ test("Sc2-Slider filtert nach biped_count (blendete früher ALLES aus: Attribut 
 
 // Bekannte Lücken: Popup liest ein Attribut, das (noch) nicht in den Tiles steht -> die Zeile
 // erscheint nie. Jede Ausnahme braucht einen Grund; sobald die Tiles das Feld liefern, schlägt
-// der Test an ("Ausnahme überflüssig") und der Eintrag fliegt raus. Siehe docs/TODO.md.
+// der Test an ("Ausnahme überflüssig") und der Eintrag fliegt raus. Siehe docs/DONE.md.
 const KNOWN_POPUP_GAPS = {
   // health/playgrounds: `operator` + `playground` fehlten bis zum OSM-Rebuild am 2026-09-19
   // (osmconf-Fix 187c78a). Ausnahmen entfernt, die Popup-Zeilen "Träger"/"Ausstattung" leben.

@@ -10,7 +10,7 @@
 > reine Historie: was umgebaut wurde und **warum** (Entscheidungen zu CRS, Bucket-Struktur,
 > Local-first, keyless Basemap, AGPL). Der Review-Backlog in §13 ist abgearbeitet; die beiden
 > Punkte, die offen blieben (Deploy-Retry, Pipeline-Golden im pytest), sind nach `TODO.md`
-> gewandert.
+> gewandert — ebenso die nie ausgeführte History-Bereinigung aus §12.
 >
 > Ziel: Die Jupyter-Notebooks in `preprocessing/` und `scenarios/` durch einen
 > wartbaren, testbaren Python-Code ersetzen, sodass sich die Daten (v. a. die
@@ -517,7 +517,8 @@ einfacher.
 
 ## 12. Offene Fragen (Rest)
 
-1. **Repo-History (Reihenfolge geklärt):** Zwei getrennte Dinge nicht verwechseln:
+1. ➡️ *(zweiter Teil offen, verschoben nach [`TODO.md`](TODO.md) „Aufräumen“)*
+   **Repo-History (Reihenfolge geklärt):** Zwei getrennte Dinge nicht verwechseln:
    - *Jetzt, auf dem Branch (sicher):* `data/` in `.gitignore` **und** bereits
      getrackte Großdateien per `git rm --cached <datei>` aus dem Tracking nehmen
      (Datei bleibt lokal, raus aus künftigen Commits). Normaler Commit.

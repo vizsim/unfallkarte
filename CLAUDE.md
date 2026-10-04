@@ -2,9 +2,11 @@
 
 Interaktive Webkarte für Verkehrsunfälle in Deutschland (Unfallatlas). Die frühere
 Notebook-Verarbeitung ist zu einer wartbaren Python-Pipeline umgebaut (Refactor
-abgeschlossen). **Offene Punkte stehen ausschließlich in `docs/TODO.md`.**
-`docs/REFACTORING_PLAN.md` ist reine Historie — was umgebaut wurde und warum
-(CRS, Bucket-Struktur, Local-first, keyless, AGPL); dort nichts mehr als offen führen.
+abgeschlossen). **Offene Punkte stehen ausschließlich in `docs/TODO.md`.** Was erledigt ist,
+zieht beim Abhaken samt Datum, Begründung und Messwerten nach `docs/DONE.md` um (gleiche
+Gliederung) — die TODO bleibt kurz. `docs/REFACTORING_PLAN.md` ist reine Historie — was
+umgebaut wurde und warum (CRS, Bucket-Struktur, Local-first, keyless, AGPL); dort nichts mehr
+als offen führen.
 Überblick: `README.md`.
 Diese Datei = die Regeln, die in JEDER Session gelten.
 
@@ -15,8 +17,8 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
 - **Repo-Root** — Frontend, gebaut mit **Vite** (`index.html`, `main.js`, `js/`, `style.css`,
   `vite.config.js`). `public/` = Dateien, die zur Laufzeit per URL geholt werden und darum
   ungehasht bleiben (`style.json`, Sprite in `icons/`, og:image). Build → `dist/` (gitignored).
-  Ungebaut läuft das Root nicht (nackte Imports aus npm). Plan/Hintergrund:
-  `docs/VITE_MIGRATION.md`.
+  Ungebaut läuft das Root nicht (nackte Imports aus npm). Warum der Build so aussieht:
+  Kopfkommentar in `vite.config.js`.
 
 ## Harte Regeln (nicht brechen)
 - **Frontend-Vertrag:** PMTiles-**Dateinamen** und **interne Layer-Namen** sind ein
@@ -139,6 +141,6 @@ wird direkt mit pyogrio gelesen, das GDAL mitbringt.)
   Produktiv-Deploy. Größere
   Umbauten auf einem `temp/*`-Branch bauen und erst nach grünen Tests mergen. Der Stand vor
   dem Pipeline-Refactor hängt als Tag `v2025` (kein Branch — er liegt auf derselben Linie),
-  der letzte Stand vor Vite als Tag `pre-vite` (Rückweg: `docs/VITE_MIGRATION.md`, Schritt 4).
+  der letzte Stand vor Vite als Tag `pre-vite` (Rückweg: Kopf von `.github/workflows/ci.yml`).
   Offene Punkte siehe Auto-Memory
   bzw. `docs/TODO.md`.

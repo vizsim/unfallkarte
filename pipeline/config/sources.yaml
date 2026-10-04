@@ -192,7 +192,7 @@ datasets:
 
   # --- Kontextlayer Bevölkerung (Zensus 2022, 100-m-Gitter) ---
   # Gebaut von census.py (`unfallkarte census build`), reproduziert die frühere Kette aus
-  # erreichbarad + routing_bulk (Herkunft: docs/TODO.md); Kachel-Einstellungen in tiles.yaml.
+  # erreichbarad + routing_bulk (Herkunft: docs/DONE.md); Kachel-Einstellungen in tiles.yaml.
   # Daneben entsteht census/population_100m.parquet mit allen ~50 Merkmalen (nicht deployt).
   census_population:
     file: "census/population_100m.pmtiles"

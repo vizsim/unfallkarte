@@ -1,6 +1,6 @@
 // Golden-Reference fürs Frontend (Pendant zu pipeline/tests/golden): hält fest, WAS die App
 // aus ihrer Layer-Verdrahtung macht — unabhängig davon, WIE sie verdrahtet ist. Sicherheitsnetz
-// für den Umbau auf die Layer-Registry (docs/TODO.md, Roadmap 2): nach jedem Schritt muss der
+// für den Umbau auf die Layer-Registry (docs/DONE.md, Roadmap 2): nach jedem Schritt muss der
 // Snapshot identisch sein, außer eine Änderung ist gewollt. Dann bewusst neu aufnehmen:
 //
 //     npx playwright test golden --update-snapshots      (Diff im Commit prüfen!)

@@ -5,7 +5,8 @@
 # Deploy: Pages liefert NICHT mehr den Branch aus, sondern das dist/, das der web-Job gebaut
 # UND getestet hat (getestet = ausgeliefert). Voraussetzung: Repo-Settings → Pages → Source
 # „GitHub Actions". Ein Push auf main ist damit erst NACH grünen Frontend-Tests live.
-# Hintergrund + Rückweg: docs/VITE_MIGRATION.md (Schritt 4).
+# Zurück auf „Deploy from branch" hieße: Pages liefert das UNGEBAUTE Root aus (nackte Imports
+# → leere Karte). Letzter Stand ohne Build: Tag `pre-vite`.
 #
 # Action-Versionen: alle auf der Node-24-Laufzeit des Runners (Node 20 ist dort abgekündigt).
 # Das ist unabhängig vom Node, mit dem UNSERE Tests laufen (setup-node: node-version 22).

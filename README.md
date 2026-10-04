@@ -214,10 +214,16 @@ data.vizsim.de (`publish deploy`, eigener Bucket) ist ein dritter.
 
 ## 📚 Weitere Doku
 
-- [`docs/TODO.md`](docs/TODO.md) — **alle** offenen Punkte (UX, CI, Pipeline, Aufräumen).
+- [`docs/TODO.md`](docs/TODO.md) — **alle** offenen Punkte (UX, CI, Pipeline, Aufräumen);
+  Erledigtes mit Datum und Begründung in [`docs/DONE.md`](docs/DONE.md).
 - [`docs/REFACTORING_PLAN.md`](docs/REFACTORING_PLAN.md) — reine Historie: was beim Umbau von
   Notebooks zur Pipeline entschieden wurde und **warum** (CRS-Disziplin, Bucket-Struktur,
   Local-first, keyless Basemap, AGPL). Keine offenen Punkte mehr.
+- [`docs/MLT_EVALUATION.md`](docs/MLT_EVALUATION.md) — Unfall-Kacheln als MLT: Messungen,
+  Entscheidung, offene Nacharbeiten.
+- Ladezeit: [`docs/PERFORMANCE_PLAN.md`](docs/PERFORMANCE_PLAN.md) (Stufen, Ergebnisse,
+  Messmethode) und [`docs/PERFORMANCE_REPORT_2026-09-24.md`](docs/PERFORMANCE_REPORT_2026-09-24.md)
+  (Maßnahmenkatalog, Vergleich mit OpenTrailMap).
 - [`CLAUDE.md`](CLAUDE.md) — Regeln und Konventionen für die Arbeit im Repo.
 
 ## 🧰 Tech

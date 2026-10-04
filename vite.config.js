@@ -1,4 +1,4 @@
-// vite.config.js — Dev-Server + Build des Frontends. Hintergrund: docs/VITE_MIGRATION.md.
+// vite.config.js — Dev-Server + Build des Frontends (Verlauf der Umstellung: docs/DONE.md).
 //
 // Drei Abweichungen vom Vite-Standard, jede mit gemessenem Grund:
 //  1. MapLibre wird NICHT gebündelt (maplibreExternal). Es sucht seinen Worker zur Laufzeit
@@ -37,7 +37,7 @@ function maplibreExternal() {
       { tag: "script", attrs: { type: "importmap" }, injectTo: "head-prepend",
         children: JSON.stringify({ imports: { "maplibre-gl": `./${ML_DIR}/maplibre-gl.mjs` } }) },
       // Ohne Preload entdeckt der Browser MapLibre erst nach dem Parsen des Bündels, -shared
-      // noch einen Roundtrip später (gemessen ~0,3 s, docs/MAPLIBRE_6_UPGRADE.md).
+      // noch einen Roundtrip später (gemessen ~0,3 s beim Umstieg auf MapLibre 6).
       ...ML_FILES.slice(0, 2).map((f) => ({
         tag: "link", attrs: { rel: "modulepreload", href: `./${ML_DIR}/${f}` }, injectTo: "head-prepend",
       })),

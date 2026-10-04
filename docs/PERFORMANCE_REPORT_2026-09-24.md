@@ -585,4 +585,4 @@ const ends = await Promise.all([...Array(8)].map(async (_, i) => {
   [Origin Range Requests (Changelog 02.09.2026)](https://developers.cloudflare.com/changelog/post/2026-09-02-origin-range-requests-rulesets-api/),
   [Default cache behavior](https://developers.cloudflare.com/cache/concepts/default-cache-behavior/),
   [Workers-Preise](https://developers.cloudflare.com/workers/platform/pricing/), [R2-Preise](https://developers.cloudflare.com/r2/pricing)
-- Eigene Doku: `docs/PERFORMANCE_PLAN.md`, `docs/VITE_MIGRATION.md`, `docs/MAPLIBRE_6_UPGRADE.md`
+- Eigene Doku (Stand `50d7fd5`): `docs/PERFORMANCE_PLAN.md`, `docs/VITE_MIGRATION.md`, `docs/MAPLIBRE_6_UPGRADE.md`
