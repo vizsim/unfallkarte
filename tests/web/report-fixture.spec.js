@@ -82,7 +82,8 @@ test("Einrichtung aus dem Link: alle Abschnitte, Weg A, Nutzerangabe, Brief, Dru
   // Druckansicht: A4-Dokument mit Karte, Einordnung und Brief; Druck-CSS blendet den Rest aus
   await page.click('button[data-go="pdf"]');
   await expect(page.locator(".doc h1")).toHaveText("Grundschule am Testpark");
-  await expect(page.locator(".doc .map svg")).toHaveCount(1);
+  await expect(page.locator(".doc .map > svg")).toHaveCount(1);   // die Karte; ihre Legende hat eigene Symbole
+  await expect(page.locator(".doc .maplegend")).toContainText("Unfälle");
   await expect(page.locator(".doc .letter .subject")).toContainText("Tempo 30");
   await page.emulateMedia({ media: "print" });
   await expect(page.locator(".steps")).toBeHidden();

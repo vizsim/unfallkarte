@@ -2,7 +2,7 @@
 // Kein DOM-Zugriff hier: main.js setzt das Ergebnis ein. Werte aus OSM gehen durch esc().
 import { esc, fmt, origin, stIcon, ST_ICON, pctOr, unavailable } from "./common.js";
 import { chartYears, chartHBars, chartHours } from "./charts.js";
-import { mapSVG, mapLegend } from "./svgMap.js";
+import { mapWithLegend } from "./svgMap.js";
 import { BET, TYP, ART, WT, KAT, REGIOSTAR7, CROSSING_LABEL, STOP_LABEL } from "../model.js";
 import { FAC, facLabel } from "../facilities.js";
 import { REF_LABEL } from "../roads.js";
@@ -122,7 +122,7 @@ export function renderReport(V) {
         <div class="metaline">${title.ort ? `<span>${esc(title.ort)}</span>` : ""}${cz?.gemeinde ? `<span>Gemeinde (Zensus): ${esc(cz.gemeinde)}</span>` : ""}<span>${land && land !== "bund" ? `${esc(landName(land))}${!st.land && place?.landQuelle ? ` <span class="muted">(${esc(place.landQuelle)})</span>` : ""}` : "Land: Bund (ohne Landesregeln)"}</span><span>erstellt ${esc(V.today)}</span></div>
         <div class="stamp"><span>Datenbasierte Einschätzung</span><span>keine Rechtsberatung</span><span>kein Gutachten</span><span>keine amtliche Feststellung</span></div>
         <div class="metaline small"><span>Regelwerk ${RW.version} (Stand ${RW.stand})</span><span>Landesregeln: ${esc(R.P.label)}</span>${vintage(meta, "accidents") ? `<span>Unfallatlas bis ${esc(vintage(meta, "accidents"))}</span>` : ""}${vintage(meta, "roads") ? `<span>OSM ${esc(vintage(meta, "roads"))}</span>` : ""}</div>
-        <div class="mapbox" id="map-report">${mapSVG(M, R, { width: V.mapWidth ?? 760, years: st.years })}${mapLegend()}</div>
+        <div class="mapbox" id="map-report">${mapWithLegend(M, R, { width: V.mapWidth ?? 760, years: st.years })}</div>
       </div>
       <div class="panel glance">
         <div class="eyebrow">1 · Auf einen Blick</div>
@@ -335,8 +335,7 @@ export function printDoc(V) {
     <h1>${esc(title.titel)}</h1>
     <div class="dmeta">${esc([title.ort, cz?.gemeinde ? `Gemeinde ${cz.gemeinde}` : null, R.P.land !== "bund" ? landName(R.P.land) : null].filter(Boolean).join(" · "))} · Landesregeln: ${esc(R.P.label)} · Regelwerk ${RW.version} (Stand ${RW.stand})</div>
     <div class="dstamp">Datenbasierte Einschätzung · keine Rechtsberatung · kein Gutachten · keine amtliche Feststellung</div>
-    <div class="map keep">${mapSVG(M, R, { width: 700, years: st.years, print: true, aspect: 1.5 })}</div>
-    <p class="dmeta">Karte: Punkte = Unfälle mit Personenschaden ${st.years.from}–${st.years.to} (dunkelrot Getötete, rot Schwerverletzte, hell Leichtverletzte; hohl = außerhalb). Straßenband grün ≤ 30, gelb 50, rot &gt; 50 km/h (gestrichelt = abgeleitet). Gestrichelt mit Zeichen 274 = Vorschlag. © OpenStreetMap-Mitwirkende, Unfallatlas.</p>
+    <div class="map keep">${mapWithLegend(M, R, { width: 700, years: st.years, print: true, aspect: 1.5 })}</div>
     <h2>1 · Auf einen Blick</h2>
     <table class="glance"><tbody>${R.glance.map((f) => `<tr><td style="width:22px">${amp(f.st)}</td><td><b>${esc(f.t)}</b><br><span class="dmeta">${esc(f.n)}</span></td></tr>`).join("")}</tbody></table>
     <p><b>Maßnahmen-Kandidaten:</b> ${R.measures.map((m) => esc(m.t)).join(" · ") || "keine aus den Daten"}</p>

@@ -8,8 +8,10 @@
   --rule: #d7dfda; --rule-strong: #b6c2bc;
   --accent: #0d5a9e; --accent-ink: #0b4f8c; --accent-wash: #e2ecf7; --on-accent: #ffffff;
   --good: #0ca30c; --warn: #fab219; --crit: #d03b3b; --neutral: #8a948f;
-  --sev1: #7a1a1d; --sev2: #c8402f; --sev3: #ee9a7c;
-  --t30: #1baf7a; --t50: #eda100; --t70: #c43d3d;
+  /* Unfälle nach Schwere und Tempo 30 wie in der Hauptkarte (js/styleConfig.js: paintStyles.UKATEGORIE,
+     SPEED_COLOR_STOPS) — gleiche Farben in hell, dunkel und im Druck. */
+  --sev1: #e41a1c; --sev2: #377eb8; --sev3: #4daf4a;
+  --t30: #31a354;
   --map-bg: #eef2ef; --road: #ffffff; --road-casing: #c3cdc8; --map-label: #33413b;
   --paper: #ffffff; --paper-ink: #1b1b1b; --paper-muted: #5a5a5a; --paper-rule: #d9d9d9;
   --shadow: 0 1px 2px rgba(16, 28, 22, .06), 0 6px 18px rgba(16, 28, 22, .06);
@@ -24,8 +26,6 @@
     --bg: #0d1110; --surface: #151a18; --surface-2: #1b211e; --ink: #e5ece8; --ink-2: #b4c0ba; --muted: #87948e;
     --rule: #28312d; --rule-strong: #3b4641;
     --accent: #6fa8e6; --accent-ink: #8dbbf0; --accent-wash: #16283a; --on-accent: #0a1622;
-    --sev1: #ffa48c; --sev2: #d6553d; --sev3: #9a3b2f;
-    --t30: #199e70; --t50: #c98500; --t70: #b43a3a;
     --map-bg: #131816; --road: #2a332f; --road-casing: #3d4843; --map-label: #c7d2cc;
     --paper: #f7f6f2; --paper-ink: #1b1b1b; --paper-muted: #555; --paper-rule: #d3d1cb;
     --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 8px 22px rgba(0, 0, 0, .3);
@@ -36,8 +36,6 @@
   --bg: #0d1110; --surface: #151a18; --surface-2: #1b211e; --ink: #e5ece8; --ink-2: #b4c0ba; --muted: #87948e;
   --rule: #28312d; --rule-strong: #3b4641;
   --accent: #6fa8e6; --accent-ink: #8dbbf0; --accent-wash: #16283a; --on-accent: #0a1622;
-  --sev1: #ffa48c; --sev2: #d6553d; --sev3: #9a3b2f;
-  --t30: #199e70; --t50: #c98500; --t70: #b43a3a;
   --map-bg: #131816; --road: #2a332f; --road-casing: #3d4843; --map-label: #c7d2cc;
   --paper: #f7f6f2; --paper-ink: #1b1b1b; --paper-muted: #555; --paper-rule: #d3d1cb;
 }
@@ -63,6 +61,8 @@ a { color: var(--accent-ink) }
 .brand-name { font-weight: 700; font-size: 19px }
 .brand-name span { color: var(--muted); font-weight: 500 }
 .badge { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--rule-strong); color: var(--ink-2); background: var(--surface) }
+/* Experimentell: Bernstein wie die Plakette am Akkordeon „Analyse" in der Karte (style.css). */
+.badge.experimental { border-color: #fcd34d; background: #fffbeb; color: #92400e; cursor: help }
 .topbar .spacer { flex: 1 }
 .topbar .note { font-size: 13px; color: var(--muted); max-width: 60ch }
 .steps { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 14px; border-bottom: 1px solid var(--rule) }
@@ -156,11 +156,20 @@ table.t td.r, table.t th.r { text-align: right; font-variant-numeric: tabular-nu
 .legend span { display: inline-flex; align-items: center; gap: 5px }
 .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block }
 .mapbox { position: relative; background: var(--map-bg); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--rule) }
-.mapbox svg { display: block; width: 100%; height: auto }
-.maplegend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 9px 12px; font-size: 12px; color: var(--ink-2); border-top: 1px solid var(--rule); background: var(--surface) }
-.maplegend span { display: inline-flex; align-items: center; gap: 6px }
+.mapbox > svg { display: block; width: 100%; height: auto }   /* nur die Karte, nicht die Legenden-Symbole */
+.maplegend svg { display: inline-block; flex: none; vertical-align: middle }
+/* Kartenlegende: eine Zeile je Gruppe (Unfälle, Tempo, Außerdem), nur was in der Karte steht. */
+.maplegend { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 7px 14px; padding: 10px 12px; font-size: 12px; color: var(--ink-2); border-top: 1px solid var(--rule); background: var(--surface) }
+.maplegend .lg-title { font-weight: 650; color: var(--ink); white-space: nowrap }
+.maplegend .lg-items { display: flex; flex-wrap: wrap; gap: 4px 14px }
+.maplegend .lg-items > span { display: inline-flex; align-items: center; gap: 6px }
 .sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none }
 .sw.bar { width: 18px; height: 6px; border-radius: 3px }
+.sw.bar.dashed { background: repeating-linear-gradient(90deg, var(--ink-2) 0 5px, transparent 5px 8px) }
+.sw.hollow { background: var(--surface); border: 1.5px solid var(--ink-2) }
+.sw.sq { border-radius: 2px; opacity: .75 }
+.sw.area { width: 16px; height: 11px; border-radius: 3px; border: 1.5px dashed var(--accent); background: var(--accent-wash) }
+@media (max-width: 560px) { .maplegend { grid-template-columns: minmax(0, 1fr); gap: 3px 0 } .maplegend .lg-items { margin-bottom: 4px } }
 .tip { position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--rule-strong); border-radius: 8px; padding: 7px 9px; font-size: 12px; line-height: 1.35; box-shadow: var(--shadow); max-width: 250px; z-index: 5 }
 .tip strong { display: block; font-size: 13px }
 
@@ -241,7 +250,9 @@ pre.json { margin: 0; max-height: 280px; overflow: auto; background: var(--surfa
 .doc .amp { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font: 700 10px/1 var(--font-sans); color: #fff; vertical-align: -3px }
 .doc .amp.erfuellt { background: #0a8a0a } .doc .amp.unklar { background: #e0a000; color: #1f1600 } .doc .amp.nicht_erfuellt { background: #c43434 }
 .doc .amp.hinweis { background: #0d5a9e; font-family: var(--font-serif); font-style: italic } .doc .amp.entfaellt { background: #888 }
-.doc .map svg { width: 100%; height: auto; display: block; border: 1px solid var(--paper-rule) }
+.doc .map > svg { width: 100%; height: auto; display: block; border: 1px solid var(--paper-rule) }
+.doc .maplegend { padding: 6px 0 0; border-top: 0; background: none; color: var(--paper-ink); font-size: 10.5px }
+.doc .maplegend .lg-title { color: var(--paper-ink) }
 .doc .pb { height: 0; border-top: 1px dashed #999; margin: 26px -50px; position: relative }
 .doc .pb::after { content: "Seitenumbruch"; position: absolute; right: 50px; top: -9px; background: var(--paper); padding: 0 6px; font-size: 10px; color: #888 }
 .doc .letter { font: 13px/1.5 var(--font-serif) }
@@ -280,7 +291,7 @@ pre.json { margin: 0; max-height: 280px; overflow: auto; background: var(--surfa
   :root, :root[data-theme="dark"] {
     color-scheme: light; --paper: #fff; --paper-ink: #111; --paper-muted: #555; --paper-rule: #cfcfcf;
     --map-bg: #f1f4f2; --road: #fff; --road-casing: #b9c3be; --map-label: #2e3a35;
-    --sev1: #7a1a1d; --sev2: #c8402f; --sev3: #ee9a7c; --t30: #1baf7a; --t50: #eda100; --t70: #c43d3d;
+
     --accent: #0d5a9e; --ink: #111; --muted: #666; --rule: #ddd; --surface: #fff
   }
   body { background: #fff; padding: 0; margin: 0 }

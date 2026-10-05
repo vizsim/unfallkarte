@@ -68,7 +68,7 @@ Reihenfolge wie im Report, Abschnitt 8.
 
 ## Analyse-Report (`report.html`, Stand: [`ANALYSE_REPORT.md`](ANALYSE_REPORT.md))
 
-Beta auf `temp/analyse-report`, noch nicht live (Patch vom 2026-09-26, am 2026-10-05 auf den
+Experimentell auf `temp/analyse-report`, noch nicht live (Patch vom 2026-09-26, am 2026-10-05 auf den
 Stand mit Export und „Gebiet zeichnen" gehoben): Kreuzung und Einrichtung, Abschnitte 0–9,
 Weg A/B/C, M Uko, Brief, Druck, Popup-Einstiege. Vision, Konzept mit Quellen und Prototyp:
 `docs/intern/anaylse_report/`.

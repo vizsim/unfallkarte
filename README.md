@@ -42,7 +42,7 @@ Zwei Teile in einem Repo:
   **Vite** nach `dist/`. Die PMTiles kommen **local-first** aus `data/`, sonst per
   **B2-Fallback**; gesteuert über ein generiertes `manifest.json`.
 
-Daneben der **Analyse-Report** (`report.html`, Beta): Für eine Kreuzung oder eine Schule,
+Daneben der **Analyse-Report** (`report.html`, experimentell): Für eine Kreuzung oder eine Schule,
 Kita, einen Spielplatz liest er dieselben PMTiles im Browser und zeigt Unfalllage,
 schutzbedürftige Nutzungen, Straße, Lärm und eine rechtliche Einordnung nach § 45 StVO –
 mit Briefentwurf an die Behörde und Druckansicht. Einstieg per Popup („Analyse-Report →")

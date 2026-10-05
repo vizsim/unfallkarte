@@ -1,6 +1,6 @@
 # Analyse-Report (`report.html`)
 
-Stand: 2026-09-26 · Regelwerk und Textbausteine 0.1.0 · Status: **Beta, juristisch ungeprüft**
+Stand: 2026-09-26 · Regelwerk und Textbausteine 0.1.0 · Status: **experimentell, juristisch ungeprüft**
 
 Der Analyse-Report beantwortet für eine gewählte Stelle: Was sagen die Daten der Unfallkarte
 hier, welche Maßnahme käme nach § 45 StVO in Betracht, und wie schreibe ich das der Behörde?

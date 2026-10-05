@@ -80,3 +80,29 @@ export function getCircleColorPaint(styleKey) {
   match.push("#aaaaaa");
   return match;
 }
+
+// Tempolimit-Farben (OSM maxspeed) als Stützstellen: die Karte (js/layers/traffic-speed.js)
+// baut daraus ihren MapLibre-Ausdruck, die Report-Karte (js/report/render/svgMap.js) rechnet
+// dieselbe Farbe in JS. Eine Quelle, damit beide nie auseinanderlaufen.
+export const SPEED_COLOR_STOPS = [[10, "#006400"], [30, "#31a354"], [50, "#fdcc8a"], [100, "#e31a1c"], [140, "#8B0000"]];
+export const SPEED_COLOR_SPECIAL = {
+  none: "#000000",      // maxspeed=none (unbegrenzt)
+  urban: "#fdcc8a",     // ohne Wert, maxspeed:type=DE:urban (≈ 50)
+  rural: "#e31a1c",     // ohne Wert, maxspeed:type=DE:rural (≈ 100)
+  unknown: "#ff69b4",   // keine Angabe in OSM
+};
+
+/** Farbe zu einem Tempo wie MapLibres lineare RGB-Interpolation über SPEED_COLOR_STOPS. */
+export function speedColorOf(v) {
+  const stops = SPEED_COLOR_STOPS;
+  if (!Number.isFinite(v)) return SPEED_COLOR_SPECIAL.unknown;
+  if (v <= stops[0][0]) return stops[0][1];
+  if (v >= stops.at(-1)[0]) return stops.at(-1)[1];
+  const i = stops.findIndex(([s]) => s >= v);
+  const [s0, c0] = stops[i - 1];
+  const [s1, c1] = stops[i];
+  const t = (v - s0) / (s1 - s0);
+  const rgb = (c) => [1, 3, 5].map((k) => parseInt(c.slice(k, k + 2), 16));
+  const [a, b] = [rgb(c0), rgb(c1)];
+  return `#${a.map((x, k) => Math.round(x + (b[k] - x) * t).toString(16).padStart(2, "0")).join("")}`;
+}
