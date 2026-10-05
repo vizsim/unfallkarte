@@ -95,6 +95,10 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
   in `DATASETS` (`js/report/sources.js`) eintragen — `tests/web/report.spec.js` prüft es gegen die
   Archive. Rechtliche Aussagen nur mit Primärquelle, Regeländerung = neue Regelwerk-Version.
   `reportLink.js` darf `permalinkFormat.js` NICHT importieren (Kreis über die Layer-Registry).
+  Einstieg in der Karte (experimentell): `js/analysis/` — Akkordeon „Analyse" in der Legende,
+  Kontextmenü (`contextmenu` = Rechtsklick UND langes Drücken, das meldet MapLibre selbst) und
+  der Popup-Link „Analysieren →"; alle drei setzen dieselbe Auswahl. Einrasten und Vorschau
+  (`analysisData.js`) nur per dynamischem `import()`. Beim Wählen gilt `setDrawing(true)`.
 - Code: kurz, getippt, ruff-konform. Keine Notebooks in der Pipeline.
 - Config-getrieben: Jahres-Quirks/Filter/Tile-Profile in `pipeline/config/*.yaml`, nicht im Code.
 - Tippecanoe legt FGB-Integer-Attribute als **String** im PMTiles ab → im Frontend immer

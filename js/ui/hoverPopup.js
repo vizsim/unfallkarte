@@ -31,8 +31,10 @@
 //             Fußzeile in der Karte; mit openOnClick: true öffnet ein Klick auf das
 //             Objekt den Link direkt (neuer Tab) statt das Fenster zu fixieren
 //   report?   (props, feature, lngLat) -> Auswahl {kind, lat, lng, oid?} | null: im fixierten
-//             Fenster eine zweite Fußzeile „Analyse-Report →" (js/report/entry.js baut die
-//             Auswahl, reportHref die absolute Adresse — safeHref lässt nur http(s) durch)
+//             Fenster eine zweite Fußzeile „Analysieren →" (js/report/entry.js baut die
+//             Auswahl, reportHref die absolute Adresse — safeHref lässt nur http(s) durch).
+//             Ein normaler Klick öffnet das Akkordeon „Analyse" (js/analysis/analysisPanel.js),
+//             Mittel- bzw. Strg-Klick wie jeder Link direkt den Report.
 //   onClick?  (feature, e) -> eigene Klick-Aktion (z. B. Chart-Popup), mit clickHint
 //   anchor?   (feature) -> { lngLat, offset }: Popup an einem Punkt statt am Cursor
 //   onEnter?/onLeave?  Hooks, wenn ein Feature dieses Eintrags gehovert/verlassen wird
@@ -133,7 +135,7 @@ export function setupHoverPopup(map, entries) {
         const report = pinned ? reportOf(hit, lngLat) : null;
         const foot = link || report
             ? `<div class="pop-foot">${link ? `<a href="${esc(link.href)}" target="_blank" rel="noopener">${esc(link.label)} →</a>` : ""}`
-              + `${report ? `${link ? " · " : ""}<a href="${esc(report)}" target="_blank" rel="noopener" class="pop-report">Analyse-Report →</a>` : ""}</div>`
+              + `${report ? `${link ? " · " : ""}<a href="${esc(report)}" target="_blank" rel="noopener" class="pop-report">Analysieren →</a>` : ""}</div>`
             : "";
         const body = safe(entry, "render", () => entry.render(escapedView(feature.properties), feature),
             `<div class="pop-meta">Details nicht darstellbar</div>`);

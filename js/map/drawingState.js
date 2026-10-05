@@ -1,6 +1,7 @@
-// drawingState.js — „gerade wird ein Gebiet gezeichnet". Solange setzen Karten-Klicks nur
-// Punkte: das Hover-Popup (js/ui/hoverPopup.js) und der Mapillary-Klick halten still.
-// Gesetzt von js/selection/drawArea.js.
+// drawingState.js — „gerade wird in der Karte gezeichnet oder gewählt". Solange gehören
+// Karten-Klicks dem Werkzeug: das Hover-Popup (js/ui/hoverPopup.js), der Mapillary-Klick und
+// das Analyse-Kontextmenü halten still. Gesetzt von js/selection/drawArea.js (Gebiet) und
+// js/analysis/analysisPanel.js (Stelle für die Analyse wählen).
 
 let drawing = false;
 const listeners = new Set();

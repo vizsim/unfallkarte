@@ -262,11 +262,15 @@ test.describe("Handy", () => {
     const legend = document.querySelector(".legend");
     const top = legend.getBoundingClientRect().top;
     const titleBottom = Math.round(legend.querySelector(".legend-title").getBoundingClientRect().bottom - top);
+    const firstSection = [...legend.querySelectorAll(".legend-section-title")]
+      .find((el) => el.getBoundingClientRect().height > 0);
+    const sectionTop = firstSection ? Math.round(firstSection.getBoundingClientRect().top - top) : titleBottom + 60;
     const lines = [...legend.querySelectorAll("*")]
       // Gesucht sind Trennlinien über die Breite — runde Abzeichen (ⓘ, Status-Pille)
       // haben zwar einen Rahmen, sind aber keine.
       .filter((el) => el.getBoundingClientRect().height > 0
-        && !el.classList.contains("info-icon") && !el.classList.contains("fc-badge"))
+        && !el.classList.contains("info-icon") && !el.classList.contains("fc-badge")
+        && !el.classList.contains("analysis-badge"))
       .flatMap((el) => ["Top", "Bottom"].filter((side) => {
         const cs = getComputedStyle(el);
         return parseFloat(cs[`border${side}Width`]) > 0 && cs[`border${side}Style`] !== "none";
@@ -274,9 +278,10 @@ test.describe("Handy", () => {
         what: `${el.className}.${side}`,
         dy: Math.round(el.getBoundingClientRect()[side.toLowerCase()] - top),
       })))
-      // Betrachtet wird nur das Feld direkt unter der Titelzeile — auch dieses Fenster
-      // hängt an ihr, nicht an einer festen Pixelzahl.
-      .filter((l) => l.dy < titleBottom + 60);
+      // Betrachtet wird nur das Feld direkt unter der Titelzeile — bis zur ersten sichtbaren
+      // Sektionsüberschrift (seit 2026-10 steht dort „Analyse"), zugeklappt 60 px. Auch dieses
+      // Fenster hängt an der Legende selbst, nicht an einer festen Pixelzahl.
+      .filter((l) => l.dy < sectionTop);
     return { lines, titleBottom };
   });
 

@@ -25,6 +25,7 @@ import { setupPopups, allPopupEntries } from './js/ui/popupHandlers.js';   // EI
 import { setupMapillary, setupMapillaryTS } from "./js/utils/useMapillary.js";
 import { LAYER_REGISTRY, ensureEntry } from './js/layers/registry.js';
 import { getArea, onAreaChange } from './js/selection/areaSelection.js';
+import { analysisSnapshot, setupAnalysis } from './js/analysis/analysisPanel.js';
 
 // 📦 Legende
 import {
@@ -82,7 +83,7 @@ window.addEventListener("vite:preloadError", (event) => {
 // importierten die Tests sie im Browser über ihren Pfad (`import("/js/layers/registry.js")`) —
 // im gebündelten Build gibt es diese Pfade nicht mehr. Wie `window.map`: nur lesen, nie
 // darauf aufbauen.
-window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles, getArea };
+window.__app = { LAYER_REGISTRY, ensureEntry, allPopupEntries, PMTiles, getArea, analysis: analysisSnapshot };
 
 cleanupLegacyPermalink();
 
@@ -218,6 +219,10 @@ function setupUI(map) {
     openExportDialog(map);
   });
   onAreaChange(() => writePermalink());
+
+  // Analyse (experimentell): Akkordeon in der Legende, Rechtsklick/langes Drücken, Popup-Link.
+  // Einrasten und Vorschau lesen PMTiles und laden erst bei der ersten Auswahl.
+  setupAnalysis(map);
 
   // Radinfrastruktur (TILDA) — externer Live-Layer, läuft nicht über die Layer-Registry.
   document.getElementById('toggle-bikelanes')?.addEventListener('change', (e) => {
