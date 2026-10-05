@@ -6,8 +6,13 @@ const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;
 export const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ESC[c]);
 export const fmt = (n, d = 0) => (Number.isFinite(Number(n)) ? Number(n).toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d }) : "–");
 
-export const ST_ICON = { erfuellt: "✓", unklar: "?", nicht_erfuellt: "✕", hinweis: "i", entfaellt: "–" };
-export const ST_LABEL = { erfuellt: "erfüllt", unklar: "unklar", nicht_erfuellt: "nicht erfüllt", hinweis: "Hinweis", entfaellt: "entfällt" };
+// Befunde (Unfallhäufung nach M Uko, Lärm über einer Landesschwelle) sind NEUTRAL: „auffällig"
+// statt grünem ✓, „nicht erreicht" statt rotem ✕ — sonst läse sich ein erreichtes
+// Häufungs-Kriterium wie ein Erfolg (Wortwahl wie Sc9: „Auffällig", keine Feststellung).
+export const ST_ICON = { erfuellt: "✓", unklar: "?", nicht_erfuellt: "✕", hinweis: "i", entfaellt: "–", auffaellig: "!", nicht_erreicht: "–" };
+export const ST_LABEL = { erfuellt: "erfüllt", unklar: "unklar", nicht_erfuellt: "nicht erfüllt", hinweis: "Hinweis", entfaellt: "entfällt", auffaellig: "auffällig", nicht_erreicht: "nicht erreicht" };
+/** Status eines M-Uko-Kriteriums (Logik: erfuellt/nicht_erfuellt/unklar) → neutrale Anzeige. */
+export const ukoDisplay = (status) => ({ erfuellt: "auffaellig", nicht_erfuellt: "nicht_erreicht" })[status] ?? status;
 const ORIGIN = { AMT: "amtliche Daten", OSM: "OpenStreetMap", MESS: "Community-Messung", MOD: "Modell / geschätzt", NUTZ: "Angabe der Nutzerin" };
 export const origin = (k) => `<span class="origin" title="${ORIGIN[k]}">${k}</span>`;
 export const stIcon = (st, sm = false) => `<span class="st ${st}${sm ? " sm" : ""}" role="img" aria-label="${ST_LABEL[st]}">${ST_ICON[st]}</span>`;

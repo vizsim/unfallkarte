@@ -10,8 +10,8 @@
 import { dist, nearestOnLine } from "../geometry.js";
 
 export const UKO_DEF = {
-  mu_3jk_up5: { text: "≥ 5 Unfälle mit Personenschaden in 3 Jahren, Ausdehnung ≤ 50 m", quelle: "M Uko 2012, 3-Jahres-Karte (Unfallhäufungsstelle innerorts)" },
-  mu_uhl_typ4: { text: "≥ 3 Unfälle Typ 4 (Überschreiten) in 3 Jahren, Abstand ≤ 300 m", quelle: "M Uko 2012, Unfallhäufungslinie Typ 4 innerorts" },
+  mu_3jk_up5: { text: "≥ 5 Unfälle mit Personenschaden in 3 Jahren, Ausdehnung ≤ 50 m", quelle: "M Uko 2012, 3-Jahres-Karte, innerorts" },
+  mu_uhl_typ4: { text: "≥ 3 Unfälle Typ 4 (Überschreiten) in 3 Jahren, Abstand ≤ 300 m", quelle: "M Uko 2012, Häufung entlang einer Strecke, Typ 4, innerorts" },
   mu_1jk_gtyp5_untergrenze: { text: "≥ 5 Unfälle gleichen Typs in 1 Jahr (alle Kategorien)", quelle: "M Uko 2012, 1-Jahres-Karte – mit dem Unfallatlas nur als Untergrenze prüfbar" },
   nw_3jk_fussrad_up5: { text: "≥ 5 Unfälle mit Personenschaden und Fuß- oder Radbeteiligung in 3 Jahren", quelle: "Grenzwert NRW (Gem. RdErl. 2017, Wiedergabe Stadt Bielefeld)" },
   nw_3jk_usp3: { text: "≥ 3 Unfälle mit Getöteten oder Schwerverletzten in 3 Jahren", quelle: "Grenzwert NRW (Gem. RdErl. 2017)" },

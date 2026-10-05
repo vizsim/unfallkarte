@@ -94,7 +94,7 @@ test("Hamburg: Ampel in der Lücke verhindert den Lückenschluss, Zeitfenster au
   assert.equal(step(R, "A9").status, "nicht_erfuellt");
   assert.equal(R.A.zf, "werktags 6–22 Uhr");
   assert.ok(R.Cw, "Lärm kartiert");
-  assert.equal(R.Cw.steps.find((s) => s.id === "C5").status, "erfuellt", "Klassen 65–69 / 55–59 erreichen 65/55");
+  assert.equal(R.Cw.steps.find((s) => s.id === "C5").status, "auffaellig", "Klassen 65–69 / 55–59 erreichen 65/55 — ein Befund, neutral");
 });
 
 test("M Uko an der Kreuzung (r = 25 m) und Sc9-Treffer", () => {
@@ -104,6 +104,9 @@ test("M Uko an der Kreuzung (r = 25 m) und Sc9-Treffer", () => {
   assert.equal(u3.status, "erfuellt");
   assert.equal(R.U.list.find((u) => u.id === "mu_1jk_gtyp5_untergrenze").status, "unklar", "1-JK nur Untergrenze");
   assert.equal(M.sc9.length, 1);
+  const flag = R.glance.find((g) => /M Uko/.test(g.n));
+  assert.equal(flag?.st, "auffaellig", "Häufung als Befund: neutral „auffällig\", kein grünes ✓");
+  assert.ok(!R.U.list.some((u) => /Unfallhäufungsstelle/.test(u.quelle)), "Fachbegriff nicht als Label");
   assert.equal(R.A.fac?.name, "Grundschule am Testpark", "Kreuzung: Einrichtung an der Hauptstraße in der Nähe");
   const nw = run({ sel: { kind: "k", lat: CENTER.lat, lng: CENTER.lng }, r: 25, land: "nw" });
   assert.ok(nw.R.U.list.some((u) => u.id === "nw_3jk_fussrad_up5"));

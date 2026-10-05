@@ -34,7 +34,7 @@ export function evalWegC(M, P, ans = {}) {
   if (PC.lap) {
     // Kartierung in 5-dB-Klassen: die Klasse „65–69" erreicht den Auslösewert 65 dB(A).
     const over = den != null && night != null && den >= PC.lap.lden && night >= PC.lap.lnight;
-    steps.push({ id: "C5", t: "Landesschwelle (Hamburg)", status: over ? "erfuellt" : "nicht_erfuellt",
+    steps.push({ id: "C5", t: "Landesschwelle (Hamburg)", status: over ? "auffaellig" : "nicht_erreicht",
       txt: over ? `Die Pegelklassen erreichen die Auslösewerte des Hamburger Lärmaktionsplans (L_DEN ${PC.lap.lden}, L_Night ${PC.lap.lnight} dB(A)).${den >= PC.lap.vorrang[0] && night >= PC.lap.vorrang[1] ? " Im Vorrangbereich (70/60)." : ""} Typische Maßnahme dort: Tempo 30 nachts.` : "Unter den Auslösewerten des Lärmaktionsplans (65/55 dB(A)).",
       data: "Lärmaktionsplan Hamburg, 4. Stufe (Schwellen in L_DEN/L_Night – direkt vergleichbar)" });
   } else if (PC.bw) {

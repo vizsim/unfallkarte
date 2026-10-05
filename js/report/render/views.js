@@ -1,6 +1,6 @@
 // views.js — HTML der vier Ansichten (Auswahl-Panel, Report, Brief, Druck) aus dem Zustand.
 // Kein DOM-Zugriff hier: main.js setzt das Ergebnis ein. Werte aus OSM gehen durch esc().
-import { esc, fmt, origin, stIcon, ST_ICON, pctOr, unavailable } from "./common.js";
+import { esc, fmt, origin, stIcon, ST_ICON, ST_LABEL, pctOr, ukoDisplay, unavailable } from "./common.js";
 import { chartYears, chartHBars, chartHours } from "./charts.js";
 import { mapWithLegend } from "./svgMap.js";
 import { BET, TYP, ART, WT, KAT, REGIOSTAR7, CROSSING_LABEL, STOP_LABEL } from "../model.js";
@@ -44,7 +44,7 @@ function wayBlock(title, norm, W, answers) {
 }
 function stepRow(x, answers) {
   const ask = x.ask ? `<div class="ask"><span class="q">${esc(x.ask.q)}</span>${x.ask.opts.map(([v, l]) => `<button class="chip" data-ans="${x.ask.key}" data-val="${v}" aria-pressed="${(answers[x.ask.key] ?? "") === v && (v !== "" || x.ask.key in answers)}">${esc(l)}</button>`).join("")}</div>` : "";
-  return `<div class="row">${stIcon(x.status)}<div><div class="title"><b>${x.id} · ${esc(x.t)}</b><span class="sl">${{ erfuellt: "erfüllt", unklar: "unklar", nicht_erfuellt: "nicht erfüllt", hinweis: "Hinweis", entfaellt: "entfällt" }[x.status]}</span>${x.nutz ? '<span class="nutz">NUTZ</span>' : ""}${x.mod ? '<span class="nutz">MOD</span>' : ""}</div><p class="txt">${esc(x.txt)}</p><div class="data mono">${esc(x.data || "")}</div>${x.hilfe ? `<div class="data">${esc(x.hilfe)}</div>` : ""}${ask}</div></div>`;
+  return `<div class="row">${stIcon(x.status)}<div><div class="title"><b>${x.id} · ${esc(x.t)}</b><span class="sl">${ST_LABEL[x.status]}</span>${x.nutz ? '<span class="nutz">NUTZ</span>' : ""}${x.mod ? '<span class="nutz">MOD</span>' : ""}</div><p class="txt">${esc(x.txt)}</p><div class="data mono">${esc(x.data || "")}</div>${x.hilfe ? `<div class="data">${esc(x.hilfe)}</div>` : ""}${ask}</div></div>`;
 }
 
 const whereTxt = (M) => (M.selection.kind === "k" ? `Radius ${M.selection.r} m` : `Umfeld ${M.selection.r} m um die Einrichtung`);
@@ -128,7 +128,7 @@ export function renderReport(V) {
           <div class="chart"><h3>Häufigste Unfalltypen</h3>${acc.n >= 5 ? chartHBars(topTyp.map(([k, v]) => ({ l: TYP[k], v })), acc.n, (v) => v) : `<div class="empty">Top-Typen erst ab 5 Unfällen (hier ${acc.n}).</div>`}</div>
         </div>
         <div class="tablewrap"><table class="t"><thead><tr><th>M-Uko-Kriterium (rechnerisch, ${esc(R.U.window)})</th><th>Status</th><th>Ergebnis</th><th>Quelle</th></tr></thead><tbody>
-          ${R.U.list.map((u) => `<tr><td>${esc(u.text)}</td><td>${stIcon(u.status, true)}</td><td>${esc(u.detail)}</td><td class="small">${esc(u.quelle)}</td></tr>`).join("")}
+          ${R.U.list.map((u) => `<tr><td>${esc(u.text)}</td><td class="nowrap">${stIcon(ukoDisplay(u.status), true)} <span class="sl">${ST_LABEL[ukoDisplay(u.status)]}</span></td><td>${esc(u.detail)}</td><td class="small">${esc(u.quelle)}</td></tr>`).join("")}
         </tbody></table></div>
         ${M.sc9?.length ? `<div class="callout">Szenario 9 der Karte markiert hier eine Unfallhäufung (${M.sc9.map((z) => `${esc(z.rule)}, bis ${esc(z.n_max)} Unfälle, ${esc(z.window_best)}`).join("; ")}) – vorberechnet nach M-Uko-Kriterien, keine amtliche Feststellung.</div>` : ""}
         <div class="empty">Vergleich mit Referenzwerten (erwartete Unfälle an vergleichbaren Stellen): kommt mit <span class="mono">report/baselines.json</span> aus der Pipeline. Bis dahin kein „x-mal so viele“.</div>
@@ -170,7 +170,7 @@ export function renderReport(V) {
 
     <details class="sec" open><summary><span class="no">6</span><h2>Rechtliche Einordnung</h2><span class="sum">Weg A: ${esc(A.verdict.label)} · Weg B: ${esc(R.B.verdict.label)}${R.Cw ? ` · Weg C: ${esc(R.Cw.verdict.label)}` : ""}</span></summary>
       <div class="body">
-        <p class="small muted" style="margin:0">Hinweise nach den Daten, keine Feststellung. Gelb heißt: Datenlücke – beantworte die Frage, dann rechnet die Ampel neu. Rot aus den Daten wird nicht überschrieben.</p>
+        <p class="small muted" style="margin:0">Hinweise nach den Daten, keine Feststellung. Gelb heißt: Datenlücke – beantworte die Frage, dann rechnet die Ampel neu. Rot aus den Daten wird nicht überschrieben. Grau „!“ = auffällig (Häufung, Schwelle erreicht) – ein Befund, keine Feststellung.</p>
         ${wayBlock("Weg A · Tempo 30 vor Einrichtungen", "§ 45 Abs. 9 S. 4 Nr. 6 und Nr. 4 StVO · VwV zu Z. 274 Rn. 13–13b · ohne Gefahrenlage, Ermessen bleibt", A, st.answers)}
         ${wayBlock("Weg B · Gefahrenlage", "§ 45 Abs. 9 S. 3 StVO · BVerwG 3 C 37.09 · Feststellung ist Sache der Behörde", R.B, st.answers)}
         ${R.Cw ? wayBlock("Weg C · Lärm", "§ 45 Abs. 1 S. 2 Nr. 3 StVO · 16. BImSchV · LSR-StV 2007 · nur Indizien", R.Cw, st.answers) : ""}
@@ -329,7 +329,7 @@ export function printDoc(V) {
     <div class="twocol">
       <table><tbody><tr><td>Unfälle ${st.years.from}–${st.years.to}</td><td class="r">${acc.n}</td></tr><tr><td>davon Getötete / Schwerverletzte</td><td class="r">${acc.nT} / ${acc.nSP - acc.nT}</td></tr><tr><td>mit Fuß- oder Radbeteiligung</td><td class="r">${acc.fr}</td></tr>
       ${Object.entries(acc.byTyp).filter(([, v]) => v).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, v]) => `<tr><td>Typ: ${TYP[k]}</td><td class="r">${v}</td></tr>`).join("")}</tbody></table>
-      <table><tbody>${R.U.list.map((u) => `<tr><td style="width:22px">${amp(u.status)}</td><td>${esc(u.text)}<br><span class="dmeta">${esc(u.detail)}</span></td></tr>`).join("")}</tbody></table>
+      <table><tbody>${R.U.list.map((u) => `<tr><td style="width:22px">${amp(ukoDisplay(u.status))}</td><td>${esc(u.text)}<br><span class="dmeta">${esc(u.detail)}</span></td></tr>`).join("")}</tbody></table>
     </div>
     <p class="dmeta">Referenzvergleich (erwartete Unfälle an vergleichbaren Stellen) folgt mit einer späteren Stufe. Anteile erst ab 20 Fällen.</p>
     <h2>3 bis 5 · Nutzungen, Straße, Umwelt</h2>
@@ -341,7 +341,7 @@ export function printDoc(V) {
     </tbody></table>
     <div class="pb"></div>
     <h2>6 · Rechtliche Einordnung</h2>
-    <p class="dmeta">Hinweise nach den Daten, keine Feststellung. ✓ erfüllt · ? unklar (Datenlücke) · ✕ nicht erfüllt · i Hinweis · – entfällt.</p>
+    <p class="dmeta">Hinweise nach den Daten, keine Feststellung. ✓ erfüllt · ? unklar (Datenlücke) · ✕ nicht erfüllt · ! auffällig (Befund, keine Feststellung) · i Hinweis · – entfällt bzw. nicht erreicht.</p>
     ${wayT("Weg A · Tempo 30 vor Einrichtungen (§ 45 Abs. 9 S. 4 Nr. 6 StVO)", R.A)}
     ${wayT("Weg B · Gefahrenlage (§ 45 Abs. 9 S. 3 StVO)", R.B)}
     ${R.Cw ? wayT("Weg C · Lärm (§ 45 Abs. 1 S. 2 Nr. 3 StVO)", R.Cw) : ""}

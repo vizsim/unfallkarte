@@ -10,7 +10,7 @@ export function evalWegB(M, years, U, ans = {}, beob = "") {
   steps.push({ id: "B1", t: "Datenbasis", status: A.nYears >= 3 && A.n >= 3 ? "erfuellt" : "unklar",
     txt: `${A.n} Unfälle mit Personenschaden in ${A.nYears} Jahren (${years.from}–${years.to}).${A.nYears < 3 ? " Für eine Aussage mindestens 3 Jahre wählen." : A.n < 3 ? " Zu wenige Fälle für eine Aussage." : ""}`,
     data: "Unfallatlas (nur Unfälle mit Personenschaden)" });
-  steps.push({ id: "B2", t: "Unfallhäufung (M Uko)", status: U.any ? "erfuellt" : U.list.some((x) => x.status === "unklar") ? "unklar" : "nicht_erfuellt",
+  steps.push({ id: "B2", t: "Unfallhäufung (M Uko)", status: U.any ? "auffaellig" : U.list.some((x) => x.status === "unklar") ? "unklar" : "nicht_erreicht",
     txt: U.any ? `Kriterium rechnerisch erfüllt: ${U.best.text}.` : U.list.some((x) => x.status === "unklar") ? "Kein Kriterium sicher erfüllt; mindestens eines ist mit dem Unfallatlas nicht abschließend prüfbar." : "Kein Kriterium rechnerisch erfüllt.",
     data: U.any ? U.best.quelle : "siehe Abschnitt 2" });
   steps.push({ id: "B3", t: "Vergleich mit Referenz", status: "unklar", mod: true,
@@ -33,7 +33,7 @@ export function evalWegB(M, years, U, ans = {}, beob = "") {
     txt: has ? "Eigene Beobachtung liegt vor (Abschnitt „Brief“)." : "Noch keine eigene Beobachtung (Sicht, Querungsbedarf, Tempo) – sie ist im Brief Pflicht.", data: "Angabe der Nutzerin" });
   let verdict;
   if (steps[0].status !== "erfuellt") verdict = { key: "wenig", label: "zu wenig Daten", cls: "warn" };
-  else if (steps[1].status === "erfuellt") verdict = { key: "stuetzt", label: "Befundlage stützt eine Prüfung", cls: "good" };
+  else if (steps[1].status === "auffaellig") verdict = { key: "stuetzt", label: "Befundlage stützt eine Prüfung", cls: "info" };
   else verdict = { key: "nicht", label: "keine datenbasierte Gefahrenlage erkennbar (ohne Referenzvergleich)", cls: "neutral" };
   return { steps, verdict };
 }

@@ -53,7 +53,7 @@ export function glance(M, A, U, Cw) {
     f.push({ st: "hinweis", t: `Tempo 30 gilt hier schon zeitweise${c ? ` (${c.when})` : ""} – passen die Zeiten zur Einrichtung?`, n: "§ 45 Abs. 9 S. 4 Nr. 6 StVO · VwV zu Z. 274 Rn. 13 (Öffnungszeiten)" });
   }
   if (A.verdict.key === "fehlt") f.push({ st: "unklar", t: "Die Einrichtung aus dem Link ist nicht mehr in den OSM-Kacheln – bitte in der Auswahl neu wählen.", n: "Ausgewertet wurde ein Kreis um die gespeicherte Koordinate." });
-  if (U.any) f.push({ st: "erfuellt", t: `Unfallhäufung rechnerisch: ${U.best.text}.`, n: `${U.best.quelle} · Feststellung durch die Unfallkommission` });
+  if (U.any) f.push({ st: "auffaellig", t: `Auffällig: ${U.best.text}.`, n: `${U.best.quelle} · rechnerisch, keine Feststellung – die trifft die Unfallkommission` });
   const acc = M.accidents;
   if (acc.n >= 5 && f.length < 3) {
     const share = acc.fr / acc.n;

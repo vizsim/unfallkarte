@@ -174,6 +174,9 @@ table.t td.r, table.t th.r { text-align: right; font-variant-numeric: tabular-nu
 .st.erfuellt { background: var(--good); color: #fff } .st.unklar { background: var(--warn); color: #1f1600 }
 .st.nicht_erfuellt { background: var(--crit); color: #fff } .st.hinweis { background: var(--accent); color: var(--on-accent); font-family: var(--font-serif); font-style: italic }
 .st.entfaellt { background: var(--neutral); color: #fff }
+/* Befunde neutral (wie das Sc9-Popup „Auffällig"): grau, kein Grün, kein Rot. */
+.st.auffaellig { background: #4b5563; color: #fff } .st.nicht_erreicht { background: var(--neutral); color: #fff }
+.nowrap { white-space: nowrap }
 .row .title { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline }
 .row .title b { font-weight: 650 }
 .row .title .sl { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 650 }
@@ -233,6 +236,7 @@ pre.json { margin: 0; max-height: 280px; overflow: auto; background: var(--surfa
 .doc .amp { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font: 700 10px/1 var(--font-sans); color: #fff; vertical-align: -3px }
 .doc .amp.erfuellt { background: #0a8a0a } .doc .amp.unklar { background: #e0a000; color: #1f1600 } .doc .amp.nicht_erfuellt { background: #c43434 }
 .doc .amp.hinweis { background: #0d5a9e; font-family: var(--font-serif); font-style: italic } .doc .amp.entfaellt { background: #888 }
+.doc .amp.auffaellig { background: #4b5563 } .doc .amp.nicht_erreicht { background: #888 }
 .doc .map > svg { width: 100%; height: auto; display: block; border: 1px solid var(--paper-rule) }
 .doc .maplegend { padding: 6px 0 0; border-top: 0; background: none; color: var(--paper-ink); font-size: 10.5px }
 .doc .maplegend .lg-title { color: var(--paper-ink) }
