@@ -32,7 +32,9 @@ function maplibreExternal() {
     name: "unfallkarte:maplibre-external",
     apply: "build",
     config: () => ({ build: { rolldownOptions: { external: ["maplibre-gl"] } } }),
-    transformIndexHtml: () => [
+    // Nur die Karte braucht MapLibre. report.html zeichnet seine Karte als SVG und lädt es nicht —
+    // dort wären Importmap und Preload ~0,25 MB für nichts.
+    transformIndexHtml: (html, ctx) => (!ctx.path.endsWith("/index.html") ? [] : [
       // Die Importmap muss vor dem ersten Modul stehen.
       { tag: "script", attrs: { type: "importmap" }, injectTo: "head-prepend",
         children: JSON.stringify({ imports: { "maplibre-gl": `./${ML_DIR}/maplibre-gl.mjs` } }) },
@@ -41,7 +43,7 @@ function maplibreExternal() {
       ...ML_FILES.slice(0, 2).map((f) => ({
         tag: "link", attrs: { rel: "modulepreload", href: `./${ML_DIR}/${f}` }, injectTo: "head-prepend",
       })),
-    ],
+    ]),
     writeBundle({ dir }) {
       mkdirSync(join(dir, ML_DIR), { recursive: true });
       for (const f of ML_FILES) {

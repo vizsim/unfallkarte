@@ -24,35 +24,18 @@ export function landSelect(id, st, autoLand) {
   return `<select id="${id}" data-bind="land"><option value="" ${!st.land ? "selected" : ""}>${esc(auto)}</option><option value="bund" ${st.land === "bund" ? "selected" : ""}>Bund (ohne Landesregeln)</option>${LAENDER.map(([k, n]) => `<option value="${k}" ${st.land === k ? "selected" : ""}>${n}${PROFILE[k] ? " · eigene Regeln" : ""}</option>`).join("")}</select>`;
 }
 
-// ------------------------------------------------------------------ Auswahl-Panel
-export function renderPanel(V) {
-  const { st, dataYears, preview, link, busy } = V;
-  const lim = RADIUS[st.mode];
-  const r = st.r[st.mode];
-  const pv = preview;
-  const hint = st.mode === "k" ? "Klick in die Karte setzt den Mittelpunkt; er rastet am nächsten Knoten ein (30 m)." : "Klick auf eine Schule, Kita, einen Spielplatz oder eine Gesundheits-/Pflegeeinrichtung.";
-  let pvHtml = `<div class="empty">${busy ? "Lade Daten …" : "Noch keine Stelle gewählt."}</div>`;
-  if (pv && !busy) {
-    pvHtml = `<div class="preview">
-      <div class="kv"><div class="v num">${pv.n}</div><div class="l">Unfälle mit Personenschaden ${st.years.from}–${st.years.to}</div></div>
-      <div class="kv"><div class="v num">${pv.nSP}</div><div class="l">davon mit Getöteten oder Schwerverletzten</div></div>
-      <div class="kv"><div class="v num">${pv.fr}</div><div class="l">mit Fuß- oder Radbeteiligung</div></div>
-      <div class="kv"><div class="v">${pv.speed ?? "–"}</div><div class="l">${esc(pv.road ?? "keine Straße in den Daten")}</div></div>
-    </div>${pv.fac ? `<p class="hint" style="margin:6px 0 0">Einrichtung: <b>${esc(pv.fac)}</b></p>` : ""}${pv.snap ? `<p class="hint" style="margin:6px 0 0">${esc(pv.snap)}</p>` : ""}`;
-  }
+// ------------------------------------------------------------------ Ohne Auswahl
+/** Kein (gültiger) Report-Link: gewählt wird in der Karte. */
+export function renderEmpty({ warnings = [] } = {}) {
   return `
-    <div class="field search"><label for="sel-search">Ort suchen</label><input type="search" id="sel-search" placeholder="Adresse, Schule, Kreuzung …" autocomplete="off" value="${esc(st.search ?? "")}"><div class="search-results" id="sel-results" hidden></div></div>
-    <div class="field"><span class="lbl">Was möchtest du untersuchen?</span><div class="chips">
-      <button class="chip" data-mode="k" aria-pressed="${st.mode === "k"}">Kreuzung / Stelle</button>
-      <button class="chip" data-mode="e" aria-pressed="${st.mode === "e"}">Einrichtung</button>
-      <button class="chip" disabled title="kommt mit Stufe 2">Straßenzug</button>
-      <button class="chip" disabled title="kommt mit Stufe 2">Gebiet</button></div>
-      <p class="hint" style="margin:4px 0 0">${hint}</p></div>
-    <div class="field"><label for="sel-r">${st.mode === "k" ? "Radius" : "Umfeld"}: <b class="num">${r} m</b></label><input type="range" id="sel-r" data-bind="r" min="${lim.min}" max="${lim.max}" step="5" value="${r}"></div>
-    <div class="row2">${yearSelects(st, dataYears, "sel")}</div>
-    <div><div class="eyebrow" style="margin-bottom:6px">Vorschau</div>${pvHtml}</div>
-    <button class="btn primary" data-go="report" ${st.sel ? "" : 'aria-disabled="true"'}>Report öffnen →</button>
-    ${link ? `<div class="field"><span class="lbl">Report-Link</span><div class="linkbox"><code id="replink">${esc(link)}</code><button class="btn" data-copy="#replink">Kopieren</button></div><p class="hint" style="margin:0">Eigene Eingaben (Rolle, Beobachtung, Name) stehen nie im Link.</p></div>` : ""}`;
+    <div class="panel empty-state">
+      <h2>Noch keine Stelle gewählt</h2>
+      ${warnings.map((w) => `<div class="notice">${esc(w)}</div>`).join("")}
+      <p>Wähle in der Karte eine Kreuzung oder eine Einrichtung: in der Legende unter <b>Analyse</b>,
+        per Rechtsklick in die Karte (am Handy: lange drücken) oder im Popup über <b>Analysieren →</b>.
+        Von dort öffnet „Report öffnen“ diese Seite.</p>
+      <a class="btn primary" href="./index.html">Zur Karte →</a>
+    </div>`;
 }
 
 // ------------------------------------------------------------------ Report
@@ -109,9 +92,10 @@ export function renderReport(V) {
       ${yearSelects(st, dataYears, "rep")}
       <div class="field"><label for="rep-land">Landesregeln und Zuständigkeit</label>${landSelect("rep-land", st, autoLand)}</div>
       ${roadChooser}
+      <div class="field"><label for="rep-r">${M.selection.kind === "k" ? "Radius" : "Umfeld"}: <b class="num">${M.selection.r} m</b></label><input type="range" id="rep-r" data-bind="r" min="${RADIUS[M.selection.kind].min}" max="${RADIUS[M.selection.kind].max}" step="5" value="${M.selection.r}"></div>
       <span style="flex:1"></span>
-      <button class="btn" data-go="auswahl">← Auswahl</button>
       ${mapLink ? `<a class="btn" href="${esc(mapLink)}">In der Karte ↗</a>` : ""}
+      <button class="btn" id="rep-copy-link" type="button">Link kopieren</button>
       <button class="btn primary" data-go="brief">Brief schreiben →</button>
     </div>
     ${noticesHtml(V)}
@@ -366,7 +350,7 @@ export function printDoc(V) {
     <h2>8 · Gegenargumente und Abwägung</h2>
     <ul>${R.gegen.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>
     <h2>9 · Datengrundlage und Grenzen</h2>
-    <p class="dmeta">${sourcesList(meta).map((s) => s.replace(/<[^>]+>/g, "")).join(" · ")} · Rechtsstand: ${esc(RW.stvo)}; ${esc(RW.vwv)} · Landesregeln: ${esc(R.P.quelle)} · Report-Link: <span style="font-family:var(--font-mono)">${esc(link)}</span></p>
+    <p class="dmeta">${sourcesList(meta).map((s) => s.replace(/<[^>]+>/g, "")).join(" · ")} · Rechtsstand: ${esc(RW.stvo)}; ${esc(RW.vwv)} · Landesregeln: ${esc(R.P.quelle)} · Report-Link: <span class="mono wrap-any">${esc(link)}</span></p>
     <div class="pb"></div>
     <div class="letter">
       <div class="dmeta">Briefentwurf · ${esc(typeLabel)} · Textbausteine ${TEXTVERSION} · juristisch zu prüfen</div>

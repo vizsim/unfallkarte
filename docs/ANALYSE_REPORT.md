@@ -13,11 +13,20 @@ keine amtliche Feststellung*. Wortwahl wie Sc9: „Kandidat", „rechnerisch", �
 
 ## Einstieg
 
-- **Direkt:** `report.html` → Karte, Klick auf eine Kreuzung (rastet am nächsten Knoten ein)
-  oder auf eine Schule, Kita, einen Spielplatz, eine Gesundheits-/Pflegeeinrichtung.
-- **Aus der Karte:** im fixierten Popup von Schulen/Kitas, Gesundheit, Spielplätzen, Unfällen
-  und den Szenarien 2, 6, 8, 9 steht „Analyse-Report →" (PopupSpec-Feld `report`,
-  `js/report/entry.js`).
+Gewählt wird **in der Karte** (`js/analysis/`, experimentell); alle Wege setzen dieselbe
+Auswahl, zeigen sie als Kreis bzw. Umfeld und eine Vorschau im Akkordeon, „Report öffnen" führt
+hierher:
+
+- **Akkordeon „Analyse"** oben in der Legende: Kreuzung (Klick rastet am nächsten Knoten ein)
+  oder Einrichtung (Schule, Kita, Spielplatz, Gesundheit/Pflege; der Chip blendet sie ein).
+- **Kontextmenü:** Rechtsklick, am Handy langes Drücken (MapLibre meldet beides als
+  `contextmenu`).
+- **Popup:** im fixierten Popup von Schulen/Kitas, Gesundheit, Spielplätzen, Unfällen und den
+  Szenarien 2, 6, 8, 9 steht „Analysieren →" (PopupSpec-Feld `report`, `js/report/entry.js`);
+  der Klick öffnet das Akkordeon, Mittel-/Strg-Klick direkt den Report.
+
+`report.html` ohne gültige Auswahl erklärt diese Wege und verlinkt die Karte; im Report selbst
+lassen sich Radius, Jahre, Land und Straße ändern.
 - **Per Link** (Vertrag, `js/report/reportLink.js`, Kürzel nie neu vergeben):
 
   ```
@@ -35,7 +44,8 @@ keine amtliche Feststellung*. Wortwahl wie Sc9: „Kandidat", „rechnerisch", �
 
 | Datei | Aufgabe | rein? |
 |---|---|---|
-| `report.html`, `js/report/main.js` | Seite, Auswahlkarte (MapLibre), Zustand, Ereignisse | – |
+| `report.html`, `js/report/main.js` | Seite, Zustand, Ereignisse (kein MapLibre: die Karte ist SVG) | – |
+| `js/analysis/` | Auswahl in der Karte: Akkordeon, Kontextmenü, Popup-Link; Vorschau lazy | – |
 | `reportLink.js` | Link ↔ Auswahl | ja |
 | `sources.js` | Datensätze, Leseradien, Feldvertrag, Auflösung über das Manifest | – |
 | `tileReader.js` | PMTiles lesen, MVT + MLT dekodieren, Kachelkanten | – |
@@ -110,7 +120,9 @@ Hauptverkehrsstraßen · kein Gemeindeschlüssel (AGS) in den Zensus-Kacheln · 
   Datenmodell, Regelwerk, Briefe, Zuständigkeit, Land.
 - `tests/web/report-fixture.spec.js`: ein **erfundener Ort** (`tests/fixtures/report/`) als echte
   PMTiles-Archive, per Routing ausgeliefert — der ganze Weg Link → Kacheln → Report → Brief →
-  Druck, Auswahl per Klick, kaputter Link. Unabhängig von `data/` und B2.
+  Druck, Radius im Report, kaputter Link. Unabhängig von `data/` und B2.
+- `tests/web/analysis.spec.js`: die Auswahl in der Karte (Akkordeon, Esc, Rechtsklick,
+  Einrichtung, Popup-Link) gegen echte Daten.
 - `tests/web/report.spec.js`: echte Daten (CI: B2) — eine Kreuzung in Berlin, der
   **Feldvertrag** (jedes Feld, das der Report liest, steht in den Archiven) und der
   Popup-Einstieg.
@@ -120,7 +132,7 @@ Hauptverkehrsstraßen · kein Gemeindeschlüssel (AGS) in den Zensus-Kacheln · 
 
 ## Bündel
 
-Zwei Vite-Einstiege (`index`, `report`). Gemeinsame Module (pmtiles, Quellen-Auflösung) liegen
-seitdem in einem geteilten Chunk, den beide Seiten per `modulepreload` laden; die Karte lädt
-zusätzlich ~2 KB (gzip) für die Popup-Einstiege. Report: ~53 KB gzip + MLT-Decoder ~18 KB
-(nur bei Bedarf) + MapLibre (wie die Karte).
+Zwei Vite-Einstiege (`index`, `report`). Die Karte trägt für die Analyse ~3,5 KB gzip im
+Hauptbündel (Akkordeon, Kontextmenü, Popup-Link); Einrasten und Vorschau laden erst bei der
+ersten Auswahl. Report: ~36 KB gzip + MLT-Decoder ~18 KB (nur bei Bedarf), **ohne MapLibre** —
+Importmap und Preload setzt `vite.config.js` nur noch in `index.html`.

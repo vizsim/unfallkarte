@@ -106,33 +106,33 @@ test("Hamburg: Landesregeln aus der Lage, Ampel in der Lücke, Zuständigkeit", 
   expect(errors).toEqual([]);
 });
 
-test("Auswahl per Klick: rastet am Knoten ein, schreibt den Link, öffnet den Report", async ({ page }) => {
-  const errors = collectErrors(page);
-  await useFixtures(page);
-  await page.goto(`/report.html?map=17/${CENTER.lat}/${CENTER.lng}`);
-  await page.waitForFunction(() => document.documentElement.dataset.mapReady === "true", null, { timeout: 60_000 });
-  const pt = await page.evaluate(([lat, lng]) => {
-    const m = window.__report.app.map;
-    const p = m.project([lng + 0.00012, lat + 0.00008]); // ~10 m neben der Kreuzung
-    const r = m.getContainer().getBoundingClientRect();
-    return { x: r.left + p.x, y: r.top + p.y };
-  }, [CENTER.lat, CENTER.lng]);
-  await page.mouse.click(pt.x, pt.y);
-  await expect.poll(() => page.evaluate(() => window.__report.app.preview?.n ?? null), { timeout: 30_000 }).toBe(6);
-  expect(page.url()).toContain("sel=k:53.56000,10.04500");
-  await expect(page.locator("#selpanel")).toContainText("Eingerastet auf den Knoten");
-  await page.click('button[data-go="report"]');
-  await page.waitForFunction(() => document.documentElement.dataset.reportReady === "true" && window.__report.app.E?.M.selection.kind === "k");
+test("Kreuzung aus dem Link; Radius im Report ändern lädt nach und schreibt den Link", async ({ page }) => {
+  // Gewählt wird in der Karte (js/analysis/, tests/web/analysis.spec.js) — hier kommt die Stelle
+  // aus dem Link, wie nach „Report öffnen".
+  const errors = await openReport(page, `rv=1&sel=k:${CENTER.lat.toFixed(5)},${CENTER.lng.toFixed(5)}&jahr=23-25`);
   await expect(page.locator("#view-report h1")).toHaveText("Kreuzung Teststraße / Querweg");
   await expect(page.locator("details.sec").first()).toContainText("rechnerisch");
+  expect(await page.evaluate(() => window.__report.app.E.M.accidents.n)).toBe(6);
+
+  await page.locator("#rep-r").evaluate((el) => {
+    el.value = "40";
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await expect.poll(() => page.evaluate(() => window.__report.app.E?.M.selection.r)).toBe(40);
+  expect(page.url()).toContain("&r=40&");
+  await expect(page.locator("#view-report h1")).toBeVisible();   // der Report blieb stehen
   expect(errors).toEqual([]);
 });
 
-test("kaputter Link: Hinweis statt Absturz, Auswahlkarte bleibt bedienbar", async ({ page }) => {
+test("kaputter Link: Hinweis statt Absturz, Weg zurück in die Karte", async ({ page }) => {
   const errors = collectErrors(page);
   await useFixtures(page);
   await page.goto("/report.html?rv=1&sel=e:foo/1@x");
-  await expect(page.locator("#view-auswahl")).toBeVisible();
-  await expect(page.locator('button[data-go="report"]')).toHaveAttribute("aria-disabled", "true");
+  await page.waitForFunction(() => document.documentElement.dataset.reportReady === "empty");
+  const empty = page.locator("#view-report .empty-state");
+  await expect(empty).toContainText("Noch keine Stelle gewählt");
+  await expect(empty).toContainText("beschädigt");
+  await expect(empty.locator('a[href="./index.html"]')).toBeVisible();
+  await expect(page.locator("#tab-brief")).toHaveAttribute("aria-disabled", "true");
   expect(errors).toEqual([]);
 });

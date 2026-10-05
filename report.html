@@ -8,8 +8,7 @@
   <meta name="description"
     content="Analyse-Report der Unfallkarte: Unfalllage, schutzbedürftige Nutzungen, Straße und Lärm an einer Stelle – mit rechtlicher Einordnung (§ 45 StVO) und Briefentwurf an die Behörde. Datenbasierte Einschätzung, keine Rechtsberatung." />
   <link rel="icon" href="stationary-bike-gym-svgrepo-com.svg" type="image/svg+xml">
-  <!-- Wie die Karte: Grundkarte (OpenFreeMap) und Datenbucket (B2) per fetch/CORS. -->
-  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+  <!-- Datenbucket (B2) per fetch/CORS; eine Grundkarte gibt es hier nicht (die Report-Karte ist SVG). -->
   <link rel="preconnect" href="https://tiles.vizsim.de" crossorigin>
   <link rel="stylesheet" href="./js/report/report.css" />
 </head>
@@ -27,19 +26,12 @@
     </header>
 
     <div class="steps" role="tablist" aria-label="Ablauf">
-      <button class="step" role="tab" id="tab-auswahl" aria-controls="view-auswahl" data-tab="auswahl"><span class="n">1</span>Auswahl</button>
-      <button class="step" role="tab" id="tab-report" aria-controls="view-report" data-tab="report"><span class="n">2</span>Report</button>
-      <button class="step" role="tab" id="tab-brief" aria-controls="view-brief" data-tab="brief"><span class="n">3</span>Brief</button>
-      <button class="step" role="tab" id="tab-pdf" aria-controls="view-pdf" data-tab="pdf"><span class="n">4</span>Druckansicht (PDF)</button>
+      <button class="step" role="tab" id="tab-report" aria-controls="view-report" data-tab="report"><span class="n">1</span>Report</button>
+      <button class="step" role="tab" id="tab-brief" aria-controls="view-brief" data-tab="brief"><span class="n">2</span>Brief</button>
+      <button class="step" role="tab" id="tab-pdf" aria-controls="view-pdf" data-tab="pdf"><span class="n">3</span>Druckansicht (PDF)</button>
     </div>
 
-    <section id="view-auswahl" role="tabpanel" aria-labelledby="tab-auswahl">
-      <div class="selgrid">
-        <div class="mapwrap"><div id="selmap"></div><div class="map-hint" id="map-hint">Klick setzt den Mittelpunkt der Auswahl</div></div>
-        <div class="panel selpanel" id="selpanel"></div>
-      </div>
-    </section>
-    <section id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></section>
+    <section id="view-report" role="tabpanel" aria-labelledby="tab-report"></section>
     <section id="view-brief" role="tabpanel" aria-labelledby="tab-brief" hidden></section>
     <section id="view-pdf" role="tabpanel" aria-labelledby="tab-pdf" hidden></section>
   </div>
