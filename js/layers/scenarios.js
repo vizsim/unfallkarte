@@ -4,6 +4,7 @@
 // Layer filtert. Popups: multi -> überlappende Flächen desselben Szenarios werden alle gezeigt.
 import { row } from "../ui/popupHelpers.js";
 import { translations } from "../ui/accidentLabels.js";
+import { oidSel, pointSel } from "../report/entry.js";
 
 const OUTLINE = "#1B4D3E";
 const ALL = ["all"];
@@ -103,6 +104,7 @@ export default [
         controls: { container: "scenario2-slider-container", slider: "scenario2-slider", sliderLabel: "scenario2-slider-value", filter: minValue("biped_count") },
         popup: {
             eyebrow: "Schulumfeld · Unfälle",
+            report: (p, f, ll) => oidSel(p.oid, f, ll),
             render: (p) => `
                 <div class="pop-title">${p.name ?? "Schule / Kindergarten"} <span class="info-icon" data-tip="Gezählt: Unfälle ab 2020 (seit 2020 bundesweit einheitlich erfasst, inkl. 2025) im 50-m-Umfeld. Die Karte zeigt dagegen alle Jahre 2017–2025 — ältere Unfälle erscheinen als Punkte, ohne mitgezählt zu werden.">i</span></div>
                 <table class="pop-table">
@@ -138,6 +140,7 @@ export default [
         }],
         popup: {
             eyebrow: "Schule · Tempo 50 nah",
+            report: (p, f, ll) => oidSel(p.oid, f, ll),
             // Tiles tragen nur oid + Tempo-50-Länge (kein Name) -> beides zeigen, sonst sind
             // überlappende Buffer (Schulgelände + Kita-Node) im Stapel nicht unterscheidbar.
             render: (p) => `
@@ -156,6 +159,7 @@ export default [
         controls: { container: "scenario8-slider-container", slider: "scenario8-slider", sliderLabel: "scenario8-slider-value", filter: minValue("max_laerm_num") },
         popup: {
             eyebrow: "Schule · Lärm",
+            report: (p, f, ll) => oidSel(p.oid, f, ll),
             render: (p) => `
                 <div class="pop-title">${p.name ?? "Unbenannte Schule"}</div>
                 <div class="pop-hero pop-hero--sm">bis ${laermText(p.max_laerm_num)}</div>
@@ -175,6 +179,7 @@ export default [
         },
         popup: {
             eyebrow: "Unfall-Häufung · M-Uko",
+            report: pointSel,
             render: (p) => {
                 const utyp = Number(p.utyp);
                 const utypText = utyp > 0 ? `${translations.UTYP1[utyp] ?? "-"} (${utyp})` : null;

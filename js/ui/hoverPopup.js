@@ -30,6 +30,9 @@
 //   link?     (props) -> { href, label } | null: im fixierten Fenster als anklickbare
 //             Fußzeile in der Karte; mit openOnClick: true öffnet ein Klick auf das
 //             Objekt den Link direkt (neuer Tab) statt das Fenster zu fixieren
+//   report?   (props, feature, lngLat) -> Auswahl {kind, lat, lng, oid?} | null: im fixierten
+//             Fenster eine zweite Fußzeile „Analyse-Report →" (js/report/entry.js baut die
+//             Auswahl, reportHref die absolute Adresse — safeHref lässt nur http(s) durch)
 //   onClick?  (feature, e) -> eigene Klick-Aktion (z. B. Chart-Popup), mit clickHint
 //   anchor?   (feature) -> { lngLat, offset }: Popup an einem Punkt statt am Cursor
 //   onEnter?/onLeave?  Hooks, wenn ein Feature dieses Eintrags gehovert/verlassen wird
@@ -46,6 +49,7 @@
 
 import { Popup } from "../lib/maplibre.js";
 import { isDrawing, onDrawingChange } from "../map/drawingState.js";
+import { reportHref } from "../report/entry.js";
 
 const MAX_HOVER_CARDS = 3;  // Hover zeigt max. so viele Karten; fixiert = alle
 const MAX_WIDTH = "340px";
@@ -115,12 +119,21 @@ export function setupHoverPopup(map, entries) {
         return href ? { href, label: link.label } : null;
     };
 
-    const card = (hit, { pinned }) => {
+    // Analyse-Report für diesen Treffer (nur im fixierten Fenster) oder null.
+    const reportOf = ({ entry, feature }, lngLat) => {
+        if (!entry.report || !lngLat) return null;
+        const sel = safe(entry, "report", () => entry.report(feature.properties, feature, lngLat));
+        return sel ? safeHref(reportHref(sel, window.location.href)) : null;
+    };
+
+    const card = (hit, { pinned, lngLat }) => {
         const { entry, feature } = hit;
         const eyebrow = [KIND_LABEL[entry.kind], entry.eyebrow].filter(Boolean).join(" · ");
         const link = pinned ? linkOf(hit) : null;
-        const foot = link
-            ? `<div class="pop-foot"><a href="${esc(link.href)}" target="_blank" rel="noopener">${esc(link.label)} →</a></div>`
+        const report = pinned ? reportOf(hit, lngLat) : null;
+        const foot = link || report
+            ? `<div class="pop-foot">${link ? `<a href="${esc(link.href)}" target="_blank" rel="noopener">${esc(link.label)} →</a>` : ""}`
+              + `${report ? `${link ? " · " : ""}<a href="${esc(report)}" target="_blank" rel="noopener" class="pop-report">Analyse-Report →</a>` : ""}</div>`
             : "";
         const body = safe(entry, "render", () => entry.render(escapedView(feature.properties), feature),
             `<div class="pop-meta">Details nicht darstellbar</div>`);
@@ -161,14 +174,14 @@ export function setupHoverPopup(map, entries) {
         if (top.entry.onClick) return top.entry.clickHint ?? "";
         if (hidden > 0) return `+${hidden} weitere · Klick zeigt alle`;
         // Nur wenn im Fenster etwas Anklickbares steckt (Link / Info-Icon), lohnt der Hinweis.
-        return /href=|data-tip=/.test(html) || hits.some((h) => h.entry.link) ? "→ Klick fixiert das Fenster" : "";
+        return /href=|data-tip=/.test(html) || hits.some((h) => h.entry.link || h.entry.report) ? "→ Klick fixiert das Fenster" : "";
     };
 
-    const buildHTML = (hits, { pinned }) => {
+    const buildHTML = (hits, { pinned, lngLat = null }) => {
         const shown = pinned ? hits : hits.slice(0, MAX_HOVER_CARDS);
         const hidden = hits.length - shown.length;
         const header = hits.length > 1 ? `<div class="pop-multi">${hits.length} Objekte an diesem Punkt</div>` : "";
-        let html = header + shown.map((h) => card(h, { pinned })).join("");
+        let html = header + shown.map((h) => card(h, { pinned, lngLat })).join("");
         if (!pinned) {
             const hint = hoverHint(hits, hidden, html);
             if (hint) html += `<div class="pop-pinhint">${hint}</div>`;
@@ -247,7 +260,7 @@ export function setupHoverPopup(map, entries) {
         unpin();
         pinKeys = new Set(hits.map(hitKey));
         pinPopup = new Popup({ closeButton: true, closeOnClick: false, maxWidth: MAX_WIDTH })
-            .setHTML(buildHTML(hits, { pinned: true }));
+            .setHTML(buildHTML(hits, { pinned: true, lngLat: e.lngLat }));
         place(pinPopup, hits, e);
         pinPopup.addTo(map);
         pinPopup.on("close", () => { pinPopup = null; pinKeys = null; });

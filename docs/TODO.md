@@ -66,6 +66,38 @@ Reihenfolge wie im Report, Abschnitt 8.
 - [ ] **B3 — ZXY-Kacheln über einen Worker** (Muster OSM-US-Tileservice), wenn Kosten/Limits
       passen. Später: D2 (Zähler im Worker), B4 (Brotli), C3 (zopfli), E1–E4.
 
+## Analyse-Report (`report.html`, Stand: [`ANALYSE_REPORT.md`](ANALYSE_REPORT.md))
+
+Beta auf `temp/analyse-report`, noch nicht live (Patch vom 2026-09-26, am 2026-10-05 auf den
+Stand mit Export und „Gebiet zeichnen" gehoben): Kreuzung und Einrichtung, Abschnitte 0–9,
+Weg A/B/C, M Uko, Brief, Druck, Popup-Einstiege. Vision, Konzept mit Quellen und Prototyp:
+`docs/intern/anaylse_report/`.
+
+- [ ] **R0 — Juristische Durchsicht** von Regelwerk 0.1.0 und Textbausteinen (RDG § 6 Abs. 2);
+      danach `rules/params.js` + Changelog versionieren. Amtliche Wortlaute (§ 45 Nr. 4/6/10,
+      VwV zu Z. 274) gegen gesetze-im-internet.de/BAnz prüfen.
+- [ ] **R7 — Pipeline:** `ags` in `census_population` (include) → Gemeinde/Kreis sicher statt
+      über Photon; `LICHT`/`USTRZUSTAND` in `accidents_single` (vorher Kachelgröße messen).
+- [ ] **R8 — Pipeline:** `report/coverage.json` (Land × Jahr, Logik `_valid_laender`) statt
+      der Heuristik im Report; `report/uko_rules.json` gemeinsam mit Sc9; später
+      `report/baselines.json` → Weg B mit Referenzvergleich (B3).
+- [ ] **R9 — OSM K3:** `priority_road`, `lanes`, `oneway`, `entrance`, `opening_hours`,
+      `amenity=childcare`, `crossing_ref`, `school:*`, `access`, Knoten `highway=traffic_signals`,
+      `source:maxspeed` (in DE häufiger Träger von `DE:urban` — fehlt es, bleibt „innerorts" im
+      Report oft „unklar") in osmconf/`osm.yaml` + Report-Feldvertrag (`js/report/sources.js`).
+- [ ] **R10 — Sc3 auf 500 m** (§ 45 Abs. 9 S. 4 Nr. 4 seit 11.10.2024) + Legendentext.
+- [ ] **R11 — Sc8-Popup:** „Orientierungswert ~57 dB(A)" ersetzen (L_DEN ≠ Beurteilungspegel).
+- [ ] **R12 — Zuständigkeit:** `report/zustaendigkeit.json` (GV-ISys + Landeslisten: Große
+      Kreisstädte, selbständige Gemeinden …) statt der Textregeln in `addressee.js`; ST, SH, TH,
+      RP, SL primär belegen.
+- [ ] **R13 — `geo.make_osm_oid`:** Relations-Multipolygone ergeben `node/<Relations-ID>` →
+      `relation/…` (Sc6-OSM-Link, Report-Einstieg aus Sc2/6/8 findet die Einrichtung sonst nicht).
+- [ ] **R14 — Sc9 an `report/uko_rules.json`** anbinden (Kriterien je Land wie im Report).
+- [ ] **R15 — Straßenzug und Gebiet** (`sel=s:`/`g:`), Radinfrastruktur (TILDA) im Report,
+      Knopf „Analyse" in der Karte (bisher nur Popup-Einstiege und direkter Aufruf).
+- [ ] **R16 — Ladezeit messen** (Pages-ähnlicher Server, `tools/perf/`): Range-Anfragen je
+      Report (~16 Archive), ggf. Leseradien/Zoom je Archiv nachschärfen.
+
 ## Frontend / UX
 
 - [ ] **Favicon ersetzen** — aktuell `stationary-bike-gym-svgrepo-com.svg`

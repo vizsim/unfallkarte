@@ -1,5 +1,6 @@
 // Kontext-Layer aus OpenStreetMap: Orte & Einrichtungen, Querungen, ÖPNV-Haltestellen.
 import { row, osmLink } from "../ui/popupHelpers.js";
+import { facilitySel } from "../report/entry.js";
 
 const schoolTitle = { school: "Schule", kindergarten: "Kindergarten" };
 
@@ -130,6 +131,7 @@ export default [
         permalink: "k", dataMinZoom: 9,
         popups: [{
             eyebrow: "OSM",
+            report: facilitySel,
             render: (p) => `
                 <div class="pop-title">${schoolTitle[p.amenity] || "Schule / Kindergarten"}</div>
                 <table class="pop-table">
@@ -233,6 +235,7 @@ export default [
         permalink: "e", dataMinZoom: 9,
         popups: [{
             eyebrow: "OSM",
+            report: facilitySel,
             // OSM-Tags mit Doppelpunkt heißen in den Tiles mit Unterstrich (GDAL-osmconf).
             render: (p) => `
                 <div class="pop-title">Gesundheitseinrichtung</div>
@@ -317,6 +320,7 @@ export default [
         permalink: "p", dataMinZoom: 9,
         popups: [{
             eyebrow: "OSM",
+            report: facilitySel,
             render: (p) => `
                 <div class="pop-title">Spielplatz</div>
                 <table class="pop-table">

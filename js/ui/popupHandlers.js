@@ -14,6 +14,7 @@ import { setupHoverPopup } from "./hoverPopup.js";
 import { row } from "./popupHelpers.js";
 import { translations } from "./accidentLabels.js";
 import { registryPopupEntries } from "../layers/registry.js";
+import { pointSel } from "../report/entry.js";
 
 const weekdayNames = ["?", "Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 const monthNames = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
@@ -70,7 +71,8 @@ function accidentEntries(map) {
     return [
         {
             id: "accidents", kind: "accidents", layers: ["accident-points"],
-            render: renderAccident
+            render: renderAccident,
+            report: pointSel
         },
         {
             id: "clusters", kind: "accidents", eyebrow: "Cluster", layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"],

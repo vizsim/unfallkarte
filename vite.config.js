@@ -109,6 +109,12 @@ function localData() {
 export default defineConfig({
   base: "./",        // Pages liefert unter vizsim.de/unfallkarte/ aus; relativ passt überall
   appType: "mpa",    // siehe 2. oben
+  // Zwei Seiten: die Karte und der Analyse-Report (docs/ANALYSE_REPORT.md). Beide bekommen
+  // Importmap + MapLibre-Preload über maplibreExternal (transformIndexHtml läuft je Seite).
+  // Schlüssel `index` hält den Dateinamen des Karten-Bündels (assets/index-*.js) stabil —
+  // tests/web/mobile.spec.js blockiert es über diesen Namen. Gemeinsame Module (pmtiles,
+  // Quellen-Auflösung) landen in einem geteilten Chunk, den die Karte per modulepreload lädt.
+  build: { rolldownOptions: { input: { index: resolve(ROOT, "index.html"), report: resolve(ROOT, "report.html") } } },
   server: {
     // Nicht beobachten: der Datenbaum (18 GB) und alles, was die Pipeline/Tests erzeugen.
     watch: { ignored: ["**/data/**", "**/pipeline/**", "**/test-results/**", "**/playwright-report/**"] },
