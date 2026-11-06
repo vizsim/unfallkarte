@@ -243,6 +243,18 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
 
 ## Daten / Pipeline
 
+- [x] **OSM-Auffrischung + `source:maxspeed`** (2026-11-06) — Geofabrik-Snapshot 2026-07-10 →
+      2026-11-04, alle 7 OSM-Layer und die Szenarien neu (`osm fetch --force`, `osm build all`,
+      `scenario run-all`; zusammen 44 min: Fetch 3, OSM 16, Szenarien 25). Nur Tempo zu erneuern
+      hätte nicht gereicht: Sc1/3/6 rechnen auf `maxspeed_*.fgb`, und das Manifest stempelt das
+      PBF-Datum auf ALLE OSM-Einträge. Objekte +0,4 … +3,6 % (Querungen am stärksten), Tempo-
+      Abdeckung Hauptstraßen 80,1 → 80,4 %, Nebenstraßen 52,4 → 52,8 %; Sc3 1.225 → 1.270,
+      Sc6 10.843 → 10.917, Sc9 unverändert (nur Unfälle). **Neu `source_maxspeed`** in beiden
+      Tempo-Kacheln: ~337k (Haupt) + ~359k (Neben) Abschnitte, davon ~633k ohne `maxspeed:type`
+      — vor allem `DE:urban`/`DE:zone30`/`sign`; Kacheln dadurch nur ~+1 % (347 / 241 MB).
+      Der Report liest das Feld noch nicht (R9 auf dem Report-Branch). Dazu `osm fetch` gehärtet:
+      lädt in `.part` und benennt am Ende um — die PBF war per Hardlink mit dem datierten
+      Snapshot in `osm_history_analysis` verbunden und wäre sonst mit überschrieben worden.
 - [x] **Unfall-Tiles als MLT** (2026-09-23, übernommen) — Details + Zahlen in
       [`MLT_EVALUATION.md`](MLT_EVALUATION.md): tippecanoe-MVT per `tools/mlt/mvt-to-mlt.mjs`
       (`@maplibre/mlt`, int32) umgewandelt, alle 48.667 Kacheln identisch; Pipeline-Schritt
