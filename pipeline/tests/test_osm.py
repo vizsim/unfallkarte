@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import geopandas as gpd
+import pytest
 from shapely.geometry import LineString, Point
 
 from unfallkarte import geo, osm
@@ -68,6 +72,54 @@ def test_osm_build_crossings_dry_run(capsys) -> None:
     assert "n/highway=crossing" in out and "w/footway=crossing" in out
     assert "PBF-Layer ['points', 'lines']" in out
     assert "-l germany_osm_crossings" in out
+
+
+class _FakeResponse:
+    def __init__(self, chunks: list[bytes], fail: bool = False) -> None:
+        self.chunks, self.fail = chunks, fail
+
+    def __enter__(self) -> _FakeResponse:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        return None
+
+    def raise_for_status(self) -> None:
+        return None
+
+    def iter_content(self, chunk_size: int):
+        yield from self.chunks
+        if self.fail:
+            raise ConnectionError("Abbruch mitten im Download")
+
+
+def _fake_fetch_env(monkeypatch, tmp_path: Path, response: _FakeResponse) -> Path:
+    monkeypatch.setattr(osm, "_raw", lambda: tmp_path)
+    monkeypatch.setattr(osm, "_config", lambda: {"geofabrik": {"url": "x", "pbf": "de.osm.pbf"}})
+    monkeypatch.setattr(osm.requests, "get", lambda *a, **k: response)
+    return tmp_path / "de.osm.pbf"
+
+
+def test_fetch_keeps_hardlinked_snapshot(monkeypatch, tmp_path: Path) -> None:
+    # Die PBF teilt sich per Hardlink die Datei mit einem datierten Snapshot woanders:
+    # der neue Download darf den Snapshot nicht überschreiben.
+    dest = _fake_fetch_env(monkeypatch, tmp_path, _FakeResponse([b"neu"]))
+    dest.write_bytes(b"alt")
+    snapshot = tmp_path / "germany-260710.osm.pbf"
+    os.link(dest, snapshot)
+    osm.fetch(force=True)
+    assert dest.read_bytes() == b"neu"
+    assert snapshot.read_bytes() == b"alt"
+    assert not dest.with_name(dest.name + ".part").exists()
+
+
+def test_fetch_abort_keeps_old_pbf(monkeypatch, tmp_path: Path) -> None:
+    dest = _fake_fetch_env(monkeypatch, tmp_path, _FakeResponse([b"halb"], fail=True))
+    dest.write_bytes(b"alt")
+    with pytest.raises(ConnectionError):
+        osm.fetch(force=True)
+    assert dest.read_bytes() == b"alt"
+    assert not dest.with_name(dest.name + ".part").exists()
 
 
 def test_crossings_tag_filters_keep_points_and_lines() -> None:

@@ -47,19 +47,29 @@ def _run(cmd: list[str], *, dry_run: bool, env: dict[str, str] | None = None) ->
 
 
 def fetch(*, force: bool = False) -> Path:
-    """Lädt germany-latest.osm.pbf von Geofabrik nach data/raw/osm/."""
+    """Lädt germany-latest.osm.pbf von Geofabrik nach data/raw/osm/.
+
+    Erst in `<pbf>.part`, am Ende umbenennen: Ein abgebrochener Download lässt die alte PBF
+    stehen, und eine per Hardlink geteilte PBF (z. B. ein datierter Snapshot in einem
+    anderen Projekt) wird nicht überschrieben — das Umbenennen trennt nur den Verweis.
+    """
     cfg = _config()["geofabrik"]
     _raw().mkdir(parents=True, exist_ok=True)
     dest = _raw() / cfg["pbf"]
     if dest.exists() and not force:
         print(f"  vorhanden: {dest}")
         return dest
+    part = dest.with_name(dest.name + ".part")
     print(f"  lade {cfg['url']}")
-    with requests.get(cfg["url"], stream=True, timeout=600) as resp:
-        resp.raise_for_status()
-        with open(dest, "wb") as fh:
-            for chunk in resp.iter_content(chunk_size=1 << 20):
-                fh.write(chunk)
+    try:
+        with requests.get(cfg["url"], stream=True, timeout=600) as resp:
+            resp.raise_for_status()
+            with open(part, "wb") as fh:
+                for chunk in resp.iter_content(chunk_size=1 << 20):
+                    fh.write(chunk)
+        os.replace(part, dest)
+    finally:
+        part.unlink(missing_ok=True)
     return dest
 
 
