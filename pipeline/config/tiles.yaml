@@ -255,3 +255,15 @@ accidents_build:
   single_mlt_output: "accidents_single_mlt.pmtiles"
   cluster_output: "combined_cluster.pmtiles"
   cluster_profiles: ["clusters_6_8", "clusters_9_11"]
+  # Cluster für die Merkmals-Ansichten (Unfalltyp, Unfallart, Jahr, Beteiligung): EIGENE Datei, die
+  # das Frontend erst lädt, wenn jemand nach einem dieser Merkmale färbt — combined_cluster.pmtiles
+  # (nur Schwere) bleibt für den Start schlank. Gleiche Cluster-Profile wie oben. Jeder Unfall trägt
+  # NUR seine eigenen Merkmale als „<SPALTE>__<wert>": 1 (dünn besetzt); tippecanoe summiert je
+  # Cluster und überspringt fehlende Felder, ein Cluster trägt also nur, was in ihm vorkommt.
+  # Beteiligung als Bitmaske „BET__<maske>" (Bits in der Reihenfolge von `beteiligung_bits`), damit
+  # „Rad ODER Fuß" exakt zählbar ist wie im Punktfilter. Feldnamen + Bitreihenfolge = Vertrag mit
+  # js/map/clusterModes.js.
+  cluster_modes_output: "cluster_modes.pmtiles"
+  cluster_modes_geojson: "accidents_cluster_modes.geojsonl.gz"   # Zwischenstand in data/raw/accidents/
+  cluster_modes_columns: ["UKATEGORIE", "UTYP1", "UART", "UJAHR"]
+  beteiligung_bits: ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstig"]

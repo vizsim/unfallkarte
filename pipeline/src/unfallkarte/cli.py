@@ -102,6 +102,20 @@ def accidents_tiles(
         typer.secho(f"{name}: {path}", fg=typer.colors.GREEN)
 
 
+@accidents_app.command("cluster-modes")
+def accidents_cluster_modes(
+    parquet: str = typer.Argument(..., help="Pfad zum accidents_*.parquet"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Kommandos nur zeigen"),
+) -> None:
+    """Baut nur cluster_modes.pmtiles (Merkmals-Cluster) — ohne die übrigen Unfall-Kacheln."""
+    from pathlib import Path
+
+    from unfallkarte import tiles
+
+    out = tiles.build_cluster_modes(Path(parquet), dry_run=dry_run)
+    typer.secho(f"cluster_modes: {out}", fg=typer.colors.GREEN)
+
+
 @accidents_app.command("mlt")
 def accidents_mlt(
     dry_run: bool = typer.Option(False, "--dry-run", help="Kommando nur zeigen"),

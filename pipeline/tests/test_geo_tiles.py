@@ -89,3 +89,62 @@ def test_accident_profiles_carry_only_frontend_attributes() -> None:
         assert prof["include"] == ["UKATEGORIE__1", "UKATEGORIE__2", "UKATEGORIE__3"]
         # Jede akkumulierte Spalte muss die Diät überleben, sonst summiert tippecanoe ins Leere.
         assert {a.split(":")[0] for a in prof["accumulate"]} <= set(prof["include"])
+
+
+def _modes_parquet(tmp_path):
+    """Drei Unfälle: Rad+Pkw, nur Fuß, ohne Beteiligung (Grenzfall)."""
+    gdf = gpd.GeoDataFrame(
+        {
+            "UKATEGORIE": [3, 1, 2], "UTYP1": [2, 4, 7], "UART": [5, 6, 0],
+            "UJAHR": [2024, 2017, 2025],
+            "IstRad": [1, 0, 0], "IstPKW": [1, 0, 0], "IstFuss": [0, 1, 0],
+            "IstKrad": [0, 0, 0], "IstGkfz": [0, 0, 0], "IstSonstig": [0, 0, 0],
+        },
+        geometry=[Point(13.4, 52.52), Point(13.5, 52.53), Point(13.6, 52.54)],
+        crs="EPSG:4326",
+    )
+    path = tmp_path / "acc.parquet"
+    gdf.to_parquet(path)
+    return path
+
+
+def test_cluster_modes_geojson_is_sparse_with_bitmask(tmp_path) -> None:
+    """Je Unfall NUR die eigenen Merkmale (= 1), Beteiligung als Bitmaske in der Reihenfolge
+    aus tiles.yaml — Vertrag mit js/map/clusterModes.js."""
+    import gzip
+    import json
+
+    cfg = tiles.load_yaml("tiles.yaml")["accidents_build"]
+    out = tmp_path / "modes.geojsonl.gz"
+    fields = tiles.write_cluster_modes_geojson(
+        _modes_parquet(tmp_path), out, cfg["cluster_modes_columns"], cfg["beteiligung_bits"]
+    )
+    rows = [json.loads(line) for line in gzip.open(out, "rt")]
+    assert [r["properties"] for r in rows] == [
+        # Rad = Bit 1, Pkw = Bit 2 -> 3; Fuß = Bit 4; ohne Beteiligung kein BET-Feld
+        {"UKATEGORIE__3": 1, "UTYP1__2": 1, "UART__5": 1, "UJAHR__2024": 1, "BET__3": 1},
+        {"UKATEGORIE__1": 1, "UTYP1__4": 1, "UART__6": 1, "UJAHR__2017": 1, "BET__4": 1},
+        {"UKATEGORIE__2": 1, "UTYP1__7": 1, "UART__0": 1, "UJAHR__2025": 1},
+    ]
+    assert rows[0]["geometry"]["coordinates"] == [13.4, 52.52]
+    assert "BET__3" in fields and "BET__0" not in fields and "UJAHR__2017" in fields
+    assert cfg["beteiligung_bits"][:3] == ["IstRad", "IstPKW", "IstFuss"]
+
+
+def test_cluster_modes_build_accumulates_every_field(tmp_path, monkeypatch, capsys) -> None:
+    """Jedes vorkommende Feld wird summiert UND überlebt die Attribut-Diät; tile-join ohne
+    500-KB-Grenze (sonst fallen dicke Übersichts-Kacheln stumm weg)."""
+    from unfallkarte.config import Paths
+
+    monkeypatch.setattr(tiles, "write_cluster_modes_geojson",
+                        lambda *a, **k: ["UTYP1__2", "BET__3"])
+    monkeypatch.setattr(tiles, "which", lambda _: None)  # Binaries „fehlen" -> nur ausgeben
+    # NIE die echten Datenpfade: der Build räumt seine Zwischendateien auf und hätte einem
+    # parallel laufenden echten Build die halb geschriebene Kachel-Datei weggelöscht.
+    monkeypatch.setattr(tiles, "get_paths", lambda: Paths(root=tmp_path))
+    tiles.build_cluster_modes(_modes_parquet(tmp_path))
+    out = capsys.readouterr().out
+    for field in ("UTYP1__2", "BET__3"):
+        assert f"--accumulate-attribute={field}:sum" in out and f"-y {field}" in out
+    assert "--cluster-distance=25" in out and "--cluster-distance=10" in out
+    assert "tile-join --force -o" in out and "--no-tile-size-limit" in out

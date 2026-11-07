@@ -61,7 +61,8 @@ Update-Ablauf; accidents- und osm-Strang sind unabhängig und können parallel l
 | --- | --- | --- |
 | `accidents fetch` | Sekunden/Jahr | ~13 MB ZIP pro Jahr |
 | `accidents build` | ~2 min | 9 Jahre, 2,2 Mio. Zeilen → GeoParquet |
-| `accidents tiles` | ~10 min | single ~6 min, cluster ~4 min (Tippecanoe) |
+| `accidents tiles` | ~12 min | single ~6 min, cluster ~4 min, Merkmals-Cluster ~2 min (Tippecanoe) |
+| `accidents cluster-modes` | ~2 min | nur `cluster_modes.pmtiles` (Summe je Unfalltyp/-art/Jahr/Beteiligung); 2,2 GB RAM |
 | `osm fetch` | ~10 min | 4,5 GB Geofabrik-PBF (netzabhängig) |
 | `osm build all` | ~20 min | 6 Layer; je Layer osmium-Filter über die volle PBF + Tippecanoe |
 | `scenario run-all` | ~30 min | Szenarien 1/2/3/6/8/9; teuerstes: 3 (Tempo-30-Netz-Analyse, ~18 min) |

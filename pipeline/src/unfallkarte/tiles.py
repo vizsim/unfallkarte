@@ -100,9 +100,12 @@ def tippecanoe(
     output_path: Path,
     *,
     layer_override: str | None = None,
+    overrides: dict[str, Any] | None = None,
     dry_run: bool = False,
 ) -> Path:
-    profile = _profiles()[profile_name]
+    """`overrides` ersetzt einzelne Profil-Schlüssel (z. B. erst zur Laufzeit bekannte
+    accumulate-/include-Listen), ohne das Profil zu kopieren."""
+    profile = {**_profiles()[profile_name], **(overrides or {})}
     output_path.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
         "tippecanoe", "-o", str(output_path),
@@ -112,9 +115,19 @@ def tippecanoe(
     return output_path
 
 
-def tile_join(output_path: Path, inputs: list[Path], *, dry_run: bool = False) -> Path:
+def tile_join(
+    output_path: Path,
+    inputs: list[Path],
+    *,
+    no_tile_size_limit: bool = False,
+    dry_run: bool = False,
+) -> Path:
+    """`no_tile_size_limit`: tile-join überspringt Kacheln > 500 KB sonst STUMM."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    cmd = ["tile-join", "--force", "-o", str(output_path), *[str(p) for p in inputs]]
+    cmd = ["tile-join", "--force", "-o", str(output_path)]
+    if no_tile_size_limit:
+        cmd.append("--no-tile-size-limit")
+    cmd += [str(p) for p in inputs]
     _run(cmd, dry_run=dry_run)
     return output_path
 
@@ -157,6 +170,75 @@ def write_grouped_geojson(parquet: Path, out_gz: Path) -> Path:
         shutil.copyfileobj(f_in, f_out)
     tmp.unlink(missing_ok=True)
     return out_gz
+
+
+def write_cluster_modes_geojson(
+    parquet: Path, out_gz: Path, columns: list[str], beteiligung_bits: list[str]
+) -> list[str]:
+    """Dünn besetztes, zeilenweises GeoJSON für die Merkmals-Cluster (siehe tiles.yaml,
+    `cluster_modes_*`): je Unfall nur `<SPALTE>__<wert>: 1` und `BET__<bitmaske>: 1`.
+
+    Gibt die vorkommenden Feldnamen zurück (= accumulate-/include-Liste für tippecanoe).
+    """
+    import geopandas as gpd
+    import numpy as np
+    import pandas as pd
+
+    gdf = gpd.read_parquet(parquet, columns=[*columns, *beteiligung_bits, "geometry"])
+    props = pd.Series("", index=gdf.index)
+    fields: set[str] = set()
+    for col in columns:
+        values = gdf[col].astype(int).astype(str)
+        props += f'"{col}__' + values + '":1,'
+        fields.update(f"{col}__{v}" for v in values.unique())
+
+    mask = np.zeros(len(gdf), dtype=np.int64)
+    for bit, col in enumerate(beteiligung_bits):
+        mask |= (gdf[col].to_numpy() == 1).astype(np.int64) << bit
+    bet = pd.Series(mask, index=gdf.index)
+    has_bet = bet > 0  # ohne jede Beteiligung: kein BET-Feld (zählt dann zu keiner Auswahl)
+    props[has_bet] += '"BET__' + bet[has_bet].astype(str) + '":1,'
+    fields.update(f"BET__{m}" for m in bet[has_bet].unique())
+
+    lon = gdf.geometry.x.round(6).astype(str)
+    lat = gdf.geometry.y.round(6).astype(str)
+    lines = ('{"type":"Feature","geometry":{"type":"Point","coordinates":[' + lon + "," + lat
+             + ']},"properties":{' + props.str.rstrip(",") + "}}\n")
+
+    out_gz.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(out_gz, "wt", encoding="utf-8") as fh:
+        fh.writelines(lines)
+    return sorted(fields)
+
+
+def build_cluster_modes(parquet: Path, *, dry_run: bool = False) -> Path:
+    """Merkmals-Cluster (cluster_modes.pmtiles): gleiche Profile wie die Schwere-Cluster,
+    aber mit einer Summe je Merkmalswert. Eigene Datei, damit der Kartenstart sie nicht lädt."""
+    cfg = load_yaml(_CFG)["accidents_build"]
+    paths = get_paths()
+    raw = paths.raw / "accidents"
+    src = raw / cfg["cluster_modes_geojson"]
+
+    if dry_run:
+        fields = ["<SPALTE>__<wert>"]
+    else:
+        fields = write_cluster_modes_geojson(
+            parquet, src, cfg["cluster_modes_columns"], cfg["beteiligung_bits"]
+        )
+        print(f"  {len(fields)} Summen-Felder je Cluster möglich")
+    overrides = {"accumulate": [f"{f}:sum" for f in fields], "include": fields}
+
+    parts: list[Path] = []
+    for prof in cfg["cluster_profiles"]:
+        part = raw / f"_tmp_modes_{prof}.pmtiles"
+        tippecanoe(prof, src, part, overrides=overrides, dry_run=dry_run)
+        parts.append(part)
+    out = tile_join(paths.out("accidents") / cfg["cluster_modes_output"], parts,
+                    no_tile_size_limit=True, dry_run=dry_run)
+    if not dry_run:
+        for part in parts:
+            part.unlink(missing_ok=True)
+    return out
 
 
 def build_dual_layer(
@@ -230,6 +312,8 @@ def build_accident_tiles(parquet: Path, *, dry_run: bool = False) -> dict[str, P
             part.unlink(missing_ok=True)
 
     out = {"single": single, "cluster": combined}
+    if cfg.get("cluster_modes_output"):
+        out["cluster_modes"] = build_cluster_modes(parquet, dry_run=dry_run)
     single_mlt = convert_accident_tiles_to_mlt(dry_run=dry_run)
     if single_mlt:
         out["single_mlt"] = single_mlt

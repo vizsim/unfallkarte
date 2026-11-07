@@ -22,6 +22,15 @@ datasets:
     attribution: "Unfallatlas der Statistischen Ämter (dl-de/by-2-0)"
     date: auto
 
+  # Cluster mit einer Summe je Merkmalswert (Unfalltyp, -art, Jahr, Beteiligung) — lädt das
+  # Frontend erst, wenn jemand nach einem dieser Merkmale färbt (LAZY_ACCIDENT_SOURCES in
+  # js/mapdata/resolveSources.js). Bau: `unfallkarte accidents cluster-modes`.
+  accidents_cluster_modes:
+    file: "accidents/cluster_modes.pmtiles"
+    label: "Unfälle (Cluster nach Merkmal)"
+    attribution: "Unfallatlas der Statistischen Ämter (dl-de/by-2-0)"
+    date: auto
+
   osm_schools:
     file: "osm/schools.pmtiles"
     label: "Schulen & Kindergärten"
