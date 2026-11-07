@@ -143,7 +143,7 @@ MAIN HEADER
           </div>
 
           <div class="legend-items" data-section="beteiligung">
-            <div style="margin: 6px 0 6px 16px;">
+            <div class="details-toggle" style="margin: 6px 0 6px 16px;">
               <label>
                 <input type="checkbox" id="toggle-details" />
                 Beteiligungsdetails anzeigen
@@ -470,18 +470,20 @@ MAIN HEADER
       <div class="legend-section-title" data-section-id="cluster">
         <label>
           <input type="checkbox" class="section-checkbox" data-section="cluster" />
-          Unfälle-Cluster nach Schwere (ungefiltert)
+          Unfälle-Cluster
         </label>
         <button type="button" class="toggle-arrow section-arrow open" data-arrow="cluster" aria-expanded="true" aria-label="Sektion Unfall-Cluster auf-/zuklappen"></button>
       </div>
 
       <div class="legend-section-allcontent cluster-legend-body">
+        <!-- Text setzt updateClusterLegend() je Merkmal (js/map/clusterModes.js, clusterHintHtml) -->
         <p class="cluster-hint">Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl,
-          <b>Farbanteile</b> = Schweregrad.</p>
+          <b>Farbanteile</b> = Schweregrad; es zählen die angehakten Stufen. Andere Filter gelten nur
+          für die Einzelunfälle ab Zoom 11.</p>
         <div class="cluster-legend-grid">
           <!-- Größe = Anzahl: verschachtelte Kreise (flächen-proportional) mit Leader-Labels -->
           <div>
-            <div class="cluster-legend-sub">Größe = Anzahl</div>
+            <div class="cluster-legend-sub">Größe = Anzahl<span class="when-share"> (angehakt)</span></div>
             <svg viewBox="0 0 150 70" width="100%" height="70" style="max-width:150px"
               font-size="10" font-family="sans-serif" aria-hidden="true">
               <g fill="rgba(120,120,120,.14)" stroke="#8a8f96" stroke-width="1">
@@ -499,7 +501,7 @@ MAIN HEADER
             </svg>
           </div>
           <!-- Farbe = Schwere: eine Beispiel-Torte (wie die Karten-Pies) + Farb-Key -->
-          <div>
+          <div class="cluster-key-pie">
             <div class="cluster-legend-sub">Farbe = Schwere</div>
             <div class="cluster-legend-pie-row">
               <div class="cluster-legend-pie" aria-hidden="true"></div>
@@ -509,6 +511,13 @@ MAIN HEADER
                 <li><span class="cluster-legend-dot" style="background:rgba(77,175,74,.6)"></span>Leichtverletzte</li>
               </ul>
             </div>
+          </div>
+          <!-- Kreise der Merkmals-Ansichten (data-view="share…"): Farbe = Anteil der angehakten
+               Werte; die Klassen erzeugt updateClusterLegend() aus clusterModes.js -->
+          <div class="cluster-key-share">
+            <div class="cluster-legend-sub">Farbe = Anteil (<span class="cluster-share-name"></span>)</div>
+            <ul class="cluster-legend-key cluster-share-key"></ul>
+            <p class="cluster-share-all">Grau = alles angehakt, kein Anteil</p>
           </div>
         </div>
       </div>

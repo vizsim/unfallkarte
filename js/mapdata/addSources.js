@@ -1,4 +1,4 @@
-import { resolveSources, resolveAccidentSources, ACCIDENT_SOURCES } from "./resolveSources.js";
+import { resolveSources, resolveAccidentSource, resolveAccidentSources, ACCIDENT_SOURCES } from "./resolveSources.js";
 import { showErrorBanner } from "../ui/errorBanner.js";
 import { setSourceResolver } from "../layers/registry.js";
 import { MAPILLARY_TOKEN } from "../config/env.js";
@@ -18,6 +18,22 @@ import { MAPILLARY_TOKEN } from "../config/env.js";
 // zeigt gleiche Zeichenketten nur einmal.
 const ACCIDENT_ATTRIBUTION =
   'Unfalldaten: <a href="https://unfallatlas.statistikportal.de/" target="_blank" rel="noopener">Unfallatlas</a> © Statistische Ämter des Bundes und der Länder (dl-de/by-2-0)';
+
+const lazyPending = new Map();
+
+/**
+ * Lazy Unfall-Quelle (LAZY_ACCIDENT_SOURCES) anlegen, falls noch nicht da. Je Quelle nur EIN
+ * Auflösen, auch wenn mehrere Aufrufe gleichzeitig kommen (gemerkt wird die Promise).
+ */
+export function ensureLazyAccidentSource(map, id) {
+  if (map.getSource(id)) return Promise.resolve();
+  if (!lazyPending.has(id)) {
+    lazyPending.set(id, resolveAccidentSource(id).then((url) => {
+      if (!map.getSource(id)) map.addSource(id, { type: "vector", url, attribution: ACCIDENT_ATTRIBUTION });
+    }));
+  }
+  return lazyPending.get(id);
+}
 
 /**
  * Quellen, die kein Manifest brauchen — laufen sofort, damit die Unfall-Tiles nicht hinter

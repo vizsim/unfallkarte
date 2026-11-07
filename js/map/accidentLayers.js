@@ -10,13 +10,15 @@
 // weder Zoom-Lock noch URL-Format.
 
 import { getCircleColorPaint, paintStyles } from "../styleConfig.js";
-import { updateLegendColors } from "../ui/legendHandlers.js";
+import { isClusterSectionOn, updateClusterLegend, updateLegendColors } from "../ui/legendHandlers.js";
+import { CIRCLE_LAYERS, PIE_LAYERS, createClusterView } from "./clusterView.js";
 
-/** Layer-IDs der Kern-App. Auch der Feature-Zähler rechnet damit (js/ui/featureCounter.js). */
+/** Layer-IDs der Kern-App. Auch der Feature-Zähler rechnet damit (js/ui/featureCounter.js).
+ *  Die Kreis-Cluster entstehen lazy — wer sie abfragt, prüft vorher map.getLayer(). */
 export const LAYERS = {
   accidents: ["accident-points"],
   symbols: ["beteiligung-symbols"],
-  clusters: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"],
+  clusters: [...PIE_LAYERS, ...CIRCLE_LAYERS],
 };
 
 /** Die fünf Filter-Dimensionen des Datensatzes. Reihenfolge = Reihenfolge im Filter. */
@@ -45,6 +47,21 @@ export function readSelection() {
   };
 }
 
+/** Was die Cluster zeigen: Merkmal aus „Färben nach …", dessen angehakte Werte und wie viele
+ *  es gibt (Beteiligung: Feldnamen wie „IstRad"). Nur DIESES Merkmal wirkt auf die Cluster. */
+export function readClusterView() {
+  const mode = document.querySelector('input[name="color-style"]:checked')?.value ?? "UKATEGORIE";
+  const { byGroup, beteiligungen } = readSelection();
+  if (mode === "BETEILIGUNG") {
+    return { mode, selected: beteiligungen, available: document.querySelectorAll("input[data-field]").length };
+  }
+  return {
+    mode,
+    selected: byGroup[mode] ?? [],
+    available: document.querySelectorAll(`input[data-group="${mode}"]`).length,
+  };
+}
+
 const detailsOn = () => !!document.getElementById("toggle-details")?.checked;
 
 const setVisible = (map, ids, visible) => {
@@ -62,9 +79,18 @@ const setVisible = (map, ids, visible) => {
  * @param {{value: boolean}} deps.isInitializingRef  während des Permalink-Restores kein Rückschreiben
  * @param {() => void} deps.recount                  sichtbare Unfälle neu zählen
  * @param {() => void} deps.writePermalink           URL nachziehen
- * @returns {{updateLayerFilter: Function, updateColorStyle: Function}}
+ * @returns {{updateLayerFilter: Function, updateColorStyle: Function, updateClusterView: Function}}
  */
 export function setupAccidentLayers(map, { isInitializingRef, recount, writePermalink }) {
+  const clusterView = createClusterView(map, {
+    readView: readClusterView,
+    isOn: isClusterSectionOn,
+    onView: updateClusterLegend,
+  });
+  // Nach dem Umstellen neu zählen: die Cluster zeigen jetzt andere Zahlen. (Im Filter-Pfad
+  // nicht — der zählt ohnehin auf `idle`, und ein Zähldurchgang kostet in dichten Gegenden ~1 s.)
+  const updateClusterView = () => clusterView.update().then(() => map.once("idle", recount));
+
   function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
     if (isInitializingRef.value && !force) return;
 
@@ -84,6 +110,7 @@ export function setupAccidentLayers(map, { isInitializingRef, recount, writePerm
 
     setVisible(map, LAYERS.accidents, willShow);
     setVisible(map, LAYERS.symbols, willShow && detailsOn());
+    clusterView.update();
 
     map.once("idle", recount);
     if (shouldUpdatePermalink && !isInitializingRef.value) writePermalink();
@@ -105,6 +132,7 @@ export function setupAccidentLayers(map, { isInitializingRef, recount, writePerm
     // Beteiligungs-Buchstaben nur, wenn Details an sind UND die Auswahl etwas zeigt.
     setVisible(map, LAYERS.symbols, detailsOn() && readSelection().willShow);
     updateLegendColors(selected, paintStyles);
+    updateClusterView();
   }
 
   document.querySelectorAll('input[name="color-style"]').forEach((rb) =>
@@ -113,8 +141,9 @@ export function setupAccidentLayers(map, { isInitializingRef, recount, writePerm
   document.getElementById("toggle-details")?.addEventListener("change", (e) =>
     setVisible(map, LAYERS.symbols, e.target.checked && readSelection().willShow));
 
-  // Cluster starten versteckt; ab hier steuert sie die Cluster-Checkbox der Legende.
+  // Cluster starten versteckt; ab hier entscheidet clusterView (Merkmal, Häkchen, Legenden-
+  // Häkchen „Unfälle-Cluster").
   setVisible(map, LAYERS.clusters, false);
 
-  return { updateLayerFilter, updateColorStyle };
+  return { updateLayerFilter, updateColorStyle, updateClusterView };
 }

@@ -11,7 +11,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { ACCIDENT_SOURCES } from "../../js/mapdata/resolveSources.js";
+import { ACCIDENT_SOURCES, LAZY_ACCIDENT_SOURCES } from "../../js/mapdata/resolveSources.js";
+
+// Auch die erst bei Bedarf angelegten Unfall-Quellen (Merkmals-Cluster) folgen dem Vertrag.
+const ALL = { ...ACCIDENT_SOURCES, ...LAZY_ACCIDENT_SOURCES };
 
 const YAML = new URL("../../pipeline/config/sources.yaml", import.meta.url);
 
@@ -37,7 +40,7 @@ test("Dateinamen der Unfall-Quellen stimmen mit sources.yaml überein", () => {
   // Der Parser selbst muss etwas gefunden haben, sonst wäre der Test still immer grün.
   assert.ok(Object.keys(files).length > 5, `sources.yaml lieferte nur ${Object.keys(files).length} Einträge`);
 
-  for (const [sourceId, { manifestId, file }] of Object.entries(ACCIDENT_SOURCES)) {
+  for (const [sourceId, { manifestId, file }] of Object.entries(ALL)) {
     assert.equal(
       files[manifestId], file,
       `Quelle "${sourceId}": Frontend sagt "${file}", sources.yaml sagt "${files[manifestId]}"`,
@@ -47,7 +50,7 @@ test("Dateinamen der Unfall-Quellen stimmen mit sources.yaml überein", () => {
 
 test("jede Unfall-Quelle nennt eine Manifest-ID, die es in sources.yaml gibt", () => {
   const files = filesFromSourcesYaml();
-  for (const [sourceId, { manifestId }] of Object.entries(ACCIDENT_SOURCES)) {
+  for (const [sourceId, { manifestId }] of Object.entries(ALL)) {
     assert.ok(manifestId in files, `Quelle "${sourceId}" zeigt auf unbekanntes Dataset "${manifestId}"`);
   }
 });

@@ -72,6 +72,36 @@ export function radiusFor(n) {
 /** Klasse (0–5) eines Anteils — wie der step-Ausdruck. */
 export const shareClass = (share) => SHARE_BREAKS.filter((b) => share >= b).length;
 
+const pct = (x) => `${Math.round(x * 100)} %`;
+/** Beschriftung der 6 Farbklassen: „< 5 %", „5–10 %" … „≥ 50 %". */
+export const shareClassLabels = () => [
+  `< ${pct(SHARE_BREAKS[0])}`,
+  ...SHARE_BREAKS.slice(1).map((b, i) => `${Math.round(SHARE_BREAKS[i] * 100)}–${pct(b)}`),
+  `≥ ${pct(SHARE_BREAKS.at(-1))}`,
+];
+
+/** Name des Merkmals in Texten (Legende, Popup). */
+export const MODE_NAMES = {
+  UKATEGORIE: "Schweregrad", BETEILIGUNG: "Beteiligung", UJAHR: "Jahr", UTYP1: "Unfalltyp", UART: "Unfallart",
+};
+
+/** Erklärtext der Cluster-Legende (HTML ohne Fremddaten). */
+export function clusterHintHtml(mode, selected, available) {
+  const name = MODE_NAMES[mode] ?? mode;
+  const rest = `Andere Filter gelten nur für die Einzelunfälle ab Zoom 11.`;
+  if (!CLUSTER_MODES.includes(mode)) {
+    return `Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl, <b>Farbanteile</b> = Schweregrad; `
+      + `es zählen die angehakten Stufen. ${rest}`;
+  }
+  let text = `Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Zahl der angehakten Werte bei „${name}“, `
+    + `<b>Farbe</b> = ihr Anteil an allen Unfällen im Kreis. ${rest}`;
+  if (selected.length >= available) text += ` <b>Alles angehakt</b> – hake Werte ab, um ihren Anteil zu sehen.`;
+  if (mode === "UJAHR") {
+    text += ` Achtung: Nicht jedes Bundesland ist in jedem Jahr im Unfallatlas enthalten – Jahresanteile können dadurch verzerrt sein.`;
+  }
+  return text;
+}
+
 /**
  * Filter, Radius und Farbe der Kreis-Layer für ein Merkmal.
  * @param {string} mode       eins aus CLUSTER_MODES

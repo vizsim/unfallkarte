@@ -27,6 +27,12 @@ export const ACCIDENT_SOURCES = {
   "accidents-cluster": { manifestId: "accidents_cluster", file: "accidents/combined_cluster.pmtiles" },
 };
 
+/** Unfall-Quellen, die erst bei Bedarf entstehen (ensureLazyAccidentSource in addSources.js) —
+ *  der Kartenstart lädt nicht einmal ihren Kopf. Gleicher Vertrag mit sources.yaml wie oben. */
+export const LAZY_ACCIDENT_SOURCES = {
+  "accidents-cluster-modes": { manifestId: "accidents_cluster_modes", file: "accidents/cluster_modes.pmtiles" },
+};
+
 // ./data/ ist gitignoriert und existiert nur auf dem Entwicklungsrechner; auf Pages ist die
 // Probe ein Roundtrip für eine Antwort, die immer "nein" lautet. (Auch der Export fragt das.)
 // Bewusst am Hostnamen, NICHT an `import.meta.env.DEV`: sonst probte der gebaute Stand
@@ -94,6 +100,13 @@ export async function resolveAccidentSources({ localBase = LOCAL_BASE, remoteBas
     })
   );
   return Object.fromEntries(resolved);
+}
+
+/** URL EINER Unfall-Quelle (auch der lazy) — gleiche Regel wie resolveAccidentSources. */
+export async function resolveAccidentSource(id, { localBase = LOCAL_BASE, remoteBase = REMOTE_BASE } = {}) {
+  const { file } = { ...ACCIDENT_SOURCES, ...LAZY_ACCIDENT_SOURCES }[id];
+  const local = mayHaveLocalTree() && (await existsLocally(`${localBase}${file}`));
+  return `pmtiles://${local ? localBase : remoteBase}${file}`;
 }
 
 // Liefert ein Lookup-Objekt: url(id) -> "pmtiles://<lokal|remote>".

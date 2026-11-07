@@ -229,9 +229,9 @@ function setupUI(map) {
 }
 
 function setupLegend(map) {
-  setupLegendClusterCheckboxSync(map);
+  setupLegendClusterCheckboxSync();
   setupLegendToggleHandlers();
-  setupLegendSectionCheckboxes(accidents.updateLayerFilter);
+  setupLegendSectionCheckboxes(accidents.updateLayerFilter, accidents.updateClusterView);
   setupZoomHintLinks(map);
 
   accidents.updateColorStyle();

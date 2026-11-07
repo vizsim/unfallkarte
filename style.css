@@ -226,10 +226,47 @@ body {
   display: block;
 }
 
-.legend[data-zoom="cluster"]>.legend-section[data-section="einzeln"],
-.legend[data-zoom="cluster"]>.legend-section-divider {
+/* Reihenfolge bei Cluster-Zoom: Titel | Trenner | Umschalter (Einzel-Block, reduziert) | Trenner |
+   Cluster-Block | dessen unterer Trenner | Szenarien … — der obere Eigen-Trenner des Cluster-Blocks
+   entfiele sonst doppelt auf den Trenner davor. */
+#cluster-legend-section > .legend-section-divider:first-child {
   display: none;
 }
+
+/* Die Cluster folgen „Färben nach …" und den Häkchen DIESES Merkmals (js/map/clusterView.js).
+   Darum bleiben die Umschalter auch bei Cluster-Zoom sichtbar — aber nur die Häkchen des
+   gewählten Merkmals (.is-cluster-active setzt updateClusterLegend), ohne Zähler, ohne die
+   Buchstaben-Details und ohne das Punkt-Häkchen „Unfälle einzeln". */
+.legend[data-zoom="cluster"] .legend-section-title[data-section-id="einzeln"],
+.legend[data-zoom="cluster"] [data-section="einzeln"] .legend-items,
+.legend[data-zoom="cluster"] [data-section="einzeln"] .count-badge,
+.legend[data-zoom="cluster"] [data-section="einzeln"] .legend-header .toggle-arrow,
+.legend[data-zoom="cluster"] .details-toggle {
+  display: none;
+}
+
+/* Kreise färben nach Anteil, nicht nach Kategorie — die Punktfarben neben den Häkchen gelten dort nicht */
+.legend[data-zoom="cluster"][data-cluster-view^="share"] [data-section="einzeln"] .color-box {
+  visibility: hidden;
+}
+
+.legend[data-zoom="cluster"] .legend-section[data-section="einzeln"].collapsed .legend-section-content,
+.legend[data-zoom="cluster"] [data-section="einzeln"] .legend-items.is-cluster-active {
+  display: block;
+}
+
+/* Cluster-Legende je Ansicht (data-view: "pie" | "share" | "share-all") */
+#cluster-legend-section .when-share,
+#cluster-legend-section .cluster-key-share,
+#cluster-legend-section[data-view^="share"] .cluster-key-pie,
+#cluster-legend-section[data-view="share-all"] .cluster-share-key,
+#cluster-legend-section:not([data-view="share-all"]) .cluster-share-all {
+  display: none;
+}
+
+#cluster-legend-section[data-view^="share"] .when-share { display: inline; }
+#cluster-legend-section[data-view^="share"] .cluster-key-share { display: block; }
+.cluster-share-all { font-size: 11.5px; color: var(--ui-text-muted); margin: 0; }
 
 /* Layer-Legende, Zoom-Hinweis und Regler sind aus, bis JS sie als aktiv markiert.
    (Vorher stand dieser Startzustand als inline `display:none` im Markup — und wurde

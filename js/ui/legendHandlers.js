@@ -1,6 +1,7 @@
 // legendHandlers.js
 
 import { LAYER_REGISTRY } from "../layers/registry.js";
+import { CLUSTER_MODES, MODE_NAMES, SHARE_COLORS, clusterHintHtml, shareClassLabels } from "../map/clusterModes.js";
 
 // ─────────────────────────────────────────────────────────────────────────────────────
 // Sichtbarkeit: dieses Modul setzt nur ZUSTAND (Klassen / data-Attribute), über `display`
@@ -58,13 +59,10 @@ export function updateLegendVisibilityByZoom(map) {
 
   syncLegendBlocks();
 
-  // Defensiv: fehlt der Layer (noch nicht geladen / Add fehlgeschlagen), nicht werfen —
-  // sonst crasht die ganze Legenden-Funktion in einer Render-Schleife.
+  // Das Häkchen spiegelt den gemerkten Zustand, nicht die Sichtbarkeit eines Layers: je nach
+  // Merkmal sind Torten ODER Kreise sichtbar (js/map/clusterView.js).
   const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
-  if (clusterCheckbox) {
-    const layer = "pie-clusters-fine-layer";
-    clusterCheckbox.checked = !!map.getLayer(layer) && map.getLayoutProperty(layer, "visibility") === "visible";
-  }
+  if (clusterCheckbox) clusterCheckbox.checked = isClusterSectionOn();
 
   // Zoom-Hinweis je Layer: sichtbar, solange der Layer aktiv ist und seine Daten noch nicht
   // gerendert werden. indeterminate zählt als aktiv (z. B. nur "Panorama-Bilder" an).
@@ -118,16 +116,43 @@ export function isClusterSectionOn() {
   return stored === null ? true : stored === "true";
 }
 
-export function setupLegendClusterCheckboxSync(map) {
+// Nur das Häkchen setzen — welche Cluster-Layer sichtbar werden, entscheidet clusterView beim
+// nächsten updateColorStyle (main.js ruft es direkt danach auf).
+export function setupLegendClusterCheckboxSync() {
   const clusterCheckbox = document.querySelector('.section-checkbox[data-section="cluster"]');
-  if (!clusterCheckbox) return;
+  if (clusterCheckbox) clusterCheckbox.checked = isClusterSectionOn();
+}
 
-  const on = isClusterSectionOn();
-  clusterCheckbox.checked = on;
-  ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"].forEach(layerId => {
-    if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, "visibility", on ? "visible" : "none");
-    }
+/**
+ * Cluster-Legende an die Ansicht anpassen (Zustand setzen, CSS zeigt an):
+ *  - data-view am Cluster-Block: "pie" (Torten) | "share" (Kreise) | "share-all" (alles angehakt);
+ *  - Erklärtext je Merkmal; Farbklassen der Kreise (einmal aus clusterModes.js erzeugt);
+ *  - .is-cluster-active an der Filtergruppe des Merkmals: bei Cluster-Zoom bleiben nur deren
+ *    Häkchen sichtbar, denn nur sie wirken auf die Cluster.
+ */
+export function updateClusterLegend({ mode, selected, available }) {
+  const section = document.getElementById("cluster-legend-section");
+  if (!section) return;
+  const circles = CLUSTER_MODES.includes(mode);
+  section.dataset.view = !circles ? "pie" : selected.length >= available ? "share-all" : "share";
+  // auch an der Legende selbst: bei Kreisen tragen die Farbkästchen der Häkchen keine Bedeutung
+  document.querySelector(".legend")?.setAttribute("data-cluster-view", section.dataset.view);
+
+  const hint = section.querySelector(".cluster-hint");
+  if (hint) hint.innerHTML = clusterHintHtml(mode, selected, available);
+
+  const key = section.querySelector(".cluster-share-key");
+  if (key && !key.children.length) {
+    key.innerHTML = shareClassLabels()
+      .map((label, i) => `<li><span class="cluster-legend-dot" style="background:${SHARE_COLORS[i]}"></span>${label}</li>`)
+      .join("");
+  }
+  const name = section.querySelector(".cluster-share-name");
+  if (name) name.textContent = MODE_NAMES[mode] ?? "";
+
+  const group = mode === "BETEILIGUNG" ? "beteiligung" : mode;
+  document.querySelectorAll('.legend-section[data-section="einzeln"] .legend-items').forEach((el) => {
+    el.classList.toggle("is-cluster-active", el.dataset.section === group);
   });
 }
 
@@ -192,7 +217,7 @@ export function setupLegendToggleHandlers() {
   });
 }
 
-export function setupLegendSectionCheckboxes(updateLayerFilter) {
+export function setupLegendSectionCheckboxes(updateLayerFilter, onClusterToggle = () => {}) {
   document.querySelectorAll('.section-checkbox').forEach(sectionCb => {
     const sectionId = sectionCb.dataset.section;
     const section = document.querySelector(`.legend-section[data-section="${sectionId}"]`);
@@ -204,13 +229,8 @@ export function setupLegendSectionCheckboxes(updateLayerFilter) {
       const checked = sectionCb.checked;
 
       if (sectionId === "cluster") {
-        const visibility = checked ? "visible" : "none";
-        ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"].forEach(layerId => {
-          if (window.map.getLayer(layerId)) {
-            window.map.setLayoutProperty(layerId, "visibility", visibility);
-          }
-        });
         sessionStorage.setItem(CLUSTER_SESSION_KEY, String(checked));
+        onClusterToggle();   // clusterView entscheidet: Torten, Kreise oder nichts
         return;
       }
 
