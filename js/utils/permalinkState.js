@@ -46,6 +46,7 @@ export function readState(map) {
         style: document.querySelector('input[name="color-style"]:checked')?.value,
         filters: readFilters(),
         details: !!byId("toggle-details")?.checked,
+        cluster: document.querySelector('input[name="cluster-focus"]:checked')?.value,
         layers: Object.keys(kontextKeys).filter((id) => byId(`toggle-${id}`)?.checked),
         scenarios: checkedValues('input[name="scenario"]'),
         controls: readControls(),
@@ -112,6 +113,8 @@ export function applyState(map, state) {
     // (setupPermalinkHandling), damit er auch ohne Link im Spiel läuft.
     if (state.filters) applyFilters(state.filters);
     if (state.details != null) setChecked(byId("toggle-details"), state.details);
+    // Cluster-Ansicht (Torten | Anteil einer Beteiligung) — der change-Handler zieht die Karte nach
+    if (state.cluster) setRadio("cluster-focus", state.cluster);
 
     // Regler VOR den Layern: schaltet ein Toggle seinen Layer ein, wendet setupEntryControls
     // den AKTUELL angezeigten Reglerwert an — der muss dann schon der aus dem Link sein.

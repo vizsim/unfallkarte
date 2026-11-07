@@ -22,6 +22,7 @@ const defaults = () => ({
         UART: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
     },
     details: false,
+    cluster: "UKATEGORIE",
     layers: [],
     scenarios: [],
     controls: { c1: "3", c2: "3", c8: "60", c9: "3", c9r: "all", uh: "14", vm: "dtv", vl: "1", vb: "1", tm: "bike" },
@@ -233,4 +234,14 @@ test("Gebiet: kaputter oder fremder sel-Wert fällt weg, der Rest des Links gilt
     assert.equal(state.view.zoom, 14);
     assert.equal(parse("?v=2&map=14/52.5/13.4&sel=k:abc").area, undefined);   // künftige Auswahlart
     assert.equal(parse("?v=2&map=14/52.5/13.4&sel=g:_p~iF~ps|U").area, undefined); // < 3 Punkte
+});
+
+test("Cluster-Ansicht (?cl=): eine Beteiligung mit den Ziffern von ?bet=, Default fällt weg", () => {
+    const base = defaults();
+    assert.equal(serialize({ ...base, cluster: "UKATEGORIE" }, base).includes("cl="), false);
+    assert.match(serialize({ ...base, cluster: "IstRad" }, base), /&cl=1(&|$)/);
+    assert.equal(roundtrip({ ...base, cluster: "IstFuss" }).cluster, "IstFuss");
+    assert.equal(roundtrip({ ...base, cluster: "IstGkfz" }).cluster, "IstGkfz");
+    // unbekanntes Kürzel (Link aus einer neueren Version) fällt still auf den Default zurück
+    assert.equal(mergeState(base, parse("?v=2&cl=9")).cluster, "UKATEGORIE");
 });

@@ -34,6 +34,7 @@ export const PERMALINK_VERSION = "2";
  * @property {string} [style]                      Einfärbung: UKATEGORIE | BETEILIGUNG | …
  * @property {Record<string, string[]>} [filters]  FILTER_GROUPS -> ausgewählte Werte
  * @property {boolean} [details]                   Beteiligungs-Buchstaben (#toggle-details)
+ * @property {string} [cluster]                    Cluster-Ansicht: UKATEGORIE (Torten) | IstRad | …
  * @property {string[]} [layers]                   Kontext-Layer: Toggle-IDs
  * @property {string[]} [scenarios]                Checkbox-Werte: "sc1" …
  * @property {Record<string, string>} [controls]   CONTROLS-Kürzel -> Wert
@@ -229,7 +230,7 @@ const encodeFilterGroup = (group, values = []) => {
  * %2C/%2F-Kaskaden. Alle verwendeten Trennzeichen (`/` `_` `-` `:` `,`) sind in einer Query erlaubt.
  */
 export function serialize(state, defaults = {}) {
-    const { view, style, filters, details, layers, scenarios, controls, area } = state;
+    const { view, style, filters, details, cluster, layers, scenarios, controls, area } = state;
     const pairs = [["v", PERMALINK_VERSION]];
 
     // Ansicht steht immer drin — sie ist der Zweck des Links (Konvention wie bei OSM: z/lat/lng).
@@ -245,6 +246,9 @@ export function serialize(state, defaults = {}) {
     }
     if (style && style !== defaults.style) pairs.push(["s", styleShortMap[style] ?? style]);
     if (details != null && details !== defaults.details) pairs.push(["d", details ? "1" : "0"]);
+    // Cluster-Ansicht (?cl=): Anteil EINER Beteiligung, gleiche Ziffern wie ?bet= (1 = Rad …);
+    // Default (Torten nach Schwere) fällt weg.
+    if (cluster && cluster !== defaults.cluster && beteiligungMap[cluster]) pairs.push(["cl", beteiligungMap[cluster]]);
     if (layers && !sameSet(layers, defaults.layers)) {
         pairs.push(["l", layers.map((id) => kontextKeys[id]).filter(Boolean).sort().join("") || "-"]);
     }
@@ -322,6 +326,7 @@ function parseV2(params) {
     set("view", params.get("map"), (raw) => decodeView(raw, "map"));
     set("style", params.get("s"), (raw) => reverseStyle[raw]);
     set("details", params.get("d"), (raw) => raw === "1");
+    set("cluster", params.get("cl"), (raw) => reverseBeteiligung[raw]);
     set("layers", params.get("l"), decodeLayers);
     set("scenarios", params.get("n"), (raw) => (raw === "-" ? [] : split(raw, "_").map((n) => `sc${n}`)));
     set("controls", params.get("o"), decodeControls);
