@@ -71,6 +71,14 @@ Reihenfolge wie im Report, Abschnitt 8.
 
 ## Frontend / UX
 
+- [ ] **Cluster nach Beteiligung — vor dem Merge:** `cluster_modes.pmtiles` + Manifest nach B2
+      (`unfallkarte manifest` + `deploy`); die CI prüft gegen B2. Ausbau später: Unfalltyp/-art als
+      weitere Chips (Daten stecken schon in der Datei); ein „Trend" statt Jahresanteilen braucht die
+      Abdeckung je Land (sonst zeigt er nur, wer wann im Unfallatlas ist). Nach jedem Daten-Update
+      meldet `cluster-modes.spec.js`, wenn ein Bundesschnitt in `clusterModes.js` > 2 Punkte abweicht.
+- [ ] **Punktfarbe „Beteiligung" zeigt den schwächsten Beteiligten nicht** — `styleConfig.js` prüft
+      Rad, Pkw, Fuß, … der Reihe nach; ein Unfall Fußgänger + Pkw erscheint darum als Pkw. Reihenfolge
+      nach Verletzlichkeit (Fuß, Rad, Krad, Pkw, Güter-Kfz, Sonstige) wäre ehrlicher.
 - [ ] **Favicon ersetzen** — aktuell `stationary-bike-gym-svgrepo-com.svg`
       (Heimtrainer-Icon).
 - [ ] **A11y über die Klapp-Pfeile hinaus** — z. B. Kontrast-Audit, Screenreader-Test der

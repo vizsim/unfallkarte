@@ -204,6 +204,26 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
 
 ## Frontend / UX
 
+- [x] **Cluster nach Beteiligung** (2026-11-07, Branch `temp/cluster-modes`) — im Cluster-Block
+      Chips: Schwere (Torten, Standard) oder Fahrrad / Fußgänger / Kraftrad / Güter-Kfz. Dann Kreise:
+      Größe = Unfälle mit dieser Beteiligung, Farbe = ihr Anteil im Farbton der Einzelpunkte, 5 Stufen
+      um den Bundesschnitt (× 0,5 / 0,8 / 1,25 / 1,6; Ø Rad 31 %, Fuß 9 %, Krad 14 %, Güter-Kfz 5 %).
+      Feste Prozentstufen gingen nicht: je Cluster liegt Fuß bei 1–18 %, Rad bei 7–55 %, Pkw bei
+      60–94 % — die eine Karte wäre fast weiß, die andere fast einfarbig. Pkw/Sonstige bewusst ohne
+      Chip (Pkw ist fast überall beteiligt). Farbskalen mit dem dataviz-Validator geprüft (hellste
+      Stufe ≥ 2:1 auf der Grundkarte); Rad-Mitte `#2079b5` ≈ Punktfarbe `#1f78b4`. Wahl einer
+      Beteiligung färbt auch die Einzelpunkte nach Beteiligung (Blau bleibt „Fahrrad“), außer beim
+      Wiederherstellen eines Links. Permalink `?cl=` (Ziffern wie `?bet=`). Popup: Unfälle mit der
+      Beteiligung, Anteil, Bundesschnitt, alle Beteiligten als Kontext (Mehrfachnennung).
+      **Verworfen:** Torten je Merkmal (Unfalltyp/-art/Jahr/Beteiligung) — Raster-Näherung über ganz
+      Deutschland: Schwere 18.853 → 2.427 Bilder bei 1-%-Rundung, Unfalltyp aber 80.362 → 79.152, selbst
+      bei 10 % noch 13.577 (fast jeder Cluster ein Unikat → das Bildproblem aus D3 kehrte zurück).
+      Ebenso verworfen nach dem ersten Bau: Mehrfach-Auswahl über „Färben nach …“ + Häkchen — die
+      Legende bei Zoom < 11 wurde zu schwer. Daten: `cluster_modes.pmtiles` (Pipeline
+      `accidents cluster-modes`, ~2 min): je Unfall nur die eigenen Merkmale (dünn besetzt), Beteiligung
+      als Bitmaske; 84 mögliche Summen, Datei 20,6 MB (Kacheln Median 8–19 KB, max. 53 KB); lädt erst
+      beim ersten Chip, der Kartenstart bleibt gleich. Tests: Ausdrücke browserlos mit der Style-Spec,
+      im Browser Wechsel/Popup/Link/Vertrag und die Bundesschnitte gegen die Kacheln (±2 Punkte).
 - [x] **Unfall-Popup neu** (2026-11-07) — statt 8 Tabellenzeilen mit Kennziffern: Unfalltyp als
       Titel, Unfallart darunter, Schwere als Pill in der Punktfarbe der Karte, Beteiligte als
       Chips mit Icon (nach Lucide), Zeit als Fußzeile („Fr · Juni 2025 · 18–19 Uhr“). Aus drei
