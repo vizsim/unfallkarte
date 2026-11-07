@@ -88,12 +88,15 @@ test("Cluster, Trend: Veränderung groß, Urteil, Balken je Jahr (verglichene fa
   const p = { UJAHR__2019: 80, UJAHR__2022: 50, UJAHR__2023: 50, UJAHR__2024: 35, UJAHR__2025: 35 };
   const html = renderCluster(p, "TREND");
   assert.match(html, /<div class="pop-hero">−30 % <span class="pop-unit">2024\/25 ggü\. 2022\/23<\/span>/);
-  assert.match(html, /Stark rückläufig – deutlich/);
+  assert.match(html, /Rückläufig – deutlich/);
   assert.equal((html.match(/class="pop-trend-col"/g) ?? []).length, 9);
   // 2019 = höchster Balken, grau (nicht verglichen); 2024 in der Trendfarbe
   assert.match(html, /data-tip="2019: 80 Unfälle"><div class="pop-trend-plot"><span class="pop-trend-bar" style="height:100%;--sev:#d1d5db">/);
-  assert.match(html, /data-tip="2024: 35 Unfälle"><div class="pop-trend-plot"><span class="pop-trend-bar" style="height:44%;--sev:#17559b">/);
+  assert.match(html, /data-tip="2024: 35 Unfälle"><div class="pop-trend-plot"><span class="pop-trend-bar" style="height:44%;--sev:#17559b;opacity:1">/);
   assert.match(html, /100 → 70 Unfälle · Ø Deutschland \+3 %/);
   assert.match(renderCluster({ UJAHR__2022: 1, UJAHR__2025: 2 }, "TREND"), /Zu wenige Unfälle für einen Trend/);
-  assert.match(renderCluster({ UJAHR__2022: 5, UJAHR__2023: 5, UJAHR__2024: 6, UJAHR__2025: 5 }, "TREND"), /Eher steigend – kann Zufall sein/); // +10 %
+  // +10 % bei 21 Unfällen: Zufall — blass wie der Kreis, mit der Schwelle (2 · √21 → ±10)
+  const unsure = renderCluster({ UJAHR__2022: 5, UJAHR__2023: 5, UJAHR__2024: 6, UJAHR__2025: 5 }, "TREND");
+  assert.match(unsure, /Eher steigend – kann Zufall sein \(deutlich erst ab ±10 Unfällen\)/);
+  assert.match(unsure, /--sev:#9b1f1d;opacity:0\.3/);
 });

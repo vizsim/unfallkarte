@@ -81,9 +81,9 @@ export function renderCluster(props, focus = PIE_FOCUS) {
 export const TREND_CHART_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
 
 /**
- * Trend: Veränderung 2024/25 gegenüber 2022/23 groß, darunter das Urteil (deutlich / eher Zufall)
- * und alle Jahre als Balken — verglichen werden nur die farbigen; die grauen davor sind Kontext
- * (nicht alle Länder erfasst, 2020/21 Corona).
+ * Trend: Veränderung 2024/25 gegenüber 2022/23 groß, darunter das Urteil (deutlich / eher Zufall,
+ * mit der Schwelle, ab der es deutlich wäre) und alle Jahre als Balken — verglichen werden nur die
+ * farbigen; die grauen davor sind Kontext (nicht alle Länder erfasst, 2020/21 Corona).
  */
 function renderTrendCluster(props) {
     const t = trendOf(props);
@@ -91,14 +91,18 @@ function renderTrendCluster(props) {
     const label = TREND.labels[t.cls];
     const verdict = t.small
         ? "Zu wenige Unfälle für einen Trend"
-        : t.certain ? `${label[0].toUpperCase()}${label.slice(1)} – deutlich` : `Eher ${label} – kann Zufall sein`;
+        : t.certain
+            ? `${label[0].toUpperCase()}${label.slice(1)} – deutlich`
+            : `Eher ${label} – kann Zufall sein (deutlich erst ab ±${fmtInt(t.needed)} Unfällen)`;
+    // verglichene Jahre so wie der Kreis auf der Karte: kräftig = deutlich, blass = eher Zufall
+    const opacity = t.certain ? 1 : TREND.opacity.uncertain;
     const counts = TREND_CHART_YEARS.map((y) => Number(props[`UJAHR__${y}`]) || 0);
     const max = Math.max(...counts, 1);
     const compared = new Set([...TREND.early, ...TREND.late]);
     const bars = TREND_CHART_YEARS.map((y, i) => {
         const height = counts[i] ? Math.max(4, Math.round((counts[i] / max) * 100)) : 0;
         return `<div class="pop-trend-col" data-tip="${y}: ${fmtInt(counts[i])} ${counts[i] === 1 ? "Unfall" : "Unfälle"}">`
-            + `<div class="pop-trend-plot"><span class="pop-trend-bar" style="height:${height}%;--sev:${compared.has(y) ? color : "#d1d5db"}"></span></div>`
+            + `<div class="pop-trend-plot"><span class="pop-trend-bar" style="height:${height}%;--sev:${compared.has(y) ? `${color};opacity:${opacity}` : "#d1d5db"}"></span></div>`
             + `<span class="pop-trend-year">${String(y).slice(2)}</span></div>`;
     }).join("");
     return `<div class="pop-hero">${signedPct(t.change)} <span class="pop-unit">2024/25 ggü. 2022/23</span></div>`

@@ -145,18 +145,21 @@ export function updateClusterLegend(focus) {
   if (!circles) return;
 
   const title = section.querySelector(".cluster-share-title");
-  if (title) title.textContent = trend ? "Farbe = Veränderung 2024/25 ggü. 2022/23" : `Farbe = Anteil ${FOCUS[focus].noun}`;
+  if (title) title.textContent = trend ? "Farbe = Richtung 2024/25 ggü. 2022/23" : `Farbe = Anteil ${FOCUS[focus].noun}`;
   const [colors, labels] = trend ? [TREND.colors, trendClassLabels()] : [FOCUS[focus].colors, focusClassLabels(focus)];
+  // Trend: je Richtung kräftig (deutlich) + blass (eher Zufall) — wie die Kreise auf der Karte
+  const dot = (color, opacity = 1) =>
+    `<span class="cluster-legend-dot" style="background:${color}${opacity < 1 ? `;opacity:${opacity}` : ""}"></span>`;
   const key = section.querySelector(".cluster-share-key");
   if (key) {
     key.innerHTML = labels
-      .map((label, i) => `<li><span class="cluster-legend-dot" style="background:${colors[i]}"></span>${label}</li>`)
+      .map((label, i) => `<li>${dot(colors[i])}${trend ? dot(colors[i], TREND.opacity.uncertain) : ""}${label}</li>`)
       .join("");
   }
   const avg = section.querySelector(".cluster-share-avg");
   if (avg) {
     avg.textContent = trend
-      ? `Ø Deutschland ${signedPct(TREND.national)} · blass = eher Zufall, kräftig = deutlich`
+      ? `kräftig = deutlich, blass = eher Zufall · Ø Deutschland ${signedPct(TREND.national)}`
       : `Ø Deutschland ${focusAverage(focus)} – mittlere Stufe`;
   }
 }

@@ -122,8 +122,10 @@ export function clusterFocusStyle(focus) {
 // Corona-Jahre mit deutlich weniger Unfällen. Felder: „UJAHR__<jahr>" aus cluster_modes.pmtiles.
 //
 // Zwei Jahre gegen zwei sind bei kleinen Clustern meist Zufall (gemessen: bei 95 % Sicherheit
-// blieben 87–97 % der Cluster ohne deutlichen Trend). Darum zeigt die FARBE die Tendenz und die
-// DECKKRAFT, wie belastbar sie ist: kräftig = deutlich (|z| ≥ 2, Poisson), blass = eher Zufall.
+// blieben 87–97 % der Cluster ohne deutlichen Trend). Darum zeigt die FARBE nur die Richtung
+// (rückläufig | stabil | steigend) und die DECKKRAFT, wie belastbar sie ist: kräftig = deutlich
+// (|z| ≥ 2, Poisson), blass = eher Zufall. Die Stärke (+33 %) steht im Popup. Erst gab es fünf
+// Stufen (±20 % dunkler) — ein blasses Dunkelrot sah dann aus wie ein kräftiges Hellrot.
 // ---------------------------------------------------------------------------------------------
 
 export const TREND_FOCUS = "TREND";
@@ -135,10 +137,10 @@ export const TREND = {
   minCount: 10,
   /** |z| ab dem eine Veränderung als deutlich gilt (≈ 95 %). */
   significance: 2,
-  /** Veränderungs-Stufen: stark ↓ | ↓ | stabil | ↑ | stark ↑ */
-  breaks: [-0.2, -0.05, 0.05, 0.2],
-  colors: ["#17559b", "#609fd2", "#9e9e9e", "#d87a6b", "#9b1f1d"],
-  labels: ["stark rückläufig", "rückläufig", "stabil", "steigend", "stark steigend"],
+  /** Richtungen: rückläufig | stabil | steigend (Grenzen ±5 %) */
+  breaks: [-0.05, 0.05],
+  colors: ["#17559b", "#9e9e9e", "#9b1f1d"],
+  labels: ["rückläufig", "stabil", "steigend"],
   /** bundesweit 2022/23 → 2024/25: 525.540 → 541.526 Unfälle (coverage.csv). */
   national: 0.03,
   opacity: { certain: 0.9, uncertain: 0.3 },
@@ -159,8 +161,10 @@ export function trendOf(props) {
   const change = (late - early) / Math.max(early, 1);
   const z = (late - early) / Math.sqrt(Math.max(window, 1));
   const small = window < TREND.minCount;
-  const cls = small ? 2 : TREND.breaks.filter((b) => change >= b).length;
-  return { early, late, window, change, z, small, cls, certain: !small && Math.abs(z) >= TREND.significance };
+  const cls = small ? 1 : TREND.breaks.filter((b) => change >= b).length;
+  // ab dieser Differenz (late − early) gilt die Veränderung als deutlich
+  const needed = Math.ceil(TREND.significance * Math.sqrt(Math.max(window, 1)));
+  return { early, late, window, change, z, small, cls, needed, certain: !small && Math.abs(z) >= TREND.significance };
 }
 
 function trendStyle() {
@@ -170,7 +174,7 @@ function trendStyle() {
   return {
     filter: [">", WINDOW, 0],
     radius: ["interpolate", ["linear"], WINDOW, ...RADIUS_STOPS.flat()],
-    color: ["case", ["<", WINDOW, minCount], colors[2],
+    color: ["case", ["<", WINDOW, minCount], colors[1],
       ["step", change, colors[0], ...breaks.flatMap((b, i) => [b, colors[i + 1]])]],
     opacity: ["case", ["all", [">=", WINDOW, minCount], [">=", ["abs", z], significance]],
       opacity.certain, opacity.uncertain],
@@ -192,19 +196,19 @@ export const circleCount = (props, focus) => (focus === TREND_FOCUS ? trendOf(pr
 /** „+3 %", „−18 %" (mit echtem Minus). */
 export const signedPct = (x) => `${x >= 0 ? "+" : "−"}${Math.round(Math.abs(x) * 100)} %`;
 
-/** Legende der Trend-Stufen: „stark rückläufig (≤ −20 %)" … „stark steigend (≥ +20 %)". */
+/** Legende der Trend-Richtungen: „rückläufig (unter −5 %)" … „steigend (über +5 %)". */
 export function trendClassLabels() {
-  const [a, b, c, d] = TREND.breaks.map((x) => Math.round(Math.abs(x) * 100));
-  const ranges = [`≤ −${a} %`, `−${a} bis −${b} %`, `±${c} %`, `+${c} bis +${d} %`, `≥ +${d} %`];
-  return TREND.labels.map((label, i) => `${label} (${ranges[i].replaceAll(" %", "\u00a0%")})`);
+  const [a, b] = TREND.breaks.map((x) => Math.round(Math.abs(x) * 100));
+  const ranges = [`unter −${a}\u00a0%`, `±${b}\u00a0%`, `über +${b}\u00a0%`];
+  return TREND.labels.map((label, i) => `${label} (${ranges[i]})`);
 }
 
 /** Erklärtext der Cluster-Legende (HTML ohne Fremddaten). */
 export function clusterHintHtml(focus) {
   if (focus === TREND_FOCUS) {
-    return "Jeder Kreis bündelt mehrere Unfälle. <b>Farbe</b> = Veränderung 2024/25 gegenüber 2022/23, "
-      + "<b>kräftig</b> = deutlich, <b>blass</b> = eher Zufall. Frühere Jahre fehlen in einigen Ländern, "
-      + "2020/21 waren Corona-Jahre.";
+    return "Jeder Kreis bündelt mehrere Unfälle. <b>Farbe</b> = Richtung 2024/25 gegenüber 2022/23, "
+      + "<b>kräftig</b> = deutlich, <b>blass</b> = eher Zufall; die Stärke steht im Popup. Frühere Jahre "
+      + "fehlen in einigen Ländern, 2020/21 waren Corona-Jahre.";
   }
   if (!FOCUS[focus]) {
     return "Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl, <b>Farbanteile</b> = Schweregrad. "

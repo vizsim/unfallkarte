@@ -145,8 +145,9 @@ test("Chip Trend: Kreise mit Deckkraft je Sicherheit, Legende, Popup mit Jahresb
   await expect.poll(() => vis(page, CIRCLES)).toEqual(["visible", "visible"]);
   await waitForBusiestPoint(page, CIRCLES, { step: 20 });
   expect(await page.evaluate(() => window.map.getPaintProperty("cluster-modes-coarse", "circle-opacity")[0])).toBe("case");
-  await expect(page.locator(".cluster-share-title")).toContainText("Veränderung 2024/25");
-  await expect(page.locator(".cluster-share-key li")).toHaveCount(5);
+  await expect(page.locator(".cluster-share-title")).toContainText("Richtung 2024/25");
+  await expect(page.locator(".cluster-share-key li")).toHaveCount(3);
+  await expect(page.locator(".cluster-share-key li").first().locator(".cluster-legend-dot")).toHaveCount(2); // kräftig + blass
   await expect.poll(() => page.evaluate(() => new URLSearchParams(location.search).get("cl"))).toBe("t");
   // Einzelpunkte behalten ihre Einfärbung (nur eine Beteiligung schaltet sie um)
   expect(await page.locator('input[name="color-style"][value="UKATEGORIE"]').isChecked()).toBe(true);

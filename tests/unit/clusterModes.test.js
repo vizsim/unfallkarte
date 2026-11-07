@@ -79,16 +79,19 @@ import { TREND, TREND_FOCUS, circleCount, circleStyle, isCircleFocus, trendOf } 
 
 const years = (y22, y23, y24, y25, extra = {}) => ({ UJAHR__2022: y22, UJAHR__2023: y23, UJAHR__2024: y24, UJAHR__2025: y25, ...extra });
 
-test("Trend in JS: 2024/25 gegen 2022/23, Poisson-z, Stufen", () => {
+test("Trend in JS: 2024/25 gegen 2022/23, Poisson-z, Richtung, Schwelle", () => {
   const t = trendOf(years(50, 50, 35, 35, { UJAHR__2019: 999 }));   // 2019 zählt nicht mit
   assert.deepEqual([t.early, t.late, t.window], [100, 70, 170]);
   assert.equal(Math.round(t.change * 100), -30);
   assert.ok(Math.abs(t.z - -30 / Math.sqrt(170)) < 1e-9);
-  assert.equal(t.cls, 0);
+  assert.equal(t.cls, 0);                                           // rückläufig
+  assert.equal(t.needed, 27);                                       // 2 · √170 aufgerundet
   assert.equal(t.certain, true);
+  assert.equal(trendOf(years(50, 50, 52, 50)).cls, 1);              // +2 % → stabil
+  assert.equal(trendOf(years(50, 50, 80, 80)).cls, 2);              // +60 % → steigend
   assert.equal(trendOf(years(5, 5, 6, 6)).certain, false);           // +20 %, aber 22 Unfälle: Zufall
   assert.equal(trendOf(years(2, 1, 3, 2)).small, true);              // < 10 Unfälle → grau
-  assert.equal(trendOf(years(2, 1, 3, 2)).cls, 2);
+  assert.equal(trendOf(years(2, 1, 3, 2)).cls, 1);                 // grau wie „stabil"
   assert.equal(circleCount(years(1, 2, 3, 4), TREND_FOCUS), 10);
   assert.ok(isCircleFocus(TREND_FOCUS) && isCircleFocus("IstRad") && !isCircleFocus("UKATEGORIE"));
 });
