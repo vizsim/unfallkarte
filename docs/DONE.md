@@ -204,6 +204,18 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
 
 ## Frontend / UX
 
+- [x] **Cluster-Trend** (2026-11-07, Chip „Trend", `?cl=t`) — Kreise: Farbe = Richtung 2024/25
+      gegenüber 2022/23 (blau rückläufig, grau stabil ±5 %, rot steigend), Deckkraft = wie belastbar
+      (kräftig bei |z| ≥ 2 nach Poisson = 2·√Summe, sonst blass; < 10 Unfälle grau). Popup: Veränderung
+      in %, Urteil mit Schwelle („deutlich erst ab ±22 Unfällen"), Balken je Jahr 2017–2025 (verglichene
+      wie der Kreis, übrige grau). **Zeitraum:** erst ab 2020 sind alle Länder im Unfallatlas (NRW/
+      Thüringen ab 2019, Berlin 2018, MV 2020 — ein früherer Start zeigte dort den Datenbeginn), 2020/21
+      waren Corona-Jahre (bundesweit 238 Tsd. statt 256–273 Tsd.); bundesweit 2022/23 → 2024/25 +3 %.
+      **Gemessen:** bei 95 % Sicherheit blieben 87–97 % der Cluster ohne deutlichen Trend — darum
+      Tendenz + Sicherheit statt nur „deutlich oder grau". **Verworfen:** fünf Stufen (±20 % dunkler)
+      mit blass = unsicher — ein blasses Dunkelrot sah aus wie ein kräftiges Hellrot (User-Feedback).
+      Keine neuen Daten: die `UJAHR__`-Summen stecken schon in `cluster_modes.pmtiles`. Tests: Rechnung in
+      JS = Ausdrücke (400 Zufallsfälle), Bundestrend gegen die Kacheln (±1 Punkt).
 - [x] **Cluster nach Beteiligung** (2026-11-07; `cluster_modes.pmtiles` auf B2) — im Cluster-Block
       Chips: Schwere (Torten, Standard) oder Fahrrad / Fußgänger / Kraftrad / Güter-Kfz. Dann Kreise:
       Größe = Unfälle mit dieser Beteiligung, Farbe = ihr Anteil im Farbton der Einzelpunkte, 5 Stufen

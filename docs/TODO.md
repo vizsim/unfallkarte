@@ -71,10 +71,11 @@ Reihenfolge wie im Report, Abschnitt 8.
 
 ## Frontend / UX
 
-- [ ] **Cluster nach Beteiligung ausbauen** (Stand: DONE.md) — Unfalltyp/-art als weitere Chips
-      (Daten stecken schon in `cluster_modes.pmtiles`); ein „Trend" statt Jahresanteilen braucht die
-      Abdeckung je Land (sonst zeigt er nur, wer wann im Unfallatlas ist). Nach jedem Daten-Update
-      meldet `cluster-modes.spec.js`, wenn ein Bundesschnitt in `clusterModes.js` > 2 Punkte abweicht.
+- [ ] **Cluster ausbauen** (Stand: DONE.md) — Unfalltyp/-art als weitere Chips (Daten stecken schon in
+      `cluster_modes.pmtiles`). Trend: relativ zum Bundestrend färben („stärker gestiegen als Deutschland")
+      und je Land einen längeren Zeitraum nutzen, wo es länger erfasst ist (z. B. 2017–19 gegen 2023–25).
+      Nach jedem Daten-Update meldet `cluster-modes.spec.js`, wenn ein Bundesschnitt oder der Bundestrend
+      in `clusterModes.js` abweicht — dann dort nachziehen (Trend-Zeitraum ggf. um ein Jahr schieben).
 - [ ] **Punktfarbe „Beteiligung" zeigt den schwächsten Beteiligten nicht** — `styleConfig.js` prüft
       Rad, Pkw, Fuß, … der Reihe nach; ein Unfall Fußgänger + Pkw erscheint darum als Pkw. Reihenfolge
       nach Verletzlichkeit (Fuß, Rad, Krad, Pkw, Güter-Kfz, Sonstige) wäre ehrlicher.
