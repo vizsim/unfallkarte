@@ -1,6 +1,6 @@
 
 import { setDrawOrder, entryLayerIds } from "../layers/registry.js";
-import { pieImageExpression } from "../utils/generatePieIcon.js";
+import { pieImageExpression, pieSizeExpression, pieSortKey } from "../utils/generatePieIcon.js";
 
 export function addLayers(map) {
 
@@ -100,26 +100,6 @@ export function addLayers(map) {
   /// Pie Charts for AccidnetClusters
 
   function addAccidentClusterLayers(map) {
-    const sharedIconSizeExpression = [
-      "interpolate", ["linear"], [
-        "+",
-        ["get", "UKATEGORIE__1"],
-        ["get", "UKATEGORIE__2"],
-        ["get", "UKATEGORIE__3"]
-      ],
-      1, 0.1,
-      4, 0.2,
-      10, 0.35,
-      50, 0.4,
-      100, 0.5,
-      500, 0.55,
-      1000, 0.6,
-      5000, 0.7,
-      10000, 0.75,
-      20000, 0.8,
-      40000, 0.9
-    ];
-
     const clusterLayers = [
       { id: "pie-clusters-fine-layer", sourceLayer: "clusters_9_11", minzoom: 9, maxzoom: 11 },
       { id: "pie-clusters-coarse-layer", sourceLayer: "clusters_6_8", minzoom: 6, maxzoom: 9 }
@@ -137,15 +117,9 @@ export function addLayers(map) {
           // Bildname aus gerundeten Anteilen → begrenzte, wiederverwendbare Bildmenge
           // (Begründung + Messwerte: js/utils/generatePieIcon.js)
           "icon-image": pieImageExpression(),
-          "icon-size": sharedIconSizeExpression,
+          "icon-size": pieSizeExpression(),
           "icon-allow-overlap": true,
-          "symbol-sort-key": [
-            "-",
-            ["/", ["get", "UKATEGORIE__3"],
-              ["+", ["get", "UKATEGORIE__1"],
-                ["get", "UKATEGORIE__2"],
-                ["get", "UKATEGORIE__3"]]]
-          ]
+          "symbol-sort-key": pieSortKey()
         }
       });
     }
