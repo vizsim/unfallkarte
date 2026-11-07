@@ -36,6 +36,12 @@ test("Tempo aus OSM: Zahl, abgeleitet, Zone, Richtung, Bedingung, Ortslage", () 
   assert.deepEqual(parseSpeed({ maxspeed: "50", maxspeed_conditional: "30 @ (Mo-Fr 07:00-17:00)" }).cond, { v: 30, when: "Mo-Fr 07:00-17:00" });
   assert.equal(parseSpeed({ maxspeed: "70", maxspeed_type: "DE:rural" }).urban, false);
   assert.equal(parseSpeed({ maxspeed: "50" }).urban, null, "ohne Typ bleibt die Ortslage offen");
+  // source:maxspeed nennt die Ortslage oft als einziges Tag — fürs Tempo zählt es nie
+  assert.equal(parseSpeed({ maxspeed: "50", source_maxspeed: "DE:urban" }).urban, true);
+  assert.equal(parseSpeed({ maxspeed: "100", source_maxspeed: "DE:rural" }).urban, false);
+  assert.equal(parseSpeed({ maxspeed: "30", source_maxspeed: "DE:zone:30" }).urban, true);
+  assert.equal(parseSpeed({ maxspeed: "50", source_maxspeed: "sign" }).urban, null);
+  assert.deepEqual([parseSpeed({ source_maxspeed: "DE:urban" }).v, parseSpeed({ source_maxspeed: "DE:urban" }).urban], [null, true]);
 });
 
 test("Einrichtungen nach Nr. 6: ISCED, Namen, Gesundheit", () => {

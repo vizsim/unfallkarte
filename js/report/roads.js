@@ -3,6 +3,8 @@
 // - Gruppierung: Wege mit derselben Nummer (ref) oder demselben Namen bilden eine „Straße".
 // - Tempo je Weg aus maxspeed (+ Richtung, Bedingung, Typ); fehlt es, wird es aus
 //   maxspeed:type abgeleitet (DE:urban → 50, wie Sc3/Sc6) und als „abgeleitet" markiert.
+// - Ortslage aus maxspeed:type, zone:traffic, maxspeed und source:maxspeed (Kachelfeld
+//   source_maxspeed, seit 2026-11): in DE oft der einzige Träger von „DE:urban".
 // - Kette: für die Hauptstraße eine durchgehende Linie ab dem Frontpunkt, damit sich Längen
 //   ENTLANG der Straße messen lassen (±150 m Vorschlag, Abstand zur nächsten Tempo-30-Strecke).
 //   An Verzweigungen geht es geradeaus weiter; von zwei Richtungsfahrbahnen folgt sie einer.
@@ -43,6 +45,7 @@ export function parseSpeed(p) {
   const raw = p.maxspeed != null && p.maxspeed !== "" ? String(p.maxspeed) : null;
   const type = p.maxspeed_type || null;
   const zoneTraffic = p.zone_traffic || null;
+  const src = p.source_maxspeed || null;   // nur für die Ortslage, nie fürs Tempo
   let v = null;
   let derived = false;
   let zone = false;
@@ -72,8 +75,8 @@ export function parseSpeed(p) {
   const c = /(\d{1,3})\s*@\s*\(?([^)]*)\)?/.exec(String(p.maxspeed_conditional ?? ""));
   if (c) cond = { v: Number(c[1]), when: c[2].trim() };
   let urban = null;
-  if ([type, zoneTraffic, raw].includes("DE:urban") || zone) urban = true;
-  else if ([type, zoneTraffic, raw].includes("DE:rural")) urban = false;
+  if ([type, zoneTraffic, raw, src].includes("DE:urban") || zone || ZONE.test(src ?? "")) urban = true;
+  else if ([type, zoneTraffic, raw, src].includes("DE:rural")) urban = false;
   return { v, derived, zone, dir, cond, urban, type: type || zoneTraffic, raw, note };
 }
 
