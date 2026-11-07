@@ -191,6 +191,13 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
 
 ## Frontend / UX
 
+- [x] **Unfall-Popup neu** (2026-11-07) — statt 8 Tabellenzeilen mit Kennziffern: Unfalltyp als
+      Titel, Unfallart darunter, Schwere als Pill in der Punktfarbe der Karte, Beteiligte als
+      Chips mit Icon (nach Lucide), Zeit als Fußzeile („Fr · Juni 2025 · 18–19 Uhr“). Aus drei
+      Entwürfen gewählt (B), dessen Farbmarke für den Unfalltyp wieder raus: doppelt zum Titel,
+      nirgends erklärt, und Rot hieße dort etwas anderes als am Punkt. Renderer rein in
+      `js/ui/accidentPopup.js` → browserlos getestet (`tests/unit/accidentPopup.test.js`).
+      Nicht geändert: je Punkt zeigt das Popup nur den OBERSTEN Unfall (Eintrag ohne `multi`).
 - [x] **Mobile-Breakpoint** (2026-09-19) — erste `@media`-Query im Projekt (< 640px): Legende
       wird zum Bottom-Sheet, zugeklappt als Startzustand (gemessen 17 % statt ~50 % verdeckte
       Karte), aufgeklappt max. 72 dvh. Karten-Bedienelemente sitzen über dem Streifen

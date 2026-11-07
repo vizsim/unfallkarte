@@ -124,6 +124,10 @@ test("Unfallpunkt antippen zeigt die Details", async ({ page }) => {
 
   await page.touchscreen.tap(pt.x, pt.y);
   await expect(popups(page).first()).toBeVisible();
-  await expect(popups(page).first().locator(".pop-eyebrow").first()).toContainText("Unfallatlas");
+  const card = popups(page).first();
+  await expect(card.locator(".pop-eyebrow").first()).toContainText("Unfallatlas");
+  // Karte aus accidentPopup.js: Schwere als Pill, Zeitzeile mit Jahr
+  await expect(card.locator(".pop-pill").first()).toHaveText(/^(Getötete|Schwerverletzte|Leichtverletzte)$/);
+  await expect(card.locator(".pop-when").first()).toContainText(/20\d\d/);
   expectNoErrors(errors);
 });
