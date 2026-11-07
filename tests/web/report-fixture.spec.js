@@ -1,7 +1,10 @@
 // Analyse-Report mit festen Testdaten (tests/fixtures/report/): ein erfundener Ort, als echte
 // PMTiles-Archive gebaut (MVT, Unfälle als MLT) und per Routing ausgeliefert — lokal und in der
 // CI gleich, unabhängig von data/ und B2. Prüft den ganzen Weg: Link → Kacheln → Modell →
-// Regelwerk → Report/Brief/Druck, die Auswahl per Klick und den Einstieg aus dem Popup.
+// Report → Druck. Der Build läuft ohne VITE_REPORT_LEGAL wie die Live-Seite: nur der Datenteil.
+// Den Rechtsteil (Wege A–C, Brief, Zuständigkeit) prüfen tests/unit/report-rules.test.js und
+// report-views.test.js browserlos in beiden Modi; die „Rechtsteil:"-Tests hier laufen nur mit
+// `VITE_REPORT_LEGAL=1 npx playwright test report-fixture` (der webServer erbt die Variable).
 import { test, expect } from "@playwright/test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -42,18 +45,82 @@ function collectErrors(page) {
   return errors;
 }
 
-async function openReport(page, query) {
-  const errors = collectErrors(page);
-  await useFixtures(page);
+async function gotoReport(page, query) {
   await page.goto(`/report.html?${query}`);
   await page.waitForFunction(() => ["true", "error"].includes(document.documentElement.dataset.reportReady), null, { timeout: 60_000 });
   expect(await page.evaluate(() => document.documentElement.dataset.reportReady)).toBe("true");
+}
+
+async function openReport(page, query) {
+  const errors = collectErrors(page);
+  await useFixtures(page);
+  await gotoReport(page, query);
   return errors;
 }
 
-const SCHOOL = "rv=1&sel=e:way/3001@53.56065,10.04651&jahr=23-25";
+// Was im Datenteil nicht stehen darf (wie LEGAL in tests/unit/report-views.test.js).
+const LEGAL_TEXT = /§|StVO|Rechtsberatung|Nr\. 6|Weg [ABC]\b|Kandidat|zuständig|Landesregeln|Regelwerk|Brief|Maßnahme|Rechtliche Einordnung|Gegenargument/;
 
-test("Einrichtung aus dem Link: alle Abschnitte, Weg A, Nutzerangabe, Brief, Druck", async ({ page }) => {
+const SCHOOL = "rv=1&sel=e:way/3001@53.56065,10.04651&jahr=23-25";
+const LEGAL_BUILD = process.env.VITE_REPORT_LEGAL === "1";
+
+test("Einrichtung aus dem Link: Datenteil aus allen Archiven, kein Rechtsteil, Druck ohne Brief", async ({ page }) => {
+  test.skip(LEGAL_BUILD, "prüft den Build ohne Rechtsteil");
+  const errors = await openReport(page, `${SCHOOL}&land=bund`);
+  expect(await page.evaluate(() => window.__report.legal), "Build ohne VITE_REPORT_LEGAL (wie Pages)").toBe(false);
+  await expect(page.locator("#view-report h1")).toHaveText("Grundschule am Testpark");
+  await expect(page.locator("details.sec .no")).toHaveText(["2", "3", "4", "5", "6"]);
+  await expect(page.locator("details.sec").last().locator("h2")).toHaveText("Datengrundlage und Grenzen");
+  // Daten aus allen Archiven angekommen (MLT-Unfälle, Zensus, Lärm, SVZ …)
+  const E = await page.evaluate(() => { const V = window.__report.app.E; return { n: V.M.accidents.n, status: V.M.status, dtv: V.M.traffic.svz.kfz, ew: V.M.census.ew }; });
+  expect(Object.values(E.status).every((s) => s === "ok"), JSON.stringify(E.status)).toBe(true);
+  expect(E.n).toBe(11);
+  expect(E.dtv).toBe(14200);
+  expect(E.ew).toBeGreaterThan(1000);
+
+  // Rechtsteil bleibt draußen: keine Wege, kein Brief, keine Landesregeln, keine Zuständigkeit
+  await expect(page.locator(".way")).toHaveCount(0);
+  await expect(page.locator("#rep-land")).toHaveCount(0);
+  await expect(page.locator("#tab-brief")).toBeHidden();
+  await expect(page.locator(".step:visible")).toHaveText(["1Report", "2Druckansicht (PDF)"]);
+  await expect(page.locator("#view-report")).not.toContainText(LEGAL_TEXT);
+  await expect(page.locator(".topbar")).not.toContainText(LEGAL_TEXT);
+  // „Auf einen Blick": nur Befunde aus den Daten, die Häufung neutral
+  await expect(page.locator(".glance .finding").first()).toContainText("Auffällig:");
+  await expect(page.locator(".glance .st.auffaellig")).toHaveCount(1);
+
+  // Druckansicht: A4-Dokument mit Karte und Datenteil, ohne Brief; Druck-CSS blendet den Rest aus
+  await page.click('button[data-go="pdf"]');
+  await expect(page.locator(".doc h1")).toHaveText("Grundschule am Testpark");
+  await expect(page.locator(".doc .map > svg")).toHaveCount(1);   // die Karte; ihre Legende hat eigene Symbole
+  await expect(page.locator(".doc .maplegend")).toContainText("Unfälle");
+  await expect(page.locator(".doc .letter")).toHaveCount(0);
+  await expect(page.locator(".doc h2").last()).toHaveText("6 · Datengrundlage und Grenzen");
+  await expect(page.locator(".doc")).not.toContainText(LEGAL_TEXT);
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator(".steps")).toBeHidden();
+  await expect(page.locator(".doc")).toBeVisible();
+  await page.emulateMedia({ media: "screen" });
+  expect(errors).toEqual([]);
+});
+
+test("Land aus der Lage im Kopf; ein Land im Link wählt die M-Uko-Kriterien", async ({ page }) => {
+  test.skip(LEGAL_BUILD, "prüft den Build ohne Rechtsteil");
+  // Ohne Rechtsteil bestimmt das Land nur noch, welche M-Uko-Kriterien gelten (Bund 3, NRW 5).
+  const errors = await openReport(page, SCHOOL);
+  expect(await page.evaluate(() => window.__report.app.E.R.P.land)).toBe("hh");
+  await expect(page.locator(".rhead .metaline").first()).toContainText("Hamburg");
+  const uko = page.locator("table.t", { has: page.locator("th", { hasText: "M-Uko-Kriterium" }) }).locator("tbody tr");
+  await expect(uko).toHaveCount(3);   // Hamburg hat keine eigenen Kriterien → Bund
+  await gotoReport(page, `${SCHOOL}&land=nw`);
+  await expect(page.locator(".rhead .metaline").first()).toContainText("Nordrhein-Westfalen");
+  await expect(uko).toHaveCount(5);   // Gem. RdErl. NRW 2017
+  expect(page.url()).toContain("land=nw");
+  expect(errors).toEqual([]);
+});
+
+test("Rechtsteil: Einrichtung mit Weg A, Nutzerangabe, Brief, Druck", async ({ page }) => {
+  test.skip(!LEGAL_BUILD, "nur mit VITE_REPORT_LEGAL=1");
   const errors = await openReport(page, `${SCHOOL}&land=bund`);
   await expect(page.locator("#view-report h1")).toHaveText("Grundschule am Testpark");
   for (const n of ["2", "3", "4", "5", "6", "7", "8", "9"]) await expect(page.locator(`details.sec .no:text-is("${n}")`)).toHaveCount(1);
@@ -92,7 +159,8 @@ test("Einrichtung aus dem Link: alle Abschnitte, Weg A, Nutzerangabe, Brief, Dru
   expect(errors).toEqual([]);
 });
 
-test("Hamburg: Landesregeln aus der Lage, Ampel in der Lücke, Zuständigkeit", async ({ page }) => {
+test("Rechtsteil: Hamburger Landesregeln aus der Lage, Ampel in der Lücke, Zuständigkeit", async ({ page }) => {
+  test.skip(!LEGAL_BUILD, "nur mit VITE_REPORT_LEGAL=1");
   const errors = await openReport(page, SCHOOL);
   const E = await page.evaluate(() => { const V = window.__report.app.E; return { land: V.R.P.land, a9: V.R.A.steps.find((s) => s.id === "A9").status, zf: V.R.A.zf, adr: V.adr.stelle }; });
   expect(E.land).toBe("hh");
@@ -133,6 +201,7 @@ test("kaputter Link: Hinweis statt Absturz, Weg zurück in die Karte", async ({ 
   await expect(empty).toContainText("Noch keine Stelle gewählt");
   await expect(empty).toContainText("beschädigt");
   await expect(empty.locator('a[href="./index.html"]')).toBeVisible();
-  await expect(page.locator("#tab-brief")).toHaveAttribute("aria-disabled", "true");
+  await expect(page.locator("#tab-pdf")).toHaveAttribute("aria-disabled", "true");
+  await expect(page.locator("#tab-brief")).toBeVisible({ visible: LEGAL_BUILD });
   expect(errors).toEqual([]);
 });

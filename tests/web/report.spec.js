@@ -26,7 +26,7 @@ test("Report für eine echte Kreuzung: lädt, liest alle Archive, baut die Absch
   expect(info.n, "am Alexanderplatz gibt es Unfälle im Dreijahresfenster").toBeGreaterThan(0);
   expect(info.road, "Hauptstraße erkannt").not.toBeNull();
   expect(info.land).toBe("be");
-  expect(info.sections).toBe(8);
+  expect(info.sections, "Datenteil: 2–5 + Datengrundlage (ohne VITE_REPORT_LEGAL)").toBe(5);
   expectNoErrors(errors);
 });
 

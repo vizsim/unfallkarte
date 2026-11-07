@@ -6,6 +6,9 @@
 // Gewählt wird die Stelle in der Karte (js/analysis/: Akkordeon „Analyse", Rechtsklick, Popup);
 // hier gibt es keine eigene Auswahlkarte und damit kein MapLibre — die Karte im Report ist SVG.
 // Eigene Eingaben (Rolle, Beobachtung, Name) bleiben im Arbeitsspeicher und nie im Link.
+// Rechtsteil (Wege A–C, Maßnahmen, Zuständigkeit, Landesregeln, Brief) nur mit REPORT_LEGAL
+// (js/config/env.js); report.html zeigt statisch den Datenteil, so wie die Live-Seite.
+import { REPORT_LEGAL } from "../config/env.js";
 import { createTileReader } from "./tileReader.js";
 import { DATASETS, extentOf, readAll, resolveReportSources } from "./sources.js";
 import { buildModel } from "./model.js";
@@ -32,7 +35,8 @@ const app = {
   laender: null, busyReport: false, warnings: [], genReport: 0, progress: 0, error: null,
 };
 const TEXT_FIELDS = ["beob", "name", "kontakt", "anschrift", "initiative", "hausnr", "behoerde", "behoerdeMail"];
-window.__report = { st, app, DATASETS }; // Test-Hook (tests/web/report*.spec.js): nur lesen
+window.__report = { st, app, DATASETS, legal: REPORT_LEGAL }; // Test-Hook (tests/web/report*.spec.js): nur lesen
+const TABS = REPORT_LEGAL ? ["report", "brief", "pdf"] : ["report", "pdf"];
 
 let rangeTimer = null;
 
@@ -98,7 +102,7 @@ function computeRules() {
   const adr = zustaendigkeit(R.P.land, app.place, { refClass: M.road?.refClass ?? null, major: M.road ? !M.road.minor : false });
   const title = titleOf(M, app.place);
   app.R = R;
-  const V = { st, M, R, place: app.place, adr, title, meta: app.sources.meta, dataYears: app.dataYears, link: absLink(), mapLink: mapLink(), warnings: app.warnings, today: today() };
+  const V = { st, M, R, place: app.place, adr, title, meta: app.sources.meta, dataYears: app.dataYears, link: absLink(), mapLink: mapLink(), warnings: app.warnings, today: today(), legal: REPORT_LEGAL };
   V.E = { M, R, s: st, place: app.place, adr, title, today: V.today, meta: app.sources.meta };
   app.E = V;
 }
@@ -158,12 +162,11 @@ function paintProgress() {
   if (bar) bar.style.width = `${Math.round(app.progress * 100)}%`;
 }
 function render({ keep = false } = {}) {
-  const tabs = ["report", "brief", "pdf"];
   $$(".step").forEach((b) => {
     b.setAttribute("aria-selected", String(b.dataset.tab === st.tab));
     b.setAttribute("aria-disabled", String(!st.sel));
   });
-  for (const t of tabs) $(`#view-${t}`).hidden = t !== st.tab;
+  for (const t of TABS) $(`#view-${t}`).hidden = t !== st.tab;
   const view = $(`#view-${st.tab}`);
   if (!st.sel) { view.innerHTML = renderEmpty({ warnings: app.warnings }); return; }
   if (app.busyReport) {
@@ -178,7 +181,7 @@ function render({ keep = false } = {}) {
   const open = $$("details.sec", view).map((d) => d.open);
   const V = { ...app.E, mapWidth: Math.max(320, Math.min(760, Math.round((view.clientWidth || 1100) * 0.56))) };
   if (st.tab === "report") view.innerHTML = renderReport(V);
-  if (st.tab === "brief") view.innerHTML = renderBrief(V);
+  if (st.tab === "brief" && REPORT_LEGAL) view.innerHTML = renderBrief(V);
   if (st.tab === "pdf") view.innerHTML = renderPrint(V, { framed: (() => { try { return window.self !== window.top; } catch { return true; } })() });
   if (keep) {
     $$("details.sec", view).forEach((d, i) => { if (open[i] !== undefined) d.open = open[i]; });
@@ -191,6 +194,7 @@ function render({ keep = false } = {}) {
 }
 
 function setTab(tab) {
+  if (!TABS.includes(tab)) return;
   if (!st.sel) { toast("Bitte zuerst in der Karte eine Stelle wählen."); return; }
   st.tab = tab;
   if (!isFresh() && !app.busyReport) loadReport();
@@ -316,7 +320,12 @@ window.addEventListener("resize", () => { clearTimeout(rsz); rsz = setTimeout(()
 
 // ------------------------------------------------------------------ Start
 (async function init() {
-  $("#rw-version").textContent = RW.version;
+  if (REPORT_LEGAL) {
+    $("#tab-brief").hidden = false;
+    $("#tab-pdf .n").textContent = "3";
+    $("#rw-version").textContent = ` · Regelwerk ${RW.version}`;
+    $("#report-note").textContent = "Datenbasierte Einschätzung aus den Daten der Unfallkarte – keine Rechtsberatung, kein Gutachten, keine amtliche Feststellung. Regelwerk und Briefbausteine sind juristisch zu prüfen.";
+  }
   try {
     app.sources = await resolveReportSources();
   } catch (err) {

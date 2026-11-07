@@ -66,6 +66,8 @@ a { color: var(--accent-ink) }
 .topbar .note { font-size: 13px; color: var(--muted); max-width: 60ch }
 .steps { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 14px; border-bottom: 1px solid var(--rule) }
 .step { all: unset; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 9px 12px 10px; border-bottom: 3px solid transparent; white-space: nowrap; color: var(--ink-2); font-weight: 500 }
+/* all: unset nimmt dem hidden-Attribut sein display: none — ohne Rechtsteil fehlt der Brief-Tab. */
+.step[hidden] { display: none }
 .step .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--rule-strong); font-size: 12px; font-weight: 650; color: var(--muted) }
 .step[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent) }
 .step[aria-selected="true"] .n { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }

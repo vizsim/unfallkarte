@@ -64,6 +64,29 @@ export function glance(M, A, U, Cw) {
   return f.slice(0, 3);
 }
 
+// Hohe Pegel für „Auf einen Blick" im Datenteil: dieselben Werte wie Weg C (LSR-StV nachts im
+// Wohngebiet, L_DEN 70), hier aber nur als Hinweis auf den Messwert, ohne Rechtsbezug.
+const NOISE_NOTABLE = { night: 60, den: 70 };
+
+/**
+ * „Auf einen Blick" ohne Rechtsteil (REPORT_LEGAL aus): nur Befunde aus den Daten — keine
+ * Wege A–C, keine Kandidaten, keine Bitte an eine Behörde.
+ */
+export function facts(M, U) {
+  const f = [];
+  if (U.any) f.push({ st: "auffaellig", t: `Auffällig: ${U.best.text}.`, n: `${U.best.quelle} · rechnerisch, keine Feststellung – die trifft die Unfallkommission` });
+  const acc = M.accidents;
+  if (acc.n >= 5 && acc.fr / acc.n >= 0.5) f.push({ st: "hinweis", t: `${acc.fr} von ${acc.n} Unfällen mit Fuß- oder Radbeteiligung.`, n: "Unfallatlas · Vergleichswerte folgen mit einer späteren Stufe" });
+  const N = M.noise;
+  const night = N.night?.status === "ok" ? N.night.v : null;
+  const den = N.den?.status === "ok" ? N.den.v : null;
+  if ((night != null && night >= NOISE_NOTABLE.night) || (den != null && den >= NOISE_NOTABLE.den)) {
+    f.push({ st: "hinweis", t: `Lärm laut Kartierung: L_DEN ${N.den.txt ?? "unter 55"}, L_Night ${N.night.txt ?? "unter 50"} dB(A).`, n: "UBA-Lärmkartierung · Kartierungswerte, keine Beurteilungspegel" });
+  }
+  if (!f.length) f.push({ st: "entfaellt", t: "Nach den Daten keine besonderen Befunde.", n: "Alle Werte stehen in den Abschnitten unten." });
+  return f.slice(0, 3);
+}
+
 export function gegen(M, A, Cw, ans = {}) {
   const g = [];
   if (A.busOn) g.push("ÖPNV: An der Strecke hält ein Bus. Nach Rn. 13 kann „im Ausnahmefall“ auf Tempo 30 verzichtet werden, wenn der Taktfahrplan leidet. Linien und Takt sind nicht in den Daten.");
@@ -89,5 +112,5 @@ export function evaluate(M, { years, land, answers = {}, beob = "" }) {
   const U = evalUko(M, years, P, { urban: A.sp?.urban ?? null });
   const B = evalWegB(M, years, U, answers, beob);
   const Cw = evalWegC(M, P, answers);
-  return { P, A, U, B, Cw, measures: measures(M, A, U, Cw), glance: glance(M, A, U, Cw), gegen: gegen(M, A, Cw, answers) };
+  return { P, A, U, B, Cw, measures: measures(M, A, U, Cw), glance: glance(M, A, U, Cw), facts: facts(M, U), gegen: gegen(M, A, Cw, answers) };
 }

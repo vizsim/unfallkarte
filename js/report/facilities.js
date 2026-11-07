@@ -9,18 +9,19 @@
 // Umgekehrt macht ein Name („Berufsschule …") nur „unklar", nie „nicht erfüllt".
 import { emptyGeom } from "./geometry.js";
 
+// label = Art im Nominativ für Tabellen (Datenteil, ohne Bezug zu Nr. 6); noun/art/plural für Sätze.
 export const FAC = {
-  schule: { art: "der", noun: "Schule", nr6: "allgemeinbildende Schule", plural: "allgemeinbildenden Schulen", zf: "schule" },
-  foerderschule: { art: "der", noun: "Förderschule", nr6: "Förderschule", plural: "Förderschulen", zf: "schule" },
-  kita: { art: "der", noun: "Kita", nr6: "Kindertagesstätte", plural: "Kindergärten und Kindertagesstätten", zf: "kita" },
-  spielplatz: { art: "dem", noun: "Spielplatz", nr6: "Spielplatz", plural: "Spielplätzen", zf: "spielplatz" },
-  pflegeheim: { art: "dem", noun: "Pflegeheim", nr6: "Alten- und Pflegeheim", plural: "Alten- und Pflegeheimen", zf: "altenheim" },
-  krankenhaus: { art: "dem", noun: "Krankenhaus", nr6: "Krankenhaus", plural: "Krankenhäusern", zf: "krankenhaus" },
-  behinderung: { art: "der", noun: "Einrichtung", nr6: "Einrichtung für Menschen mit Behinderungen", plural: "Einrichtungen für Menschen mit Behinderungen", zf: "wohnheim_behinderung" },
-  schule_art: { art: "der", noun: "Schule", nr6: null, plural: "Schulen" },
-  senioren: { art: "der", noun: "Senioreneinrichtung", nr6: null, plural: "Senioreneinrichtungen" },
-  klinik: { art: "der", noun: "Klinik", nr6: null, plural: "Kliniken" },
-  berufsschule: { art: "der", noun: "berufsbildenden Schule", nr6: null, plural: "" },
+  schule: { label: "allgemeinbildende Schule", art: "der", noun: "Schule", nr6: "allgemeinbildende Schule", plural: "allgemeinbildenden Schulen", zf: "schule" },
+  foerderschule: { label: "Förderschule", art: "der", noun: "Förderschule", nr6: "Förderschule", plural: "Förderschulen", zf: "schule" },
+  kita: { label: "Kita", art: "der", noun: "Kita", nr6: "Kindertagesstätte", plural: "Kindergärten und Kindertagesstätten", zf: "kita" },
+  spielplatz: { label: "Spielplatz", art: "dem", noun: "Spielplatz", nr6: "Spielplatz", plural: "Spielplätzen", zf: "spielplatz" },
+  pflegeheim: { label: "Alten- und Pflegeheim", art: "dem", noun: "Pflegeheim", nr6: "Alten- und Pflegeheim", plural: "Alten- und Pflegeheimen", zf: "altenheim" },
+  krankenhaus: { label: "Krankenhaus", art: "dem", noun: "Krankenhaus", nr6: "Krankenhaus", plural: "Krankenhäusern", zf: "krankenhaus" },
+  behinderung: { label: "Einrichtung für Menschen mit Behinderungen", art: "der", noun: "Einrichtung", nr6: "Einrichtung für Menschen mit Behinderungen", plural: "Einrichtungen für Menschen mit Behinderungen", zf: "wohnheim_behinderung" },
+  schule_art: { label: "Schule (Art unklar)", art: "der", noun: "Schule", nr6: null, plural: "Schulen" },
+  senioren: { label: "Senioreneinrichtung", art: "der", noun: "Senioreneinrichtung", nr6: null, plural: "Senioreneinrichtungen" },
+  klinik: { label: "Klinik", art: "der", noun: "Klinik", nr6: null, plural: "Kliniken" },
+  berufsschule: { label: "berufsbildende Schule", art: "der", noun: "berufsbildenden Schule", nr6: null, plural: "" },
 };
 
 // Frage an die Nutzerin, wenn die Art unklar ist (löst „unklar" auf, nie „nicht erfüllt").

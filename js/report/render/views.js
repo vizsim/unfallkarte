@@ -61,8 +61,18 @@ export function noticesHtml(V) {
   return n.map((t) => `<div class="notice">${esc(t)}</div>`).join("");
 }
 
+// V.legal (REPORT_LEGAL in js/config/env.js, main.js reicht ihn durch): mit Rechtsteil —
+// Landesregeln, Weg A/B/C, Maßnahmen, Gegenargumente, Zuständigkeit, Brief. Ohne (Standard, so
+// läuft die Live-Seite bis zur juristischen Durchsicht) nur der Datenteil: Abschnitte 1–5 und die
+// Datengrundlage als 6; die Karte ohne Tempo-30-Vorschlag, Einrichtungen ohne Nr.-6-Bezug.
+
+/** Stempel unter dem Titel — ohne Rechtsteil gibt es nichts, wovor „keine Rechtsberatung" warnen müsste. */
+const stampParts = (legal) => (legal
+  ? ["Datenbasierte Einschätzung", "keine Rechtsberatung", "kein Gutachten", "keine amtliche Feststellung"]
+  : ["Datenbasierte Auswertung", "kein Gutachten", "keine amtliche Feststellung"]);
+
 export function renderReport(V) {
-  const { st, M, R, place, adr, title, meta, dataYears, mapLink } = V;
+  const { st, M, R, place, adr, title, meta, dataYears, mapLink, legal = false } = V;
   const acc = M.accidents;
   const road = M.road;
   const A = R.A;
@@ -71,7 +81,10 @@ export function renderReport(V) {
   const hoursBlock = acc.n >= 10 ? chartHours(acc.hours) : `<div class="empty">Die Verteilung nach Stunde erscheint erst ab 10 Unfällen (hier ${acc.n}). Werktags zu Schulzeiten (7–9, 12–16 Uhr): <b>${acc.win.filter((a) => a.wt >= 2 && a.wt <= 6 && R.P.schulzeit.includes(a.h)).length}</b> von ${acc.n}.</div>`;
   const acList = acc.win.slice().sort((a, b) => b.j - a.j || b.m - a.m)
     .map((a) => `<tr><td class="num">${a.j}-${String(a.m).padStart(2, "0")}</td><td>${WT[a.wt] ?? ""}, ${a.h} Uhr</td><td>${KAT[a.kat]}</td><td>${TYP[a.typ] ?? "–"}</td><td>${ART[a.art] ?? "–"}</td><td>${a.bet.map((b) => BET[b]).join(", ")}</td></tr>`).join("");
-  const facRows = M.facilities.slice(0, 12).map((f) => `<tr><td>${esc(facLabel(f))}</td><td>${stIcon(f.status, true)} ${esc(FAC[f.typ]?.nr6 ?? (f.status === "nicht_erfuellt" ? "nicht nach Nr. 6" : `${FAC[f.typ]?.noun ?? "Einrichtung"} (Art unklar)`))}</td><td class="r">${fmt(f.dSel)} m</td><td class="r">${f.dRoad != null ? `${fmt(f.dRoad)} m` : "–"}</td><td class="mono small">${esc(f.osm)}</td></tr>`).join("");
+  const facKind = (f) => (legal
+    ? `${stIcon(f.status, true)} ${esc(FAC[f.typ]?.nr6 ?? (f.status === "nicht_erfuellt" ? "nicht nach Nr. 6" : `${FAC[f.typ]?.noun ?? "Einrichtung"} (Art unklar)`))}`
+    : esc(FAC[f.typ]?.label ?? "Einrichtung"));
+  const facRows = M.facilities.slice(0, 12).map((f) => `<tr><td>${esc(facLabel(f))}</td><td>${facKind(f)}</td><td class="r">${fmt(f.dSel)} m</td><td class="r">${f.dRoad != null ? `${fmt(f.dRoad)} m` : "–"}</td><td class="mono small">${esc(f.osm)}</td></tr>`).join("");
   const cz = M.census;
   const sp = A.sp ?? M.speed;
   const svz = M.traffic.svz;
@@ -85,34 +98,38 @@ export function renderReport(V) {
   const autoLand = place?.land ?? null;
   const land = R.P.land;
   const roadChooser = M.roadCandidates.length > 1
-    ? `<div class="field"><label for="rep-road">Straße für die Prüfung</label><select id="rep-road" data-bind="roadKey">${M.roadCandidates.map((c) => `<option value="${esc(c.key)}" ${road && c.key === road.key ? "selected" : ""}>${esc(c.label)} (${fmt(c.d)} m)</option>`).join("")}</select></div>` : "";
+    ? `<div class="field"><label for="rep-road">${legal ? "Straße für die Prüfung" : "Ausgewertete Straße"}</label><select id="rep-road" data-bind="roadKey">${M.roadCandidates.map((c) => `<option value="${esc(c.key)}" ${road && c.key === road.key ? "selected" : ""}>${esc(c.label)} (${fmt(c.d)} m)</option>`).join("")}</select></div>` : "";
+  const landSrc = !st.land && place?.landQuelle ? ` <span class="muted">(${esc(place.landQuelle)})</span>` : "";
+  const landLine = land && land !== "bund" ? `<span>${esc(landName(land))}${landSrc}</span>` : legal ? "<span>Land: Bund (ohne Landesregeln)</span>" : "";
+  const vintages = `${vintage(meta, "accidents") ? `<span>Unfallatlas bis ${esc(vintage(meta, "accidents"))}</span>` : ""}${vintage(meta, "roads") ? `<span>OSM ${esc(vintage(meta, "roads"))}</span>` : ""}`;
+  const findings = (legal ? R.glance : R.facts).map((f) => `<div class="finding">${stIcon(f.st)}<div><p><b>${esc(f.t)}</b></p><p class="norm">${esc(f.n)}</p></div></div>`).join("");
 
   return `
     <div class="panel controls">
       ${yearSelects(st, dataYears, "rep")}
-      <div class="field"><label for="rep-land">Landesregeln und Zuständigkeit</label>${landSelect("rep-land", st, autoLand)}</div>
+      ${legal ? `<div class="field"><label for="rep-land">Landesregeln und Zuständigkeit</label>${landSelect("rep-land", st, autoLand)}</div>` : ""}
       ${roadChooser}
       <div class="field"><label for="rep-r">${M.selection.kind === "k" ? "Radius" : "Umfeld"}: <b class="num">${M.selection.r} m</b></label><input type="range" id="rep-r" data-bind="r" min="${RADIUS[M.selection.kind].min}" max="${RADIUS[M.selection.kind].max}" step="5" value="${M.selection.r}"></div>
       <span style="flex:1"></span>
       ${mapLink ? `<a class="btn" href="${esc(mapLink)}">In der Karte ↗</a>` : ""}
       <button class="btn" id="rep-copy-link" type="button">Link kopieren</button>
-      <button class="btn primary" data-go="brief">Brief schreiben →</button>
+      ${legal ? '<button class="btn primary" data-go="brief">Brief schreiben →</button>' : '<button class="btn primary" data-go="pdf">Druckansicht →</button>'}
     </div>
     ${noticesHtml(V)}
     <div class="grid-2">
       <div class="panel rhead">
         <div class="eyebrow">Analyse-Report · ${KIND_LABEL[M.selection.kind]} · ${esc(whereTxt(M))}</div>
         <h1>${esc(title.titel)}</h1>
-        <div class="metaline">${title.ort ? `<span>${esc(title.ort)}</span>` : ""}${cz?.gemeinde ? `<span>Gemeinde (Zensus): ${esc(cz.gemeinde)}</span>` : ""}<span>${land && land !== "bund" ? `${esc(landName(land))}${!st.land && place?.landQuelle ? ` <span class="muted">(${esc(place.landQuelle)})</span>` : ""}` : "Land: Bund (ohne Landesregeln)"}</span><span>erstellt ${esc(V.today)}</span></div>
-        <div class="stamp"><span>Datenbasierte Einschätzung</span><span>keine Rechtsberatung</span><span>kein Gutachten</span><span>keine amtliche Feststellung</span></div>
-        <div class="metaline small"><span>Regelwerk ${RW.version} (Stand ${RW.stand})</span><span>Landesregeln: ${esc(R.P.label)}</span>${vintage(meta, "accidents") ? `<span>Unfallatlas bis ${esc(vintage(meta, "accidents"))}</span>` : ""}${vintage(meta, "roads") ? `<span>OSM ${esc(vintage(meta, "roads"))}</span>` : ""}</div>
-        <div class="mapbox" id="map-report">${mapWithLegend(M, R, { width: V.mapWidth ?? 760, years: st.years })}</div>
+        <div class="metaline">${title.ort ? `<span>${esc(title.ort)}</span>` : ""}${cz?.gemeinde ? `<span>Gemeinde (Zensus): ${esc(cz.gemeinde)}</span>` : ""}${landLine}<span>erstellt ${esc(V.today)}</span></div>
+        <div class="stamp">${stampParts(legal).map((s) => `<span>${s}</span>`).join("")}</div>
+        <div class="metaline small">${legal ? `<span>Regelwerk ${RW.version} (Stand ${RW.stand})</span><span>Landesregeln: ${esc(R.P.label)}</span>` : ""}${vintages}</div>
+        <div class="mapbox" id="map-report">${mapWithLegend(M, legal ? R : null, { width: V.mapWidth ?? 760, years: st.years })}</div>
       </div>
       <div class="panel glance">
         <div class="eyebrow">1 · Auf einen Blick</div>
-        ${R.glance.map((f) => `<div class="finding">${stIcon(f.st)}<div><p><b>${esc(f.t)}</b></p><p class="norm">${esc(f.n)}</p></div></div>`).join("")}
-        <div><div class="eyebrow" style="margin-bottom:6px">Maßnahmen-Kandidaten</div><div class="measures">${R.measures.slice(0, 4).map((m) => `<span>${esc(m.t)}</span>`).join("") || "<span>keine aus den Daten</span>"}</div></div>
-        <div class="callout">Vermutlich zuständig: <b>${esc(adr.stelle)}</b>${adr.alt ? `<br><span class="small">oder: ${esc(adr.alt)}</span>` : ""}<br><span class="small">${esc(adr.basis)} · Beleg: ${esc(adr.sicher)} · <a href="${BUNDESPORTAL}" target="_blank" rel="noopener">Zuständigkeit prüfen ↗</a></span></div>
+        ${findings}
+        ${legal ? `<div><div class="eyebrow" style="margin-bottom:6px">Maßnahmen-Kandidaten</div><div class="measures">${R.measures.slice(0, 4).map((m) => `<span>${esc(m.t)}</span>`).join("") || "<span>keine aus den Daten</span>"}</div></div>
+        <div class="callout">Vermutlich zuständig: <b>${esc(adr.stelle)}</b>${adr.alt ? `<br><span class="small">oder: ${esc(adr.alt)}</span>` : ""}<br><span class="small">${esc(adr.basis)} · Beleg: ${esc(adr.sicher)} · <a href="${BUNDESPORTAL}" target="_blank" rel="noopener">Zuständigkeit prüfen ↗</a></span></div>` : ""}
       </div>
     </div>
 
@@ -131,7 +148,7 @@ export function renderReport(V) {
           ${R.U.list.map((u) => `<tr><td>${esc(u.text)}</td><td class="nowrap">${stIcon(ukoDisplay(u.status), true)} <span class="sl">${ST_LABEL[ukoDisplay(u.status)]}</span></td><td>${esc(u.detail)}</td><td class="small">${esc(u.quelle)}</td></tr>`).join("")}
         </tbody></table></div>
         ${M.sc9?.length ? `<div class="callout">Szenario 9 der Karte markiert hier eine Unfallhäufung (${M.sc9.map((z) => `${esc(z.rule)}, bis ${esc(z.n_max)} Unfälle, ${esc(z.window_best)}`).join("; ")}) – vorberechnet nach M-Uko-Kriterien, keine amtliche Feststellung.</div>` : ""}
-        <div class="empty">Vergleich mit Referenzwerten (erwartete Unfälle an vergleichbaren Stellen): kommt mit <span class="mono">report/baselines.json</span> aus der Pipeline. Bis dahin kein „x-mal so viele“.</div>
+        <div class="empty">Ein Vergleich mit ähnlichen Stellen (erwartete Unfälle an vergleichbaren Straßen) folgt später. Bis dahin gibt es kein „x-mal so viele“.</div>
         <details><summary class="small">Einzelunfälle im Fenster (${acc.n}) – Tabelle</summary><div class="tablewrap"><table class="t"><thead><tr><th>Jahr-Monat</th><th>Zeit</th><th>Schwere</th><th>Typ</th><th>Art</th><th>Beteiligt</th></tr></thead><tbody>${acList || '<tr><td colspan="6">keine</td></tr>'}</tbody></table></div></details>
         <div class="srcline">${origin("AMT")} Unfallatlas der Statistischen Ämter (dl-de/by-2-0), nur Unfälle mit Personenschaden, ohne Ortslage und Datum · Anteile erst ab n = 20 · Lage auf das Straßennetz referenziert</div>
       </div>
@@ -139,7 +156,7 @@ export function renderReport(V) {
 
     <details class="sec"><summary><span class="no">3</span><h2>Schutzbedürftige Nutzungen</h2><span class="sum">${M.facilities.length === 1 ? "1 Einrichtung" : `${M.facilities.length} Einrichtungen`} · ${cz ? `${fmt(cz.ew)} EW im 300-m-Umfeld` : "Zensus nicht verfügbar"}</span></summary>
       <div class="body">
-        ${M.facilities.length ? `<div class="tablewrap"><table class="t"><thead><tr><th>Einrichtung ${origin("OSM")}</th><th>Kategorie nach Nr. 6</th><th class="r">zur Auswahl</th><th class="r">zur Hauptstraße</th><th>OSM</th></tr></thead><tbody>${facRows}</tbody></table></div>` : `<div class="empty">Keine Schulen, Kitas, Spielplätze oder Gesundheits-/Pflegeeinrichtungen im Umfeld (laut OSM).</div>`}
+        ${M.facilities.length ? `<div class="tablewrap"><table class="t"><thead><tr><th>Einrichtung ${origin("OSM")}</th><th>${legal ? "Kategorie nach Nr. 6" : "Art"}</th><th class="r">zur Auswahl</th><th class="r">zur Hauptstraße</th><th>OSM</th></tr></thead><tbody>${facRows}</tbody></table></div>` : `<div class="empty">Keine Schulen, Kitas, Spielplätze oder Gesundheits-/Pflegeeinrichtungen im Umfeld (laut OSM).</div>`}
         <div class="tablewrap"><table class="t"><thead><tr><th>Bevölkerung ${origin("AMT")}</th><th class="r">Einwohner</th><th class="r">unter 18</th><th class="r">ab 65</th><th>Raumtyp</th></tr></thead><tbody>
           ${cz ? `<tr><td>Umfeld 300 m (Zellen anteilig)${cz.secret ? ` · ${cz.secret} Zellen geheimgehalten → eher mehr` : ""}</td><td class="r">${fmt(cz.ew)}</td><td class="r">${fmt(cz.u18)}</td><td class="r">${fmt(cz.a65)}</td><td>${esc(REGIOSTAR7[cz.regiostar] ?? "–")}</td></tr>` : `<tr><td colspan="5">${esc(unavailable(M.status.census))}</td></tr>`}
         </tbody></table></div>
@@ -168,6 +185,25 @@ export function renderReport(V) {
       </tbody></table></div></div>
     </details>
 
+    ${legal ? legalSections(V) : ""}
+
+    <details class="sec"><summary><span class="no">${legal ? 9 : 6}</span><h2>Datengrundlage und Grenzen</h2><span class="sum">Quellen · Lizenzen · Anhang</span></summary>
+      <div class="body">
+        <ul class="plain small">${sourcesList(meta).map((s) => `<li>${s}</li>`).join("")}
+          <li>Methode: lokale Tangentialebene um die Stelle (Abweichung zu EPSG:25832 &lt; 0,1 %); Unfälle je Kachel genau einmal gezählt; Einrichtungen über ihre Fläche, Umfeld als Puffer; Lärm und Bevölkerung am Abschnitt ±150 m entlang der Hauptstraße.</li>
+          <li>Grenzen: keine Sachschäden im Unfallatlas; OSM ist nicht die Beschilderung vor Ort; Eingänge, Fahrstreifen, Vorfahrtstraßen und Krippen fehlen noch in den Kacheln; Lärm nur an Hauptverkehrsstraßen; Land aus Photon/OSM bzw. groben Landesgrenzen.</li>
+          ${legal ? `<li>Rechtsstand: ${esc(RW.stvo)}; ${esc(RW.vwv)}. Landesregeln: ${esc(R.P.quelle)}.</li>` : ""}
+        </ul>
+        <details><summary class="small">Maschinenlesbarer Anhang (JSON)</summary><pre class="json" id="jsonout">${esc(JSON.stringify(annex(V), null, 2))}</pre><div class="actions" style="margin-top:8px"><button class="btn" data-copy="#jsonout">JSON kopieren</button></div></details>
+      </div>
+    </details>`;
+}
+
+/** Abschnitte 6–8 (nur mit Rechtsteil): Wege A–C, Maßnahmen, Gegenargumente. */
+function legalSections(V) {
+  const { st, R } = V;
+  const A = R.A;
+  return `
     <details class="sec" open><summary><span class="no">6</span><h2>Rechtliche Einordnung</h2><span class="sum">Weg A: ${esc(A.verdict.label)} · Weg B: ${esc(R.B.verdict.label)}${R.Cw ? ` · Weg C: ${esc(R.Cw.verdict.label)}` : ""}</span></summary>
       <div class="body">
         <p class="small muted" style="margin:0">Hinweise nach den Daten, keine Feststellung. Gelb heißt: Datenlücke – beantworte die Frage, dann rechnet die Ampel neu. Rot aus den Daten wird nicht überschrieben. Grau „!“ = auffällig (Häufung, Schwelle erreicht) – ein Befund, keine Feststellung.</p>
@@ -183,17 +219,6 @@ export function renderReport(V) {
 
     <details class="sec"><summary><span class="no">8</span><h2>Gegenargumente und Abwägung</h2><span class="sum">offen gezeigt</span></summary>
       <div class="body"><ul class="plain">${R.gegen.map((g) => `<li>${esc(g)}</li>`).join("")}</ul></div>
-    </details>
-
-    <details class="sec"><summary><span class="no">9</span><h2>Datengrundlage und Grenzen</h2><span class="sum">Quellen · Lizenzen · Anhang</span></summary>
-      <div class="body">
-        <ul class="plain small">${sourcesList(meta).map((s) => `<li>${s}</li>`).join("")}
-          <li>Methode: lokale Tangentialebene um die Stelle (Abweichung zu EPSG:25832 &lt; 0,1 %); Unfälle je Kachel genau einmal gezählt; Einrichtungen über ihre Fläche, Umfeld als Puffer; Lärm und Bevölkerung am Abschnitt ±150 m entlang der Hauptstraße.</li>
-          <li>Grenzen: keine Sachschäden im Unfallatlas; OSM ist nicht die Beschilderung vor Ort; Eingänge, Fahrstreifen, Vorfahrtstraßen und Krippen fehlen noch in den Kacheln; Lärm nur an Hauptverkehrsstraßen; Land aus Photon/OSM bzw. groben Landesgrenzen.</li>
-          <li>Rechtsstand: ${esc(RW.stvo)}; ${esc(RW.vwv)}. Landesregeln: ${esc(R.P.quelle)}.</li>
-        </ul>
-        <details><summary class="small">Maschinenlesbarer Anhang (JSON)</summary><pre class="json" id="jsonout">${esc(JSON.stringify(annex(V), null, 2))}</pre><div class="actions" style="margin-top:8px"><button class="btn" data-copy="#jsonout">JSON kopieren</button></div></details>
-      </div>
     </details>`;
 }
 
@@ -213,18 +238,20 @@ function sourcesList(meta) {
 }
 
 export function annex(V) {
-  const { st, M, R, meta, link, place } = V;
+  const { st, M, R, meta, link, place, legal = false } = V;
   const acc = M.accidents;
   return {
-    format: "unfallkarte-report", version: 1, erstellt: V.today, regelwerk: RW.version, texte: TEXTVERSION, link,
+    format: "unfallkarte-report", version: 1, erstellt: V.today, ...(legal ? { regelwerk: RW.version, texte: TEXTVERSION } : {}), link,
     auswahl: { art: M.selection.kind, radius_m: M.selection.r, einrichtung: M.selection.fac?.oid ?? null, jahre: [st.years.from, st.years.to], land: R.P.land, land_quelle: st.land ? "Nutzerwahl" : place?.landQuelle ?? null },
     strasse: M.road ? { name: M.streetName, ref: M.road.ref, highway: M.road.highway, tempo: (R.A.sp ?? M.speed)?.v ?? null } : null,
     unfaelle: { n: acc.n, u_sp: acc.nSP, getoetete: acc.nT, fuss_rad: acc.fr, je_jahr: acc.byYear, typen: acc.byTyp, beteiligung: acc.bet },
     uko: R.U.list.map((u) => ({ id: u.id, status: u.status, detail: u.detail })),
-    weg_a: { urteil: R.A.verdict.key, schritte: R.A.steps.map((x) => ({ id: x.id, status: x.status, nutzerangabe: !!x.nutz })) },
-    weg_b: { urteil: R.B.verdict.key, schritte: R.B.steps.map((x) => ({ id: x.id, status: x.status })) },
-    ...(R.Cw ? { weg_c: { urteil: R.Cw.verdict.key, schritte: R.Cw.steps.map((x) => ({ id: x.id, status: x.status })) } } : {}),
-    massnahmen: R.measures.map((m) => m.id),
+    ...(legal ? {
+      weg_a: { urteil: R.A.verdict.key, schritte: R.A.steps.map((x) => ({ id: x.id, status: x.status, nutzerangabe: !!x.nutz })) },
+      weg_b: { urteil: R.B.verdict.key, schritte: R.B.steps.map((x) => ({ id: x.id, status: x.status })) },
+      ...(R.Cw ? { weg_c: { urteil: R.Cw.verdict.key, schritte: R.Cw.steps.map((x) => ({ id: x.id, status: x.status })) } } : {}),
+      massnahmen: R.measures.map((m) => m.id),
+    } : {}),
     datenstaende: Object.fromEntries(Object.entries(meta ?? {}).filter(([, m]) => m?.vintage).map(([k, m]) => [k, m.vintage])),
     verfuegbarkeit: M.status,
   };
@@ -296,15 +323,14 @@ function letterInner(V, L) {
 export function renderPrint(V, { framed = false } = {}) {
   return `
     <div class="panel pdfbar">
-      <div class="small" style="max-width:70ch">So sieht der Report beim Drucken aus. „Drucken“ öffnet den Druckdialog des Browsers – dort „Als PDF speichern“ wählen. Hintergrundgrafiken einschalten, falls die Ampelfarben fehlen.</div>
+      <div class="small" style="max-width:70ch">So sieht der Report beim Drucken aus. „Drucken“ öffnet den Druckdialog des Browsers – dort „Als PDF speichern“ wählen. Hintergrundgrafiken einschalten, falls Farben fehlen.</div>
       ${framed ? "" : '<button class="btn primary" id="doprint">Drucken / Als PDF speichern</button>'}
     </div>
     <div class="docstack">${printDoc(V)}</div>`;
 }
 
 export function printDoc(V) {
-  const { st, M, R, adr, title, meta, link, dataYears } = V;
-  const L = buildLetter(V.E);
+  const { st, M, R, adr, title, meta, link, dataYears, legal = false } = V;
   const acc = M.accidents;
   const amp = (k) => `<span class="amp ${k}">${ST_ICON[k]}</span>`;
   const wayT = (t, W) => `<h3>${t} — ${esc(W.verdict.label)}</h3><table><tbody>${W.steps.map((x) => `<tr class="keep"><td style="width:22px">${amp(x.status)}</td><td style="width:33%"><b>${x.id} · ${esc(x.t)}</b>${x.nutz ? " <i>(Nutzerangabe)</i>" : ""}</td><td>${esc(x.txt)}<br><span class="dmeta">${esc(x.data || "")}</span></td></tr>`).join("")}</tbody></table>`;
@@ -313,17 +339,18 @@ export function printDoc(V) {
   const cz = M.census;
   const svz = M.traffic.svz;
   const noise = M.noise;
-  const typeLabel = briefTypes(V.E).find((t) => t.id === L.type).label;
+  const where = [title.ort, cz?.gemeinde ? `Gemeinde ${cz.gemeinde}` : null, R.P.land !== "bund" ? landName(R.P.land) : null].filter(Boolean).join(" · ");
+  const facKind = (f) => (legal ? FAC[f.typ]?.nr6 ?? "nicht bzw. unklar nach Nr. 6" : FAC[f.typ]?.label ?? "Einrichtung");
   return `<article class="doc">
     <div class="dmeta">Unfallkarte · Analyse-Report · ${KIND_LABEL[M.selection.kind]} · ${esc(whereTxt(M))} · erstellt ${esc(V.today)}</div>
     <h1>${esc(title.titel)}</h1>
-    <div class="dmeta">${esc([title.ort, cz?.gemeinde ? `Gemeinde ${cz.gemeinde}` : null, R.P.land !== "bund" ? landName(R.P.land) : null].filter(Boolean).join(" · "))} · Landesregeln: ${esc(R.P.label)} · Regelwerk ${RW.version} (Stand ${RW.stand})</div>
-    <div class="dstamp">Datenbasierte Einschätzung · keine Rechtsberatung · kein Gutachten · keine amtliche Feststellung</div>
-    <div class="map keep">${mapWithLegend(M, R, { width: 700, years: st.years, print: true, aspect: 1.5 })}</div>
+    <div class="dmeta">${esc(where)}${legal ? ` · Landesregeln: ${esc(R.P.label)} · Regelwerk ${RW.version} (Stand ${RW.stand})` : ""}</div>
+    <div class="dstamp">${stampParts(legal).join(" · ")}</div>
+    <div class="map keep">${mapWithLegend(M, legal ? R : null, { width: 700, years: st.years, print: true, aspect: 1.5 })}</div>
     <h2>1 · Auf einen Blick</h2>
-    <table class="glance"><tbody>${R.glance.map((f) => `<tr><td style="width:22px">${amp(f.st)}</td><td><b>${esc(f.t)}</b><br><span class="dmeta">${esc(f.n)}</span></td></tr>`).join("")}</tbody></table>
-    <p><b>Maßnahmen-Kandidaten:</b> ${R.measures.map((m) => esc(m.t)).join(" · ") || "keine aus den Daten"}</p>
-    <p><b>Vermutlich zuständig:</b> ${esc(adr.stelle)} <span class="dmeta">(${esc(adr.basis)} Beleg: ${esc(adr.sicher)})</span></p>
+    <table class="glance"><tbody>${(legal ? R.glance : R.facts).map((f) => `<tr><td style="width:22px">${amp(f.st)}</td><td><b>${esc(f.t)}</b><br><span class="dmeta">${esc(f.n)}</span></td></tr>`).join("")}</tbody></table>
+    ${legal ? `<p><b>Maßnahmen-Kandidaten:</b> ${R.measures.map((m) => esc(m.t)).join(" · ") || "keine aus den Daten"}</p>
+    <p><b>Vermutlich zuständig:</b> ${esc(adr.stelle)} <span class="dmeta">(${esc(adr.basis)} Beleg: ${esc(adr.sicher)})</span></p>` : ""}
     <h2>2 · Unfalllage</h2>
     <table><thead><tr><th>Jahr</th>${dataYears.map((y) => `<th class="r">${y}</th>`).join("")}</tr></thead><tbody><tr><td>U(P) in der Auswahl</td>${yearsRow}</tr></tbody></table>
     <div class="twocol">
@@ -334,12 +361,12 @@ export function printDoc(V) {
     <p class="dmeta">Referenzvergleich (erwartete Unfälle an vergleichbaren Stellen) folgt mit einer späteren Stufe. Anteile erst ab 20 Fällen.</p>
     <h2>3 bis 5 · Nutzungen, Straße, Umwelt</h2>
     <table><tbody>
-      ${M.facilities.slice(0, 8).map((f) => `<tr><td>${esc(facLabel(f))}</td><td>${esc(FAC[f.typ]?.nr6 ?? "nicht bzw. unklar nach Nr. 6")}</td><td class="r">${fmt(f.dSel)} m zur Auswahl${f.dRoad != null ? ` · ${fmt(f.dRoad)} m zur Hauptstraße` : ""}</td></tr>`).join("")}
+      ${M.facilities.slice(0, 8).map((f) => `<tr><td>${esc(facLabel(f))}</td><td>${esc(facKind(f))}</td><td class="r">${fmt(f.dSel)} m zur Auswahl${f.dRoad != null ? ` · ${fmt(f.dRoad)} m zur Hauptstraße` : ""}</td></tr>`).join("")}
       <tr><td>Bevölkerung</td><td colspan="2">${cz ? `${fmt(cz.ew)} EW im 300-m-Umfeld, davon ${fmt(cz.u18)} unter 18 und ${fmt(cz.a65)} ab 65 (Zensus 2022)` : "nicht verfügbar"}</td></tr>
       <tr><td>Straße</td><td colspan="2">${M.road ? `${esc(M.streetName ?? M.road.label)} · ${esc(M.road.ref || "ohne Nummer")} · ${sp?.v != null ? `${sp.v} km/h${sp.derived ? " (abgeleitet)" : ""}` : "Tempo unbekannt"} · ${svz?.status === "ok" ? `${fmt(svz.kfz)} Kfz/24 h (SVZ ${esc(svz.year ?? "")})` : "keine Zählung"}` : "keine Straße in den Daten"}</td></tr>
       <tr><td>Lärm</td><td colspan="2">${noise.den?.status === "ok" && (noise.den.v != null || noise.night.v != null) ? `L_DEN ${esc(noise.den.txt ?? "unter 55")} / L_Night ${esc(noise.night?.txt ?? "unter 50")} dB(A) (Kartierung, keine Beurteilungspegel)` : "keine Kartierung bzw. nicht verfügbar"}</td></tr>
     </tbody></table>
-    <div class="pb"></div>
+    ${legal ? `<div class="pb"></div>
     <h2>6 · Rechtliche Einordnung</h2>
     <p class="dmeta">Hinweise nach den Daten, keine Feststellung. ✓ erfüllt · ? unklar (Datenlücke) · ✕ nicht erfüllt · ! auffällig (Befund, keine Feststellung) · i Hinweis · – entfällt bzw. nicht erreicht.</p>
     ${wayT("Weg A · Tempo 30 vor Einrichtungen (§ 45 Abs. 9 S. 4 Nr. 6 StVO)", R.A)}
@@ -348,14 +375,21 @@ export function printDoc(V) {
     <h2>7 · Mögliche Maßnahmen (unverbindlich)</h2>
     <table><tbody>${R.measures.map((m) => `<tr class="keep"><td style="width:30%"><b>${esc(m.t)}</b></td><td>${esc(m.why)}<br><span class="dmeta">${esc(m.norm)} · ${esc(m.who)}</span></td></tr>`).join("") || "<tr><td>keine</td></tr>"}</tbody></table>
     <h2>8 · Gegenargumente und Abwägung</h2>
-    <ul>${R.gegen.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>
-    <h2>9 · Datengrundlage und Grenzen</h2>
-    <p class="dmeta">${sourcesList(meta).map((s) => s.replace(/<[^>]+>/g, "")).join(" · ")} · Rechtsstand: ${esc(RW.stvo)}; ${esc(RW.vwv)} · Landesregeln: ${esc(R.P.quelle)} · Report-Link: <span class="mono wrap-any">${esc(link)}</span></p>
-    <div class="pb"></div>
+    <ul>${R.gegen.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>` : ""}
+    <h2>${legal ? 9 : 6} · Datengrundlage und Grenzen</h2>
+    <p class="dmeta">${sourcesList(meta).map((s) => s.replace(/<[^>]+>/g, "")).join(" · ")}${legal ? ` · Rechtsstand: ${esc(RW.stvo)}; ${esc(RW.vwv)} · Landesregeln: ${esc(R.P.quelle)}` : ""} · Report-Link: <span class="mono wrap-any">${esc(link)}</span></p>
+    ${legal ? letterPage(V) : ""}
+    <div class="foot">${legal ? `Erstellt mit der Unfallkarte · Regelwerk ${RW.version} · Textbausteine ${TEXTVERSION} · Datenbasierte Einschätzung, keine Rechtsberatung, kein Gutachten.` : "Erstellt mit der Unfallkarte · Datenbasierte Auswertung, kein Gutachten, keine amtliche Feststellung."}</div>
+  </article>`;
+}
+
+/** Briefseite im Druck (nur mit Rechtsteil). */
+function letterPage(V) {
+  const L = buildLetter(V.E);
+  const typeLabel = briefTypes(V.E).find((t) => t.id === L.type).label;
+  return `<div class="pb"></div>
     <div class="letter">
       <div class="dmeta">Briefentwurf · ${esc(typeLabel)} · Textbausteine ${TEXTVERSION} · juristisch zu prüfen</div>
       ${letterInner(V, L)}
-    </div>
-    <div class="foot">Erstellt mit der Unfallkarte · Regelwerk ${RW.version} · Textbausteine ${TEXTVERSION} · Datenbasierte Einschätzung, keine Rechtsberatung, kein Gutachten.</div>
-  </article>`;
+    </div>`;
 }
