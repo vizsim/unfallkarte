@@ -11,7 +11,8 @@
 // und innerhalb einer Sitzung hält MapLibre die Kacheln selbst.
 import { FetchSource, PMTiles, Protocol } from "pmtiles";
 
-class NoStoreFetchSource extends FetchSource {
+// Exportiert: der Analyse-Report (js/report/tileReader.js) liest dieselben Archive direkt.
+export class NoStoreFetchSource extends FetchSource {
   constructor(url) {
     super(url);
     // Internes Flag von FetchSource (pmtiles 4.5.0): schaltet genau `cache: "no-store"`.

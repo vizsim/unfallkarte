@@ -32,7 +32,9 @@ function maplibreExternal() {
     name: "unfallkarte:maplibre-external",
     apply: "build",
     config: () => ({ build: { rolldownOptions: { external: ["maplibre-gl"] } } }),
-    transformIndexHtml: () => [
+    // Nur die Karte braucht MapLibre. report.html zeichnet seine Karte als SVG und lädt es nicht —
+    // dort wären Importmap und Preload ~0,25 MB für nichts.
+    transformIndexHtml: (html, ctx) => (!ctx.path.endsWith("/index.html") ? [] : [
       // Die Importmap muss vor dem ersten Modul stehen.
       { tag: "script", attrs: { type: "importmap" }, injectTo: "head-prepend",
         children: JSON.stringify({ imports: { "maplibre-gl": `./${ML_DIR}/maplibre-gl.mjs` } }) },
@@ -41,7 +43,7 @@ function maplibreExternal() {
       ...ML_FILES.slice(0, 2).map((f) => ({
         tag: "link", attrs: { rel: "modulepreload", href: `./${ML_DIR}/${f}` }, injectTo: "head-prepend",
       })),
-    ],
+    ]),
     writeBundle({ dir }) {
       mkdirSync(join(dir, ML_DIR), { recursive: true });
       for (const f of ML_FILES) {
@@ -109,6 +111,12 @@ function localData() {
 export default defineConfig({
   base: "./",        // Pages liefert unter vizsim.de/unfallkarte/ aus; relativ passt überall
   appType: "mpa",    // siehe 2. oben
+  // Zwei Seiten: die Karte und der Analyse-Report (docs/ANALYSE_REPORT.md). Beide bekommen
+  // Importmap + MapLibre-Preload über maplibreExternal (transformIndexHtml läuft je Seite).
+  // Schlüssel `index` hält den Dateinamen des Karten-Bündels (assets/index-*.js) stabil —
+  // tests/web/mobile.spec.js blockiert es über diesen Namen. Gemeinsame Module (pmtiles,
+  // Quellen-Auflösung) landen in einem geteilten Chunk, den die Karte per modulepreload lädt.
+  build: { rolldownOptions: { input: { index: resolve(ROOT, "index.html"), report: resolve(ROOT, "report.html") } } },
   server: {
     // Nicht beobachten: der Datenbaum (18 GB) und alles, was die Pipeline/Tests erzeugen.
     watch: { ignored: ["**/data/**", "**/pipeline/**", "**/test-results/**", "**/playwright-report/**"] },

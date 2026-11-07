@@ -13,17 +13,17 @@
     "test:web:ui": "playwright test --ui"
   },
   "devDependencies": {
-    "@mapbox/vector-tile": "3.0.0",
-    "@maplibre/mlt": "1.3.0",
     "@playwright/test": "^1.63.0",
-    "pbf": "5.1.2",
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@mapbox/vector-tile": "3.0.0",
+    "@maplibre/mlt": "1.3.0",
     "chart.js": "4.5.1",
     "fzstd": "0.1.1",
     "hyparquet": "1.31.2",
     "maplibre-gl": "6.11.2",
+    "pbf": "5.1.2",
     "pmtiles": "4.5.0",
     "terra-draw": "1.35.0",
     "terra-draw-maplibre-gl-adapter": "1.4.1"

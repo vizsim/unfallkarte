@@ -1,6 +1,7 @@
 // Geschwindigkeiten: Tempolimits aus OSM (maxspeed, 12 Layer aus einer Fabrik) und
 // gefahrene Geschwindigkeiten aus Uber Movement (uspeed, mit Stunden-Regler).
 import { row, osmLink } from "../ui/popupHelpers.js";
+import { SPEED_COLOR_SPECIAL, SPEED_COLOR_STOPS } from "../styleConfig.js";
 import { showUspeedChartPopup } from "../ui/uspeedChart.js";
 
 // ---------------------------------------------------------------------------------------------
@@ -11,14 +12,14 @@ import { showUspeedChartPopup } from "../ui/uspeedChart.js";
 
 // Farbe nach Tempolimit. "None" = unbegrenzt (schwarz); ohne Wert hilft maxspeed:type
 // (DE:urban ≈ 50, DE:rural ≈ 100); sonst pink = keine Angabe in OSM.
+// Farben: SPEED_COLOR_STOPS in js/styleConfig.js (die Report-Karte nutzt dieselben).
 const speedColor = (field) => ["case",
-    ["==", ["get", field], "None"], "#000000",
-    ["all", ["!", ["has", field]], ["==", ["get", "maxspeed_type"], "DE:urban"]], "#fdcc8a",
-    ["all", ["!", ["has", field]], ["==", ["get", "maxspeed_type"], "DE:rural"]], "#e31a1c",
-    ["!", ["has", field]], "#ff69b4",
-    ["==", ["get", field], null], "#ff69b4",
-    ["interpolate", ["linear"], ["to-number", ["get", field]],
-        10, "#006400", 30, "#31a354", 50, "#fdcc8a", 100, "#e31a1c", 140, "#8B0000"]];
+    ["==", ["get", field], "None"], SPEED_COLOR_SPECIAL.none,
+    ["all", ["!", ["has", field]], ["==", ["get", "maxspeed_type"], "DE:urban"]], SPEED_COLOR_SPECIAL.urban,
+    ["all", ["!", ["has", field]], ["==", ["get", "maxspeed_type"], "DE:rural"]], SPEED_COLOR_SPECIAL.rural,
+    ["!", ["has", field]], SPEED_COLOR_SPECIAL.unknown,
+    ["==", ["get", field], null], SPEED_COLOR_SPECIAL.unknown,
+    ["interpolate", ["linear"], ["to-number", ["get", field]], ...SPEED_COLOR_STOPS.flat()]];
 
 const NETWORKS = [
     {   // Hauptstraßen: Breite + Versatz wachsen mit dem Zoom

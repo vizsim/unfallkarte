@@ -46,12 +46,17 @@ test("Link-hrefs: nur http(s), Attribut escaped", async ({ page }) => {
   const pt = await waitForBusiestPoint(page, ["scenario6-points"]);
   await hoverAt(page, pt);
   await page.mouse.click(pt.x, pt.y); // Sc6 fixiert (kein openOnClick) -> Link als Fußzeile
-  const link = popups(page).first().locator(".pop-foot a");
+  const link = popups(page).first().locator(".pop-foot a:not(.pop-report)");
   await expect(link).toHaveCount(1);
   expect(await link.getAttribute("href")).toBe(`https://www.openstreetmap.org/node/1" onmouseover="window.__xss=3`);
   expect(await link.getAttribute("onmouseover")).toBeNull();
   await link.hover();
   expect(await page.evaluate(() => window.__xss)).toBeUndefined();
+  // Zweite Fußzeile: Analyse-Report. Die kaputte oid wird NICHT übernommen (kein sel=e:…),
+  // der Link fällt auf die Stelle zurück und bleibt ein sauberer http(s)-Link.
+  const report = popups(page).first().locator(".pop-foot a.pop-report");
+  await expect(report).toHaveCount(1);
+  expect(await report.getAttribute("href")).toMatch(/^https?:\/\/[^"]+\/report\.html\?rv=1&sel=k:-?\d+\.\d{5},-?\d+\.\d{5}$/);
   expectNoErrors(errors);
 });
 

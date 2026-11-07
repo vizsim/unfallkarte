@@ -227,9 +227,11 @@ body {
 }
 
 .legend[data-zoom="cluster"]>.legend-section[data-section="einzeln"],
-.legend[data-zoom="cluster"]>.legend-section-divider {
+.legend[data-zoom="cluster"]>.legend-section-divider:not(.legend-head-divider) {
   display: none;
 }
+/* Der Trenner unter dem Titel bleibt: zwischen Titel und Cluster-Block steht die Sektion
+   „Analyse", der Cluster-Block bringt seinen eigenen Trenner erst danach mit. */
 
 /* Cluster-Legende je Ansicht (data-view: "pie" | "share", setzt updateClusterLegend) */
 #cluster-legend-section .when-share,
@@ -1414,3 +1416,102 @@ body {
 .pop-trend-plot { height: 44px; width: 100%; display: flex; align-items: flex-end; }
 .pop-trend-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--sev); }
 .pop-trend-year { font-size: 9.5px; line-height: 1.4; color: var(--ui-text-muted); }
+
+/* ────────────── Analyse (js/analysis/analysisPanel.js) ────────────── */
+/* Akkordeon „Analyse" in der Legende, Kontextmenü in der Karte. Beim Wählen in der Karte
+   erscheint die Leiste vom Gebiet-Zeichnen (.draw-bar). Experimentell → eigene Plakette in
+   Bernstein statt des blauen Beta-Tons. */
+.analysis-heading { display: flex; align-items: center; gap: 8px; }
+.analysis-badge {
+  padding: 1px 7px;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  cursor: help;
+}
+.analysis-panel { margin: 0 10px 10px; font-size: 12.5px; line-height: 1.45; color: var(--ui-text); }
+.analysis-intro { margin: 0 0 6px; color: var(--ui-text-muted); }
+.analysis-disclaimer {
+  margin: 0 0 10px;
+  padding: 6px 9px;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 8px 8px 0;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: 11.5px;
+}
+.analysis-hint { margin: 0; }
+.analysis-hint:empty { display: none; }
+.legend-chip.is-disabled { cursor: not-allowed; }
+.legend-chip.is-disabled span { opacity: 0.45; }
+.analysis-result { margin-top: 8px; padding: 10px 12px; border-radius: var(--ui-radius-sm); background: var(--ui-hover); }
+.analysis-result[hidden] { display: none; }
+.analysis-title { margin-bottom: 6px; font-weight: 700; color: var(--ui-text-strong); }
+.analysis-radius { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; color: var(--ui-text-muted); }
+.analysis-radius input { flex: 1; min-width: 0; accent-color: var(--ui-accent); }
+.analysis-r-value { min-width: 46px; text-align: right; color: var(--ui-text-strong); }
+/* Mit Auswahl tritt die Einleitung zurück; der Experimentell-Hinweis bleibt stehen. */
+.analysis-panel.has-selection .analysis-intro { display: none; }
+.analysis-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 4px 0 6px; }
+.analysis-stats:empty { display: none; }
+.analysis-stat { padding: 6px 8px; border-radius: 8px; background: var(--ui-surface); cursor: default; }
+.analysis-stat b { display: block; font-size: 17px; line-height: 1.2; color: var(--ui-text-strong); }
+.analysis-stat span { font-size: 11px; color: var(--ui-text-muted); }
+.analysis-meta { margin: 0 0 10px; color: var(--ui-text-muted); font-size: 12px; }
+.analysis-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.analysis-more { color: var(--ui-text-muted); font-size: 12px; }
+.analysis-open {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--ui-accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.analysis-open:hover { background: #1e40af; }
+.analysis-link { padding: 0; border: 0; background: none; color: var(--ui-accent); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
+
+/* Kontextmenü: Rechtsklick bzw. langes Drücken auf die Karte */
+.map-menu {
+  position: absolute;
+  z-index: 5;
+  min-width: 210px;
+  max-width: min(300px, calc(100% - 8px));
+  padding: 4px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-sm);
+  font-size: 13px;
+}
+.map-menu-title {
+  padding: 4px 8px 3px;
+  color: var(--ui-text-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.map-menu button {
+  display: block;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--ui-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.map-menu button:hover,
+.map-menu button:focus-visible { background: var(--ui-hover); outline: none; }
+@media (max-width: 640px) {
+  .map-menu button { padding: 10px 8px; }   /* Tippfläche */
+}

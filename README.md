@@ -42,6 +42,12 @@ Zwei Teile in einem Repo:
   **Vite** nach `dist/`. Die PMTiles kommen **local-first** aus `data/`, sonst per
   **B2-Fallback**; gesteuert über ein generiertes `manifest.json`.
 
+Daneben der **Analyse-Report** (`report.html`, experimentell): Für eine Kreuzung oder eine Schule,
+Kita, einen Spielplatz liest er dieselben PMTiles im Browser und zeigt Unfalllage,
+schutzbedürftige Nutzungen, Straße, Lärm und eine rechtliche Einordnung nach § 45 StVO –
+mit Briefentwurf an die Behörde und Druckansicht. Einstieg per Popup („Analyse-Report →")
+oder direkt. Details: [`docs/ANALYSE_REPORT.md`](docs/ANALYSE_REPORT.md).
+
 Jede Zeile der Legende entspricht genau einem Eintrag in der **Layer-Registry**
 (`js/layers/`): Quelle, Layer-Definitionen, Popup, Permalink-Zeichen und Legendentext
 stehen dort an einer Stelle statt über acht Dateien verteilt.
@@ -169,6 +175,9 @@ Zwei Tests sind das eigentliche Sicherheitsnetz für Umbauten:
   Toggles über drei Zoomstufen als Snapshot fest. Nach einem Refactor muss er
   **unverändert** grün sein; gewollte Änderungen mit `--update-snapshots` aufnehmen und den
   Diff Zeile für Zeile prüfen.
+- **`report-fixture.spec.js`** baut einen erfundenen Ort als echte PMTiles
+  (`tests/fixtures/report/`) und fährt den Analyse-Report damit von Link bis Druck —
+  unabhängig von `data/` und B2. `report.spec.js` prüft ihn gegen die echten Daten.
 - **`contract.spec.js`** liest die Metadaten der echten PMTiles und prüft jeden
   `source-layer` und jedes im Style benutzte Attribut. Nötig, weil MapLibre bei PMTiles
   **nicht** validiert — der Test fand auf Anhieb zwei Bugs, die monatelang unbemerkt waren.
@@ -224,6 +233,8 @@ data.vizsim.de (`publish deploy`, eigener Bucket) ist ein dritter.
 - Ladezeit: [`docs/PERFORMANCE_PLAN.md`](docs/PERFORMANCE_PLAN.md) (Stufen, Ergebnisse,
   Messmethode) und [`docs/PERFORMANCE_REPORT_2026-09-24.md`](docs/PERFORMANCE_REPORT_2026-09-24.md)
   (Maßnahmenkatalog, Vergleich mit OpenTrailMap).
+- [`docs/ANALYSE_REPORT.md`](docs/ANALYSE_REPORT.md) — der Analyse-Report: Link-Vertrag,
+  Datenzugriff, Regelwerk 0.1.0, Grenzen, Tests.
 - [`CLAUDE.md`](CLAUDE.md) — Regeln und Konventionen für die Arbeit im Repo.
 
 ## 🧰 Tech

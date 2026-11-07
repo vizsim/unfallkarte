@@ -17,6 +17,7 @@ import { readClusterFocus } from "../map/accidentLayers.js";
 import { CIRCLE_LAYERS, PIE_LAYERS } from "../map/clusterView.js";
 import { circleCount, radiusFor } from "../map/clusterModes.js";
 import { registryPopupEntries } from "../layers/registry.js";
+import { pointSel } from "../report/entry.js";
 
 
 // ---------------------------------------------------------------------------
@@ -27,7 +28,8 @@ function accidentEntries(map) {
     return [
         {
             id: "accidents", kind: "accidents", layers: ["accident-points"],
-            render: renderAccident
+            render: renderAccident,
+            report: pointSel
         },
         {
             // Torten (Schwere) ODER Kreise (Anteil einer Beteiligung) — js/map/clusterView.js

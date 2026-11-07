@@ -72,6 +72,51 @@ MAIN HEADER
       <button type="button" class="toggle-arrow toggle-root open" data-arrow="legend-root" aria-expanded="true" aria-label="Legende ein-/ausklappen"></button>
     </div>
 
+    <div class="legend-section-divider legend-head-divider"></div>
+
+    <!-- ====================
+     Sektion 0: Analyse (experimentell) — js/analysis/analysisPanel.js
+     Startet zugeklappt. Die Chips hier, ein Rechtsklick in die Karte (am Handy: lange
+     drücken) oder „Analysieren →" im Popup setzen die Auswahl und klappen sie auf.
+======================= -->
+    <div class="legend-section collapsed" data-section="analyse">
+      <div class="legend-section-title section-toggle row row--between" data-section-id="analyse">
+        <span class="analysis-heading">Analyse
+          <span class="analysis-badge" data-tip="Experimentell: keine Gewähr, dass Zahlen und Schlussfolgerungen stimmen"
+            aria-label="Status: experimentell">Experimentell</span>
+        </span>
+        <button type="button" class="toggle-arrow section-arrow" data-arrow="analyse" aria-expanded="false" aria-label="Sektion Analyse auf-/zuklappen"></button>
+      </div>
+      <div class="legend-section-content">
+        <div class="analysis-panel">
+          <p class="analysis-intro">Wähle eine Kreuzung oder eine Einrichtung. Der Report fasst zusammen, was
+            die Karte dort zeigt: Unfälle, Einrichtungen, Straße und Lärm, mit Druckansicht. Rechtsklick in die
+            Karte geht auch (am Handy: lange drücken).</p>
+          <p class="analysis-disclaimer"><strong>Experimentell.</strong> Die Analyse wertet die Daten automatisch aus.
+            Keine Gewähr, dass Zahlen und Schlussfolgerungen stimmen – bitte vor Ort prüfen. Keine Rechtsberatung.</p>
+          <div class="legend-modes" role="radiogroup" aria-label="Was möchtest du untersuchen?">
+            <label class="legend-chip"><input type="radio" name="analysis-kind" value="k" /><span>Kreuzung</span></label>
+            <label class="legend-chip"><input type="radio" name="analysis-kind" value="e" /><span>Einrichtung</span></label>
+            <label class="legend-chip is-disabled" title="Report für ein gezeichnetes Gebiet – folgt"><input type="radio"
+                name="analysis-kind" value="g" disabled /><span>Gebiet · folgt</span></label>
+          </div>
+          <p class="analysis-hint" role="status" aria-live="polite"></p>
+          <div class="analysis-result" hidden>
+            <div class="analysis-title"></div>
+            <label class="analysis-radius"><span class="analysis-r-label">Radius</span>
+              <input type="range" class="analysis-r" step="5" /><b class="analysis-r-value"></b></label>
+            <div class="analysis-stats"></div>
+            <p class="analysis-meta"></p>
+            <div class="analysis-actions">
+              <a class="analysis-open" target="_blank" rel="noopener">Report öffnen →</a>
+              <span class="analysis-more"><button type="button" class="analysis-link analysis-copy">Link kopieren</button>
+                · <button type="button" class="analysis-link analysis-clear">Auswahl löschen</button></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="legend-section-divider"></div>
 
     <!-- ====================

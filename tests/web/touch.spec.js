@@ -62,7 +62,8 @@ test("Tippen auf ein openOnClick-Objekt navigiert NICHT weg, sondern fixiert das
   expect(opened, "Tap hat einen neuen Tab geöffnet").toHaveLength(0);
 
   // Der Link ist nicht weg — er steht jetzt im Fenster und lässt sich bewusst antippen.
-  const link = popups(page).locator(".pop-foot a");
+  // (Liegt ein Unfall unter dem Finger, hat dessen Karte zusätzlich „Analyse-Report →".)
+  const link = popups(page).locator(".pop-foot a:not(.pop-report)");
   await expect(link).toHaveCount(1);
   await expect(link).toHaveAttribute("href", /openstreetmap\.org\/way\/\d+/);
   expectNoErrors(errors);
