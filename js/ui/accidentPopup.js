@@ -7,7 +7,9 @@
 // Rohtext aus den Kacheln landet hier nie im Markup.
 
 import { translations } from "./accidentLabels.js";
-import { BET_BITS, BET_LABELS, FOCUS, PIE_FOCUS, countSelected, focusAverage, shareClass } from "../map/clusterModes.js";
+import {
+    BET_BITS, BET_LABELS, FOCUS, PIE_FOCUS, TREND, TREND_FOCUS, countSelected, focusAverage, shareClass, signedPct, trendOf,
+} from "../map/clusterModes.js";
 
 const WEEKDAY_SHORT = ["?", "So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]; // UWOCHENTAG 1 = Sonntag
 const MONTH = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
@@ -71,7 +73,39 @@ const hero = (n, unit) => `<div class="pop-hero">${fmtInt(n)} <span class="pop-u
  *   als Kontext (Mehrfachnennung: ein Unfall kann mehrere Beteiligte haben).
  */
 export function renderCluster(props, focus = PIE_FOCUS) {
+    if (focus === TREND_FOCUS) return renderTrendCluster(props);
     return FOCUS[focus] ? renderFocusCluster(props, focus) : renderSeverityCluster(props);
+}
+
+/** Jahre im Balkendiagramm des Trends: alle Kartenjahre (die Felder stehen in cluster_modes). */
+export const TREND_CHART_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
+
+/**
+ * Trend: Veränderung 2024/25 gegenüber 2022/23 groß, darunter das Urteil (deutlich / eher Zufall)
+ * und alle Jahre als Balken — verglichen werden nur die farbigen; die grauen davor sind Kontext
+ * (nicht alle Länder erfasst, 2020/21 Corona).
+ */
+function renderTrendCluster(props) {
+    const t = trendOf(props);
+    const color = TREND.colors[t.cls];
+    const label = TREND.labels[t.cls];
+    const verdict = t.small
+        ? "Zu wenige Unfälle für einen Trend"
+        : t.certain ? `${label[0].toUpperCase()}${label.slice(1)} – deutlich` : `Eher ${label} – kann Zufall sein`;
+    const counts = TREND_CHART_YEARS.map((y) => Number(props[`UJAHR__${y}`]) || 0);
+    const max = Math.max(...counts, 1);
+    const compared = new Set([...TREND.early, ...TREND.late]);
+    const bars = TREND_CHART_YEARS.map((y, i) => {
+        const height = counts[i] ? Math.max(4, Math.round((counts[i] / max) * 100)) : 0;
+        return `<div class="pop-trend-col" data-tip="${y}: ${fmtInt(counts[i])} ${counts[i] === 1 ? "Unfall" : "Unfälle"}">`
+            + `<div class="pop-trend-plot"><span class="pop-trend-bar" style="height:${height}%;--sev:${compared.has(y) ? color : "#d1d5db"}"></span></div>`
+            + `<span class="pop-trend-year">${String(y).slice(2)}</span></div>`;
+    }).join("");
+    return `<div class="pop-hero">${signedPct(t.change)} <span class="pop-unit">2024/25 ggü. 2022/23</span></div>`
+        + `<div class="pop-meta">${verdict}</div>`
+        + `<div class="pop-trend" role="img" aria-label="Unfälle je Jahr">${bars}</div>`
+        + `<div class="pop-meta">${fmtInt(t.early)} → ${fmtInt(t.late)} Unfälle · Ø Deutschland ${signedPct(TREND.national)}</div>`
+        + `<div class="pop-meta pop-sev-meta">Grau: nicht verglichen — nicht alle Länder erfasst, 2020/21 Corona</div>`;
 }
 
 function renderSeverityCluster(props) {

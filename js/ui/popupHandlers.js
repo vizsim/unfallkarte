@@ -15,7 +15,7 @@ import { row } from "./popupHelpers.js";
 import { clusterTotal, renderAccident, renderCluster } from "./accidentPopup.js";
 import { readClusterFocus } from "../map/accidentLayers.js";
 import { CIRCLE_LAYERS, PIE_LAYERS } from "../map/clusterView.js";
-import { countSelected, radiusFor } from "../map/clusterModes.js";
+import { circleCount, radiusFor } from "../map/clusterModes.js";
 import { registryPopupEntries } from "../layers/registry.js";
 
 
@@ -38,7 +38,7 @@ function accidentEntries(map) {
             // sein Radius + Hover-Ring.
             anchor: (f) => {
                 if (f.layer?.type === "circle") {
-                    const n = countSelected(f.properties, readClusterFocus());
+                    const n = circleCount(f.properties, readClusterFocus());
                     return { lngLat: f.geometry.coordinates, offset: radiusFor(n) + 6 };
                 }
                 const total = clusterTotal(f.properties);

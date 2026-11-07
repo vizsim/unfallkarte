@@ -484,6 +484,7 @@ MAIN HEADER
           <label class="legend-chip"><input type="radio" name="cluster-focus" value="IstFuss" /><span>Fußgänger</span></label>
           <label class="legend-chip"><input type="radio" name="cluster-focus" value="IstKrad" /><span>Kraftrad</span></label>
           <label class="legend-chip"><input type="radio" name="cluster-focus" value="IstGkfz" /><span>Güter-Kfz</span></label>
+          <label class="legend-chip"><input type="radio" name="cluster-focus" value="TREND" /><span>Trend</span></label>
         </div>
         <!-- Text setzt updateClusterLegend() (js/map/clusterModes.js, clusterHintHtml) -->
         <p class="cluster-hint">Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl,
@@ -491,7 +492,7 @@ MAIN HEADER
         <div class="cluster-legend-grid">
           <!-- Größe = Anzahl: verschachtelte Kreise (flächen-proportional) mit Leader-Labels -->
           <div>
-            <div class="cluster-legend-sub">Größe = Anzahl<span class="when-share"> mit Beteiligung</span></div>
+            <div class="cluster-legend-sub">Größe = Anzahl<span class="when-share"></span></div>
             <svg viewBox="0 0 150 70" width="100%" height="70" style="max-width:150px"
               font-size="10" font-family="sans-serif" aria-hidden="true">
               <g fill="rgba(120,120,120,.14)" stroke="#8a8f96" stroke-width="1">
@@ -520,10 +521,10 @@ MAIN HEADER
               </ul>
             </div>
           </div>
-          <!-- Kreise (data-view="share"): Farbe = Anteil der gewählten Beteiligung; Stufen, Farben
-               und Bundesschnitt setzt updateClusterLegend() aus clusterModes.js -->
+          <!-- Kreise (data-view="share"): Farbe = Anteil der gewählten Beteiligung bzw. Trend; Titel,
+               Stufen, Farben und Bezugswert setzt updateClusterLegend() aus clusterModes.js -->
           <div class="cluster-key-share">
-            <div class="cluster-legend-sub">Farbe = Anteil <span class="cluster-share-name"></span></div>
+            <div class="cluster-legend-sub cluster-share-title"></div>
             <ul class="cluster-legend-key cluster-share-key"></ul>
             <p class="cluster-share-avg"></p>
           </div>

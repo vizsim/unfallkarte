@@ -3,7 +3,7 @@
 //   (Größe = Zahl der Unfälle mit ihr, Farbe = ihr Anteil). Die Quelle entsteht lazy.
 import { test, expect } from "@playwright/test";
 import { openMap, jumpTo, hoverAt, popups, waitForBusiestPoint, expectNoErrors } from "./helpers.js";
-import { BET_BITS, FOCUS } from "../../js/map/clusterModes.js";
+import { BET_BITS, FOCUS, TREND } from "../../js/map/clusterModes.js";
 
 const PIES = ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"];
 const CIRCLES = ["cluster-modes-fine", "cluster-modes-coarse"];
@@ -15,8 +15,10 @@ const legendView = (page) => page.evaluate(() => document.getElementById("cluste
 const chip = (page, value) => page.locator(`label.legend-chip:has(input[name="cluster-focus"][value="${value}"])`);
 
 test("Chip Fahrrad: Kreise statt Torten, Quelle erst dann, Punkte nach Beteiligung; zurück zu Schwere", async ({ page }) => {
+  // Nur echte Abrufe zählen: lokal probt die App jede Manifest-Datei per HEAD (local-first),
+  // deployt nicht — geladen werden darf beim Start nichts.
   const requests = [];
-  page.on("request", (r) => requests.push(r.url()));
+  page.on("request", (r) => { if (r.method() !== "HEAD") requests.push(r.url()); });
   const errors = await openMap(page);
   await jumpTo(page, BERLIN, 9);
 
@@ -133,5 +135,41 @@ test("Vertrag cluster_modes.pmtiles: Layer + Felder, und die Bundesschnitte stim
     const actual = report.withBit[focus] / report.total;
     expect(Math.abs(actual - avg), `${focus}: Kacheln ${(actual * 100).toFixed(1)} %, clusterModes.js ${avg * 100} %`).toBeLessThan(0.02);
   }
+  expectNoErrors(errors);
+});
+
+test("Chip Trend: Kreise mit Deckkraft je Sicherheit, Legende, Popup mit Jahresbalken; Bundestrend stimmt", async ({ page }) => {
+  const errors = await openMap(page);
+  await jumpTo(page, [10.4, 51.1], 6);
+  await chip(page, "TREND").click();
+  await expect.poll(() => vis(page, CIRCLES)).toEqual(["visible", "visible"]);
+  await waitForBusiestPoint(page, CIRCLES, { step: 20 });
+  expect(await page.evaluate(() => window.map.getPaintProperty("cluster-modes-coarse", "circle-opacity")[0])).toBe("case");
+  await expect(page.locator(".cluster-share-title")).toContainText("Veränderung 2024/25");
+  await expect(page.locator(".cluster-share-key li")).toHaveCount(5);
+  await expect.poll(() => page.evaluate(() => new URLSearchParams(location.search).get("cl"))).toBe("t");
+  // Einzelpunkte behalten ihre Einfärbung (nur eine Beteiligung schaltet sie um)
+  expect(await page.locator('input[name="color-style"][value="UKATEGORIE"]').isChecked()).toBe(true);
+
+  // Bundestrend aus allen z6-Clustern (ohne Doppelte an Kachelrändern) = TREND.national
+  const national = await page.evaluate(({ early, late }) => {
+    const seen = new Set();
+    let e = 0, l = 0;
+    for (const f of window.map.querySourceFeatures("accidents-cluster-modes", { sourceLayer: "clusters_6_8" })) {
+      const key = JSON.stringify([f.geometry.coordinates, f.properties]);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      for (const y of early) e += Number(f.properties[`UJAHR__${y}`]) || 0;
+      for (const y of late) l += Number(f.properties[`UJAHR__${y}`]) || 0;
+    }
+    return (l - e) / e;
+  }, { early: TREND.early, late: TREND.late });
+  expect(Math.abs(national - TREND.national), `Kacheln ${(national * 100).toFixed(1)} %, clusterModes.js ${TREND.national * 100} %`).toBeLessThan(0.01);
+
+  await jumpTo(page, BERLIN, 9);
+  const pt = await waitForBusiestPoint(page, CIRCLES, { step: 12 });
+  await hoverAt(page, pt);
+  await expect(popups(page).first().locator(".pop-trend-col")).toHaveCount(9);
+  await expect(popups(page).first()).toContainText("2024/25 ggü. 2022/23");
   expectNoErrors(errors);
 });

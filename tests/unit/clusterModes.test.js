@@ -72,3 +72,40 @@ test("Legenden-Text je Ansicht", () => {
   assert.match(clusterHintHtml("IstRad"), /Zahl der Unfälle mit Radbeteiligung/);
   assert.match(clusterHintHtml("IstRad"), /Alle Jahre, ohne Filter/);
 });
+
+// --- Trend ----------------------------------------------------------------------------------
+
+import { TREND, TREND_FOCUS, circleCount, circleStyle, isCircleFocus, trendOf } from "../../js/map/clusterModes.js";
+
+const years = (y22, y23, y24, y25, extra = {}) => ({ UJAHR__2022: y22, UJAHR__2023: y23, UJAHR__2024: y24, UJAHR__2025: y25, ...extra });
+
+test("Trend in JS: 2024/25 gegen 2022/23, Poisson-z, Stufen", () => {
+  const t = trendOf(years(50, 50, 35, 35, { UJAHR__2019: 999 }));   // 2019 zählt nicht mit
+  assert.deepEqual([t.early, t.late, t.window], [100, 70, 170]);
+  assert.equal(Math.round(t.change * 100), -30);
+  assert.ok(Math.abs(t.z - -30 / Math.sqrt(170)) < 1e-9);
+  assert.equal(t.cls, 0);
+  assert.equal(t.certain, true);
+  assert.equal(trendOf(years(5, 5, 6, 6)).certain, false);           // +20 %, aber 22 Unfälle: Zufall
+  assert.equal(trendOf(years(2, 1, 3, 2)).small, true);              // < 10 Unfälle → grau
+  assert.equal(trendOf(years(2, 1, 3, 2)).cls, 2);
+  assert.equal(circleCount(years(1, 2, 3, 4), TREND_FOCUS), 10);
+  assert.ok(isCircleFocus(TREND_FOCUS) && isCircleFocus("IstRad") && !isCircleFocus("UKATEGORIE"));
+});
+
+test("Trend-Ausdrücke = JS-Rechnung (Farbe, Deckkraft, Filter) über viele Fälle", () => {
+  const style = circleStyle(TREND_FOCUS);
+  let seed = 7;
+  const rand = (n) => Math.floor(((seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31) * n);
+  for (let i = 0; i < 400; i++) {
+    const p = years(rand(60), rand(60), rand(60), rand(60));
+    const t = trendOf(p);
+    if (t.window === 0) {
+      assert.equal(evaluate(style.filter, p, "layers[0].filter"), false);
+      continue;
+    }
+    assert.equal(evaluate(style.color, p), TREND.colors[t.cls], JSON.stringify(p));
+    assert.equal(evaluate(style.opacity, p, "layers[0].paint.circle-opacity"),
+      t.certain ? TREND.opacity.certain : TREND.opacity.uncertain, JSON.stringify(p));
+  }
+});

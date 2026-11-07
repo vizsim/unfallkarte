@@ -1406,3 +1406,11 @@ body {
 @media (max-width: 640px) {
   .draw-bar { left: 64px; right: 10px; width: auto; transform: none; }
 }
+
+/* Trend-Popup (js/ui/accidentPopup.js): Balken je Jahr; verglichene Jahre in der Trendfarbe
+   (--sev), die übrigen grau. Zahl je Jahr über data-tip (im fixierten Fenster). */
+.pop-trend { display: flex; gap: 3px; margin: 10px 0 4px; }
+.pop-trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; cursor: default; }
+.pop-trend-plot { height: 44px; width: 100%; display: flex; align-items: flex-end; }
+.pop-trend-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--sev); }
+.pop-trend-year { font-size: 9.5px; line-height: 1.4; color: var(--ui-text-muted); }

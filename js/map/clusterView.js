@@ -3,13 +3,15 @@
 // Gewählt wird im Cluster-Block der Legende genau ein Wert (Chips, name="cluster-focus"):
 //   Schwere (Standard)  → Torten aus combined_cluster.pmtiles, alle Unfälle;
 //   eine Beteiligung    → Kreise aus cluster_modes.pmtiles: Größe = Zahl der Unfälle mit
-//                         dieser Beteiligung, Farbe = ihr Anteil (js/map/clusterModes.js).
+//                         dieser Beteiligung, Farbe = ihr Anteil (js/map/clusterModes.js);
+//   Trend               → Kreise: Farbe = Veränderung 2024/25 gegenüber 2022/23, Deckkraft =
+//                         wie belastbar sie ist.
 // Unabhängig von den Filtern der Einzelpunkte — die gelten erst ab Zoom 11.
 // Quelle + Kreis-Layer entstehen erst beim ersten Wechsel auf eine Beteiligung (der
 // Kartenstart lädt nicht einmal den Kopf der Datei). Sichtbarkeit setzt NUR dieses Modul;
 // das Legenden-Häkchen „Unfälle-Cluster" fragt es über isOn() ab.
 
-import { FOCUS, clusterFocusStyle } from "./clusterModes.js";
+import { circleStyle, isCircleFocus } from "./clusterModes.js";
 import { ensureLazyAccidentSource } from "../mapdata/addSources.js";
 
 export const PIE_LAYERS = ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"];
@@ -62,7 +64,7 @@ export function createClusterView(map, { readFocus, isOn, onView = () => {} }) {
     const gen = ++generation;
     const focus = readFocus();
     const on = isOn();
-    const circles = Boolean(FOCUS[focus]);
+    const circles = isCircleFocus(focus);
     onView(focus);
 
     setVisible(map, [...PIE_LAYERS, HOVER_PIE], on && !circles);
@@ -74,11 +76,12 @@ export function createClusterView(map, { readFocus, isOn, onView = () => {} }) {
     await ensureLazyAccidentSource(map, SOURCE);
     if (gen !== generation) return; // inzwischen neuer Zustand — der zieht selbst nach
     addCircleLayers(map);
-    const style = clusterFocusStyle(focus);
+    const style = circleStyle(focus);
     for (const id of CIRCLE_LAYERS) {
       map.setFilter(id, style.filter);
       map.setPaintProperty(id, "circle-radius", style.radius);
       map.setPaintProperty(id, "circle-color", style.color);
+      map.setPaintProperty(id, "circle-opacity", style.opacity);
       map.setLayoutProperty(id, "circle-sort-key", style.sortKey);
     }
     map.setPaintProperty(HOVER_RING, "circle-radius", ["+", style.radius, 3]);

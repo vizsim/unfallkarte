@@ -1,7 +1,9 @@
 // legendHandlers.js
 
 import { LAYER_REGISTRY } from "../layers/registry.js";
-import { FOCUS, clusterHintHtml, focusAverage, focusClassLabels } from "../map/clusterModes.js";
+import {
+  FOCUS, TREND, TREND_FOCUS, clusterHintHtml, focusAverage, focusClassLabels, isCircleFocus, signedPct, trendClassLabels,
+} from "../map/clusterModes.js";
 
 // ─────────────────────────────────────────────────────────────────────────────────────
 // Sichtbarkeit: dieses Modul setzt nur ZUSTAND (Klassen / data-Attribute), über `display`
@@ -132,23 +134,31 @@ export function setupLegendClusterCheckboxSync() {
 export function updateClusterLegend(focus) {
   const section = document.getElementById("cluster-legend-section");
   if (!section) return;
-  const share = FOCUS[focus];
-  section.dataset.view = share ? "share" : "pie";
+  const circles = isCircleFocus(focus);
+  const trend = focus === TREND_FOCUS;
+  section.dataset.view = circles ? "share" : "pie";
 
   const hint = section.querySelector(".cluster-hint");
   if (hint) hint.innerHTML = clusterHintHtml(focus);
-  if (!share) return;
+  const size = section.querySelector(".when-share");
+  if (size) size.textContent = trend ? " 2022–2025" : " mit Beteiligung";
+  if (!circles) return;
 
-  const name = section.querySelector(".cluster-share-name");
-  if (name) name.textContent = share.noun;
+  const title = section.querySelector(".cluster-share-title");
+  if (title) title.textContent = trend ? "Farbe = Veränderung 2024/25 ggü. 2022/23" : `Farbe = Anteil ${FOCUS[focus].noun}`;
+  const [colors, labels] = trend ? [TREND.colors, trendClassLabels()] : [FOCUS[focus].colors, focusClassLabels(focus)];
   const key = section.querySelector(".cluster-share-key");
   if (key) {
-    key.innerHTML = focusClassLabels(focus)
-      .map((label, i) => `<li><span class="cluster-legend-dot" style="background:${share.colors[i]}"></span>${label}</li>`)
+    key.innerHTML = labels
+      .map((label, i) => `<li><span class="cluster-legend-dot" style="background:${colors[i]}"></span>${label}</li>`)
       .join("");
   }
   const avg = section.querySelector(".cluster-share-avg");
-  if (avg) avg.textContent = `Ø Deutschland ${focusAverage(focus)} – mittlere Stufe`;
+  if (avg) {
+    avg.textContent = trend
+      ? `Ø Deutschland ${signedPct(TREND.national)} · blass = eher Zufall, kräftig = deutlich`
+      : `Ø Deutschland ${focusAverage(focus)} – mittlere Stufe`;
+  }
 }
 
 /**

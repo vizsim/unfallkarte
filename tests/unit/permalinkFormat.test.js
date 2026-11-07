@@ -245,3 +245,9 @@ test("Cluster-Ansicht (?cl=): eine Beteiligung mit den Ziffern von ?bet=, Defaul
     // unbekanntes Kürzel (Link aus einer neueren Version) fällt still auf den Default zurück
     assert.equal(mergeState(base, parse("?v=2&cl=9")).cluster, "UKATEGORIE");
 });
+
+test("Cluster-Ansicht Trend: ?cl=t", () => {
+    const base = defaults();
+    assert.match(serialize({ ...base, cluster: "TREND" }, base), /&cl=t(&|$)/);
+    assert.equal(roundtrip({ ...base, cluster: "TREND" }).cluster, "TREND");
+});

@@ -115,8 +115,97 @@ export function clusterFocusStyle(focus) {
   };
 }
 
+// ---------------------------------------------------------------------------------------------
+// Trend: nehmen die Unfälle zu oder ab? Verglichen wird 2024/25 mit 2022/23 — nicht früher:
+// erst ab 2020 sind alle Länder im Unfallatlas (NRW/Thüringen ab 2019, Berlin ab 2018, MV ab
+// 2020; ein Vergleich ab 2017 zeigte dort vor allem den Datenbeginn), und 2020/21 waren
+// Corona-Jahre mit deutlich weniger Unfällen. Felder: „UJAHR__<jahr>" aus cluster_modes.pmtiles.
+//
+// Zwei Jahre gegen zwei sind bei kleinen Clustern meist Zufall (gemessen: bei 95 % Sicherheit
+// blieben 87–97 % der Cluster ohne deutlichen Trend). Darum zeigt die FARBE die Tendenz und die
+// DECKKRAFT, wie belastbar sie ist: kräftig = deutlich (|z| ≥ 2, Poisson), blass = eher Zufall.
+// ---------------------------------------------------------------------------------------------
+
+export const TREND_FOCUS = "TREND";
+
+export const TREND = {
+  early: [2022, 2023],
+  late: [2024, 2025],
+  /** Weniger Unfälle im Zeitraum → grau, ohne Tendenz. */
+  minCount: 10,
+  /** |z| ab dem eine Veränderung als deutlich gilt (≈ 95 %). */
+  significance: 2,
+  /** Veränderungs-Stufen: stark ↓ | ↓ | stabil | ↑ | stark ↑ */
+  breaks: [-0.2, -0.05, 0.05, 0.2],
+  colors: ["#17559b", "#609fd2", "#9e9e9e", "#d87a6b", "#9b1f1d"],
+  labels: ["stark rückläufig", "rückläufig", "stabil", "steigend", "stark steigend"],
+  /** bundesweit 2022/23 → 2024/25: 525.540 → 541.526 Unfälle (coverage.csv). */
+  national: 0.03,
+  opacity: { certain: 0.9, uncertain: 0.3 },
+};
+
+const yearFields = (years) => years.map((y) => `UJAHR__${y}`);
+const EARLY = sum(yearFields(TREND.early));
+const LATE = sum(yearFields(TREND.late));
+const WINDOW = ["+", EARLY, LATE];
+const DIFF = ["-", LATE, EARLY];
+
+/** Trend eines Clusters in JS (Popup, Tests) — dieselbe Rechnung wie die Ausdrücke. */
+export function trendOf(props) {
+  const get = (years) => yearFields(years).reduce((n, f) => n + (Number(props[f]) || 0), 0);
+  const early = get(TREND.early);
+  const late = get(TREND.late);
+  const window = early + late;
+  const change = (late - early) / Math.max(early, 1);
+  const z = (late - early) / Math.sqrt(Math.max(window, 1));
+  const small = window < TREND.minCount;
+  const cls = small ? 2 : TREND.breaks.filter((b) => change >= b).length;
+  return { early, late, window, change, z, small, cls, certain: !small && Math.abs(z) >= TREND.significance };
+}
+
+function trendStyle() {
+  const change = ["/", DIFF, ["max", EARLY, 1]];
+  const z = ["/", DIFF, ["sqrt", ["max", WINDOW, 1]]];
+  const { colors, breaks, minCount, significance, opacity } = TREND;
+  return {
+    filter: [">", WINDOW, 0],
+    radius: ["interpolate", ["linear"], WINDOW, ...RADIUS_STOPS.flat()],
+    color: ["case", ["<", WINDOW, minCount], colors[2],
+      ["step", change, colors[0], ...breaks.flatMap((b, i) => [b, colors[i + 1]])]],
+    opacity: ["case", ["all", [">=", WINDOW, minCount], [">=", ["abs", z], significance]],
+      opacity.certain, opacity.uncertain],
+    sortKey: ["-", 0, WINDOW],
+  };
+}
+
+/** Kreise statt Torten? (eine Beteiligung oder der Trend) */
+export const isCircleFocus = (focus) => focus === TREND_FOCUS || Boolean(FOCUS[focus]);
+
+/** Stil der Kreis-Layer je Ansicht (Trend mit eigener Deckkraft je Kreis). */
+export function circleStyle(focus) {
+  return focus === TREND_FOCUS ? trendStyle() : { ...clusterFocusStyle(focus), opacity: 0.88 };
+}
+
+/** Zahl der Unfälle, die der Kreis zeigt — Trend: die im Vergleichszeitraum. */
+export const circleCount = (props, focus) => (focus === TREND_FOCUS ? trendOf(props).window : countSelected(props, focus));
+
+/** „+3 %", „−18 %" (mit echtem Minus). */
+export const signedPct = (x) => `${x >= 0 ? "+" : "−"}${Math.round(Math.abs(x) * 100)} %`;
+
+/** Legende der Trend-Stufen: „stark rückläufig (≤ −20 %)" … „stark steigend (≥ +20 %)". */
+export function trendClassLabels() {
+  const [a, b, c, d] = TREND.breaks.map((x) => Math.round(Math.abs(x) * 100));
+  const ranges = [`≤ −${a} %`, `−${a} bis −${b} %`, `±${c} %`, `+${c} bis +${d} %`, `≥ +${d} %`];
+  return TREND.labels.map((label, i) => `${label} (${ranges[i].replaceAll(" %", "\u00a0%")})`);
+}
+
 /** Erklärtext der Cluster-Legende (HTML ohne Fremddaten). */
 export function clusterHintHtml(focus) {
+  if (focus === TREND_FOCUS) {
+    return "Jeder Kreis bündelt mehrere Unfälle. <b>Farbe</b> = Veränderung 2024/25 gegenüber 2022/23, "
+      + "<b>kräftig</b> = deutlich, <b>blass</b> = eher Zufall. Frühere Jahre fehlen in einigen Ländern, "
+      + "2020/21 waren Corona-Jahre.";
+  }
   if (!FOCUS[focus]) {
     return "Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl, <b>Farbanteile</b> = Schweregrad. "
       + "Alle Jahre, ohne Filter.";

@@ -83,6 +83,9 @@ export const beteiligungMap = {
 const encodeYear = (year) => String(year).slice(-2);
 const decodeYear = (code) => (/^\d{2}$/.test(code) ? String(2000 + Number(code)) : null);
 
+// Cluster-Ansicht (?cl=): Beteiligungen mit ihren ?bet=-Ziffern, dazu der Trend.
+export const clusterCodes = { ...beteiligungMap, TREND: "t" };
+
 export const styleShortMap = {
     UKATEGORIE: "U", BETEILIGUNG: "B", UJAHR: "J", UTYP1: "T", UART: "A",
 };
@@ -246,9 +249,9 @@ export function serialize(state, defaults = {}) {
     }
     if (style && style !== defaults.style) pairs.push(["s", styleShortMap[style] ?? style]);
     if (details != null && details !== defaults.details) pairs.push(["d", details ? "1" : "0"]);
-    // Cluster-Ansicht (?cl=): Anteil EINER Beteiligung, gleiche Ziffern wie ?bet= (1 = Rad …);
-    // Default (Torten nach Schwere) fällt weg.
-    if (cluster && cluster !== defaults.cluster && beteiligungMap[cluster]) pairs.push(["cl", beteiligungMap[cluster]]);
+    // Cluster-Ansicht (?cl=): Anteil EINER Beteiligung, gleiche Ziffern wie ?bet= (1 = Rad …),
+    // oder t = Trend; Default (Torten nach Schwere) fällt weg.
+    if (cluster && cluster !== defaults.cluster && clusterCodes[cluster]) pairs.push(["cl", clusterCodes[cluster]]);
     if (layers && !sameSet(layers, defaults.layers)) {
         pairs.push(["l", layers.map((id) => kontextKeys[id]).filter(Boolean).sort().join("") || "-"]);
     }
@@ -270,6 +273,7 @@ export function serialize(state, defaults = {}) {
 
 const reverseBeteiligung = reverse(beteiligungMap);
 const reverseStyle = reverse(styleShortMap);
+const reverseCluster = reverse(clusterCodes);
 const reverseKontext = reverse(kontextKeys);
 const controlByKey = Object.fromEntries(CONTROLS.map((c) => [c.key, c]));
 
@@ -326,7 +330,7 @@ function parseV2(params) {
     set("view", params.get("map"), (raw) => decodeView(raw, "map"));
     set("style", params.get("s"), (raw) => reverseStyle[raw]);
     set("details", params.get("d"), (raw) => raw === "1");
-    set("cluster", params.get("cl"), (raw) => reverseBeteiligung[raw]);
+    set("cluster", params.get("cl"), (raw) => reverseCluster[raw]);
     set("layers", params.get("l"), decodeLayers);
     set("scenarios", params.get("n"), (raw) => (raw === "-" ? [] : split(raw, "_").map((n) => `sc${n}`)));
     set("controls", params.get("o"), decodeControls);
