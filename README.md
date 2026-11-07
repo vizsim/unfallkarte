@@ -43,10 +43,12 @@ Zwei Teile in einem Repo:
   **B2-Fallback**; gesteuert über ein generiertes `manifest.json`.
 
 Daneben der **Analyse-Report** (`report.html`, experimentell): Für eine Kreuzung oder eine Schule,
-Kita, einen Spielplatz liest er dieselben PMTiles im Browser und zeigt Unfalllage,
-schutzbedürftige Nutzungen, Straße, Lärm und eine rechtliche Einordnung nach § 45 StVO –
-mit Briefentwurf an die Behörde und Druckansicht. Einstieg per Popup („Analyse-Report →")
-oder direkt. Details: [`docs/ANALYSE_REPORT.md`](docs/ANALYSE_REPORT.md).
+Kita, einen Spielplatz liest er dieselben PMTiles im Browser und zeigt Unfalllage (inkl. M-Uko-
+Kriterien rechnerisch), Einrichtungen, Straße, Verkehr und Lärm – mit Druckansicht. Einstieg über
+das Akkordeon „Analyse" in der Legende, per Rechtsklick in die Karte oder „Analysieren →" im
+Popup. Eine rechtliche Einordnung nach § 45 StVO mit Briefentwurf an die Behörde ist gebaut, aber
+bis zur juristischen Prüfung abgeschaltet (`VITE_REPORT_LEGAL=1` schaltet sie lokal ein).
+Details: [`docs/ANALYSE_REPORT.md`](docs/ANALYSE_REPORT.md).
 
 Jede Zeile der Legende entspricht genau einem Eintrag in der **Layer-Registry**
 (`js/layers/`): Quelle, Layer-Definitionen, Popup, Permalink-Zeichen und Legendentext

@@ -94,6 +94,11 @@ Diese Datei = die Regeln, die in JEDER Session gelten.
   `r`, `jahr`, `land` …) sind Vertrag wie der Permalink. Liest der Report ein neues Kachelfeld:
   in `DATASETS` (`js/report/sources.js`) eintragen — `tests/web/report.spec.js` prüft es gegen die
   Archive. Rechtliche Aussagen nur mit Primärquelle, Regeländerung = neue Regelwerk-Version.
+  **Rechtsteil** (Wege A–C, Maßnahmen, Zuständigkeit, Landesregeln, Brief) nur mit
+  `VITE_REPORT_LEGAL=1` (`REPORT_LEGAL` in `js/config/env.js`, als `V.legal` an die Ansichten) —
+  Pages baut ihn bis zur juristischen Durchsicht (TODO R0) NICHT; nie per URL-Parameter
+  einschaltbar machen. Neue Report-Inhalte mit Rechtsbezug gehören hinter den Schalter
+  (`tests/unit/report-views.test.js` prüft, dass im Datenteil nichts durchsickert).
   `reportLink.js` darf `permalinkFormat.js` NICHT importieren (Kreis über die Layer-Registry).
   Einstieg in der Karte (experimentell): `js/analysis/` — Akkordeon „Analyse" in der Legende,
   Kontextmenü (`contextmenu` = Rechtsklick UND langes Drücken, das meldet MapLibre selbst) und

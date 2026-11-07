@@ -202,6 +202,25 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
       statt `load`; PMTiles-Ranges mit `cache: "no-store"` gegen die Chromium-Cache-Sperre.
       Mobilfunk: Legende 5,26 → 2,73 s, erster Punkt 6,08 → 4,18 s, fertig 7,72 → 5,67 s.
 
+## Analyse-Report
+
+- [x] **Datenteil live** (2026-11-07, Branch `temp/analyse-online`: `temp/analyse-report` vom
+      05.10. auf den heutigen main gemergt) — Report für Kreuzung und Einrichtung: 1 Auf einen Blick
+      (nur Befunde aus den Daten), 2 Unfalllage mit M Uko rechnerisch (Häufung neutral „auffällig"),
+      3 Einrichtungen (nach Art, ohne Nr.-6-Bezug) und Bevölkerung, 4 Straße und Verkehr, 5 Umwelt,
+      6 Datengrundlage; Druckansicht ohne Brief. **Warum nur der Datenteil:** Rechtsteil und Brief
+      sind eine Einschätzung im Einzelfall und juristisch ungeprüft (R0, RDG) — sie bleiben im Code
+      und in den Tests, aber hinter der Build-Variable `VITE_REPORT_LEGAL` (kein URL-Parameter:
+      live ließe er sich sonst von jedem einschalten). `tests/unit/report-views.test.js` rendert
+      beide Modi und prüft, dass im Datenteil nichts vom Rechtsteil durchsickert; die Browser-Tests
+      des Rechtsteils laufen mit `VITE_REPORT_LEGAL=1 npx playwright test report-fixture`.
+      Akkordeon „Analyse" in der Legende zwischen Unfällen und Szenarien (User-Wunsch, statt ganz
+      oben). Ortslage im Report jetzt auch aus `source:maxspeed` (R9-Teil). **Gemessen** (Kartenstart,
+      Pages-ähnlich, B2, Mobilfunk 1,6 Mbit/s, zwei Reihen à 7 Läufe, Arme getauscht): Start-JS
+      45,0 → 54,0 KB gzip, 17 → 18 Anfragen; Legende 2,74 → 2,79 s bzw. 2,75 → 2,79 s, erster
+      Unfallpunkt 4,13 → 4,19 s bzw. 4,15 → 4,19 s, fertig 5,66 → 5,70 s bzw. 5,67 → 5,72 s. Davon
+      ~5,6 KB das Akkordeon — als vertretbar angenommen (User), Lazy-Laden als Option in R16.
+
 ## Frontend / UX
 
 - [x] **Cluster-Trend** (2026-11-07, Chip „Trend", `?cl=t`) — Kreise: Farbe = Richtung 2024/25

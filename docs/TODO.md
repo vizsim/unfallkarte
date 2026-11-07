@@ -71,23 +71,25 @@ Reihenfolge wie im Report, Abschnitt 8.
 
 ## Analyse-Report (`report.html`, Stand: [`ANALYSE_REPORT.md`](ANALYSE_REPORT.md))
 
-Experimentell auf `temp/analyse-report`, noch nicht live (Patch vom 2026-09-26, am 2026-10-05 auf den
-Stand mit Export und „Gebiet zeichnen" gehoben): Kreuzung und Einrichtung, Abschnitte 0–9,
-Weg A/B/C, M Uko, Brief, Druck, Popup-Einstiege. Vision, Konzept mit Quellen und Prototyp:
+Live seit 2026-11-07 **nur der Datenteil** (Stand: DONE.md): Kreuzung und Einrichtung, Abschnitte
+1–5 + Datengrundlage, Druck; Einstieg über das Akkordeon „Analyse", Rechtsklick und Popup-Link. Der
+Rechtsteil (Weg A/B/C, Maßnahmen, Zuständigkeit, Landesregeln, Brief) ist gebaut und getestet, aber
+hinter `VITE_REPORT_LEGAL` bis R0. Vision, Konzept mit Quellen und Prototyp:
 `docs/intern/anaylse_report/`.
 
 - [ ] **R0 — Juristische Durchsicht** von Regelwerk 0.1.0 und Textbausteinen (RDG § 6 Abs. 2);
       danach `rules/params.js` + Changelog versionieren. Amtliche Wortlaute (§ 45 Nr. 4/6/10,
-      VwV zu Z. 274) gegen gesetze-im-internet.de/BAnz prüfen.
+      VwV zu Z. 274) gegen gesetze-im-internet.de/BAnz prüfen. Erst dann den Rechtsteil live
+      schalten (`VITE_REPORT_LEGAL=1` im CI-Build bzw. Schalter entfernen).
 - [ ] **R7 — Pipeline:** `ags` in `census_population` (include) → Gemeinde/Kreis sicher statt
       über Photon; `LICHT`/`USTRZUSTAND` in `accidents_single` (vorher Kachelgröße messen).
 - [ ] **R8 — Pipeline:** `report/coverage.json` (Land × Jahr, Logik `_valid_laender`) statt
       der Heuristik im Report; `report/uko_rules.json` gemeinsam mit Sc9; später
       `report/baselines.json` → Weg B mit Referenzvergleich (B3).
 - [ ] **R9 — OSM K3:** `priority_road`, `lanes`, `oneway`, `entrance`, `opening_hours`,
-      `amenity=childcare`, `crossing_ref`, `school:*`, `access`, Knoten `highway=traffic_signals`,
-      `source:maxspeed` (in DE häufiger Träger von `DE:urban` — fehlt es, bleibt „innerorts" im
-      Report oft „unklar") in osmconf/`osm.yaml` + Report-Feldvertrag (`js/report/sources.js`).
+      `amenity=childcare`, `crossing_ref`, `school:*`, `access`, Knoten `highway=traffic_signals`
+      in osmconf/`osm.yaml` + Report-Feldvertrag (`js/report/sources.js`). (`source:maxspeed`
+      erledigt: seit 2026-11-06 in den Kacheln, der Report liest daraus die Ortslage.)
 - [ ] **R10 — Sc3 auf 500 m** (§ 45 Abs. 9 S. 4 Nr. 4 seit 11.10.2024) + Legendentext.
 - [ ] **R11 — Sc8-Popup:** „Orientierungswert ~57 dB(A)" ersetzen (L_DEN ≠ Beurteilungspegel).
 - [ ] **R12 — Zuständigkeit:** `report/zustaendigkeit.json` (GV-ISys + Landeslisten: Große
@@ -96,10 +98,11 @@ Weg A/B/C, M Uko, Brief, Druck, Popup-Einstiege. Vision, Konzept mit Quellen und
 - [ ] **R13 — `geo.make_osm_oid`:** Relations-Multipolygone ergeben `node/<Relations-ID>` →
       `relation/…` (Sc6-OSM-Link, Report-Einstieg aus Sc2/6/8 findet die Einrichtung sonst nicht).
 - [ ] **R14 — Sc9 an `report/uko_rules.json`** anbinden (Kriterien je Land wie im Report).
-- [ ] **R15 — Straßenzug und Gebiet** (`sel=s:`/`g:`), Radinfrastruktur (TILDA) im Report,
-      Knopf „Analyse" in der Karte (bisher nur Popup-Einstiege und direkter Aufruf).
-- [ ] **R16 — Ladezeit messen** (Pages-ähnlicher Server, `tools/perf/`): Range-Anfragen je
-      Report (~16 Archive), ggf. Leseradien/Zoom je Archiv nachschärfen.
+- [ ] **R15 — Straßenzug und Gebiet** (`sel=s:`/`g:`), Radinfrastruktur (TILDA) im Report.
+- [ ] **R16 — Ladezeit des Reports messen** (Pages-ähnlicher Server, `tools/perf/`): Range-Anfragen
+      je Report (~16 Archive), ggf. Leseradien/Zoom je Archiv nachschärfen. Kartenstart ist
+      gemessen (DONE.md: +0,04–0,06 s Mobilfunk). Option: Akkordeon erst beim ersten Gebrauch laden
+      (Stub in `main.js`, Rest per `import()`) — spart höchstens 5,6 KB gzip (~30 ms).
 
 ## Frontend / UX
 

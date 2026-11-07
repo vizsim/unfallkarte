@@ -1,15 +1,32 @@
 # Analyse-Report (`report.html`)
 
-Stand: 2026-09-26 · Regelwerk und Textbausteine 0.1.0 · Status: **experimentell, juristisch ungeprüft**
+Stand: 2026-11-07 · Regelwerk und Textbausteine 0.1.0 · Status: **experimentell; live nur der
+Datenteil, der Rechtsteil ist juristisch ungeprüft und abgeschaltet**
 
 Der Analyse-Report beantwortet für eine gewählte Stelle: Was sagen die Daten der Unfallkarte
-hier, welche Maßnahme käme nach § 45 StVO in Betracht, und wie schreibe ich das der Behörde?
-Er ist eine zweite Seite neben der Karte und liest **dieselben PMTiles** (Local-first, sonst
-B2) direkt im Browser — kein Server, kein Schlüssel. Ausgabe: Report am Bildschirm, Briefentwurf
-und Druckansicht („Als PDF speichern").
+hier? Mit Rechtsteil zusätzlich: Welche Maßnahme käme nach § 45 StVO in Betracht, und wie
+schreibe ich das der Behörde? Er ist eine zweite Seite neben der Karte und liest **dieselben
+PMTiles** (Local-first, sonst B2) direkt im Browser — kein Server, kein Schlüssel. Ausgabe:
+Report am Bildschirm und Druckansicht („Als PDF speichern"), mit Rechtsteil auch ein Briefentwurf.
 
-Kennzeichnung überall: *datenbasierte Einschätzung · keine Rechtsberatung · kein Gutachten ·
-keine amtliche Feststellung*. Wortwahl wie Sc9: „Kandidat", „rechnerisch", „Hinweis".
+Kennzeichnung: *datenbasierte Auswertung · kein Gutachten · keine amtliche Feststellung* (mit
+Rechtsteil: *datenbasierte Einschätzung · keine Rechtsberatung · …*). Wortwahl wie Sc9:
+„rechnerisch", „auffällig", „Hinweis"; mit Rechtsteil auch „Kandidat".
+
+## Datenteil und Rechtsteil (Schalter `VITE_REPORT_LEGAL`)
+
+Bis zur juristischen Durchsicht (docs/TODO.md R0) baut Pages **nur den Datenteil**: Kopf mit
+Karte, 1 Auf einen Blick (Befunde aus den Daten, `facts()` in `rules/synthesis.js`), 2 Unfalllage
+inkl. M Uko rechnerisch, 3 Schutzbedürftige Nutzungen (Einrichtungen nach Art), 4 Straße und
+Verkehr, 5 Umwelt, 6 Datengrundlage — dazu die Druckansicht.
+
+Der **Rechtsteil** bleibt im Code und in den Tests: Weg A/B/C (6), Maßnahmen (7), Gegenargumente
+(8), Datengrundlage dann als 9, Landesregeln-Auswahl, „Vermutlich zuständig", Maßnahmen-Kandidaten,
+Nr.-6-Spalte, Tempo-30-Vorschlag in der Karte, Brief-Tab und Briefseite im Druck. Einschalten:
+`VITE_REPORT_LEGAL=1 npm run dev` bzw. `… npm run build` (oder Eintrag in
+`.env.development.local`). Bewusst eine Build-Variable (`js/config/env.js`, `REPORT_LEGAL`) und
+kein URL-Parameter — den könnte auf der Live-Seite jeder setzen. `main.js` reicht den Modus als
+`V.legal` an die Ansichten; `report.html` zeigt statisch den Datenteil.
 
 ## Einstieg
 
@@ -17,7 +34,7 @@ Gewählt wird **in der Karte** (`js/analysis/`, experimentell); alle Wege setzen
 Auswahl, zeigen sie als Kreis bzw. Umfeld und eine Vorschau im Akkordeon, „Report öffnen" führt
 hierher:
 
-- **Akkordeon „Analyse"** oben in der Legende: Kreuzung (Klick rastet am nächsten Knoten ein)
+- **Akkordeon „Analyse"** in der Legende zwischen Unfällen und Szenarien: Kreuzung (Klick rastet am nächsten Knoten ein)
   oder Einrichtung (Schule, Kita, Spielplatz, Gesundheit/Pflege; der Chip blendet sie ein).
 - **Kontextmenü:** Rechtsklick, am Handy langes Drücken (MapLibre meldet beides als
   `contextmenu`).
@@ -26,7 +43,7 @@ hierher:
   der Klick öffnet das Akkordeon, Mittel-/Strg-Klick direkt den Report.
 
 `report.html` ohne gültige Auswahl erklärt diese Wege und verlinkt die Karte; im Report selbst
-lassen sich Radius, Jahre, Land und Straße ändern.
+lassen sich Radius, Jahre und Straße ändern (mit Rechtsteil auch das Land).
 - **Per Link** (Vertrag, `js/report/reportLink.js`, Kürzel nie neu vergeben):
 
   ```
@@ -67,12 +84,16 @@ wenigen km; Referenzwerte rechnet später ausschließlich die Pipeline in 25832)
 
 **Land und Zuständigkeit.** Land aus Photon (OSM-Adressdaten), sonst aus
 `public/report/laender.json` (Natural Earth, gemeinfrei, ~1 km genau; erzeugt mit
-`tools/report/make-laender.mjs`). Die Nutzerin kann das Land wählen. Die Behörde ist ein
+`tools/report/make-laender.mjs`). Im Datenteil bestimmt das Land nur, welche M-Uko-Kriterien
+gelten (Bund 3, NRW 5, Sachsen 4; `land=` im Link überschreibt). Mit Rechtsteil kann die
+Nutzerin das Land wählen, und es trägt Landesregeln und Zuständigkeit. Die Behörde ist ein
 **Vorschlag** mit Alternativen („falls Große Kreisstadt …"); Einwohnerzahlen und Städtelisten
 fehlen noch. Keine erfundenen Anschriften: die Nutzerin trägt sie ein, der Link zum
 Bundesportal („Aufstellung von Verkehrszeichen anregen", FIM 99108014042000) hilft beim Finden.
 
 ## Was das Regelwerk 0.1.0 prüft
+
+Im Datenteil nur M Uko (rechnerisch); alles andere nur mit Rechtsteil.
 
 - **Weg A** (§ 45 Abs. 9 S. 4 Nr. 6 und Nr. 4 StVO, VwV zu Z. 274 Rn. 13 ff.): A0–A5 Pflicht
   (Tempo, innerorts, Straßenkategorie, Einrichtung, Lage ≤ 30/60 m, Zugang), A6 Vorschlag
@@ -117,10 +138,13 @@ Hauptverkehrsstraßen · kein Gemeindeschlüssel (AGS) in den Zensus-Kacheln · 
 ## Tests
 
 - `tests/unit/report-*.test.js` (browserlos): Link, Metrik, TileReader (MVT/MLT, Kachelkanten),
-  Datenmodell, Regelwerk, Briefe, Zuständigkeit, Land.
+  Datenmodell, Regelwerk, Briefe, Zuständigkeit, Land; `report-views.test.js` rendert beide Modi
+  und prüft, dass ohne Rechtsteil nichts davon durchsickert (mit Gegenprobe).
 - `tests/web/report-fixture.spec.js`: ein **erfundener Ort** (`tests/fixtures/report/`) als echte
-  PMTiles-Archive, per Routing ausgeliefert — der ganze Weg Link → Kacheln → Report → Brief →
-  Druck, Radius im Report, kaputter Link. Unabhängig von `data/` und B2.
+  PMTiles-Archive, per Routing ausgeliefert — Link → Kacheln → Report → Druck, Land und
+  M-Uko-Kriterien, Radius im Report, kaputter Link. Unabhängig von `data/` und B2. Die Tests
+  „Rechtsteil: …" (Weg A, Nutzerangabe, Brief, Hamburger Regeln, Zuständigkeit) laufen nur mit
+  `VITE_REPORT_LEGAL=1 npx playwright test report-fixture`, die übrigen dann nicht.
 - `tests/web/analysis.spec.js`: die Auswahl in der Karte (Akkordeon, Esc, Rechtsklick,
   Einrichtung, Popup-Link) gegen echte Daten.
 - `tests/web/report.spec.js`: echte Daten (CI: B2) — eine Kreuzung in Berlin, der
@@ -132,7 +156,13 @@ Hauptverkehrsstraßen · kein Gemeindeschlüssel (AGS) in den Zensus-Kacheln · 
 
 ## Bündel
 
-Zwei Vite-Einstiege (`index`, `report`). Die Karte trägt für die Analyse ~3,5 KB gzip im
-Hauptbündel (Akkordeon, Kontextmenü, Popup-Link); Einrasten und Vorschau laden erst bei der
-ersten Auswahl. Report: ~36 KB gzip + MLT-Decoder ~18 KB (nur bei Bedarf), **ohne MapLibre** —
+Zwei Vite-Einstiege (`index`, `report`). Einrasten und Vorschau laden erst bei der ersten
+Auswahl. Report: ~36 KB gzip + MLT-Decoder ~18 KB (nur bei Bedarf), **ohne MapLibre** —
 Importmap und Preload setzt `vite.config.js` nur noch in `index.html`.
+
+**Was der Kartenstart dafür zahlt** (2026-11-07, `tools/perf/`, Pages-ähnlicher Server, B2,
+Mobilfunk-Profil 1,6 Mbit/s, zwei Reihen à 7 Läufe mit getauschten Armen): Start-JS 45,0 → 54,0 KB
+gzip in 2 statt 1 Datei (eigene Herkunft 391 → 401 KB, 17 → 18 Anfragen); Legende, erster
+Unfallpunkt und fertige Startansicht je **+0,04–0,06 s**. Davon ~5,6 KB das Akkordeon (statisch
+in `main.js`), der Rest der Report-Link im Popup (`reportLink.js`) und der mit dem Report geteilte
+Chunk. Ein Lazy-Akkordeon spart höchstens die 5,6 KB (~30 ms) — als Option in docs/TODO.md R16.
