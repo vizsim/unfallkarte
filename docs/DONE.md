@@ -204,7 +204,7 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
 
 ## Frontend / UX
 
-- [x] **Cluster nach Beteiligung** (2026-11-07, Branch `temp/cluster-modes`) — im Cluster-Block
+- [x] **Cluster nach Beteiligung** (2026-11-07; `cluster_modes.pmtiles` auf B2) — im Cluster-Block
       Chips: Schwere (Torten, Standard) oder Fahrrad / Fußgänger / Kraftrad / Güter-Kfz. Dann Kreise:
       Größe = Unfälle mit dieser Beteiligung, Farbe = ihr Anteil im Farbton der Einzelpunkte, 5 Stufen
       um den Bundesschnitt (× 0,5 / 0,8 / 1,25 / 1,6; Ø Rad 31 %, Fuß 9 %, Krad 14 %, Güter-Kfz 5 %).

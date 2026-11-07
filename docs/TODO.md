@@ -71,9 +71,8 @@ Reihenfolge wie im Report, Abschnitt 8.
 
 ## Frontend / UX
 
-- [ ] **Cluster nach Beteiligung — vor dem Merge:** `cluster_modes.pmtiles` + Manifest nach B2
-      (`unfallkarte manifest` + `deploy`); die CI prüft gegen B2. Ausbau später: Unfalltyp/-art als
-      weitere Chips (Daten stecken schon in der Datei); ein „Trend" statt Jahresanteilen braucht die
+- [ ] **Cluster nach Beteiligung ausbauen** (Stand: DONE.md) — Unfalltyp/-art als weitere Chips
+      (Daten stecken schon in `cluster_modes.pmtiles`); ein „Trend" statt Jahresanteilen braucht die
       Abdeckung je Land (sonst zeigt er nur, wer wann im Unfallatlas ist). Nach jedem Daten-Update
       meldet `cluster-modes.spec.js`, wenn ein Bundesschnitt in `clusterModes.js` > 2 Punkte abweicht.
 - [ ] **Punktfarbe „Beteiligung" zeigt den schwächsten Beteiligten nicht** — `styleConfig.js` prüft
