@@ -198,6 +198,13 @@ Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.m
       nirgends erklärt, und Rot hieße dort etwas anderes als am Punkt. Renderer rein in
       `js/ui/accidentPopup.js` → browserlos getestet (`tests/unit/accidentPopup.test.js`).
       Nicht geändert: je Punkt zeigt das Popup nur den OBERSTEN Unfall (Eintrag ohne `multi`).
+      **Cluster-Popup** gleich mit: Gesamtzahl groß, Anteile als Balken in den Tortenfarben (kleine
+      Anteile behalten 3 px, ein einzelner Unfall mit Getöteten unter Hunderten bleibt sichtbar),
+      Zeilen mit Anzahl + Prozent („<1 %"). Beschriftung jetzt „mit Getöteten" usw. — gezählt
+      werden Unfälle je Kategorie, nicht Personen; „Getötete 0" las sich wie eine Personenzahl.
+      Ein Steckkarten-Farbschema für die Punkte (Farbe = Unfalltyp, Größe = Schwere, nach
+      Runderlass NRW SMBl. 9221 Anl. 3, Stand 2000) wurde als Vorschau gerendert, aber bewusst
+      zurückgestellt: das heute maßgebliche FGSV-Merkblatt M Uko ist nicht einsehbar.
 - [x] **Mobile-Breakpoint** (2026-09-19) — erste `@media`-Query im Projekt (< 640px): Legende
       wird zum Bottom-Sheet, zugeklappt als Startzustand (gemessen 17 % statt ~50 % verdeckte
       Karte), aufgeklappt max. 72 dvh. Karten-Bedienelemente sitzen über dem Streifen

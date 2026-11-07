@@ -53,7 +53,10 @@ test("Cluster-Hover: vergrößertes Pie + genau ein Popup, Aufräumen beim Verla
 
   await hoverAt(page, pt);
   await expect(popups(page)).toHaveCount(1);
-  await expect(popups(page)).toContainText("Unfälle nach Schwere");
+  // Cluster-Karte (accidentPopup.js): Gesamtzahl groß, Anteile als Balken, drei Zeilen
+  await expect(popups(page).locator(".pop-hero")).toContainText(/Unfäll?e?/);
+  await expect(popups(page).locator(".pop-sev-bar")).toBeVisible();
+  await expect(popups(page).locator(".pop-sev-table tr")).toHaveCount(3);
   // hover-pie = vergrößertes Pie über dem gehoverten Cluster (der Regressionsfall)
   await expect
     .poll(() => page.evaluate(() => window.map.queryRenderedFeatures({ layers: ["hover-pie"] }).length))

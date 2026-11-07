@@ -12,15 +12,13 @@
 import { formatDateDE } from "../utils/formatDate.js";
 import { setupHoverPopup } from "./hoverPopup.js";
 import { row } from "./popupHelpers.js";
-import { renderAccident } from "./accidentPopup.js";
+import { clusterTotal, renderAccident, renderCluster } from "./accidentPopup.js";
 import { registryPopupEntries } from "../layers/registry.js";
 
 
 // ---------------------------------------------------------------------------
-// Unfälle (Einzelpunkte ab Zoom 11, Karte: accidentPopup.js) + Cluster (Zoom 6–11)
+// Unfälle (Einzelpunkte ab Zoom 11) + Cluster (Zoom 6–11); Karten: accidentPopup.js
 // ---------------------------------------------------------------------------
-
-const clusterTotal = (p) => (p.UKATEGORIE__1 || 0) + (p.UKATEGORIE__2 || 0) + (p.UKATEGORIE__3 || 0);
 
 function accidentEntries(map) {
     return [
@@ -30,14 +28,7 @@ function accidentEntries(map) {
         },
         {
             id: "clusters", kind: "accidents", eyebrow: "Cluster", layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"],
-            render: (p) => `
-                <div class="pop-title">Unfälle nach Schwere</div>
-                <table class="pop-table">
-                    <tr><td>Getötete</td><td>${p.UKATEGORIE__1 || 0}</td></tr>
-                    <tr><td>Schwerverletzte</td><td>${p.UKATEGORIE__2 || 0}</td></tr>
-                    <tr><td>Leichtverletzte</td><td>${p.UKATEGORIE__3 || 0}</td></tr>
-                    <tr><td>Gesamt</td><td><strong>${clusterTotal(p)}</strong></td></tr>
-                </table>`,
+            render: renderCluster,
             // Popup am Cluster-Zentrum (nicht am Cursor), Abstand = Radius des vergrößerten
             // Hover-Pies (icon-size 1; Bildgröße wie in generatePieIcon: 32/48/64 px).
             anchor: (f) => {

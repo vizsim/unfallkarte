@@ -919,6 +919,25 @@ body {
 .pop-acc-head .pop-title { margin-bottom: 0; line-height: 1.3; }
 .pop-acc-head .pop-meta { margin-top: 0; }
 
+/* Cluster-Karte: Anteile je Schwere als Balken + Zeilen, in den Farben der Torte
+   (js/utils/generatePieIcon.js) und der Cluster-Legende („Farbe = Schwere"). */
+.pop-sev--k1 { --sev: rgba(228, 26, 28, 1); }
+.pop-sev--k2 { --sev: rgba(55, 126, 184, .9); }
+.pop-sev--k3 { --sev: rgba(77, 175, 74, .6); }
+.pop-sev-bar { display: flex; gap: 2px; height: 8px; margin: 9px 0 7px; border-radius: 4px; overflow: hidden; }
+.pop-sev-bar > span { flex: 1 1 0; min-width: 3px; background: var(--sev); }
+.pop-sev-table { border-collapse: collapse; width: 100%; }
+.pop-sev-table td { padding: 2px 0; white-space: nowrap; }
+.pop-sev-table td:nth-child(2) { padding-left: 16px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pop-sev-table td:nth-child(3) { width: 3.6em; text-align: right; color: var(--ui-text-muted); font-variant-numeric: tabular-nums; }
+.pop-sev-dot {
+  display: inline-block; width: 8px; height: 8px; margin-right: 7px;
+  border-radius: 50%; background: var(--sev); vertical-align: 0;
+}
+.pop-sev-table tr.is-zero td { color: var(--ui-text-muted); font-weight: 500; }
+.pop-sev-table tr.is-zero .pop-sev-dot { opacity: .35; }
+.pop-sev-meta { margin-top: 7px; }
+
 /* Ein Hover-Popup für alles (js/ui/hoverPopup.js): mehrere Objekte an einem Punkt werden
    als Karten UNTEREINANDER gestapelt. Die Eyebrow nennt Gruppe + Quelle/Szenario
    („Kontext · OSM", „Szenario · Schulumfeld …"), damit gleiche Ortstitel unterscheidbar

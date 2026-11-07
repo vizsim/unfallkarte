@@ -1,8 +1,10 @@
-// Unfall-Popup (Einzelpunkt, Karte im gemeinsamen Hover-Popup) — REIN, ohne DOM (tests/unit).
+// Unfall-Popups (Karten im gemeinsamen Hover-Popup) — REIN, ohne DOM (tests/unit).
 //
-// Aufbau: Unfalltyp als Titel, darunter die Unfallart; Schwere als Pill in der Punktfarbe der
-// Karte; Beteiligte als Chips mit Icon; Zeit als Fußzeile. Alle Werte sind Schlüsselzahlen und gehen nur über Nachschlagetabellen
-// ins HTML — Rohtext aus den Kacheln landet hier nie im Markup.
+// Einzelunfall: Unfalltyp als Titel, darunter die Unfallart; Schwere als Pill in der
+// Punktfarbe der Karte; Beteiligte als Chips mit Icon; Zeit als Fußzeile.
+// Cluster: Gesamtzahl groß, Anteile je Schwere als Balken (Farben der Torte) + Zeilen.
+// Alle Werte sind Zahlen und gehen nur über Nachschlagetabellen oder Zahlformat ins HTML —
+// Rohtext aus den Kacheln landet hier nie im Markup.
 
 import { translations } from "./accidentLabels.js";
 
@@ -41,6 +43,46 @@ export function accidentWhen(props) {
         inRange(h, 0, 23) ? `${h}–${h + 1} Uhr` : null
     ].filter(Boolean).join(" · ");
 }
+
+// ---------------------------------------------------------------------------
+// Cluster (Zoom 6–11): nur die drei Summen je Unfallkategorie (tiles.yaml, accumulate).
+// Gezählt werden UNFÄLLE je Kategorie, nicht Personen → „mit Getöteten" statt „Getötete".
+// ---------------------------------------------------------------------------
+
+const SEVERITY = [[1, "mit Getöteten"], [2, "mit Schwerverletzten"], [3, "mit Leichtverletzten"]];
+
+export const clusterCounts = (props) => SEVERITY.map(([k]) => num(props[`UKATEGORIE__${k}`]) || 0);
+export const clusterTotal = (props) => clusterCounts(props).reduce((a, b) => a + b, 0);
+
+const fmtInt = (n) => n.toLocaleString("de-DE");
+const share = (n, total) => {
+    if (!n || !total) return "";
+    const p = (n / total) * 100;
+    return p < 1 ? "&lt;1 %" : `${Math.round(p)} %`;
+};
+
+export function renderCluster(props) {
+    const counts = clusterCounts(props);
+    const total = counts.reduce((a, b) => a + b, 0);
+    // Balken wie die Torte: Anteil = flex-grow, winzige Anteile behalten per CSS ein paar Pixel
+    const bar = total
+        ? `<div class="pop-sev-bar" aria-hidden="true">${counts.map((n, i) =>
+            (n ? `<span class="pop-sev--k${i + 1}" style="flex-grow:${n}"></span>` : "")).join("")}</div>`
+        : "";
+    const rows = SEVERITY.map(([k, label], i) => {
+        const n = counts[i];
+        return `<tr class="pop-sev--k${k}${n ? "" : " is-zero"}">`
+            + `<td><span class="pop-sev-dot"></span>${label}</td><td>${fmtInt(n)}</td><td>${share(n, total)}</td></tr>`;
+    }).join("");
+    return `<div class="pop-hero">${fmtInt(total)} <span class="pop-unit">${total === 1 ? "Unfall" : "Unfälle"}</span></div>`
+        + bar
+        + `<table class="pop-sev-table">${rows}</table>`
+        + `<div class="pop-meta pop-sev-meta">Alle Jahre, ungefiltert</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Einzelner Unfall (ab Zoom 11)
+// ---------------------------------------------------------------------------
 
 export function renderAccident(props) {
     const kat = num(props.UKATEGORIE);
