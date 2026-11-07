@@ -12,6 +12,7 @@
 import { getCircleColorPaint, paintStyles } from "../styleConfig.js";
 import { isClusterSectionOn, updateClusterLegend, updateLegendColors } from "../ui/legendHandlers.js";
 import { CIRCLE_LAYERS, PIE_LAYERS, createClusterView } from "./clusterView.js";
+import { FOCUS, PIE_FOCUS } from "./clusterModes.js";
 
 /** Layer-IDs der Kern-App. Auch der Feature-Zähler rechnet damit (js/ui/featureCounter.js).
  *  Die Kreis-Cluster entstehen lazy — wer sie abfragt, prüft vorher map.getLayer(). */
@@ -47,19 +48,10 @@ export function readSelection() {
   };
 }
 
-/** Was die Cluster zeigen: Merkmal aus „Färben nach …", dessen angehakte Werte und wie viele
- *  es gibt (Beteiligung: Feldnamen wie „IstRad"). Nur DIESES Merkmal wirkt auf die Cluster. */
-export function readClusterView() {
-  const mode = document.querySelector('input[name="color-style"]:checked')?.value ?? "UKATEGORIE";
-  const { byGroup, beteiligungen } = readSelection();
-  if (mode === "BETEILIGUNG") {
-    return { mode, selected: beteiligungen, available: document.querySelectorAll("input[data-field]").length };
-  }
-  return {
-    mode,
-    selected: byGroup[mode] ?? [],
-    available: document.querySelectorAll(`input[data-group="${mode}"]`).length,
-  };
+/** Was die Cluster zeigen: "UKATEGORIE" (Torten) oder eine Beteiligung ("IstRad" …) —
+ *  eigene Chips im Cluster-Block, unabhängig von den Filtern der Einzelpunkte. */
+export function readClusterFocus() {
+  return document.querySelector('input[name="cluster-focus"]:checked')?.value ?? PIE_FOCUS;
 }
 
 const detailsOn = () => !!document.getElementById("toggle-details")?.checked;
@@ -83,12 +75,11 @@ const setVisible = (map, ids, visible) => {
  */
 export function setupAccidentLayers(map, { isInitializingRef, recount, writePermalink }) {
   const clusterView = createClusterView(map, {
-    readView: readClusterView,
+    readFocus: readClusterFocus,
     isOn: isClusterSectionOn,
     onView: updateClusterLegend,
   });
-  // Nach dem Umstellen neu zählen: die Cluster zeigen jetzt andere Zahlen. (Im Filter-Pfad
-  // nicht — der zählt ohnehin auf `idle`, und ein Zähldurchgang kostet in dichten Gegenden ~1 s.)
+  // Nach dem Umstellen neu zählen: die Cluster zeigen jetzt andere Zahlen.
   const updateClusterView = () => clusterView.update().then(() => map.once("idle", recount));
 
   function updateLayerFilter(shouldUpdatePermalink = true, force = false) {
@@ -110,7 +101,6 @@ export function setupAccidentLayers(map, { isInitializingRef, recount, writePerm
 
     setVisible(map, LAYERS.accidents, willShow);
     setVisible(map, LAYERS.symbols, willShow && detailsOn());
-    clusterView.update();
 
     map.once("idle", recount);
     if (shouldUpdatePermalink && !isInitializingRef.value) writePermalink();
@@ -132,17 +122,31 @@ export function setupAccidentLayers(map, { isInitializingRef, recount, writePerm
     // Beteiligungs-Buchstaben nur, wenn Details an sind UND die Auswahl etwas zeigt.
     setVisible(map, LAYERS.symbols, detailsOn() && readSelection().willShow);
     updateLegendColors(selected, paintStyles);
-    updateClusterView();
   }
 
   document.querySelectorAll('input[name="color-style"]').forEach((rb) =>
     rb.addEventListener("change", updateColorStyle));
 
+  // Cluster-Chips. Eine Beteiligung färbt auch die Einzelpunkte nach Beteiligung — sonst hieße
+  // Blau beim Hineinzoomen plötzlich „Schwerverletzte" statt „Fahrrad". Nicht beim Wiederherstellen
+  // eines Links: dort steht die Einfärbung der Punkte selbst im Link.
+  document.querySelectorAll('input[name="cluster-focus"]').forEach((rb) =>
+    rb.addEventListener("change", () => {
+      if (!rb.checked) return;
+      const style = document.querySelector('input[name="color-style"][value="BETEILIGUNG"]');
+      if (FOCUS[rb.value] && style && !style.checked && !isInitializingRef.value) {
+        style.checked = true;
+        style.dispatchEvent(new Event("change"));
+      }
+      updateClusterView();
+      if (!isInitializingRef.value) writePermalink();
+    }));
+
   document.getElementById("toggle-details")?.addEventListener("change", (e) =>
     setVisible(map, LAYERS.symbols, e.target.checked && readSelection().willShow));
 
-  // Cluster starten versteckt; ab hier entscheidet clusterView (Merkmal, Häkchen, Legenden-
-  // Häkchen „Unfälle-Cluster").
+  // Cluster starten versteckt; ab hier entscheidet clusterView (Chip im Cluster-Block und
+  // Legenden-Häkchen „Unfälle-Cluster").
   setVisible(map, LAYERS.clusters, false);
 
   return { updateLayerFilter, updateColorStyle, updateClusterView };

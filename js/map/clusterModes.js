@@ -1,57 +1,87 @@
-// clusterModes.js — Cluster für die Merkmals-Ansichten (Unfalltyp, Unfallart, Jahr, Beteiligung).
+// clusterModes.js — Cluster-Ansicht „Anteil EINER Beteiligung" (Kreise statt Torten).
 //
-// Torten mit 7–10 Stücken gehen nicht: fast jeder Cluster wäre ein eigenes Bild (gemessen, siehe
-// docs/DONE.md). Stattdessen zeichnet die Grafikkarte Kreise:
-//   Größe = Zahl der angehakten Unfälle im Cluster,
-//   Farbe = deren Anteil an allen Unfällen des Clusters (6 Klassen, ein Farbton hell → dunkel).
-// Sind alle Werte angehakt, ist der Anteil überall 100 % — dann neutrales Grau.
+// Gewählt wird im Cluster-Block der Legende genau ein Wert (Chips): Schwere (Torten, Standard)
+// oder eine Beteiligung. Bei einer Beteiligung zeichnet die Grafikkarte Kreise:
+//   Größe = Zahl der Unfälle mit dieser Beteiligung im Cluster,
+//   Farbe = ihr Anteil an allen Unfällen des Clusters — im Farbton der Einzelpunkte
+//           (Fahrrad blau …), hell = deutlich unter, kräftig = deutlich über dem Bundesschnitt.
+// Die Stufen hängen am Bundesschnitt der Kategorie, weil die Anteile sehr verschieden liegen
+// (Fuß um 9 %, Rad um 31 %): feste Prozentstufen machten die eine Karte fast weiß, die andere
+// fast einfarbig dunkel. Gemessen und begründet in docs/DONE.md (Cluster nach Beteiligung).
 //
-// Daten: cluster_modes.pmtiles (pipeline/config/tiles.yaml, `cluster_modes_*`). Je Merkmalswert
-// eine Summe „<SPALTE>__<wert>", die Beteiligung als Bitmaske „BET__<maske>"; ein Cluster trägt
-// nur, was in ihm vorkommt (fehlend = 0). So zählt „Rad ODER Fuß" exakt wie der Punktfilter.
+// Daten: cluster_modes.pmtiles (pipeline/config/tiles.yaml, `cluster_modes_*`) — Beteiligung als
+// Bitmaske „BET__<maske>" (Bits wie BET_BITS), dazu „UKATEGORIE__1..3" für die Gesamtzahl. Ein
+// Cluster trägt nur, was in ihm vorkommt (fehlend = 0).
 //
-// REIN (kein DOM, kein window) → tests/unit/clusterModes.test.js wertet die Ausdrücke mit
-// MapLibres Style-Spec aus.
-
-/** Merkmale mit Kreis-Ansicht; Schwere (UKATEGORIE) bleibt bei den Torten. */
-export const CLUSTER_MODES = ["UTYP1", "UART", "UJAHR", "BETEILIGUNG"];
+// REIN (kein DOM) → tests/unit/clusterModes.test.js wertet die Ausdrücke mit MapLibres Style-Spec
+// aus; tests/web/cluster-modes.spec.js prüft den Bundesschnitt gegen die Kacheln.
 
 /** Bits der Beteiligungsmaske — Vertrag mit tiles.yaml `beteiligung_bits` (gleiche Reihenfolge). */
 export const BET_BITS = ["IstRad", "IstPKW", "IstFuss", "IstKrad", "IstGkfz", "IstSonstig"];
 
-/** Klassengrenzen des Anteils und eine Farbe je Klasse (Orange, hell → dunkel; geprüft mit
- *  dem dataviz-Validator: monoton, Abstände ≥ 0,06 L, hellste Stufe 2,06:1 auf der Grundkarte). */
-export const SHARE_BREAKS = [0.05, 0.1, 0.2, 0.35, 0.5];
-export const SHARE_COLORS = ["#ee9748", "#e4762c", "#d75402", "#bc3e13", "#9a2b19", "#752019"];
-/** Alles angehakt → kein Anteil zu zeigen. */
-export const ALL_SELECTED_COLOR = "#8a8f96";
+/** Beschriftung aller Beteiligungen (Popup listet sie als Kontext). */
+export const BET_LABELS = {
+  IstRad: "Fahrrad", IstPKW: "Pkw", IstFuss: "Fußgänger", IstKrad: "Kraftrad", IstGkfz: "Güter-Kfz", IstSonstig: "Sonstige",
+};
+
+/** Default: Torten nach Schwere. */
+export const PIE_FOCUS = "UKATEGORIE";
+
+/**
+ * Wählbare Beteiligungen. `avg` = Bundesschnitt (Anteil aller Unfälle mit dieser Beteiligung,
+ * Unfallatlas 2017–2025, berechnet 2026-11-07); `colors` = 5 Stufen hell → kräftig im Farbton der
+ * Punktfarbe (js/styleConfig.js), mit dem dataviz-Validator geprüft (monoton, hellste ≥ 2:1 auf der
+ * Grundkarte). Pkw und Sonstige fehlen bewusst: Pkw ist fast überall beteiligt (Ø 76 %), das zeigt
+ * nichts; „Sonstige" ist zu unbestimmt.
+ */
+export const FOCUS = {
+  IstRad: { noun: "Radbeteiligung", avg: 0.307, colors: ["#71b0e3", "#4195d3", "#2079b5", "#005e98", "#004574"] },
+  IstFuss: { noun: "Fußgängerbeteiligung", avg: 0.088, colors: ["#f38578", "#e25c50", "#c33f35", "#a31d1a", "#7c0c0c"] },
+  IstKrad: { noun: "Kraftradbeteiligung", avg: 0.137, colors: ["#eb8f52", "#da6900", "#bb4d00", "#9d2f00", "#771d00"] },
+  IstGkfz: { noun: "Güter-Kfz-Beteiligung", avg: 0.046, colors: ["#dc9773", "#c87548", "#aa5a2c", "#8d400b", "#6b2c00"] },
+};
+
+/** Stufengrenzen als Vielfache des Bundesschnitts: mittlere Stufe = „um den Schnitt" (±25 %). */
+export const BREAK_FACTORS = [0.5, 0.8, 1.25, 1.6];
+
+/** Glatt runden: ab 10 % auf ganze Prozent, darunter auf halbe. */
+const nice = (share) => {
+  const pct = share * 100;
+  return (pct >= 10 ? Math.round(pct) : Math.round(pct * 2) / 2) / 100;
+};
+
+/** Stufengrenzen (Anteile 0–1) einer Beteiligung. */
+export const focusBreaks = (focus) => BREAK_FACTORS.map((f) => nice(FOCUS[focus].avg * f));
+
+const pct = (share) => `${String(Math.round(share * 1000) / 10).replace(".", ",")} %`;
+/** Beschriftung der 5 Stufen: „< 15 %", „15–25 %" … „≥ 49 %". */
+export function focusClassLabels(focus) {
+  const b = focusBreaks(focus);
+  const num = (x) => String(Math.round(x * 1000) / 10).replace(".", ",");
+  return [`< ${pct(b[0])}`, ...b.slice(1).map((x, i) => `${num(b[i])}–${pct(x)}`), `≥ ${pct(b.at(-1))}`];
+}
+
+/** Bundesschnitt als Text („31 %"). */
+export const focusAverage = (focus) => `${Math.round(FOCUS[focus].avg * 100)} %`;
 
 const num = (field) => ["to-number", ["get", field], 0];
 const sum = (fields) => (fields.length === 0 ? 0 : fields.length === 1 ? num(fields[0]) : ["+", ...fields.map(num)]);
 
+const SEVERITY_FIELDS = ["UKATEGORIE__1", "UKATEGORIE__2", "UKATEGORIE__3"];
 /** Alle Unfälle des Clusters: jeder hat genau eine Schwere. */
-export const TOTAL = sum(["UKATEGORIE__1", "UKATEGORIE__2", "UKATEGORIE__3"]);
+export const TOTAL = sum(SEVERITY_FIELDS);
 
-/** Bitmaske der angehakten Beteiligungen (Feldnamen wie in der Legende, z. B. "IstRad"). */
-export const betMask = (fields) => fields.reduce((m, f) => (BET_BITS.includes(f) ? m | (1 << BET_BITS.indexOf(f)) : m), 0);
-
-/** Summenfelder der angehakten Werte. Beteiligung: jede Maske mit mindestens einem angehakten Bit. */
-export function selectedFields(mode, selected) {
-  if (mode === "BETEILIGUNG") {
-    const bits = betMask(selected);
-    const masks = [];
-    for (let m = 1; m < 1 << BET_BITS.length; m++) if (m & bits) masks.push(`BET__${m}`);
-    return masks;
-  }
-  return selected.map((v) => `${mode}__${v}`);
+/** Summenfelder einer Beteiligung: jede Maske, die ihr Bit trägt (Rad allein, Rad + Pkw, …). */
+export function focusFields(focus) {
+  const bit = 1 << BET_BITS.indexOf(focus);
+  const masks = [];
+  for (let m = 1; m < 1 << BET_BITS.length; m++) if (m & bit) masks.push(`BET__${m}`);
+  return masks;
 }
 
-/** Zahl der angehakten Unfälle im Cluster (MapLibre-Ausdruck). */
-export const countExpression = (mode, selected) => sum(selectedFields(mode, selected));
-
-/** Dieselbe Zählung in JS (Popup, Zähler). Schwere (UKATEGORIE) zählt die angehakten Stufen. */
-export function countSelected(props, mode, selected) {
-  const fields = mode === "UKATEGORIE" ? selected.map((k) => `UKATEGORIE__${k}`) : selectedFields(mode, selected);
+/** Zahl der Unfälle im Cluster, die die Ansicht zeigt (Torten: alle). JS — für Popup und Zähler. */
+export function countSelected(props, focus) {
+  const fields = focus === PIE_FOCUS ? SEVERITY_FIELDS : focusFields(focus);
   return fields.reduce((n, f) => n + (Number(props[f]) || 0), 0);
 }
 
@@ -69,54 +99,28 @@ export function radiusFor(n) {
   return RADIUS_STOPS.at(-1)[1];
 }
 
-/** Klasse (0–5) eines Anteils — wie der step-Ausdruck. */
-export const shareClass = (share) => SHARE_BREAKS.filter((b) => share >= b).length;
+/** Stufe (0–4) eines Anteils — wie der step-Ausdruck. */
+export const shareClass = (focus, share) => focusBreaks(focus).filter((b) => share >= b).length;
 
-const pct = (x) => `${Math.round(x * 100)} %`;
-/** Beschriftung der 6 Farbklassen: „< 5 %", „5–10 %" … „≥ 50 %". */
-export const shareClassLabels = () => [
-  `< ${pct(SHARE_BREAKS[0])}`,
-  ...SHARE_BREAKS.slice(1).map((b, i) => `${Math.round(SHARE_BREAKS[i] * 100)}–${pct(b)}`),
-  `≥ ${pct(SHARE_BREAKS.at(-1))}`,
-];
-
-/** Name des Merkmals in Texten (Legende, Popup). */
-export const MODE_NAMES = {
-  UKATEGORIE: "Schweregrad", BETEILIGUNG: "Beteiligung", UJAHR: "Jahr", UTYP1: "Unfalltyp", UART: "Unfallart",
-};
-
-/** Erklärtext der Cluster-Legende (HTML ohne Fremddaten). */
-export function clusterHintHtml(mode, selected, available) {
-  const name = MODE_NAMES[mode] ?? mode;
-  const rest = `Andere Filter gelten nur für die Einzelunfälle ab Zoom 11.`;
-  if (!CLUSTER_MODES.includes(mode)) {
-    return `Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl, <b>Farbanteile</b> = Schweregrad; `
-      + `es zählen die angehakten Stufen. ${rest}`;
-  }
-  let text = `Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Zahl der angehakten Werte bei „${name}“, `
-    + `<b>Farbe</b> = ihr Anteil an allen Unfällen im Kreis. ${rest}`;
-  if (selected.length >= available) text += ` <b>Alles angehakt</b> – hake Werte ab, um ihren Anteil zu sehen.`;
-  if (mode === "UJAHR") {
-    text += ` Achtung: Nicht jedes Bundesland ist in jedem Jahr im Unfallatlas enthalten – Jahresanteile können dadurch verzerrt sein.`;
-  }
-  return text;
-}
-
-/**
- * Filter, Radius und Farbe der Kreis-Layer für ein Merkmal.
- * @param {string} mode       eins aus CLUSTER_MODES
- * @param {Array} selected    angehakte Werte (Zahlen) bzw. Beteiligungs-Felder ("IstRad", …)
- * @param {number} available  wie viele Werte das Merkmal in der Legende hat
- */
-export function clusterModeStyle(mode, selected, available) {
-  const count = countExpression(mode, selected);
+/** Filter, Radius, Farbe und Sortierung der Kreis-Layer für eine Beteiligung. */
+export function clusterFocusStyle(focus) {
+  const count = sum(focusFields(focus));
   const share = ["/", count, ["max", TOTAL, 1]];
-  const steps = SHARE_BREAKS.flatMap((b, i) => [b, SHARE_COLORS[i + 1]]);
+  const { colors } = FOCUS[focus];
   return {
     filter: [">", count, 0],
     radius: ["interpolate", ["linear"], count, ...RADIUS_STOPS.flat()],
-    color: selected.length >= available ? ALL_SELECTED_COLOR : ["step", share, SHARE_COLORS[0], ...steps],
-    // große Kreise zuerst zeichnen, kleine obenauf
-    sortKey: ["-", 0, count],
+    color: ["step", share, colors[0], ...focusBreaks(focus).flatMap((b, i) => [b, colors[i + 1]])],
+    sortKey: ["-", 0, count], // große Kreise zuerst zeichnen, kleine obenauf
   };
+}
+
+/** Erklärtext der Cluster-Legende (HTML ohne Fremddaten). */
+export function clusterHintHtml(focus) {
+  if (!FOCUS[focus]) {
+    return "Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl, <b>Farbanteile</b> = Schweregrad. "
+      + "Alle Jahre, ohne Filter.";
+  }
+  return `Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Zahl der Unfälle mit ${FOCUS[focus].noun}, `
+    + "<b>Farbe</b> = ihr Anteil im Kreis. Alle Jahre, ohne Filter.";
 }

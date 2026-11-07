@@ -1,7 +1,7 @@
 // legendHandlers.js
 
 import { LAYER_REGISTRY } from "../layers/registry.js";
-import { CLUSTER_MODES, MODE_NAMES, SHARE_COLORS, clusterHintHtml, shareClassLabels } from "../map/clusterModes.js";
+import { FOCUS, clusterHintHtml, focusAverage, focusClassLabels } from "../map/clusterModes.js";
 
 // ─────────────────────────────────────────────────────────────────────────────────────
 // Sichtbarkeit: dieses Modul setzt nur ZUSTAND (Klassen / data-Attribute), über `display`
@@ -125,35 +125,30 @@ export function setupLegendClusterCheckboxSync() {
 
 /**
  * Cluster-Legende an die Ansicht anpassen (Zustand setzen, CSS zeigt an):
- *  - data-view am Cluster-Block: "pie" (Torten) | "share" (Kreise) | "share-all" (alles angehakt);
- *  - Erklärtext je Merkmal; Farbklassen der Kreise (einmal aus clusterModes.js erzeugt);
- *  - .is-cluster-active an der Filtergruppe des Merkmals: bei Cluster-Zoom bleiben nur deren
- *    Häkchen sichtbar, denn nur sie wirken auf die Cluster.
+ *  - data-view am Cluster-Block: "pie" (Torten nach Schwere) | "share" (Anteil einer Beteiligung);
+ *  - Erklärtext; bei Beteiligung die fünf Stufen in ihrem Farbton + Bundesschnitt
+ *    (alles aus js/map/clusterModes.js — eine Quelle für Karte und Legende).
  */
-export function updateClusterLegend({ mode, selected, available }) {
+export function updateClusterLegend(focus) {
   const section = document.getElementById("cluster-legend-section");
   if (!section) return;
-  const circles = CLUSTER_MODES.includes(mode);
-  section.dataset.view = !circles ? "pie" : selected.length >= available ? "share-all" : "share";
-  // auch an der Legende selbst: bei Kreisen tragen die Farbkästchen der Häkchen keine Bedeutung
-  document.querySelector(".legend")?.setAttribute("data-cluster-view", section.dataset.view);
+  const share = FOCUS[focus];
+  section.dataset.view = share ? "share" : "pie";
 
   const hint = section.querySelector(".cluster-hint");
-  if (hint) hint.innerHTML = clusterHintHtml(mode, selected, available);
+  if (hint) hint.innerHTML = clusterHintHtml(focus);
+  if (!share) return;
 
+  const name = section.querySelector(".cluster-share-name");
+  if (name) name.textContent = share.noun;
   const key = section.querySelector(".cluster-share-key");
-  if (key && !key.children.length) {
-    key.innerHTML = shareClassLabels()
-      .map((label, i) => `<li><span class="cluster-legend-dot" style="background:${SHARE_COLORS[i]}"></span>${label}</li>`)
+  if (key) {
+    key.innerHTML = focusClassLabels(focus)
+      .map((label, i) => `<li><span class="cluster-legend-dot" style="background:${share.colors[i]}"></span>${label}</li>`)
       .join("");
   }
-  const name = section.querySelector(".cluster-share-name");
-  if (name) name.textContent = MODE_NAMES[mode] ?? "";
-
-  const group = mode === "BETEILIGUNG" ? "beteiligung" : mode;
-  document.querySelectorAll('.legend-section[data-section="einzeln"] .legend-items').forEach((el) => {
-    el.classList.toggle("is-cluster-active", el.dataset.section === group);
-  });
+  const avg = section.querySelector(".cluster-share-avg");
+  if (avg) avg.textContent = `Ø Deutschland ${focusAverage(focus)} – mittlere Stufe`;
 }
 
 /**

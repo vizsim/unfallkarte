@@ -143,7 +143,7 @@ MAIN HEADER
           </div>
 
           <div class="legend-items" data-section="beteiligung">
-            <div class="details-toggle" style="margin: 6px 0 6px 16px;">
+            <div style="margin: 6px 0 6px 16px;">
               <label>
                 <input type="checkbox" id="toggle-details" />
                 Beteiligungsdetails anzeigen
@@ -476,14 +476,22 @@ MAIN HEADER
       </div>
 
       <div class="legend-section-allcontent cluster-legend-body">
-        <!-- Text setzt updateClusterLegend() je Merkmal (js/map/clusterModes.js, clusterHintHtml) -->
+        <!-- Was die Cluster zeigen: genau EIN Wert (js/map/clusterView.js). Unabhängig von den
+             Filtern der Einzelpunkte; Kürzel im Permalink: ?cl= (permalinkFormat.js). -->
+        <div class="legend-modes cluster-focus" role="radiogroup" aria-label="Cluster zeigen">
+          <label class="legend-chip"><input type="radio" name="cluster-focus" value="UKATEGORIE" checked /><span>Schwere</span></label>
+          <label class="legend-chip"><input type="radio" name="cluster-focus" value="IstRad" /><span>Fahrrad</span></label>
+          <label class="legend-chip"><input type="radio" name="cluster-focus" value="IstFuss" /><span>Fußgänger</span></label>
+          <label class="legend-chip"><input type="radio" name="cluster-focus" value="IstKrad" /><span>Kraftrad</span></label>
+          <label class="legend-chip"><input type="radio" name="cluster-focus" value="IstGkfz" /><span>Güter-Kfz</span></label>
+        </div>
+        <!-- Text setzt updateClusterLegend() (js/map/clusterModes.js, clusterHintHtml) -->
         <p class="cluster-hint">Jeder Kreis bündelt mehrere Unfälle. <b>Größe</b> = Anzahl,
-          <b>Farbanteile</b> = Schweregrad; es zählen die angehakten Stufen. Andere Filter gelten nur
-          für die Einzelunfälle ab Zoom 11.</p>
+          <b>Farbanteile</b> = Schweregrad. Alle Jahre, ohne Filter.</p>
         <div class="cluster-legend-grid">
           <!-- Größe = Anzahl: verschachtelte Kreise (flächen-proportional) mit Leader-Labels -->
           <div>
-            <div class="cluster-legend-sub">Größe = Anzahl<span class="when-share"> (angehakt)</span></div>
+            <div class="cluster-legend-sub">Größe = Anzahl<span class="when-share"> mit Beteiligung</span></div>
             <svg viewBox="0 0 150 70" width="100%" height="70" style="max-width:150px"
               font-size="10" font-family="sans-serif" aria-hidden="true">
               <g fill="rgba(120,120,120,.14)" stroke="#8a8f96" stroke-width="1">
@@ -512,12 +520,12 @@ MAIN HEADER
               </ul>
             </div>
           </div>
-          <!-- Kreise der Merkmals-Ansichten (data-view="share…"): Farbe = Anteil der angehakten
-               Werte; die Klassen erzeugt updateClusterLegend() aus clusterModes.js -->
+          <!-- Kreise (data-view="share"): Farbe = Anteil der gewählten Beteiligung; Stufen, Farben
+               und Bundesschnitt setzt updateClusterLegend() aus clusterModes.js -->
           <div class="cluster-key-share">
-            <div class="cluster-legend-sub">Farbe = Anteil (<span class="cluster-share-name"></span>)</div>
+            <div class="cluster-legend-sub">Farbe = Anteil <span class="cluster-share-name"></span></div>
             <ul class="cluster-legend-key cluster-share-key"></ul>
-            <p class="cluster-share-all">Grau = alles angehakt, kein Anteil</p>
+            <p class="cluster-share-avg"></p>
           </div>
         </div>
       </div>

@@ -263,10 +263,11 @@ test.describe("Handy", () => {
     const top = legend.getBoundingClientRect().top;
     const titleBottom = Math.round(legend.querySelector(".legend-title").getBoundingClientRect().bottom - top);
     const lines = [...legend.querySelectorAll("*")]
-      // Gesucht sind Trennlinien über die Breite — runde Abzeichen (ⓘ, Status-Pille)
-      // haben zwar einen Rahmen, sind aber keine.
+      // Gesucht sind Trennlinien über die Breite — runde Abzeichen (ⓘ, Status-Pille, Chips
+      // der Modus-Auswahl) haben zwar einen Rahmen, sind aber keine.
       .filter((el) => el.getBoundingClientRect().height > 0
-        && !el.classList.contains("info-icon") && !el.classList.contains("fc-badge"))
+        && !el.classList.contains("info-icon") && !el.classList.contains("fc-badge")
+        && !el.closest(".legend-chip"))
       .flatMap((el) => ["Top", "Bottom"].filter((side) => {
         const cs = getComputedStyle(el);
         return parseFloat(cs[`border${side}Width`]) > 0 && cs[`border${side}Style`] !== "none";

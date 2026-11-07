@@ -235,6 +235,7 @@ function setupLegend(map) {
   setupZoomHintLinks(map);
 
   accidents.updateColorStyle();
+  accidents.updateClusterView();   // Torten oder Kreise (Chip im Cluster-Block)
   recount();
 }
 

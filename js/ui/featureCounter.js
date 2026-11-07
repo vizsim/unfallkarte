@@ -1,6 +1,6 @@
 //featureCounter.js
 
-import { readClusterView } from "../map/accidentLayers.js";
+import { readClusterFocus } from "../map/accidentLayers.js";
 import { countSelected } from "../map/clusterModes.js";
 
 export function updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintStyles) {
@@ -18,13 +18,12 @@ export function updateVisibleFeatureCount(map, currentZoomLock, LAYERS, paintSty
   if (lockEl) lockEl.textContent = currentZoomLock ? `🔒 ${currentZoomLock}` : "";
 
   if (zoom < 11) {
-    // Gezählt wird, was die Cluster zeigen: die angehakten Werte des gewählten Merkmals
-    // (Torten: Schwere-Stufen; Kreise: Summen je Merkmalswert) — dieselbe Regel wie die Karte.
+    // Gezählt wird, was die Cluster zeigen: bei den Torten alle Unfälle, bei einer Beteiligung
+    // nur die Unfälle mit ihr — dieselbe Regel wie die Karte (js/map/clusterModes.js).
     // Die Kreis-Layer entstehen lazy, darum nur vorhandene abfragen (sonst wirft MapLibre).
     features = map.queryRenderedFeatures({ layers: LAYERS.clusters.filter((id) => map.getLayer(id)) });
-    // Torten und Kreise sind nie gleichzeitig sichtbar: bei „Schweregrad" ist mode UKATEGORIE.
-    const { mode, selected } = readClusterView();
-    setCount(features.reduce((sum, f) => sum + countSelected(f.properties, mode, selected), 0));
+    const focus = readClusterFocus();
+    setCount(features.reduce((sum, f) => sum + countSelected(f.properties, focus), 0));
     return;
   }
 

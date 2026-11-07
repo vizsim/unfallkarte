@@ -1,15 +1,15 @@
 // clusterView.js — EIN Zuständiger für die Cluster-Darstellung (Zoom 6–11).
 //
-// Was gezeigt wird, folgt „Färben nach …" in der Legende und den Häkchen DIESES Merkmals:
-//   Schweregrad          → Torten (combined_cluster.pmtiles), nach den angehakten Stufen;
-//   Beteiligung, Jahr,   → Kreise aus cluster_modes.pmtiles: Größe = Zahl der angehakten,
-//   Unfalltyp, Unfallart   Farbe = deren Anteil (js/map/clusterModes.js).
-// Quelle + Kreis-Layer entstehen erst beim ersten Wechsel auf ein solches Merkmal (der
+// Gewählt wird im Cluster-Block der Legende genau ein Wert (Chips, name="cluster-focus"):
+//   Schwere (Standard)  → Torten aus combined_cluster.pmtiles, alle Unfälle;
+//   eine Beteiligung    → Kreise aus cluster_modes.pmtiles: Größe = Zahl der Unfälle mit
+//                         dieser Beteiligung, Farbe = ihr Anteil (js/map/clusterModes.js).
+// Unabhängig von den Filtern der Einzelpunkte — die gelten erst ab Zoom 11.
+// Quelle + Kreis-Layer entstehen erst beim ersten Wechsel auf eine Beteiligung (der
 // Kartenstart lädt nicht einmal den Kopf der Datei). Sichtbarkeit setzt NUR dieses Modul;
 // das Legenden-Häkchen „Unfälle-Cluster" fragt es über isOn() ab.
 
-import { CLUSTER_MODES, clusterModeStyle } from "./clusterModes.js";
-import { pieFilter, pieImageExpression, pieSizeExpression, pieSortKey } from "../utils/generatePieIcon.js";
+import { FOCUS, clusterFocusStyle } from "./clusterModes.js";
 import { ensureLazyAccidentSource } from "../mapdata/addSources.js";
 
 export const PIE_LAYERS = ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"];
@@ -47,36 +47,24 @@ function addCircleLayers(map) {
   }, before);
 }
 
-function applyPies(map, severities) {
-  for (const id of PIE_LAYERS) {
-    if (!map.getLayer(id)) continue;
-    map.setLayoutProperty(id, "icon-image", pieImageExpression(severities));
-    map.setLayoutProperty(id, "icon-size", pieSizeExpression(severities));
-    map.setLayoutProperty(id, "symbol-sort-key", pieSortKey(severities));
-    map.setFilter(id, pieFilter(severities));
-  }
-  if (map.getLayer(HOVER_PIE)) map.setLayoutProperty(HOVER_PIE, "icon-image", pieImageExpression(severities));
-}
-
 /**
  * @param {Object} map
  * @param {Object} deps
- * @param {() => {mode: string, selected: Array, available: number}} deps.readView
+ * @param {() => string} deps.readFocus   "UKATEGORIE" (Torten) oder eine Beteiligung ("IstRad" …)
  * @param {() => boolean} deps.isOn       Legenden-Häkchen „Unfälle-Cluster"
- * @param {(view: Object) => void} [deps.onView]  z. B. Cluster-Legende nachziehen
+ * @param {(focus: string) => void} [deps.onView]  z. B. Cluster-Legende nachziehen
  * @returns {{update: () => Promise<void>}}
  */
-export function createClusterView(map, { readView, isOn, onView = () => {} }) {
+export function createClusterView(map, { readFocus, isOn, onView = () => {} }) {
   let generation = 0;
 
   async function update() {
     const gen = ++generation;
-    const view = readView();
+    const focus = readFocus();
     const on = isOn();
-    const circles = CLUSTER_MODES.includes(view.mode);
-    onView(view);
+    const circles = Boolean(FOCUS[focus]);
+    onView(focus);
 
-    if (!circles) applyPies(map, view.selected);
     setVisible(map, [...PIE_LAYERS, HOVER_PIE], on && !circles);
     if (!on || !circles) {
       setVisible(map, [...CIRCLE_LAYERS, HOVER_RING], false);
@@ -86,7 +74,7 @@ export function createClusterView(map, { readView, isOn, onView = () => {} }) {
     await ensureLazyAccidentSource(map, SOURCE);
     if (gen !== generation) return; // inzwischen neuer Zustand — der zieht selbst nach
     addCircleLayers(map);
-    const style = clusterModeStyle(view.mode, view.selected, view.available);
+    const style = clusterFocusStyle(focus);
     for (const id of CIRCLE_LAYERS) {
       map.setFilter(id, style.filter);
       map.setPaintProperty(id, "circle-radius", style.radius);

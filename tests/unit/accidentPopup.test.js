@@ -64,3 +64,22 @@ test("Cluster: Tausenderpunkt, <1 %, Einzahl, Strings und leere Felder", () => {
   assert.match(empty, /0 <span class="pop-unit">Unfälle/);
   assert.doesNotMatch(empty, /pop-sev-bar|NaN/);
 });
+
+test("Cluster, Beteiligung: Zahl + Anteil + Bundesschnitt, Balken in der Kreisfarbe, alle Beteiligten als Kontext", () => {
+  // 100 Unfälle: nur Rad 20, Rad + Pkw 10, Fuß + Pkw 5, nur Pkw 65
+  const c = { UKATEGORIE__2: 20, UKATEGORIE__3: 80, BET__1: 20, BET__3: 10, BET__6: 5, BET__2: 65 };
+  const html = renderCluster(c, "IstRad");
+  assert.match(html, /<div class="pop-hero">30 <span class="pop-unit">Unfälle mit Radbeteiligung<\/span>/);
+  assert.match(html, /30\u00a0% von 100 Unfällen im Kreis · Ø Deutschland 31\u00a0%/);
+  // 30 % = Stufe 25–38 % → mittleres Blau, Rest grau
+  assert.match(html, /<span style="flex-grow:30;--sev:#2079b5"><\/span><span style="flex-grow:70;--sev:#d1d5db">/);
+  const rows = [...html.matchAll(/<tr( [^>]*)?><td><span class="pop-sev-dot"><\/span>([^<]+)<\/td><td>(\d+)<\/td>/g)]
+    .map((m) => [m[2], Number(m[3]), (m[1] ?? "").includes("is-zero")]);
+  assert.deepEqual(rows, [["Fahrrad", 30, false], ["Pkw", 80, true], ["Fußgänger", 5, true]]); // Mehrfachnennung
+  assert.match(html, /Alle Jahre, ohne Filter · Mehrfachnennung möglich/);
+});
+
+test("Cluster: unbekannte Ansicht fällt auf die Schwere zurück; Einzahl", () => {
+  assert.match(renderCluster({ UKATEGORIE__3: 3 }, "unbekannt"), /Alle Jahre, ungefiltert/);
+  assert.match(renderCluster({ UKATEGORIE__3: 3, BET__4: 1 }, "IstFuss"), /1 <span class="pop-unit">Unfall mit Fußgängerbeteiligung/);
+});

@@ -1,10 +1,11 @@
-// Kreis-Cluster der Merkmals-Ansichten OHNE Browser: `npm run test:unit` (node --test).
+// Kreis-Cluster „Anteil einer Beteiligung" OHNE Browser: `npm run test:unit` (node --test).
 // Die Ausdrücke werden mit MapLibres eigener Style-Spec ausgewertet — wie in der Karte.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createExpression } from "@maplibre/maplibre-gl-style-spec";
 import {
-  ALL_SELECTED_COLOR, BET_BITS, SHARE_COLORS, betMask, clusterModeStyle, selectedFields,
+  BET_BITS, FOCUS, PIE_FOCUS, RADIUS_STOPS, clusterFocusStyle, clusterHintHtml, countSelected, focusAverage,
+  focusBreaks, focusClassLabels, focusFields, radiusFor, shareClass,
 } from "../../js/map/clusterModes.js";
 
 const evaluate = (expr, properties, key = "layers[0].paint.circle-color") => {
@@ -13,55 +14,50 @@ const evaluate = (expr, properties, key = "layers[0].paint.circle-color") => {
   return compiled.value.evaluate({ zoom: 8 }, { properties });
 };
 
-// 100 Unfälle: 60 leicht, 30 schwer, 10 tödlich; Typ 2 = 12, Typ 3 = 30, Typ 6 = 58
-const CLUSTER = { UKATEGORIE__1: 10, UKATEGORIE__2: 30, UKATEGORIE__3: 60, UTYP1__2: 12, UTYP1__3: 30, UTYP1__6: 58 };
+// 100 Unfälle; Rad allein 20, Rad + Pkw 10, Fuß + Pkw 5, nur Pkw 65
+const CLUSTER = { UKATEGORIE__1: 2, UKATEGORIE__2: 18, UKATEGORIE__3: 80, BET__1: 20, BET__3: 10, BET__6: 5, BET__2: 65 };
 
-test("Größe und Farbe folgen den angehakten Werten", () => {
-  const { filter, radius, color } = clusterModeStyle("UTYP1", [2], 7);
-  assert.equal(evaluate(filter, CLUSTER, "layers[0].filter"), true);
-  assert.equal(evaluate(color, CLUSTER), SHARE_COLORS[2]);           // 12 % → Klasse 10–20 %
-  assert.equal(evaluate(clusterModeStyle("UTYP1", [2, 3], 7).color, CLUSTER), SHARE_COLORS[4]); // 42 %
-  assert.equal(evaluate(clusterModeStyle("UTYP1", [6], 7).color, CLUSTER), SHARE_COLORS[5]);   // 58 %
-  assert.ok(evaluate(radius, CLUSTER, "layers[0].paint.circle-radius") > 5.5); // 12 Unfälle
+test("Bitmasken: Vertrag mit tiles.yaml, Fahrrad zählt auch Fahrrad + Pkw", () => {
+  assert.deepEqual(BET_BITS.slice(0, 3), ["IstRad", "IstPKW", "IstFuss"]); // = beteiligung_bits
+  const rad = focusFields("IstRad");
+  assert.ok(rad.includes("BET__1") && rad.includes("BET__3") && !rad.includes("BET__2"));
+  assert.equal(rad.length, 32); // jede Maske mit Bit 1
+  assert.equal(countSelected(CLUSTER, "IstRad"), 30);
+  assert.equal(countSelected(CLUSTER, "IstFuss"), 5);
+  assert.equal(countSelected(CLUSTER, PIE_FOCUS), 100);
+  assert.equal(countSelected({ BET__1: "7" }, "IstRad"), 7); // Strings (MVT) zählen mit
 });
 
-test("Cluster ohne angehakte Unfälle verschwinden; fehlende Felder zählen 0", () => {
-  const { filter } = clusterModeStyle("UTYP1", [4], 7);
-  assert.equal(evaluate(filter, CLUSTER, "layers[0].filter"), false);
-  assert.equal(evaluate(clusterModeStyle("UTYP1", [2], 7).color, { UTYP1__2: "3", UKATEGORIE__3: "3" }), SHARE_COLORS[5]);
+test("Kreis: Filter, Größe und Farbe aus den Feldern der Beteiligung", () => {
+  const style = clusterFocusStyle("IstRad");
+  assert.equal(evaluate(style.filter, CLUSTER, "layers[0].filter"), true);
+  assert.equal(evaluate(style.filter, { BET__2: 9, UKATEGORIE__3: 9 }, "layers[0].filter"), false); // kein Rad
+  assert.equal(evaluate(style.color, CLUSTER), FOCUS.IstRad.colors[2]);  // 30 % → Stufe 25–38 %
+  assert.equal(evaluate(style.radius, CLUSTER, "layers[0].paint.circle-radius"), radiusFor(30));
+  assert.equal(evaluate(style.sortKey, CLUSTER, "layers[0].layout.circle-sort-key"), -30);
 });
 
-test("Alles angehakt → neutrales Grau statt überall 100 %", () => {
-  assert.equal(evaluate(clusterModeStyle("UTYP1", [1, 2, 3, 4, 5, 6, 7], 7).color, CLUSTER), ALL_SELECTED_COLOR);
+test("Farbstufe in JS = step-Ausdruck, auch genau auf den Grenzen — für jede Beteiligung", () => {
+  for (const focus of Object.keys(FOCUS)) {
+    const expr = clusterFocusStyle(focus).color;
+    for (let n = 1; n <= 400; n++) {   // 400 Unfälle im Cluster, davon n mit dieser Beteiligung
+      const bit = 1 << BET_BITS.indexOf(focus);
+      const color = evaluate(expr, { [`BET__${bit}`]: n, UKATEGORIE__3: 400 });
+      assert.equal(color, FOCUS[focus].colors[shareClass(focus, n / 400)], `${focus}: ${n}/400`);
+    }
+  }
 });
 
-test("Klassengrenzen: genau auf der Grenze zählt die höhere Klasse", () => {
-  const color = (n) => evaluate(clusterModeStyle("UJAHR", [2024], 9).color, { UJAHR__2024: n, UKATEGORIE__3: 100 });
-  assert.deepEqual([1, 5, 9, 10, 20, 35, 50, 100].map(color),
-    [SHARE_COLORS[0], SHARE_COLORS[1], SHARE_COLORS[1], SHARE_COLORS[2], SHARE_COLORS[3], SHARE_COLORS[4], SHARE_COLORS[5], SHARE_COLORS[5]]);
-});
-
-test("Beteiligung: „Rad ODER Fuß“ zählt jede Kombination genau einmal", () => {
-  assert.deepEqual(BET_BITS.slice(0, 3), ["IstRad", "IstPKW", "IstFuss"]); // = tiles.yaml beteiligung_bits
-  assert.equal(betMask(["IstRad", "IstFuss"]), 0b101);
-  const fields = selectedFields("BETEILIGUNG", ["IstRad", "IstFuss"]);
-  assert.ok(fields.includes("BET__1") && fields.includes("BET__4") && fields.includes("BET__5") && fields.includes("BET__3"));
-  assert.ok(!fields.includes("BET__2"), "nur Pkw gehört nicht dazu");
-  // 10 nur Rad, 5 Rad+Pkw, 3 Fuß+Pkw, 20 nur Pkw → Rad ODER Fuß = 18 von 38
-  const cluster = { BET__1: 10, BET__3: 5, BET__6: 3, BET__2: 20, UKATEGORIE__3: 38 };
-  const count = evaluate(["+", 0, clusterModeStyle("BETEILIGUNG", ["IstRad", "IstFuss"], 6).sortKey], cluster, "layers[0].layout.circle-sort-key");
-  assert.equal(count, -18);
-  assert.equal(evaluate(clusterModeStyle("BETEILIGUNG", ["IstRad", "IstFuss"], 6).color, cluster), SHARE_COLORS[4]); // 47 %
-});
-
-import { countSelected, radiusFor, RADIUS_STOPS, shareClass } from "../../js/map/clusterModes.js";
-
-test("JS-Zählung = Ausdruck (Popup und Zähler zeigen dieselbe Zahl wie die Karte)", () => {
-  assert.equal(countSelected(CLUSTER, "UTYP1", [2, 3]), 42);
-  assert.equal(countSelected(CLUSTER, "UKATEGORIE", [1, 2]), 40);
-  const bet = { BET__1: 10, BET__3: 5, BET__6: 3, BET__2: "20" };
-  assert.equal(countSelected(bet, "BETEILIGUNG", ["IstRad", "IstFuss"]), 18);
-  assert.equal(countSelected(bet, "BETEILIGUNG", ["IstPKW"]), 28);
+test("Stufen hängen am Bundesschnitt: mittlere Stufe = um den Schnitt", () => {
+  for (const [focus, { avg, colors }] of Object.entries(FOCUS)) {
+    const b = focusBreaks(focus);
+    assert.equal(b.length, colors.length - 1);
+    assert.ok(b.every((x, i) => i === 0 || x > b[i - 1]), `${focus}: Grenzen steigen`);
+    assert.equal(shareClass(focus, avg), 2, `${focus}: Schnitt liegt in der mittleren Stufe`);
+  }
+  assert.deepEqual(focusBreaks("IstRad"), [0.15, 0.25, 0.38, 0.49]);
+  assert.deepEqual(focusClassLabels("IstFuss"), ["< 4,5 %", "4,5–7 %", "7–11 %", "11–14 %", "≥ 14 %"]);
+  assert.equal(focusAverage("IstRad"), "31 %");
 });
 
 test("Radius: Stützstellen exakt, dazwischen linear, außerhalb begrenzt", () => {
@@ -69,16 +65,10 @@ test("Radius: Stützstellen exakt, dazwischen linear, außerhalb begrenzt", () =
   assert.equal(radiusFor(55), (5.5 + 12) / 2);
   assert.equal(radiusFor(0), 2.5);
   assert.equal(radiusFor(1e6), 29);
-  const expr = clusterModeStyle("UJAHR", [2024], 9).radius;
-  for (const n of [1, 3, 55, 700, 25000]) {
-    assert.equal(evaluate(expr, { UJAHR__2024: n }, "layers[0].paint.circle-radius"), radiusFor(n), `n = ${n}`);
-  }
 });
 
-test("Farbklasse in JS = step-Ausdruck, auch genau auf den Grenzen", () => {
-  const expr = clusterModeStyle("UJAHR", [2024], 9).color;
-  for (let n = 1; n <= 200; n++) {   // 200 Unfälle im Cluster, davon n angehakt
-    const color = evaluate(expr, { UJAHR__2024: n, UKATEGORIE__3: 200 });
-    assert.equal(color, SHARE_COLORS[shareClass(n / 200)], `Anteil ${n / 200}`);
-  }
+test("Legenden-Text je Ansicht", () => {
+  assert.match(clusterHintHtml(PIE_FOCUS), /Farbanteile<\/b> = Schweregrad/);
+  assert.match(clusterHintHtml("IstRad"), /Zahl der Unfälle mit Radbeteiligung/);
+  assert.match(clusterHintHtml("IstRad"), /Alle Jahre, ohne Filter/);
 });

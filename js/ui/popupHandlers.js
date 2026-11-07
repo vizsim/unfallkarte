@@ -13,6 +13,9 @@ import { formatDateDE } from "../utils/formatDate.js";
 import { setupHoverPopup } from "./hoverPopup.js";
 import { row } from "./popupHelpers.js";
 import { clusterTotal, renderAccident, renderCluster } from "./accidentPopup.js";
+import { readClusterFocus } from "../map/accidentLayers.js";
+import { CIRCLE_LAYERS, PIE_LAYERS } from "../map/clusterView.js";
+import { countSelected, radiusFor } from "../map/clusterModes.js";
 import { registryPopupEntries } from "../layers/registry.js";
 
 
@@ -27,11 +30,17 @@ function accidentEntries(map) {
             render: renderAccident
         },
         {
-            id: "clusters", kind: "accidents", eyebrow: "Cluster", layers: ["pie-clusters-fine-layer", "pie-clusters-coarse-layer"],
-            render: renderCluster,
-            // Popup am Cluster-Zentrum (nicht am Cursor), Abstand = Radius des vergrößerten
-            // Hover-Pies (icon-size 1; Bildgröße wie in generatePieIcon: 32/48/64 px).
+            // Torten (Schwere) ODER Kreise (Anteil einer Beteiligung) — js/map/clusterView.js
+            id: "clusters", kind: "accidents", eyebrow: "Cluster", layers: [...PIE_LAYERS, ...CIRCLE_LAYERS],
+            render: (p) => renderCluster(p, readClusterFocus()),
+            // Popup am Cluster-Zentrum (nicht am Cursor). Abstand: Torte = Radius des vergrößerten
+            // Hover-Pies (icon-size 1; Bildgröße wie in generatePieIcon: 32/48/64 px); Kreis =
+            // sein Radius + Hover-Ring.
             anchor: (f) => {
+                if (f.layer?.type === "circle") {
+                    const n = countSelected(f.properties, readClusterFocus());
+                    return { lngLat: f.geometry.coordinates, offset: radiusFor(n) + 6 };
+                }
                 const total = clusterTotal(f.properties);
                 const pieSize = total > 100 ? 64 : total > 10 ? 48 : 32;
                 return { lngLat: f.geometry.coordinates, offset: pieSize / 2 + 4 };

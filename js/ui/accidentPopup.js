@@ -7,6 +7,7 @@
 // Rohtext aus den Kacheln landet hier nie im Markup.
 
 import { translations } from "./accidentLabels.js";
+import { BET_BITS, BET_LABELS, FOCUS, PIE_FOCUS, countSelected, focusAverage, shareClass } from "../map/clusterModes.js";
 
 const WEEKDAY_SHORT = ["?", "So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]; // UWOCHENTAG 1 = Sonntag
 const MONTH = ["?", "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
@@ -61,7 +62,19 @@ const share = (n, total) => {
     return p < 1 ? "&lt;1 %" : `${Math.round(p)} %`;
 };
 
-export function renderCluster(props) {
+const hero = (n, unit) => `<div class="pop-hero">${fmtInt(n)} <span class="pop-unit">${unit}</span></div>`;
+
+/**
+ * Cluster-Karte, passend zur Ansicht (js/map/clusterView.js):
+ *   focus "UKATEGORIE" (Standard) → Schwere wie die Torte;
+ *   focus = Beteiligung ("IstRad" …) → Zahl + Anteil der Unfälle mit ihr, dazu alle Beteiligungen
+ *   als Kontext (Mehrfachnennung: ein Unfall kann mehrere Beteiligte haben).
+ */
+export function renderCluster(props, focus = PIE_FOCUS) {
+    return FOCUS[focus] ? renderFocusCluster(props, focus) : renderSeverityCluster(props);
+}
+
+function renderSeverityCluster(props) {
     const counts = clusterCounts(props);
     const total = counts.reduce((a, b) => a + b, 0);
     // Balken wie die Torte: Anteil = flex-grow, winzige Anteile behalten per CSS ein paar Pixel
@@ -74,10 +87,37 @@ export function renderCluster(props) {
         return `<tr class="pop-sev--k${k}${n ? "" : " is-zero"}">`
             + `<td><span class="pop-sev-dot"></span>${label}</td><td>${fmtInt(n)}</td><td>${share(n, total)}</td></tr>`;
     }).join("");
-    return `<div class="pop-hero">${fmtInt(total)} <span class="pop-unit">${total === 1 ? "Unfall" : "Unfälle"}</span></div>`
+    return hero(total, total === 1 ? "Unfall" : "Unfälle")
         + bar
         + `<table class="pop-sev-table">${rows}</table>`
         + `<div class="pop-meta pop-sev-meta">Alle Jahre, ungefiltert</div>`;
+}
+
+function renderFocusCluster(props, focus) {
+    const total = clusterTotal(props);
+    const n = countSelected(props, focus);
+    const { noun, colors } = FOCUS[focus];
+    // die Farbe, die der Kreis auf der Karte hat
+    const color = colors[shareClass(focus, total ? n / total : 0)];
+    const bar = total
+        ? `<div class="pop-sev-bar" aria-hidden="true">`
+            + (n ? `<span style="flex-grow:${n};--sev:${color}"></span>` : "")
+            + (total - n ? `<span style="flex-grow:${total - n};--sev:#d1d5db"></span>` : "")
+            + `</div>`
+        : "";
+    const rows = BET_BITS
+        .map((key) => ({ key, count: countSelected(props, key) }))
+        .filter((r) => r.count > 0)
+        .map(({ key, count }) => (key === focus
+            ? `<tr style="--sev:${color}">`
+            : `<tr class="is-zero">`)
+            + `<td><span class="pop-sev-dot"></span>${BET_LABELS[key]}</td><td>${fmtInt(count)}</td><td>${share(count, total)}</td></tr>`)
+        .join("");
+    return hero(n, `${n === 1 ? "Unfall" : "Unfälle"} mit ${noun}`)
+        + `<div class="pop-meta">${share(n, total) || "0\u00a0%"} von ${fmtInt(total)} Unfällen im Kreis · Ø Deutschland ${focusAverage(focus)}</div>`
+        + bar
+        + `<table class="pop-sev-table">${rows}</table>`
+        + `<div class="pop-meta pop-sev-meta">Alle Jahre, ohne Filter · Mehrfachnennung möglich</div>`;
 }
 
 // ---------------------------------------------------------------------------

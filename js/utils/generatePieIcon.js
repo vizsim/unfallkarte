@@ -23,51 +23,37 @@ export const PIE_SIZES = [32, 48, 64];
 // Getötete, Schwerverletzte, Leichtverletzte — auch Cluster-Legende (index.html) + Popup (style.css)
 const COLORS = ["rgba(228,26,28,1)", "rgba(55,126,184,0.9)", "rgba(77,175,74,0.5)"];
 
-const SEVERITIES = [1, 2, 3];
-const field = (k) => `UKATEGORIE__${k}`;
-const count = (k) => ["to-number", ["get", field(k)], 0];
-const plus = (terms) => (terms.length === 1 ? terms[0] : ["+", ...terms]);
-
-// Die Torten folgen den Schwere-Häkchen: nicht angehakte Stufen zählen 0, Anteile und Größe
-// beziehen sich auf die angehakten. Ohne Auswahl-Argument = alle drei, und die Ausdrücke sind
-// exakt die bisherigen (Golden-Snapshot unverändert).
+const FIELDS = ["UKATEGORIE__1", "UKATEGORIE__2", "UKATEGORIE__3"];
+const count = (field) => ["to-number", ["get", field], 0];
+const TOTAL = ["+", ...FIELDS.map(count)];
 
 /** Anteil in ganzen Prozent; ein vorhandener Anteil bleibt mindestens 1 %. */
-const percent = (k, selected) => {
-  if (!selected.includes(k)) return 0;
-  const total = plus(selected.map(count));
-  return ["max",
-    ["round", ["/", ["*", 100, count(k)], ["max", total, 1]]],
-    ["case", [">", count(k), 0], 1, 0]];
-};
+const percent = (field) => ["max",
+  ["round", ["/", ["*", 100, count(field)], ["max", TOTAL, 1]]],
+  ["case", [">", count(field), 0], 1, 0]];
 
 /** MapLibre-Ausdruck für den Bildnamen eines Clusters: "pie-<px>-<% Getötete>-<% Schwerverletzte>". */
-export function pieImageExpression(selected = SEVERITIES) {
-  const total = plus(selected.map(count));
+export function pieImageExpression() {
   return ["concat", "pie-",
-    ["case", [">", total, 100], "64", [">", total, 10], "48", "32"], "-",
-    ["to-string", percent(1, selected)], "-",
-    ["to-string", percent(2, selected)]];
+    ["case", [">", TOTAL, 100], "64", [">", TOTAL, 10], "48", "32"], "-",
+    ["to-string", percent(FIELDS[0])], "-",
+    ["to-string", percent(FIELDS[1])]];
 }
 
-/** Summe der angehakten Stufen aus den Rohfeldern (combined_cluster trägt alle drei, auch 0). */
-const rawTotal = (selected) => plus(selected.map((k) => ["get", field(k)]));
+/** Summe aus den Rohfeldern (combined_cluster trägt alle drei, auch 0). */
+const RAW_TOTAL = ["+", ...FIELDS.map((f) => ["get", f])];
 
-/** icon-size: wächst mit der Zahl der (angehakten) Unfälle. */
-export function pieSizeExpression(selected = SEVERITIES) {
-  return ["interpolate", ["linear"], rawTotal(selected),
+/** icon-size: wächst mit der Zahl der Unfälle im Cluster. */
+export function pieSizeExpression() {
+  return ["interpolate", ["linear"], RAW_TOTAL,
     1, 0.1, 4, 0.2, 10, 0.35, 50, 0.4, 100, 0.5, 500, 0.55, 1000, 0.6,
     5000, 0.7, 10000, 0.75, 20000, 0.8, 40000, 0.9];
 }
 
 /** symbol-sort-key: Torten mit viel Leichtverletzten nach unten. */
-export function pieSortKey(selected = SEVERITIES) {
-  return ["-", ["/", selected.includes(3) ? ["get", field(3)] : 0, rawTotal(selected)]];
+export function pieSortKey() {
+  return ["-", ["/", ["get", FIELDS[2]], RAW_TOTAL]];
 }
-
-/** Filter: Cluster ohne angehakte Unfälle ausblenden; alle angehakt → kein Filter nötig. */
-export const pieFilter = (selected = SEVERITIES) =>
-  (selected.length >= SEVERITIES.length ? null : [">", rawTotal(selected), 0]);
 
 /** "pie-64-1-12" → { size: 64, shares: [1, 12, 87] }; null für alles andere. */
 export function parsePieId(id) {
