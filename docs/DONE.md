@@ -185,6 +185,19 @@ sind nicht klonbar). Kein Typ hätte das gefangen — ein Browser-Smoke-Test sch
 Hintergrund, Messungen und Bewertung: [`PERFORMANCE_PLAN.md`](PERFORMANCE_PLAN.md) und
 [`PERFORMANCE_REPORT_2026-09-24.md`](PERFORMANCE_REPORT_2026-09-24.md) (IDs = Report).
 
+- [x] **D3 — Torten-Bilder quantisiert** (2026-11-07, Branch `temp/cluster-pies`) — Bildname aus
+      Größenstufe + Anteilen in ganzen Prozent (`pie-64-1-12`) statt der exakten Zahlen; ein
+      vorhandener Anteil bleibt ≥ 1 % (ein Unfall mit Getöteten unter Hunderten verschwindet nicht).
+      Ursache im MapLibre-Code nachgelesen: `addImage`-Bilder werden nie freigegeben, und jede Kachel,
+      die ein neu hinzugekommenes Bild nutzt, wird neu aufgebaut (`_updateTilesForChangedImages`) —
+      die Kosten wachsen mit der Zahl VERSCHIEDENER Bilder, und exakt war fast jede Torte ein Unikat.
+      Echte Cluster, Tour z6 → z7 → Ruhrgebiet z8 (headless ohne GPU, nur relativ aussagekräftig):
+      vorher 413 / 1.618 / 2.718 Bilder (26 / 100 / 164 MB), beim nächsten Sprung brach die Messung
+      ab; jetzt 86 / 270 / 384 Bilder, bis Berlin z10 weiter 670 (~28 MB). Zusatzzeit gegenüber der
+      Tour ohne Cluster nach drei Ansichten 24,9 → 8,2 s. 1 % gewählt (3,6°, optisch exakt), 2 % und
+      5 % mitgemessen → TODO D3b. Gesichert: `tests/unit/pieIcon.test.js` (der Ausdruck wird mit
+      MapLibres Style-Spec ausgewertet), `tests/web/cluster-pies.spec.js` (Tour, < 1.000 Bilder);
+      Golden nur in den drei `icon-image`-Ausdrücken neu.
 - [x] **A1 + A2: Startpfad** (2026-09-24, `cd492aa`, `f8b055d`) — UI/Permalink bei `style.load`
       statt `load`; PMTiles-Ranges mit `cache: "no-store"` gegen die Chromium-Cache-Sperre.
       Mobilfunk: Legende 5,26 → 2,73 s, erster Punkt 6,08 → 4,18 s, fertig 7,72 → 5,67 s.

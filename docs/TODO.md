@@ -53,8 +53,11 @@ Reihenfolge wie im Report, Abschnitt 8.
 
 - [ ] **D1 — Zähler nur einmal je Bewegung** (auf `idle`, per `requestIdleCallback`, Abbruch
       bei `movestart`); heute läuft `recount()` auf `moveend` UND `idle`.
-- [ ] **D3 — Torten-Bilder quantisieren** (5-%-Schritte, drei Größenklassen); vorher mit echten
-      Clustern zählen, wie viele Bilder es real sind (Report Abschnitt 9).
+- [ ] **D3b — Torten ggf. auf 2-%-Schritte** (Option nach D3, das mit 1 % läuft — siehe DONE.md).
+      Gleiche Tour gemessen (z6 → z7 → Ruhrgebiet z8 → Berlin z8–z10): Zusatzzeit durch Torten
+      1 % 38,8 s · 2 % 26,8 s · 5 % 19,8 s; Bilder 670 · 359 · 163; Stufe 3,6° · 7,2° · 18°.
+      Umstellung = eine Zeile in `percent()` (`js/utils/generatePieIcon.js`), Erwartungen in
+      `tests/unit/pieIcon.test.js` anpassen, Golden neu aufnehmen.
 - [ ] **A7 — Mapillary-TS-Layer unsichtbar anlegen** (`addLayers.js`), sonst Anfragen bei
       Links direkt auf z ≥ 14.
 - [ ] **B1 — CDN-Cache für `tiles.vizsim.de`** = Stufe 1 in `PERFORMANCE_PLAN.md` (erst Purge,

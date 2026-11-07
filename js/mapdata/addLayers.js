@@ -1,5 +1,6 @@
 
 import { setDrawOrder, entryLayerIds } from "../layers/registry.js";
+import { pieImageExpression } from "../utils/generatePieIcon.js";
 
 export function addLayers(map) {
 
@@ -133,13 +134,9 @@ export function addLayers(map) {
         minzoom,
         maxzoom,
         layout: {
-          "icon-image": [
-            "concat",
-            "pie-",
-            ["to-string", ["get", "UKATEGORIE__1"]], "-",
-            ["to-string", ["get", "UKATEGORIE__2"]], "-",
-            ["to-string", ["get", "UKATEGORIE__3"]]
-          ],
+          // Bildname aus gerundeten Anteilen → begrenzte, wiederverwendbare Bildmenge
+          // (Begründung + Messwerte: js/utils/generatePieIcon.js)
+          "icon-image": pieImageExpression(),
           "icon-size": sharedIconSizeExpression,
           "icon-allow-overlap": true,
           "symbol-sort-key": [
@@ -158,13 +155,7 @@ export function addLayers(map) {
       type: "symbol",
       source: "hover-point",
       layout: {
-        "icon-image": [
-          "concat",
-          "pie-",
-          ["to-string", ["get", "UKATEGORIE__1"]], "-",
-          ["to-string", ["get", "UKATEGORIE__2"]], "-",
-          ["to-string", ["get", "UKATEGORIE__3"]]
-        ],
+        "icon-image": pieImageExpression(),
         "icon-size": 1,
         "icon-allow-overlap": true
       }
