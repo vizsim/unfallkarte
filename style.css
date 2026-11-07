@@ -227,11 +227,11 @@ body {
 }
 
 .legend[data-zoom="cluster"]>.legend-section[data-section="einzeln"],
-.legend[data-zoom="cluster"]>.legend-section-divider:not(.legend-head-divider) {
+.legend[data-zoom="cluster"]>.legend-section-divider:not(.legend-divider-keep) {
   display: none;
 }
-/* Der Trenner unter dem Titel bleibt: zwischen Titel und Cluster-Block steht die Sektion
-   „Analyse", der Cluster-Block bringt seinen eigenen Trenner erst danach mit. */
+/* Unter z11 bringt der Cluster-Block seine Trenner selbst mit (oben und unten). Bleiben muss nur
+   der Trenner zwischen „Analyse" und den Szenarien — er hängt an keinem Zoom. */
 
 /* Cluster-Legende je Ansicht (data-view: "pie" | "share", setzt updateClusterLegend) */
 #cluster-legend-section .when-share,
