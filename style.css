@@ -978,6 +978,24 @@ body {
   font-size: 11px; color: var(--ui-text-muted); text-align: center;
 }
 
+/* Tagesverlauf Pkw-Tempo (js/ui/speedProfile.js): Zonen in den Legendenfarben des uspeed-Layers
+   (≤ 30 grün, 50 gelb, ≥ 100 rot — uspeedColorExpr), Linie neutral dunkel, Regler-Stunde im
+   Akzent (= Farbe des Reglers). Graue Spalte = Stunde ohne Messung. */
+.pop-speed { display: block; max-width: 100%; height: auto; margin: 9px 0 3px; overflow: visible; }
+.pop-speed-z30 { fill: rgba(49, 163, 84, .12); }
+.pop-speed-z50 { fill: rgba(253, 204, 138, .34); }
+.pop-speed-zhi { fill: rgba(227, 26, 28, .08); }
+.pop-speed-gap { fill: var(--ui-hover); }
+.pop-speed-base { stroke: var(--ui-border); stroke-width: 1; }
+.pop-speed-line { fill: none; stroke: #374151; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.pop-speed-pt { fill: #374151; }
+.pop-speed-sel { stroke: var(--ui-accent); stroke-width: 1; }
+.pop-speed-dot { fill: var(--ui-accent); stroke: var(--ui-surface); stroke-width: 2; }
+.pop-speed-tick { fill: var(--ui-text-muted); font-size: 9.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.pop-speed-tick--sel { fill: var(--ui-accent); font-weight: 700; }
+.pop-speed-hit { fill: transparent; }
+.pop-speed-hit:hover { fill: rgba(17, 24, 39, .05); }
+
 /* ===== Gemeinsamer schneller Tooltip (100 ms) — ein Bauteil, löst natives title ab.
    JS-positioniert (js/ui/tooltip.js) auf document.body (position:fixed), damit er
    auch aus scrollenden Panels/Popups nie abgeschnitten wird. Markup: data-tip="…". */

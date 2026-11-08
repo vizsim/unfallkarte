@@ -467,3 +467,15 @@ Konzept: `KONZEPT_DATENEXPORT.md` (intern, nicht im Repo; Entwürfe und Messskri
       (`["has", "speed_<h>"]`) + line-color neu (`applyUspeedHour` in addLayers.js);
       Klick-Chart liest die 24 Werte direkt aus dem Feature (vorher
       querySourceFeatures über geladene Tiles — konnte Stunden unterschlagen).
+- [x] **Tagesverlauf im Standard-Popup, ohne Chart.js** (2026-11-08) — der Klick öffnete ein
+      eigenes Chart.js-Fenster außerhalb des Popup-Systems (andere Schrift, 240 statt 340 px,
+      Titel doppelt, Regler-Stunde nicht markiert, Hover-Vorschau blieb darunter stehen). Jetzt
+      zeichnet `js/ui/speedProfile.js` (REIN, `tests/unit/speedProfile.test.js`) ein SVG direkt in
+      `render()`: Linie ohne Glättung vor den Legendenzonen ≤ 30 / 30–50 / > 50 km/h, Regler-Stunde
+      als Lot mit Punkt, Wert je Stunde per `data-tip`. Steht schon in der Hover-Vorschau, Klick
+      fixiert wie überall. **Warum ohne Glättung + Lücken:** nur 38 % der 33.480 Segmente haben alle
+      24 Stunden, ein Drittel weniger als 12 — die geglättete Linie malte Werte zwischen Stunden.
+      **Gemessen:** Chart.js-Chunk 202 KB (68 KB gzip) entfällt samt Paket; Golden unverändert.
+      **Bug nebenbei:** Gegenrichtung heißt in den Daten `reverse`, übersetzt wurde nur `backward` —
+      9.474 Segmente (28 %) zeigten „· reverse". **Verworfen:** graue Säulen mit Akzent-Stunde (A) und
+      eine Farbleiste in Kartenfarben (C; bei 8 km/h typischer Tagesspanne fast immer einfarbig grün).

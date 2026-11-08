@@ -35,7 +35,8 @@
 //             Auswahl, reportHref die absolute Adresse — safeHref lässt nur http(s) durch).
 //             Ein normaler Klick öffnet das Akkordeon „Analyse" (js/analysis/analysisPanel.js),
 //             Mittel- bzw. Strg-Klick wie jeder Link direkt den Report.
-//   onClick?  (feature, e) -> eigene Klick-Aktion (z. B. Chart-Popup), mit clickHint
+//   onClick?  (feature, e) -> eigene Klick-Aktion statt Fixieren, mit clickHint (derzeit
+//             ungenutzt — der uspeed-Tagesverlauf steht seit 2026-11 direkt in der Karte)
 //   anchor?   (feature) -> { lngLat, offset }: Popup an einem Punkt statt am Cursor
 //   onEnter?/onLeave?  Hooks, wenn ein Feature dieses Eintrags gehovert/verlassen wird
 

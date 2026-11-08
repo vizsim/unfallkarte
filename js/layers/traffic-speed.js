@@ -2,7 +2,7 @@
 // gefahrene Geschwindigkeiten aus Uber Movement (uspeed, mit Stunden-Regler).
 import { row, osmLink } from "../ui/popupHelpers.js";
 import { SPEED_COLOR_SPECIAL, SPEED_COLOR_STOPS } from "../styleConfig.js";
-import { showUspeedChartPopup } from "../ui/uspeedChart.js";
+import { hourlySpeeds, profileStats, speedProfileSVG } from "../ui/speedProfile.js";
 
 // ---------------------------------------------------------------------------------------------
 // Tempolimit: 2 Netze (Hauptstraßen / Nebenstraßen) × Richtung (beide / forward / backward)
@@ -102,7 +102,10 @@ export function applyUspeedHour(map, hour) {
   }
 }
 
-const uspeedWidth = ["interpolate", ["linear"], ["zoom"], 10, 0.5, 12, 1.5, 13, 2.5, 16, 3.5, 20, 5];
+// reconstruction_direction: Werte in den Daten sind "forward" / "reverse"
+const USPEED_DIRECTION = { forward: "in Fahrtrichtung", reverse: "Gegenrichtung" };
+
+const uspeedWidth =["interpolate", ["linear"], ["zoom"], 10, 0.5, 12, 1.5, 13, 2.5, 16, 3.5, 20, 5];
 const USPEED_DEFAULT_HOUR = 14;
 const uspeedLayer = (direction, offset) => ({
     id: `uspeed-${direction}`, type: "line", "source-layer": "uber_movement_osm",
@@ -147,21 +150,27 @@ export default [
             apply: (map, { value }) => applyUspeedHour(map, value),
         },
         popups: [{
-            eyebrow: "Uber Movement",
+            eyebrow: "Uber Movement, Q2 2019",
+            // Tagesverlauf direkt in der Karte (SVG, js/ui/speedProfile.js) — schon in der Hover-
+            // Vorschau; ein Klick fixiert das Fenster, dann zeigt jede Stunde ihren Wert (data-tip).
             render: (p) => {
-                // Wide-Format: Speed der aktuell im Slider gewählten Stunde aus speed_<h>
+                // Stunde des Reglers. Bewusst ohne Fallback: fehlt der Regler, wirft render() —
+                // popup-hardening.spec.js nutzt genau das als Testfall.
                 const hour = parseInt(document.getElementById("uspeed-slider").value, 10);
-                const speed = p[`speed_${hour}`];
-                const speedNum = (speed !== undefined && speed !== null) ? Number(speed).toFixed(0) : null;
-                const dirMap = { forward: "in Fahrtrichtung", backward: "Gegenrichtung" };
-                const dir = dirMap[p.reconstruction_direction] || p.reconstruction_direction;
-                return `
-                    <div class="pop-title">Ø Geschwindigkeit</div>
-                    <div class="pop-hero">${speedNum != null ? `${speedNum} <span class="pop-unit">km/h</span>` : "—"}</div>
-                    <div class="pop-meta">um ${hour}:00 Uhr${dir ? ` · ${dir}` : ""}</div>`;
-            },
-            onClick: (f, e) => showUspeedChartPopup(e.target, f.properties, e.lngLat),
-            clickHint: "→ Klick zeigt den Tagesverlauf"
+                const speeds = hourlySpeeds(p);
+                const speed = speeds[hour];
+                const stats = profileStats(speeds);
+                const dir = USPEED_DIRECTION[p.reconstruction_direction] || p.reconstruction_direction;
+                const day = stats
+                    ? `<div class="pop-meta">Tag ${Math.round(stats.min.v)}–${Math.round(stats.max.v)} km/h · `
+                      + `${stats.n} von 24 Stunden gemessen${stats.n < 24 ? " · grau = keine Messung" : ""}</div>`
+                    : "";
+                return `<div class="pop-title">Ø Pkw-Geschwindigkeit</div>`
+                    + `<div class="pop-hero">${speed != null ? `${Math.round(speed)} <span class="pop-unit">km/h</span>` : "—"}</div>`
+                    + `<div class="pop-meta">um ${hour}:00 Uhr${speed == null ? " keine Messung" : ""}${dir ? ` · ${dir}` : ""}</div>`
+                    + speedProfileSVG(speeds, hour)
+                    + day;
+            }
         }]
     },
 ];

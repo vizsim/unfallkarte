@@ -142,7 +142,7 @@ brauchst also keine lokalen Daten, um am Frontend zu arbeiten. Dev-Server und Pr
 liefern `data/` mit Range-Requests aus (Middleware in `vite.config.js`); ins `dist/` kommt es
 nie.
 
-### Libs (maplibre-gl, pmtiles, chart.js, hyparquet)
+### Libs (maplibre-gl, pmtiles, hyparquet)
 
 Exakt gepinnt in `package.json`. Upgrade = `npm i -E maplibre-gl@x.y.z`, danach **immer**
 `npm run test:web` — die letzten beiden MapLibre-Upgrades haben den Cluster-Hover still
@@ -152,8 +152,7 @@ gebrochen, gefangen hat es jeweils nur der Smoke-Test.
 Datei; gebündelt fände es ihn nicht (die Karte bleibt ohne jeden Fehler leer). Der Build
 kopiert darum die drei `.mjs` nach `dist/lib/maplibre-gl@<version>/` und löst den Import per
 Importmap auf (`vite.config.js`). Alle Module importieren MapLibre über `js/lib/maplibre.js`.
-pmtiles wird mitgebündelt, chart.js kommt als eigener Chunk erst beim ersten Uspeed-Chart,
-der Export (hyparquet + fzstd) erst beim ersten Klick auf das Download-Symbol.
+pmtiles wird mitgebündelt, der Export (hyparquet + fzstd) erst beim ersten Klick auf das Download-Symbol.
 
 ## ✅ Tests
 

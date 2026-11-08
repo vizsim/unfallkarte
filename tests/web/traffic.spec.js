@@ -1,5 +1,5 @@
 // Verkehrs-Layer mit Hook statt reinem Sichtbarkeits-Toggle (js/layers/traffic-*.js):
-// Uber-Stunden-Regler + Chart-Klick, SVZ Master/Unter-Haken/Modus, Telraam-Modus.
+// Uber-Stunden-Regler + Tagesverlauf im Popup, SVZ Master/Unter-Haken/Modus, Telraam-Modus.
 import { test, expect } from "@playwright/test";
 import { openMap, jumpTo, hoverAt, popups, layerVisibility, expectNoErrors } from "./helpers.js";
 
@@ -27,7 +27,7 @@ test("Uber: Stunden-Regler setzt Filter + Farbe beider Richtungen", async ({ pag
   expectNoErrors(errors);
 });
 
-test("Uber: Klick auf ein Segment öffnet das Tagesverlauf-Chart", async ({ page }) => {
+test("Uber: Hover zeigt den Tagesverlauf, Klick fixiert, Stunde zeigt ihren Wert", async ({ page }) => {
   const errors = await openMap(page);
   await page.click("#toggle-uspeed", { force: true });
   await jumpTo(page, [13.405, 52.52], 14);
@@ -45,18 +45,24 @@ test("Uber: Klick auf ein Segment öffnet das Tagesverlauf-Chart", async ({ page
   let pt = null;
   await expect.poll(async () => (pt = await find()), { message: "kein Uber-Segment gefunden", timeout: 60_000 }).not.toBeNull();
 
+  // Hover: Diagramm steht schon in der Vorschau (SVG, kein Nachladen); Regler-Standard = 14 Uhr
   await hoverAt(page, pt);
-  await expect(popups(page).first().locator(".pop-pinhint")).toContainText("Tagesverlauf");
+  const hover = popups(page).first();
+  await expect(hover.locator("svg.pop-speed")).toHaveCount(1);
+  await expect(hover.locator(".pop-speed-hit")).toHaveCount(24);
+  await expect(hover.locator(".pop-speed-sel")).toHaveCount(1);
+  await expect(hover.locator(".pop-speed-tick--sel")).toHaveText("14");
+  await expect(hover.locator(".pop-pinhint")).toContainText("Klick fixiert");
+
+  // Klick fixiert wie bei jedem anderen Layer (kein eigenes Chart-Fenster mehr)
   await page.mouse.click(pt.x, pt.y);
-  await expect(page.locator(".maplibregl-popup canvas#speed-chart")).toHaveCount(1);
-  // Chart.js hat gezeichnet = der Canvas trägt Pixel. (Früher prüfte der Test das globale
-  // window.Chart; das lazy importierte ESM-Chart.js setzt keines mehr.)
-  await expect.poll(() => page.evaluate(() => {
-    const c = document.querySelector(".maplibregl-popup canvas#speed-chart");
-    const px = c?.getContext("2d").getImageData(0, 0, c.width, c.height).data ?? [];
-    for (let i = 3; i < px.length; i += 4) if (px[i]) return true;
-    return false;
-  }), { message: "chart.js hat nichts gezeichnet" }).toBe(true);
+  const pinned = page.locator(".maplibregl-popup:has(.maplibregl-popup-close-button)");
+  await expect(pinned.locator("svg.pop-speed")).toHaveCount(1);
+  await expect(page.locator(".maplibregl-popup canvas")).toHaveCount(0);
+
+  // Im fixierten Fenster zeigt eine Stunde ihren Wert im gemeinsamen Tooltip
+  await pinned.locator('.pop-speed-hit[data-tip^="14 Uhr"]').hover();
+  await expect(page.locator(".app-tooltip.is-visible")).toContainText(/^14 Uhr: (\d+ km\/h|keine Messung)$/);
   expectNoErrors(errors);
 });
 

@@ -65,7 +65,7 @@ let accidents = null; // { updateLayerFilter, updateColorStyle } — steht ab se
 
 // Nach einem Deploy gibt es die Lazy-Chunks der vorigen Version nicht mehr (gehashte Namen,
 // Pages ersetzt den ganzen Stand). Wer die Seite VOR dem Deploy geöffnet hat, bekäme beim
-// ersten Nachladen (z. B. Chart.js) einen 404. Vite meldet das als `vite:preloadError`:
+// ersten Nachladen (z. B. Export-Dialog) einen 404. Vite meldet das als `vite:preloadError`:
 // einmal neu laden holt die aktuelle Version. Die Marke in sessionStorage verhindert eine
 // Reload-Schleife, falls der Chunk auch danach fehlt (dann greift der normale Fehlerweg).
 window.addEventListener("vite:preloadError", (event) => {
